@@ -186,7 +186,7 @@ const Page = () => {
       </h1>
       <div>
         {userType !== "ROLE_USER" && (
-          <div className="flex flex-row gap-4">
+          <div className="flex flex-row gap-4 mb-4">
             <div>
               <button
                 onClick={() => handleButtonClick("All Ticket")}

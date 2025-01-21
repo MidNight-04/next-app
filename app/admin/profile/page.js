@@ -13,6 +13,7 @@ import AsideContainer from "../../../components/AsideContainer";
 const Page = () => {
   const router = useRouter();
   const userId = useAuthStore(state => state.userId);
+  const state = useAuthStore(state => state);
   const {
     data: profileData,
     isLoading,
@@ -28,6 +29,8 @@ const Page = () => {
   useEffect(() => {
     refetch();
   });
+
+  console.log(state);
 
   return (
     <AsideContainer>

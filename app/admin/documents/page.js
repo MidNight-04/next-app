@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { DataGrid } from "@mui/x-data-grid";
+import { DataGrid, gridClasses } from "@mui/x-data-grid";
 import axios from "axios";
 import {
   Chip,
@@ -24,6 +24,9 @@ import "react-toastify/dist/ReactToastify.css";
 import { Document, pdfjs } from "react-pdf";
 import AsideContainer from "../../../components/AsideContainer";
 import { useAuthStore } from "../../../store/useAuthStore";
+import { GrUpdate } from "react-icons/gr";
+import { MdOutlineFileDownload } from "react-icons/md";
+import { alpha, styled } from "@mui/material/styles";
 // import pdfjsWorker from "pdfjs-dist/build/pdf.worker.min.mjs";
 
 // pdfjs.GlobalWorkerOptions.workerSrc = new URL(
@@ -43,11 +46,39 @@ const style = {
   p: 4,
 };
 
+const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
+  [`& .${gridClasses.row}.even`]: {
+    "backgroundColor": "#f8fbfc",
+    "&:hover": {
+      "backgroundColor": "#93bfcf",
+      "color": "#eee9da",
+      "@media (hover: none)": {
+        backgroundColor: "transparent",
+      },
+    },
+    "&.Mui-selected": {
+      backgroundColor: "#93bfcf",
+    },
+  },
+  [`& .${gridClasses.row}.odd`]: {
+    "backgroundColor": "#eee9da",
+    "&:hover": {
+      "backgroundColor": "#93bfcf",
+      "color": "#eee9da",
+      "@media (hover: none)": {
+        backgroundColor: "transparent",
+      },
+    },
+    "&.Mui-selected": {
+      backgroundColor: "#93bfcf",
+    },
+  },
+}));
+
 const Page = () => {
   const linkRef = useRef(null);
   const [document, setDocument] = useState([]);
   const id = useAuthStore(state => state.userId);
-
   const [documentStatusOpen, setDocumentStatusOpen] = useState(false);
   const [documentViewOpen, setDocumentViewOpen] = useState(false);
   const [status, setStatus] = useState("");
@@ -56,17 +87,21 @@ const Page = () => {
   const [pdfURL, setPdfURL] = useState("");
 
   const columns = [
-    { field: "seriel", headerName: "SNo.", width: 80 },
-    { field: "name", headerName: "Name", width: 250 },
-    { field: "siteID", headerName: "SiteID", width: 120 },
-    { field: "uploadedby", headerName: "Uploaded By", width: 220 },
-    { field: "date", headerName: "Date", width: 150 },
-    { field: "status", headerName: "Status", width: 150 },
+    {
+      field: "seriel",
+      headerName: "S. No.",
+      width: 140,
+    },
+    { field: "name", headerName: "Name", width: 300 },
+    { field: "siteID", headerName: "Site ID", width: 100 },
+    { field: "uploadedby", headerName: "Uploaded By", width: 233 },
+    { field: "date", headerName: "Date", width: 233 },
+    { field: "status", headerName: "Status", width: 233 },
   ];
 
   useEffect(() => {
     getAllDocument();
-  }, []);
+  }, [id]);
 
   const getAllDocument = () => {
     axios
@@ -154,7 +189,7 @@ const Page = () => {
       seriel: index + 1,
       name: row?.name,
       uploadedby: row?.uploadingUserName,
-      date: row?.updatedAt,
+      date: new Date(row?.updatedAt),
       status: row?.status,
       document: row?.document[0],
     });
@@ -164,14 +199,21 @@ const Page = () => {
     {
       field: "action",
       headerName: "Action",
-      width: 280,
+      width: 335,
       renderCell: params => {
         return (
           <div>
             <Button
               variant="outlined"
               size="small"
-              sx={{ borderRadius: "16px", marginRight: "4px" }}
+              sx={{
+                "borderRadius": "16px",
+                "marginRight": "4px",
+                "borderColor": "#0b192c",
+                "& span": {
+                  color: "#0b192c",
+                },
+              }}
               onClick={() =>
                 handleDocumentUpdateDialog(
                   params?.row?.id,
@@ -179,16 +221,22 @@ const Page = () => {
                 )
               }
             >
-              Update Status
+              <span className="flex flex-row gap-2 items-center">
+                <GrUpdate />
+                Update Status
+              </span>
             </Button>
             <a ref={linkRef} style={{ display: "none" }}></a>
             <Button
               variant="outlined"
               size="small"
-              sx={{ borderRadius: "16px" }}
+              sx={{ borderRadius: "16px", borderColor: "#0b192c" }}
               onClick={() => handleViewDocumentDialog(params?.row?.document)}
             >
-              Download
+              <span className="flex flex-row gap-2 items-center text-secondary">
+                <MdOutlineFileDownload />
+                Download
+              </span>
             </Button>
           </div>
         );
@@ -200,25 +248,90 @@ const Page = () => {
       <h1 className="text-[25px] font-ubuntu font-bold my-2 -md:text-lg">
         Project Document List
       </h1>
-      <div className="bg-white p-8 rounded-3xl h-90vh -lg:p-4">
-        <DataGrid
-          rows={arrayData}
-          columns={columns.concat(actionColumn)}
-          pageSize={10}
-          rowsPerPageOptions={[10]}
-          localeText={{ noRowsLabel: "No Data Available..." }}
-        />
+      <div className=" flex justify-center items-center">
+        <div className="bg-white rounded-3xl h-90vh w-full">
+          <StripedDataGrid
+            rows={arrayData}
+            columns={columns.concat(actionColumn)}
+            pageSize={10}
+            rowsPerPageOptions={[10]}
+            getRowClassName={params =>
+              params.indexRelativeToCurrentPage % 2 === 0 ? "even" : "odd"
+            }
+            localeText={{ noRowsLabel: "No Data Available..." }}
+            sx={{
+              "fontFamily": "ubuntu",
+              "fontSize": "16px",
+              ".MuiDataGrid-columnSeparator": {
+                display: "none",
+              },
+              "& .MuiDataGrid-columnHeaderTitle": { color: "#93bfcf" },
+              "& .MuiDataGrid-menuOpen": { background: "#0b192c" },
+              "&.MuiDataGrid-root": {
+                borderRadius: "16px",
+                // color: "#93bfcf",
+                background: "#0b192c",
+              },
+              "& .MuiDataGrid-columnHeader": {
+                background: "#0b192c",
+                color: "#93bfcf",
+              },
+              "& .MuiDataGrid-columnHeader--sortable": {
+                color: "#93bfcf",
+              },
+              "& .MuiDataGrid-withBorderColor": {
+                color: "#93bfcf",
+              },
+              "& .MuiDataGrid-menuIcon": {
+                background: "#0b192c",
+                color: "#93bfcf",
+              },
+              "& .MuiDataGrid-columnHeaders": {
+                background: "#0b192c",
+                color: "#93bfcf",
+              },
+              "& .MuiDataGrid-sortIcon": {
+                opacity: "inherit !important",
+                color: "#93bfcf",
+              },
+              "& .MuiDataGrid-cell:focus-within": {
+                outline: "none !important",
+              },
+              "& .MuiDataGrid-columnHeaderTitleContainer": {
+                background: "#0b192c",
+                color: "#93bfcf",
+              },
+              "& .MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular MuiTablePagination-toolbar":
+                {
+                  display: "none",
+                },
+              "& .MuiToolbar-root ": {
+                color: "#93bfcf",
+              },
+              "& .MuiButtonBase-root": {
+                color: "#93bfcf",
+              },
+              "& .MuiDataGrid-overlay": {
+                background: "#eee9da",
+                color: "#0b192c",
+              },
+            }}
+          />
+        </div>
       </div>
 
       {/* update document accepted status by client dialog */}
       <Dialog open={documentStatusOpen} onClose={handleDocumentStatusClose}>
-        <DialogTitle>Update Document Status</DialogTitle>
+        <div className="text-xl font-bold text-center font-ubuntu px-4 py-3">
+          Update Document Status
+        </div>
         <DialogContent style={{ width: "600px" }}>
           <FormControl fullWidth className="mt-1 mb-1">
-            <InputLabel id="demo-simple-select-label">Status</InputLabel>
+            <InputLabel id="status-select-label">Status</InputLabel>
             <Select
-              labelId="demo-simple-select-label"
-              id="demo-simple-select"
+              labelId="status-select-label"
+              label="Status"
+              id="status-select"
               value={status}
               name="status"
               onChange={e => setStatus(e.target.value)}

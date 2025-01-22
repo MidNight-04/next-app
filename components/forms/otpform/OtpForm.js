@@ -56,6 +56,25 @@ const OtpForm = () => {
     //   router.back();
     // },
   });
+  const loginMutation = useMutation({
+    mutationKey: ["login", slug],
+    mutationFn: postEndpoint({
+      endpoint: `${slug}/signin-otp`,
+      data: { username },
+    }),
+    onSuccess: data => {
+      if (data.status === 200) {
+        setShowLoader(false);
+        toast.success("OTP sent to you registered mobile number.");
+      }
+    },
+    onError: data => {
+      if (data.status !== 200) {
+        setShowLoader(false);
+        toast.success("Something went Wrong please try again later.");
+      }
+    },
+  });
 
   return (
     <>
@@ -99,6 +118,14 @@ const OtpForm = () => {
             >
               login
             </Button>
+            <div
+              onClick={() => {
+                setShowLoader(true);
+                loginMutation.mutate();
+              }}
+            >
+              Resend OTP!
+            </div>
           </Form>
         )}
       </Formik>

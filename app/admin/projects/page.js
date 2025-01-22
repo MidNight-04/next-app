@@ -97,6 +97,8 @@ const Page = () => {
     },
   ];
 
+  console.log(userType);
+
   const searchFunction = e => {
     const { value } = e.target;
     setSearch(value);
@@ -231,9 +233,11 @@ const Page = () => {
                           <span className="flex justify-center items-center p-2 bg-primary-foreground rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl -md:p-1 -md:text-xs">
                             <FiArrowUpRight />
                           </span>
-                          <span className="flex justify-center items-center p-2 bg-primary-foreground rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl -md:p-1 -md:text-xs">
-                            <MdDeleteOutline />
-                          </span>
+                          {userType === "ROLE_ADMIN" && (
+                            <span className="flex justify-center items-center p-2 bg-primary-foreground rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl -md:p-1 -md:text-xs">
+                              <MdDeleteOutline />
+                            </span>
+                          )}
                         </div>
                       </div>
                     </div>

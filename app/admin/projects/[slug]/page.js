@@ -17,10 +17,11 @@ import {
   ImageListItem,
   InputLabel,
   MenuItem,
-  // Select,
+  Select as MUISelect,
   styled,
   TextField,
   Typography,
+  Modal,
 } from "@mui/material";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -438,7 +439,7 @@ const ClientProjectView = () => {
             </>
           )}
           <button
-            className="px-[15px] py-[12px] bg-transparent border-2 border-red-500 rounded-full font-ubuntu -md:px-2 -md:py-[6px]"
+            className="px-[15px] py-[12px] bg-transparent border-2 border-red-500 rounded-full font-ubuntu -md:px-2 -md:py-[6px] cursor-pointer"
             onClick={() => updateStatus()}
           >
             <div className="text-red-500 flex flex-row">
@@ -451,14 +452,14 @@ const ClientProjectView = () => {
       </div>
       <div className="grid grid-row grid-cols-5 gap-4 -lg:gap-2 -xl:grid-cols-4 -lg:grid-cols-3 -md:grid-cols-2 justify-evenly -2xl:[&>div]:h-[88px] -lg:[&>div]:p-[10px] -md:[&>div]:h-14 -lg:text-xs ">
         <div
-          className="p-[20px]  w-full rounded-[14px] [&_svg]:text-primary font-ubuntu flex flex-row gap-2 items-center self-center justify-between bg-white"
+          className="p-[20px]  w-full rounded-[14px] [&_svg]:text-primary font-ubuntu flex flex-row gap-2 items-center self-center justify-between bg-white cursor-pointer"
           onClick={() => documentDialogFunction()}
         >
           <div className="font-semibold">Documents</div>
           <IoDocumentsOutline className="text-[20px]" />
         </div>
         <div
-          className="p-[20px] w-full rounded-[14px] [&_svg]:text-primary font-ubuntu flex flex-row gap-2 items-center self-center justify-between bg-white"
+          className="p-[20px] w-full rounded-[14px] [&_svg]:text-primary font-ubuntu flex flex-row gap-2 items-center self-center justify-between bg-white cursor-pointer"
           onClick={() => setTeamOpen(true)}
         >
           <div className="font-semibold">Teams</div>
@@ -692,17 +693,16 @@ const ClientProjectView = () => {
                                   );
                                 })}
                               </div>
-                              <div className="w-[200px] h-12 -md:w-28">
-                                <div className="flex flex-row ">
+                              <div className="w-[200px] -md:w-28">
+                                <div className="flex flex-row mb-2">
                                   <div className="text-sm font-semibold">
-                                    Date:
+                                    Date :
                                   </div>
-                                  <div className="text-sm">{finalDate}</div>
+                                  <div className="text-sm"> {finalDate}</div>
                                 </div>
-                                <br />
                                 <div className="flex flex-row">
                                   <div className="text-sm font-semibold">
-                                    Final:
+                                    Final :
                                   </div>
                                   <div className="text-sm">
                                     {itm.finalStatus[0].date}{" "}
@@ -728,8 +728,10 @@ const ClientProjectView = () => {
                             </div>
                           </AccordionSummary>
                           <AccordionDetails>
-                            <div>
-                              <h5>Details</h5>
+                            <div className="p-5 shadow-lg rounded-3xl border-[1px] border-primary mx-6">
+                              <h5 className="text-lg font-bold mb-4">
+                                Details :
+                              </h5>
                               <div>
                                 <div>{workDetails[0]?.date}</div>
                                 <div>
@@ -742,7 +744,9 @@ const ClientProjectView = () => {
                                     />
                                   ))}
                                 </div>
-                                <div>{workDetails[0]?.status}</div>
+                                <div className="font-semibold">
+                                  Status:{workDetails[0]?.status}
+                                </div>
                               </div>
                             </div>
                           </AccordionDetails>
@@ -755,129 +759,12 @@ const ClientProjectView = () => {
             );
           })}
       </div>
-      {/* <table className="w-full">
-                      <thead>
-                        <tr>
-                          <th>Point</th>
-                          <th>Member Issue</th>
-                          <th>Schedule Time</th>
-                        </tr>
-                      </thead>
-                      {item.step?.map((itm, idx) => {
-                        let initialDate = new Date(projectDetails?.date);
-                        const dur = itm.duration ? parseInt(itm.duration) : 0;
-                        // Add duration days
-                        initialDate.setDate(initialDate.getDate() + dur);
-                        // Get the final date
-                        let finalDate = initialDate.toISOString().split("T")[0]; // Format to YYYY-MM-DD
-                        return (
-                          <tbody key={idx}>
-                            <tr>
-                              <td className="flex items-center justify-center w-full">
-                                <div className="relative flex flex-row items-center">
-                                  <div className="relative flex flex-row">
-                                    <div className="h-full w-6 flex items-center justify-center mr-4">
-                                      <div
-                                        className={cn(
-                                          "w-[2px] bg-green-500 pointer-events-none h-12",
-                                          idx === 0 ? "mt-[100%] h-7" : "",
-                                          idx === item.step.length - 1
-                                            ? "mb-[100%] h-7"
-                                            : "",
-                                          itm.finalStatus[0].status !==
-                                            "Completed"
-                                            ? "bg-yellow-500"
-                                            : ""
-                                        )}
-                                      />
-                                    </div>
-                                    <div
-                                      className={cn(
-                                        "w-6 h-6 absolute top-1/2 -mt-3 rounded-full bg-green-500 shadow text-center",
-                                        itm.finalStatus[0].status !==
-                                          "Completed"
-                                          ? "bg-yellow-500"
-                                          : ""
-                                      )}
-                                    >
-                                      {itm.finalStatus[0].status ===
-                                      "Pending" ? (
-                                        <PriorityHigh
-                                          sx={{
-                                            fontSize: "16px",
-                                            color: "red",
-                                          }}
-                                        />
-                                      ) : (
-                                        <Check
-                                          sx={{
-                                            fontSize: "16px",
-                                            color: "white",
-                                          }}
-                                        />
-                                      )}
-                                    </div>
-                                    <div className="flex items-center">
-                                      <div className="w-32 -md:w-24 truncate">
-                                        {itm.content}
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                              </td>
-                              <td>
-                                {itm.issueMember?.map((mem, id) => {
-                                  return (
-                                    <span key={id} className="text-center">
-                                      {mem}
-                                    </span>
-                                  );
-                                })}
-                              </td>
-                              <td>
-                                <div className="w-full flex items-center flex-col [&_span]:leading-none">
-                                  <span>
-                                    <span>Date - </span>
-                                    <span>{finalDate}</span>
-                                  </span>
-                                  <br />
-                                  <span>
-                                    <span>Final - </span>
-                                    <span>
-                                      {itm.finalStatus[0].date}{" "}
-                                      {/* {itm.finalStatus[0].date ? (
-                                        new Date(itm.finalStatus[0].date) >
-                                        new Date(finalDate) ? (
-                                          <span className="delay-task">
-                                            {`(-`}
-                                            {(new Date(
-                                              itm.finalStatus[0].date
-                                            ) -
-                                              new Date(finalDate)) /
-                                              (1000 * 3600 * 24)}
-                                            {` days)`}
-                                          </span>
-                                        ) : (
-                                          <span className="ontime-task">{`(OnTime)`}</span>
-                                        )
-                                      ) : (
-                                        ""
-                                      )} 
-                                    </span>
-                                  </span>
-                                </div>
-                              </td>
-                            </tr>
-                          </tbody>
-                        );
-                      })}
-                    </table> */}
 
       {/* Team list open dialog */}
       <Dialog open={teamOpen} onClose={teamOpenCancel}>
         <DialogTitle
           className="text-center"
-          style={{
+          sx={{
             fontSize: "18px",
             fontWeight: "600",
             letterSpacing: "1px",
@@ -886,101 +773,124 @@ const ClientProjectView = () => {
           Team Members
         </DialogTitle>
         <DialogContent style={{ width: "600px" }}>
-          <div className="mt-2">
+          <div className="rounded-3xl">
             <div className="row">
-              <div className="col-lg-12 pteam-single-box">
-                <span className="pteam-member mb-5">Project Admin</span>
+              <div className="mb-2">
+                <span className="font-ubuntu font-semibold">Project Admin</span>
                 {projectDetails?.project_admin?.map((item, index) => {
                   return (
-                    <div className="pteam-member-name-call" key={index}>
-                      <span className="pdm-name  mt-1">{item.name}</span>
-                      <span className="">
+                    <div
+                      className="flex flex-row items-center justify-between"
+                      key={index}
+                    >
+                      <span className="mt-1">{item.name}</span>
+                      <span className="p-2 bg-green-600 rounded-full cursor-pointer">
                         {" "}
-                        <IoCallSharp className="pteam-member-callicon" />
+                        <IoCallSharp className="text-white" />
                       </span>
                     </div>
                   );
                 })}
               </div>
-              <div className="col-lg-12 pteam-single-box">
-                <span className="pteam-member mb-5">Project Manager</span>
+              <div className="mb-2">
+                <span className="font-ubuntu font-semibold">
+                  Project Manager
+                </span>
                 {projectDetails?.project_manager?.map((item, index) => {
                   return (
-                    <div className="pteam-member-name-call" key={index}>
+                    <div
+                      className="flex flex-row items-center justify-between"
+                      key={index}
+                    >
                       <span className="pdm-name mt-1">{item.name}</span>
-                      <span className="">
+                      <span className="p-2 bg-green-600 rounded-full cursor-pointer">
                         {" "}
-                        <IoCallSharp className="pteam-member-callicon" />
+                        <IoCallSharp className="text-white" />
                       </span>
                     </div>
                   );
                 })}
               </div>
-              <div className="col-lg-12 pteam-single-box">
-                <span className="pteam-member">Sr. Engineer</span>
+              <div className="mb-2">
+                <span className="font-ubuntu font-semibold">Sr. Engineer</span>
                 {projectDetails?.sr_engineer?.map((item, index) => {
                   return (
-                    <div className="pteam-member-name-call" key={index}>
+                    <div
+                      className="flex flex-row items-center justify-between"
+                      key={index}
+                    >
                       <span className="pdm-name mt-1">{item.name}</span>
-                      <span className="">
+                      <span className="p-2 bg-green-600 rounded-full cursor-pointer">
                         {" "}
-                        <IoCallSharp className="pteam-member-callicon" />
+                        <IoCallSharp className="text-white" />
                       </span>
                     </div>
                   );
                 })}
               </div>
-              <div className="col-lg-12 pteam-single-box">
-                <span className="pteam-member">Site Engineer</span>
+              <div className="mb-2">
+                <span className="font-ubuntu font-semibold">Site Engineer</span>
                 {projectDetails?.site_engineer?.map((item, index) => {
                   return (
-                    <div className="pteam-member-name-call" key={index}>
+                    <div
+                      className="flex flex-row items-center justify-between"
+                      key={index}
+                    >
                       <span className="pdm-name mt-1">{item.name}</span>
-                      <span className="">
+                      <span className="p-2 bg-green-600 rounded-full cursor-pointer">
                         {" "}
-                        <IoCallSharp className="pteam-member-callicon" />
+                        <IoCallSharp className="text-white" />
                       </span>
                     </div>
                   );
                 })}
               </div>
-              <div className="col-lg-12 pteam-single-box">
-                <span className="pteam-member">Contractor</span>
+              <div className="mb-2">
+                <span className="font-ubuntu font-semibold">Contractor</span>
                 {projectDetails?.contractor?.map((item, index) => {
                   return (
-                    <div className="pteam-member-name-call" key={index}>
+                    <div
+                      className="flex flex-row items-center justify-between"
+                      key={index}
+                    >
                       <span className="pdm-name mt-1">{item.name}</span>
-                      <span className="">
+                      <span className="p-2 bg-green-600 rounded-full cursor-pointer">
                         {" "}
-                        <IoCallSharp className="pteam-member-callicon" />
+                        <IoCallSharp className="text-white" />
                       </span>
                     </div>
                   );
                 })}
               </div>
-              <div className="col-lg-12 pteam-single-box">
-                <span className="pteam-member">Operation</span>
+              <div className="mb-2">
+                <span className="font-ubuntu font-semibold">Operation</span>
                 {projectDetails?.operation?.map((item, index) => {
                   return (
-                    <div className="pteam-member-name-call" key={index}>
+                    <div
+                      className="flex flex-row items-center justify-between"
+                      key={index}
+                    >
                       <span className="pdm-name mt-1">{item.name}</span>
-                      <span className="">
+                      <span className="p-2 bg-green-600 rounded-full cursor-pointer">
                         {" "}
-                        <IoCallSharp className="pteam-member-callicon" />
+                        <IoCallSharp className="text-white" />
                       </span>
                     </div>
                   );
                 })}
               </div>
-              <div className="col-lg-12 pteam-single-box">
-                <span className="pteam-member">Sales</span>
+              <div className="mb-2">
+                <span className="font-ubuntu font-semibold">Sales</span>
                 {projectDetails?.sales?.map((item, index) => {
                   return (
-                    <div className="pteam-member-name-call" key={index}>
+                    <div
+                      className="flex flex-row items-center justify-between"
+                      key={index}
+                    >
                       <span className="pdm-name mt-1">{item.name}</span>
-                      <span className="">
+                      <span className="p-2 bg-green-600 rounded-full cursor-pointer">
                         {" "}
-                        <IoCallSharp className="pteam-member-callicon" />
+                        <IoCallSharp className="text-white" />
                       </span>
                     </div>
                   );
@@ -1009,28 +919,33 @@ const ClientProjectView = () => {
           Documents
         </DialogTitle>
         <DialogContent style={{ width: "600px" }}>
-          <div className="mt  -2">
-            <div className="row">
+          <div className="mt-2">
+            <div>
               {documentList?.map((item, index) => {
                 return (
-                  <div className="col-lg-12 pteam-single-box" key={index}>
-                    <div className="pteam-single-box-status">
-                      <span className="pteam-member">{item?.name}</span>
+                  <div
+                    className="flex flex-col gap-4 w-full p-5 rounded-3xl mb-2 border-[1px]"
+                    key={index}
+                  >
+                    <div className="flex flex-row justify-between">
+                      <span className="font-ubuntu text-lg font-semibold">
+                        {item?.name}
+                      </span>
                       {item?.status === "Pending" ? (
-                        <span className="pteam-member-status-pending">
+                        <span className="bg-primary text-primary-foreground rounded-lg px-2 py-1">
                           {item?.status} By You
                         </span>
                       ) : item?.status === "Accepted" ? (
-                        <span className="pteam-member-status-accepted">
+                        <span className="bg-primary text-primary-foreground rounded-lg px-2 py-1">
                           {item?.status} By You
                         </span>
                       ) : (
-                        <span className="pteam-member-status-rejected">
+                        <span className="bg-primary text-primary-foreground rounded-lg px-2 py-1">
                           {item?.status} By You
                         </span>
                       )}
                     </div>
-                    <div className="pteam-single-box-dateplus">
+                    <div className="flex flex-row justify-between">
                       <span
                         className="pdm-name"
                         style={{ fontSize: "12px" }}
@@ -1039,7 +954,7 @@ const ClientProjectView = () => {
                       }, ${new Date(item.updatedAt).getFullYear()}`}</span>
                       <a ref={linkRef} style={{ display: "none" }}></a>
                       <span
-                        className="plus"
+                        className="bg-green-600 p-2 rounded-full cursor-pointer"
                         onClick={() => {
                           const pdfUrl = item?.document[0];
                           linkRef.current.href = pdfUrl;
@@ -1047,12 +962,14 @@ const ClientProjectView = () => {
                           linkRef.current.click();
                         }}
                       >
-                        <FaDownload />
+                        <FaDownload className="text-white" />
                       </span>
                     </div>
                     <hr />
                     <span className="pdm-name">
-                      <span style={{ fontWeight: "500" }}>Uploaded by:</span>
+                      <span className="font-ubuntu font-semibold">
+                        Uploaded by :{" "}
+                      </span>
                       <span className="pteam-member-uploaded">
                         {item.uploadingUserName}
                       </span>
@@ -1070,103 +987,147 @@ const ClientProjectView = () => {
         </DialogActions>
       </Dialog>
 
-      <Dialog open={confirmationOpen} onClose={handleCancel}>
-        <DialogTitle>Raise Tickets</DialogTitle>
-        <DialogContent style={{ width: "600px" }}>
-          <FormControl fullWidth className="mt-1 mb-1">
-            <InputLabel id="demo-simple-select-label">Work</InputLabel>
-            <Select
-              labelId="demo-simple-select-label"
-              id="demo-simple-select"
-              value={status}
-              name="status"
-              onChange={e => setStatus(e.target.value)}
-            >
-              <MenuItem value="Rework">Rework</MenuItem>
-              <MenuItem value="Extra Work">Extra Work</MenuItem>
-              <MenuItem value="Correction">Correction</MenuItem>
-              <MenuItem value="Approval">Approval</MenuItem>
-            </Select>
-          </FormControl>
-          <FormControl fullWidth className="mt-1 mb-1">
-            <InputLabel id="demo-simple-select-label">Step</InputLabel>
-            <Select
-              labelId="demo-simple-select-label"
-              id="demo-simple-select"
-              value={step}
-              name="step"
-              onChange={e => {
-                setStep(e.target.value);
-                getPointListByStep(e.target.value);
+      <Modal
+        open={confirmationOpen}
+        onClose={handleCancel}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+        sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+      >
+        <div className="w-[40%] bg-white p-8 rounded-3xl">
+          <h2 className="text-2xl font-bold text-center font-ubuntu mb-4">
+            Raise Ticket
+          </h2>
+          <div className="flex flex-col gap-6 mb-4">
+            <FormControl fullWidth>
+              <InputLabel id="Work-simple-select-label">Work</InputLabel>
+              <MUISelect
+                labelId="Work-simple-select-label"
+                id="Work-simple-select"
+                label="Work"
+                value={status}
+                name="status"
+                variant="outlined"
+                onChange={e => setStatus(e.target.value)}
+                sx={{ borderRadius: "16px", background: "#f3f4f6" }}
+              >
+                <MenuItem value="Rework">Rework</MenuItem>
+                <MenuItem value="Extra Work">Extra Work</MenuItem>
+                <MenuItem value="Correction">Correction</MenuItem>
+                <MenuItem value="Approval">Approval</MenuItem>
+              </MUISelect>
+            </FormControl>
+            <FormControl fullWidth>
+              <InputLabel id="Step-simple-select-label">Step</InputLabel>
+              <MUISelect
+                labelId="Step-simple-select-label"
+                id="Step-simple-select"
+                value={step}
+                label="Step"
+                name="step"
+                onChange={e => {
+                  setStep(e.target.value);
+                  getPointListByStep(e.target.value);
+                }}
+                sx={{ borderRadius: "16px", background: "#f3f4f6" }}
+              >
+                {projectDetails?.project_status?.map((data, id) => {
+                  return (
+                    <MenuItem key={id} value={data.name}>
+                      {data.name}
+                    </MenuItem>
+                  );
+                })}
+              </MUISelect>
+            </FormControl>
+            <FormControl fullWidth>
+              <InputLabel id="content-simple-select-label">Content</InputLabel>
+              <MUISelect
+                labelId="content-simple-select-label"
+                id="content-simple-select"
+                label="Content"
+                value={content} // Adjust value to reflect state
+                name="content"
+                onChange={async e => {
+                  setContent(e.target.value);
+                  handleStepChange(e.target.value);
+                }}
+                sx={{ borderRadius: "16px", background: "#f3f4f6" }}
+              >
+                {pointList?.map((data, id) => {
+                  return (
+                    <MenuItem key={id} value={`${data.content}$${data.point}`}>
+                      {data.content}
+                    </MenuItem>
+                  );
+                })}
+              </MUISelect>
+            </FormControl>
+            <FormControl
+              fullWidth
+              sx={{
+                "& .MuiInputBase-root": {
+                  borderRadius: "16px",
+                  background: "#f3f4f6",
+                },
               }}
             >
-              {projectDetails?.project_status?.map((data, id) => {
-                return (
-                  <MenuItem key={id} value={data.name}>
-                    {data.name}
-                  </MenuItem>
-                );
-              })}
-            </Select>
-          </FormControl>
-          <FormControl fullWidth className="mt-1 mb-1">
-            <InputLabel id="demo-simple-select-label">Content</InputLabel>
-            <Select
-              labelId="demo-simple-select-label"
-              id="demo-simple-select"
-              value={content} // Adjust value to reflect state
-              name="content"
-              onChange={async e => {
-                setContent(e.target.value);
-                handleStepChange(e.target.value);
-              }}
-            >
-              {pointList?.map((data, id) => {
-                return (
-                  <MenuItem key={id} value={`${data.content}$${data.point}`}>
-                    {data.content}
-                  </MenuItem>
-                );
-              })}
-            </Select>
-          </FormControl>
-          <FormControl fullWidth className="mt-1 mb-1">
-            {/* <InputLabel id="demo-simple-select-label">Queries</InputLabel> */}
-            <TextField
-              type="text"
-              name="log"
-              value={log}
-              placeholder="Queries"
-              onChange={e => setLog(e.target.value)}
-            />
-          </FormControl>
-          <FormControl fullWidth className="mt-1 mb-1">
+              <TextField
+                type="text"
+                name="log"
+                value={log}
+                placeholder="Queries"
+                onChange={e => setLog(e.target.value)}
+                sx={{ borderRadius: "16px", background: "#f3f4f6" }}
+              />
+            </FormControl>
+            {/* <FormControl fullWidth className="mt-1 mb-1">
             <TextField
               type="file"
               name="image"
               inputProps={{ multiple: true }}
               onChange={e => setImage(e.target.files)}
             />
-          </FormControl>
-          <FormControl fullWidth className="mt-1 mb-1">
-            <TextField
-              type="date"
-              name="date"
-              value={date}
-              onChange={e => setDate(e.target.value)}
-              inputProps={{ readOnly: true }}
-            />
-          </FormControl>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCancel} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleUpdate} color="primary">
-            Update
-          </Button>
-        </DialogActions>
-      </Dialog>
+          </FormControl> */}
+            <div className="w-full">
+              {/* <label className="text-base text-[#565656] font-semibold mb-2 block text-center">
+              Image
+            </label> */}
+              <input
+                type="file"
+                name="image"
+                onChange={e => setImage(e.target.files)}
+                className="w-full rounded-3xl text-gray-400 font-semibold text-sm bg-white border file:cursor-pointer cursor-pointer file:border-0 file:py-4 file:px-6 file:mr-4 file:bg-gray-100 file:hover:bg-gray-200 file:text-gray-500"
+              />
+            </div>
+            <FormControl
+              fullWidth
+              sx={{
+                "& .MuiInputBase-root": {
+                  borderRadius: "16px",
+                  background: "#f3f4f6",
+                },
+              }}
+            >
+              <TextField
+                type="date"
+                name="date"
+                value={date}
+                onChange={e => setDate(e.target.value)}
+                inputProps={{ readOnly: true }}
+              />
+            </FormControl>
+          </div>
+          <div>
+            <Button onClick={handleCancel} color="primary">
+              Cancel
+            </Button>
+            <Button onClick={handleUpdate} color="primary">
+              Update
+            </Button>
+          </div>
+        </div>
+      </Modal>
 
       {/* Work details view dialog */}
       <Dialog open={workDetailOpen} onClose={workDetailCancel}>

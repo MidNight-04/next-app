@@ -344,15 +344,15 @@ const Page = () => {
                         <div className="flex gap-4 flex-wrap mt-8 -md:mt-2 -md:gap-2">
                           <span className="flex gap-2 justify-center items-center p-2 bg-primary-foreground rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl -md:[&_p]:text-sm -md:[&_svg]:text-sm">
                             <RiShareForwardFill />
-                            <p>Area : {dt.work}</p>
+                            <p>Work : {dt.work}</p>
                           </span>
                           <span className="flex gap-2 justify-center items-center p-2 bg-primary-foreground rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl -md:[&_p]:text-sm -md:[&_svg]:text-sm">
                             <RiShareForwardFill className="icon" />
-                            <p>Floors : {`G + ${dt.finalStatus}`}</p>
+                            <p>Status : {`G + ${dt.finalStatus}`}</p>
                           </span>
                           <span className="flex gap-2 justify-center items-center p-2 bg-primary-foreground rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl -md:[&_p]:text-sm -md:[&_svg]:text-sm">
                             <RiShareForwardFill className="icon" />
-                            <p>Duration : {dt.query} Months</p>
+                            <p>Query : {dt.query} </p>
                           </span>
                           {dt.assignMember?.map((item, it) => (
                             <span
@@ -360,7 +360,7 @@ const Page = () => {
                               className="flex gap-2 justify-center items-center p-2 bg-primary-foreground rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl -md:[&_p]:text-sm -md:[&_svg]:text-sm  "
                             >
                               <RiShareForwardFill className="icon" />
-                              <p>{item.name}</p>
+                              <p>Assign Member : {item.name}</p>
                             </span>
                           ))}
                         </div>

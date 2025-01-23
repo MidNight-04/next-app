@@ -21,10 +21,11 @@ import "react-toastify/dist/ReactToastify.css";
 import { FaCalendar, FaMinus, FaPlus, FaRegCalendar } from "react-icons/fa6";
 import { TiArrowSortedDown, TiArrowSortedUp } from "react-icons/ti";
 import { FaRegCalendarAlt, FaRupeeSign } from "react-icons/fa";
-import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
+import { IoIosArrowBack, IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import { FiDownload } from "react-icons/fi";
 import { useParams } from "next/navigation";
 import AsideContainer from "../../../../../components/AsideContainer";
+import { useRouter } from "next/navigation";
 
 const style = {
   position: "absolute",
@@ -50,6 +51,7 @@ const Page = () => {
   const [payAmount, setPayAmount] = useState("");
   const [paymentStage, setPaymentStage] = useState("");
   const [pay, setPay] = useState(0);
+  const router = useRouter();
 
   useEffect(() => {
     // Initialize showContent state based on the number of project steps
@@ -326,10 +328,16 @@ const Page = () => {
   return (
     <AsideContainer>
       <div className="datatable">
-        <div className="flex flex-row pl-4 my-4 justify-between">
-          <h1 className="text-2xl font-semibold font-ubuntu">
-            Project Payment Details
-          </h1>
+        <div className="flex flex-row my-4 justify-between">
+          <div className="flex flex-row gap-2 items-center">
+            <IoIosArrowBack
+              className="text-2xl cursor-pointer"
+              onClick={() => router.back()}
+            />
+            <h1 className="text-2xl font-semibold font-ubuntu -md:mb-2 -md:text-lg">
+              Project Payment Details
+            </h1>
+          </div>
         </div>
         <div className="row mt-4">
           <div className="bg-white rounded-3xl p-5 text-secondary font-semibold text-lg text-center flex flex-row w-full justify-between mb-6">

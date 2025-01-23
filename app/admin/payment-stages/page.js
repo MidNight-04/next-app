@@ -24,6 +24,21 @@ import { TiArrowSortedDown, TiArrowSortedUp } from "react-icons/ti";
 import Link from "next/link";
 import { ExpandMore } from "@mui/icons-material";
 import AsideContainer from "../../../components/AsideContainer";
+import { RiBuilding4Line } from "react-icons/ri";
+import { FiEdit } from "react-icons/fi";
+import { MdDeleteOutline } from "react-icons/md";
+import { IoMdAdd } from "react-icons/io";
+
+import {
+  Accordion as Saccordian,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "../../../components/ui/accordion";
+import { cn } from "../../../lib/utils";
+import { useAuthStore } from "../../../store/useAuthStore";
+import { useRouter } from "next/navigation";
+
 const style = {
   position: "absolute",
   top: "50%",
@@ -50,6 +65,9 @@ const Page = () => {
   const [deleteStatus, setDeleteStatus] = useState("");
   const [name, setName] = useState("");
   const [index, setIndex] = useState("");
+  // const userType = useAuthStore(state => state.userType);
+  const userType = "ROLE_ADMIN";
+  const router = useRouter();
 
   useEffect(() => {
     // Initialize showContent state based on the number of project steps
@@ -236,114 +254,162 @@ const Page = () => {
 
   return (
     <AsideContainer>
-      <div className="container px-4 py-2">
+      <>
         <div className="flex flex-row justify-between items-center p-4">
-          <p className="text-xl font-semibold">Payment Stages</p>
-          <Link href="/admin/payment-stages/add">
-            <Button
-              variant="contained"
-              size="small"
-              style={{
-                backgroundColor: "#fec20e",
-                fontWeight: "600",
-                marginTop: "-15px",
-              }}
-            >
-              Add Payment Stages
-            </Button>
-          </Link>
+          <h1 className="text-xl font-semibold">Payment Stages</h1>
+          {userType === "ROLE_ADMIN" && (
+            <div className="mb-3 flex flex-row items-center justify-end">
+              <button
+                className="flex flex-row items-center p-2 pr-4 font-semibold bg-secondary border-[1px] border-secondary text-primary rounded-full cursor-pointer"
+                onClick={() => router.push("/admin/payment-stages/add")}
+              >
+                <IoMdAdd className="text-2xl mr-1" />
+                Add Payment Stages
+              </button>
+            </div>
+          )}
         </div>
         <div className="container mt-2">
-          {data?.map((item, index) => {
-            return (
-              <Accordion key={index}>
-                <AccordionSummary
-                  expandIcon={<ExpandMore />}
-                  aria-controls={`panel1bh-content`}
-                  id={`panel1bh-header`}
+          <Saccordian type="single" collapsible>
+            {data?.map((item, index) => {
+              return (
+                <AccordionItem
+                  key={index}
+                  value={item._id}
+                  className="bg-white rounded-2xl mb-4"
                 >
-                  <div className="flex flex-row justify-between px-4 w-full">
-                    <div>
-                      {item?.floor === "0" ? `Ground ` : `G+${item.floor} `}
-                      Floor
+                  <AccordionTrigger className="px-4">
+                    <div className="flex flex-row justify-between px-4 w-full">
+                      <div className="flex flex-row items-center gap-4">
+                        <div className="flex flex-row items-center p-2 text-xl bg-primary-foreground border-[1px] border-primary text-primary rounded-full">
+                          <RiBuilding4Line />
+                        </div>
+                        <div className="text-lg font-bold text-secondary">
+                          {item?.floor === "0" ? `Ground ` : `G+${item.floor} `}
+                          Floor
+                        </div>
+                      </div>
+                      {userType === "ROLE_ADMIN" && (
+                        <div
+                          className="flex flex-row items-center p-2 text-xl bg-primary-foreground border-[1px] border-primary text-primary rounded-full"
+                          onClick={() => confirmDelete(item?._id)}
+                        >
+                          <MdDeleteOutline />
+                        </div>
+                      )}
                     </div>
-                    <div>
-                      <Button
-                        variant="contained"
-                        color="error"
-                        size="small"
-                        onClick={() => confirmDelete(item?._id)}
-                      >
-                        Delete
-                      </Button>
-                    </div>
-                  </div>
-                </AccordionSummary>
-                <AccordionDetails>
-                  <Button
-                    variant="contained"
-                    size="small"
-                    onClick={() => handleAddOpen(item?._id, item?.floor, index)}
-                  >
-                    Add
-                  </Button>
-                  <table className="table">
-                    <thead>
-                      <tr>
-                        <th scope="col">Payment %</th>
-                        <th scope="col">Stages</th>
-                        <th scope="col">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {item?.stages?.map((itm, idx) => {
-                        return (
-                          <tr
-                            key={idx}
-                            className="flex flex-row justify-between"
+                  </AccordionTrigger>
+                  <AccordionContent className="py-0">
+                    <div className="bg-[#efefef] pt-4">
+                      {userType === "ROLE_ADMIN" && (
+                        <div className="mb-3 flex flex-row items-center justify-end">
+                          <button
+                            className="flex flex-row items-center p-2 pr-3 font-semibold bg-primary-foreground border-[1px] border-secondary text-secondary rounded-full cursor-pointer"
+                            onClick={() =>
+                              handleAddOpen(item?._id, item?.floor, index)
+                            }
                           >
-                            <td className="data">{itm.payment}</td>
-                            <td className="data data-stage">{itm.stage}</td>
-                            <td className="data-action">
-                              <Button
-                                color="secondary"
-                                size="small"
-                                variant="contained"
-                                onClick={() =>
-                                  handleUpdateOpen(
-                                    item?._id,
-                                    itm.payment,
-                                    itm.stage,
-                                    index
-                                  )
-                                }
-                              >
-                                Edit
-                              </Button>
-                              <Button
-                                color="error"
-                                size="small"
-                                variant="contained"
-                                onClick={() =>
-                                  handleConfirmDelete(
-                                    item?._id,
-                                    itm?.payment,
-                                    itm.stage
-                                  )
-                                }
-                              >
-                                Delete
-                              </Button>
-                            </td>
+                            <IoMdAdd className="text-xl mr-1" />
+                            Add New
+                          </button>
+                        </div>
+                      )}
+
+                      <table className="w-full">
+                        <thead>
+                          <tr className="flex flex-row justify-evenly bg-secondary text-primary text-lg font-semibold rounded-t-3xl py-3">
+                            <th className="w-full text-center" scope="col">
+                              Payment %
+                            </th>
+                            <th className="w-full text-center" scope="col">
+                              Stages
+                            </th>
+                            {userType === "ROLE_ADMIN" && (
+                              <th className="w-full text-center" scope="col">
+                                Action
+                              </th>
+                            )}
                           </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </AccordionDetails>
-              </Accordion>
-            );
-          })}
+                        </thead>
+                        <tbody>
+                          {item?.stages?.map((itm, idx) => {
+                            return (
+                              <tr
+                                key={itm.stage}
+                                className={cn(
+                                  "flex flex-row justify-evenly h-14",
+                                  idx % 2
+                                    ? "bg-secondary-foreground"
+                                    : "bg-primary-foreground",
+                                  item?.stages?.length - 1 === idx
+                                    ? "rounded-b-3xl"
+                                    : ""
+                                )}
+                              >
+                                <td
+                                  className={cn(
+                                    "p-4 text-secondary text-sm font-semibold w-full text-center"
+                                  )}
+                                >
+                                  {console.log(
+                                    item?.stages?.length - 1 === idx
+                                  )}
+                                  {itm.payment}
+                                </td>
+                                <td
+                                  className={cn(
+                                    "p-4 text-secondary text-sm font-semibold w-full text-center"
+                                  )}
+                                >
+                                  {itm.stage}
+                                </td>
+                                {userType === "ROLE_ADMIN" && (
+                                  <td
+                                    className={cn(
+                                      "p-4 text-secondary text-sm font-semibold text-center w-full flex flex-row gap-4 justify-center items-center",
+                                      item?.stages?.length - 1 === idx
+                                        ? "rounded-br-3xl"
+                                        : ""
+                                    )}
+                                  >
+                                    <div
+                                      className="flex flex-row items-center p-2 text-xl bg-primary-foreground border-[1px] border-primary text-primary rounded-full cursor-pointer"
+                                      onClick={() =>
+                                        handleUpdateOpen(
+                                          item?._id,
+                                          itm.payment,
+                                          itm.stage,
+                                          index
+                                        )
+                                      }
+                                    >
+                                      <FiEdit className="text-lg" />
+                                    </div>
+                                    <div
+                                      className="flex flex-row items-center p-2 text-xl bg-primary-foreground border-[1px] border-primary text-primary rounded-full cursor-pointer"
+                                      onClick={() =>
+                                        handleConfirmDelete(
+                                          item?._id,
+                                          itm?.payment,
+                                          itm.stage
+                                        )
+                                      }
+                                    >
+                                      <MdDeleteOutline />
+                                    </div>
+                                  </td>
+                                )}
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              );
+            })}
+          </Saccordian>
           <ToastContainer
             position="top-right"
             autoClose={5000}
@@ -357,43 +423,62 @@ const Page = () => {
             theme="light"
           />
         </div>
-        <Dialog open={updateOpen} onClose={handleUpdateCancel}>
-          <DialogTitle>
-            {status === "edit" ? "Update" : "Add"} Payment Stages
-          </DialogTitle>
-          <DialogContent style={{ width: "500px" }}>
-            <Typography>Payment %</Typography>
-            <TextField
-              autoFocus
-              margin="dense"
-              id="role"
-              type="text"
-              fullWidth
-              name="payment"
-              value={payment}
-              onChange={e => setPayment(e.target.value)}
-            />
-            <Typography className="mt-2">Stage Point</Typography>
-            <TextField
-              autoFocus
-              margin="dense"
-              id="role"
-              type="text"
-              fullWidth
-              name="stage"
-              value={stage}
-              onChange={e => setStage(e.target.value)}
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleUpdateCancel} color="primary">
-              Cancel
-            </Button>
-            <Button onClick={handleConfirmUpdate} color="primary">
-              {status === "edit" ? "Update" : "Add"}
-            </Button>
-          </DialogActions>
-        </Dialog>
+        <Modal
+          open={updateOpen}
+          onClose={handleUpdateCancel}
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <div className="p-10 rounded-3xl shadow-xl bg-white w-1/3 -lg:w-2/4 -md:w-3/4 ">
+            <div>
+              <h3 className="text-2xl font-ubuntu text-secondary">
+                {status === "edit" ? "Update" : "Add"} Payment Stages
+              </h3>
+              <hr className=" my-4" />
+            </div>
+            <div>
+              <div className="flex flex-col gap-2 mb-2 [&_label]:font-semibold">
+                <label>Payment %</label>
+                <input
+                  className="h-12 border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100"
+                  id="payment"
+                  type="text"
+                  name="payment"
+                  value={payment}
+                  onChange={e => setPayment(e.target.value)}
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="mt-2 font-semibold">Stage Point</label>
+                <input
+                  id="stage"
+                  className="h-12 border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100"
+                  type="text"
+                  name="stage"
+                  value={stage}
+                  onChange={e => setStage(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="mt-4 flex flex-row gap-2 justify-end">
+              <button
+                onClick={handleUpdateCancel}
+                className="p-2  font-semibold bg-primary-foreground text-center border-[1px] border-secondary text-secondary rounded-full cursor-pointer w-[84px]"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmUpdate}
+                className="p-2  font-semibold bg-secondary text-center border-[1px] border-secondary text-primary rounded-full cursor-pointer w-[84px]"
+              >
+                {status === "edit" ? "Update" : "Add"}
+              </button>
+            </div>
+          </div>
+        </Modal>
 
         {/* Dialog for payment stage point delete */}
         <Dialog
@@ -401,20 +486,134 @@ const Page = () => {
           onClose={handleCloseDelete}
           aria-labelledby="responsive-dialog-title"
         >
-          <DialogContent>
-            <DialogContentText>Are you sure want to delete ?</DialogContentText>
+          <DialogContent sx={{ width: "30rem" }}>
+            <h3 className="text-lg font-semibold text-secondary">
+              Are you sure want to delete ?
+            </h3>
           </DialogContent>
           <DialogActions>
-            <Button autoFocus onClick={handleCloseDelete}>
+            <button
+              className="p-2  font-semibold bg-primary-foreground text-center border-[1px] border-secondary text-secondary rounded-full cursor-pointer w-[84px]"
+              onClick={handleCloseDelete}
+            >
               Cancel
-            </Button>
-            <Button onClick={handleDeletePoint} autoFocus>
+            </button>
+            <button
+              className="p-2  font-semibold bg-secondary text-center border-[1px] border-secondary text-primary rounded-full cursor-pointer w-[84px]"
+              onClick={handleDeletePoint}
+            >
               Delete
-            </Button>
+            </button>
           </DialogActions>
         </Dialog>
-      </div>
+      </>
     </AsideContainer>
   );
 };
 export default Page;
+{
+  /* <div className="container mt-2">
+{data?.map((item, index) => {
+  return (
+    <Accordion key={index}>
+      <AccordionSummary
+        expandIcon={<ExpandMore />}
+        aria-controls={`panel1bh-content`}
+        id={`panel1bh-header`}
+      >
+        <div className="flex flex-row justify-between px-4 w-full">
+          <div>
+            {item?.floor === "0" ? `Ground ` : `G+${item.floor} `}
+            Floor
+          </div>
+          <div>
+            <Button
+              variant="contained"
+              color="error"
+              size="small"
+              onClick={() => confirmDelete(item?._id)}
+            >
+              Delete
+            </Button>
+          </div>
+        </div>
+      </AccordionSummary>
+      <AccordionDetails>
+        <Button
+          variant="contained"
+          size="small"
+          onClick={() => handleAddOpen(item?._id, item?.floor, index)}
+        >
+          Add
+        </Button>
+        <table className="table">
+          <thead>
+            <tr>
+              <th scope="col">Payment %</th>
+              <th scope="col">Stages</th>
+              <th scope="col">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {item?.stages?.map((itm, idx) => {
+              return (
+                <tr
+                  key={idx}
+                  className="flex flex-row justify-between"
+                >
+                  <td className="data">{itm.payment}</td>
+                  <td className="data data-stage">{itm.stage}</td>
+                  <td className="data-action">
+                    <Button
+                      color="secondary"
+                      size="small"
+                      variant="contained"
+                      onClick={() =>
+                        handleUpdateOpen(
+                          item?._id,
+                          itm.payment,
+                          itm.stage,
+                          index
+                        )
+                      }
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      color="error"
+                      size="small"
+                      variant="contained"
+                      onClick={() =>
+                        handleConfirmDelete(
+                          item?._id,
+                          itm?.payment,
+                          itm.stage
+                        )
+                      }
+                    >
+                      Delete
+                    </Button>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </AccordionDetails>
+    </Accordion>
+  );
+})}
+<ToastContainer
+  position="top-right"
+  autoClose={5000}
+  hideProgressBar={false}
+  newestOnTop={false}
+  closeOnClick={false}
+  rtl={false}
+  pauseOnFocusLoss
+  draggable
+  pauseOnHover
+  theme="light"
+/>
+</div> */
+}

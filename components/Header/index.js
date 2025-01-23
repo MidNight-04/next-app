@@ -36,6 +36,7 @@ import { useDebounce } from "../../helpers/useDeboune";
 import Link from "next/link";
 import { redirect, usePathname, useRouter } from "next/navigation";
 import { useAuthStore } from "../../store/useAuthStore";
+import { ToastContainer } from "react-toastify";
 
 const menu = [
   {
@@ -113,6 +114,18 @@ const Header = () => {
 
   return (
     <div className="sticky top-0 left-0 z-10 w-full shadow-md bg-black h-16 flex items-center">
+      <ToastContainer
+        position="top-right"
+        autoClose={2000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
       <div className="px-24 grid md:grid-cols-8 grid-flow-row-dense justify-between items-center w-full -xl:px-16 -md:px-12 -xl:flex -sm:px-4">
         {debounceWidth < 1100 && (
           <div
@@ -334,6 +347,7 @@ const Header = () => {
                       <div
                         onClick={() => {
                           setLogout();
+                          toast.success("You have been logged out.");
                           redirect("/homepage");
                         }}
                         className="w-full px-4 py-2 text-gray-300 hover:text-white group transition duration-300"

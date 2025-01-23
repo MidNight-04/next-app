@@ -5,6 +5,7 @@ import { SidebarTrigger } from "../ui/sidebar";
 import { useAuthStore } from "../../store/useAuthStore";
 import { redirect } from "next/dist/server/api-utils";
 import { useRouter } from "next/navigation";
+import { toast } from "react-toastify";
 
 const AdminHeader = () => {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -90,8 +91,9 @@ const AdminHeader = () => {
             <MenuItem onClick={handleClose}>
               <div
                 onClick={() => {
-                  router.push("/homepage");
                   setLogout();
+                  router.push("/homepage");
+                  toast.success("You have been logged out.");
                 }}
                 className="w-full px-4 py-2 text-gray-300 hover:text-white group transition duration-300"
               >

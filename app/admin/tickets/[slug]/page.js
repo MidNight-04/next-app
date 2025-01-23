@@ -20,6 +20,8 @@ import {
 import { toast } from "react-toastify";
 import { useParams } from "next/navigation";
 import AsideContainer from "../../../../components/AsideContainer";
+import { IoIosArrowBack } from "react-icons/io";
+import { useRouter } from "next/navigation";
 
 let today = new Date();
 let yyyy = today.getFullYear();
@@ -54,6 +56,7 @@ const TicketViewClient = () => {
   const [query, setQuery] = useState("");
   const [work, setWork] = useState("");
   const [ticketDate, setTicketDate] = useState(null);
+  const router = useRouter();
   useEffect(() => {
     axios
       .get(
@@ -239,9 +242,16 @@ const TicketViewClient = () => {
   return (
     <AsideContainer>
       <div>
-        <h1 className="text-2xl font-bold my-4 font-ubuntu -md:text-lg -md:my-2">
-          Ticket Details
-        </h1>
+        <div className="flex flex-row gap-2 items-center my-4">
+          <IoIosArrowBack
+            className="text-2xl cursor-pointer"
+            onClick={() => router.back()}
+          />
+          <h1 className="text-2xl font-semibold font-ubuntu -md:mb-2 -md:text-lg">
+            Ticket Details
+          </h1>
+        </div>
+
         <div className="flex flex-row gap-4 justify-between mb-4 items-center -md:flex-col">
           {/* <div className="grid grid-col-2"> */}
           <div className="flex flex-row gap-4 flex-wrap -md:[&_div]:p-3 -md:gap-2">

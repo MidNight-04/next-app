@@ -22,8 +22,9 @@ import { TiArrowSortedDown, TiArrowSortedUp } from "react-icons/ti";
 import { useAuthStore } from "../../../../../store/useAuthStore";
 import { useParams } from "next/navigation";
 import AsideContainer from "../../../../../components/AsideContainer";
-
 import { cn } from "../../../../../lib/utils";
+import { IoIosArrowBack } from "react-icons/io";
+import { useRouter } from "next/navigation";
 const style = {
   position: "absolute",
   top: "50%",
@@ -47,6 +48,7 @@ let formatedtoday = yyyy + "-" + mm + "-" + dd;
 const Page = () => {
   // const userRole = useAuthStore(state => state.userType);
   const userRole = "client";
+  const router = useRouter();
   const activeUser = useAuthStore(state => state.userId[0]);
   const userName = useAuthStore(state => state.username[0]);
   const { slug } = useParams();
@@ -291,9 +293,15 @@ const Page = () => {
     <AsideContainer>
       <div className="datatable">
         <div className="flex flex-row justify-between pt-[20px] mb-[20px] items-center">
-          <h1 className="font-ubuntu font-bold text-[25px] leading-7">
-            Project Payment Stages
-          </h1>
+          <div className="flex flex-row gap-2 items-center">
+            <IoIosArrowBack
+              className="text-2xl cursor-pointer"
+              onClick={() => router.back()}
+            />
+            <h1 className="text-2xl font-semibold font-ubuntu -md:mb-2 -md:text-lg">
+              Project Payment Stages
+            </h1>
+          </div>
         </div>
         <div>
           {data?.map((item, index) => {

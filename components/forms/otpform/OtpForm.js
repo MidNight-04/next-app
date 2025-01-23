@@ -32,36 +32,43 @@ const OtpForm = () => {
       }),
     onSuccess: data => {
       if (data.message === "You have been logged in") {
+        toast.success("You have logged in successfully!");
         setLogIn({
           username: data.username,
           token: data?.token,
           isAuth: true,
-
           userId: data.id,
           email: data.email,
           userType: data.roles,
           token: data.token,
         });
         setShowLoader(false);
-        toast.success("You have logged in successfully!");
-        router.back();
+        setTimeout(() => {
+          if (data.roles[0] === "ROLE_USER") {
+            router.back();
+          } else {
+            router.push("/admin/projects");
+          }
+        }, 1000);
       }
     },
     onError: () => {
       setShowLoader(false);
-      toast.error("Invalid OTP");
+      toast.error("Please enter a valid OTP.");
     },
     // onSettled: () => {
     //   setShowLoader(false);
     //   router.back();
     // },
   });
+
   const loginMutation = useMutation({
     mutationKey: ["login", slug],
-    mutationFn: postEndpoint({
-      endpoint: `${slug}/signin-otp`,
-      data: { username },
-    }),
+    mutationFn: () =>
+      postEndpoint({
+        endpoint: `${slug}/signin-otp`,
+        data: { username },
+      }),
     onSuccess: data => {
       if (data.status === 200) {
         setShowLoader(false);
@@ -118,17 +125,21 @@ const OtpForm = () => {
             >
               login
             </Button>
-            <div
-              onClick={() => {
-                setShowLoader(true);
-                loginMutation.mutate();
-              }}
-            >
-              Resend OTP!
-            </div>
           </Form>
         )}
       </Formik>
+      <div className="text-center">
+        Didn&apos;t received OTP ?{"  "}
+        <span
+          className="text-blue-500 hover:underline cursor-pointer"
+          onClick={() => {
+            setShowLoader(true);
+            loginMutation.mutate();
+          }}
+        >
+          Resend
+        </span>
+      </div>
     </>
   );
 };

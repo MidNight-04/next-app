@@ -48,6 +48,7 @@ import LoaderSpinner from "../../../../components/loader/LoaderSpinner";
 import Image from "next/image";
 import { cn } from "../../../../lib/utils";
 import { Check, PriorityHigh } from "@mui/icons-material";
+import { BsClockHistory } from "react-icons/bs";
 import AsideContainer from "../../../../components/AsideContainer";
 import {
   Select,
@@ -63,6 +64,8 @@ import {
   AccordionTrigger,
 } from "../../../../components/ui/accordion";
 import { useAuthStore } from "../../../../store/useAuthStore";
+import { IoIosArrowBack } from "react-icons/io";
+import { useRouter } from "next/navigation";
 
 let today = new Date();
 let yyyy = today.getFullYear();
@@ -87,9 +90,12 @@ const monthNames = [
   "December",
 ];
 
+//Show no. of inspections _______________________________________________
+
 const ClientProjectView = () => {
   const linkRef = useRef(null);
   const { slug } = useParams();
+  const router = useRouter();
   const [projectDetails, setProjectDetails] = useState({});
   const [confirmationOpen, setConfirmationOpen] = useState(false);
   const [status, setStatus] = useState("");
@@ -393,14 +399,20 @@ const ClientProjectView = () => {
 
   return (
     <AsideContainer>
-      <div className="flex flex-row pl-4 my-4 justify-between -md:flex-col -md:pl-0 -md:my-2">
-        <h1 className="text-2xl font-semibold font-ubuntu -md:mb-2 -md:text-lg">
-          Project Details
-        </h1>
+      <div className="flex flex-row my-4 justify-between -md:flex-col -md:pl-0 -md:my-2">
+        <div className="flex flex-row gap-2 items-center">
+          <IoIosArrowBack
+            className="text-2xl cursor-pointer"
+            onClick={() => router.back()}
+          />
+          <h1 className="text-2xl font-semibold font-ubuntu -md:mb-2 -md:text-lg">
+            Project Details
+          </h1>
+        </div>
         <div className="flex flex-row gap-4 -md:gap-2 ">
           <Link href={`/admin/projects/payment-stages/${slug}`}>
-            <button className="px-[15px] py-[12px] bg-transparent border-2 border-primary rounded-full font-ubuntu -md:px-2 -md:py-[6px]">
-              <div className="text-primary flex flex-row">
+            <button className="px-[15px] py-[12px] bg-transparent border-2 border-secondary rounded-full font-ubuntu -md:px-2 -md:py-[6px] hover:bg-secondary [&_div]:hover:text-primary">
+              <div className="text-secondary flex flex-row">
                 <p className="text-[13px] font-bold leading-none -md:text-xs">
                   Payment Stages
                 </p>
@@ -408,8 +420,8 @@ const ClientProjectView = () => {
             </button>
           </Link>
           <Link href={`/admin/projects/payment-details/${slug}`}>
-            <button className="px-[15px] py-[12px] bg-transparent border-2 border-primary rounded-full font-ubuntu -md:px-2 -md:py-[6px]">
-              <div className="text-primary flex flex-row">
+            <button className="px-[15px] py-[12px] bg-transparent border-2 border-secondary rounded-full font-ubuntu -md:px-2 -md:py-[6px] hover:bg-secondary [&_div]:hover:text-primary">
+              <div className="text-secondary flex flex-row">
                 <p className="text-[13px] font-bold leading-none -md:text-xs">
                   Payment Details
                 </p>
@@ -419,8 +431,8 @@ const ClientProjectView = () => {
           {userType === "ROLE_ADMIN" && (
             <>
               <Link href={`/admin/projects/payment-details/${slug}`}>
-                <button className="px-[15px] py-[12px] bg-transparent border-2 border-primary rounded-full font-ubuntu -md:px-2 -md:py-[6px]">
-                  <div className="text-primary flex flex-row">
+                <button className="px-[15px] py-[12px] bg-transparent border-2 border-secondary rounded-full font-ubuntu -md:px-2 -md:py-[6px] hover:bg-secondary [&_div]:hover:text-primary">
+                  <div className="text-secondary flex flex-row">
                     <p className="text-[13px] font-bold leading-none -md:text-xs">
                       Project Inspections
                     </p>
@@ -428,8 +440,8 @@ const ClientProjectView = () => {
                 </button>
               </Link>
               <Link href={`/admin/projects/payment-details/${slug}`}>
-                <button className="px-[15px] py-[12px] bg-transparent border-2 border-primary rounded-full font-ubuntu">
-                  <div className="text-primary flex flex-row">
+                <button className="px-[15px] py-[12px] bg-transparent border-2 border-secondary rounded-full font-ubuntu">
+                  <div className="text-secondary flex flex-row">
                     <p className="text-[13px] font-bold leading-none">
                       Add Documents
                     </p>
@@ -439,10 +451,10 @@ const ClientProjectView = () => {
             </>
           )}
           <button
-            className="px-[15px] py-[12px] bg-transparent border-2 border-red-500 rounded-full font-ubuntu -md:px-2 -md:py-[6px] cursor-pointer"
+            className="px-[15px] py-[12px] bg-transparent border-2 border-secondary rounded-full font-ubuntu -md:px-2 -md:py-[6px] cursor-pointer hover:bg-secondary [&_div]:hover:text-primary"
             onClick={() => updateStatus()}
           >
-            <div className="text-red-500 flex flex-row">
+            <div className="text-secondary flex flex-row">
               <p className="text-[13px] font-bold leading-none -md:text-xs">
                 Raise Ticket
               </p>
@@ -588,8 +600,8 @@ const ClientProjectView = () => {
                       </div>
                     </div>
                   </AccordionTrigger>
-                  <AccordionContent>
-                    <div className="bg-[#efefef] h-24 pt-4">
+                  <AccordionContent className="py-0">
+                    <div className="bg-[#efefef] h-24 pt-4 ">
                       <div className=" bg-secondary text-primary h-20 flex flex-row justify-evenly items-center rounded-t-3xl flex-auto text-base font-semibold -md:justify-between">
                         <span className="font-semibold w-24 -sm:hidden" />
                         <span className="font-semibold w-[140px] -md:w-16 -md:ml-8 -sm:ml-16">
@@ -637,36 +649,32 @@ const ClientProjectView = () => {
                                 <div className="h-full w-6 flex items-center justify-center">
                                   <div
                                     className={cn(
-                                      "w-[2px] bg-green-500 pointer-events-none h-full",
+                                      "w-[2px] bg-secondary pointer-events-none h-full",
                                       idx === 0 ? "mt-[100%] h-7" : "",
                                       idx === item.step.length - 1
                                         ? "mb-[100%] h-7"
                                         : "",
                                       itm.finalStatus[0].status !== "Completed"
-                                        ? "bg-yellow-500"
+                                        ? "bg-secondary"
                                         : ""
                                     )}
                                   />
                                 </div>
                                 <div
                                   className={cn(
-                                    "w-6 h-6 absolute top-1/2 -mt-3 rounded-full bg-green-500 shadow text-center",
+                                    "w-8 h-8 absolute top-1/2 md:right-[92px] -md:right-1 -mt-4 rounded-full bg-green-500 shadow-xl text-center",
                                     itm.finalStatus[0].status !== "Completed"
-                                      ? "bg-yellow-500"
+                                      ? "bg-primary"
                                       : ""
                                   )}
                                 >
                                   {itm.finalStatus[0].status === "Pending" ? (
-                                    <PriorityHigh
-                                      sx={{
-                                        fontSize: "16px",
-                                        color: "red",
-                                      }}
-                                    />
+                                    <BsClockHistory className="mt-1 ml-1 text-secondary text-2xl " />
                                   ) : (
                                     <Check
                                       sx={{
-                                        fontSize: "16px",
+                                        marginTop: "4px",
+                                        fontSize: "24px",
                                         color: "white",
                                       }}
                                     />
@@ -744,8 +752,8 @@ const ClientProjectView = () => {
                                     />
                                   ))}
                                 </div>
-                                <div className="font-semibold">
-                                  Status:{workDetails[0]?.status}
+                                <div className="font-semibold mt-4">
+                                  Status : {workDetails[0]?.status}
                                 </div>
                               </div>
                             </div>
@@ -932,15 +940,15 @@ const ClientProjectView = () => {
                         {item?.name}
                       </span>
                       {item?.status === "Pending" ? (
-                        <span className="bg-primary text-primary-foreground rounded-lg px-2 py-1">
+                        <span className="bg-secondary text-primary-foreground rounded-lg px-2 py-1">
                           {item?.status} By You
                         </span>
                       ) : item?.status === "Accepted" ? (
-                        <span className="bg-primary text-primary-foreground rounded-lg px-2 py-1">
+                        <span className="bg-secondary text-primary-foreground rounded-lg px-2 py-1">
                           {item?.status} By You
                         </span>
                       ) : (
-                        <span className="bg-primary text-primary-foreground rounded-lg px-2 py-1">
+                        <span className="bg-secondary text-primary-foreground rounded-lg px-2 py-1">
                           {item?.status} By You
                         </span>
                       )}

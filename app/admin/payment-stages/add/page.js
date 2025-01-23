@@ -8,6 +8,15 @@ import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { useRouter } from "next/navigation";
 import AsideContainer from "../../../../components/AsideContainer";
+import { IoIosArrowBack, IoMdAdd } from "react-icons/io";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../../../components/ui/select";
+import { FiDownload } from "react-icons/fi";
 
 const AddPaymentStagesForm = () => {
   const router = useRouter();
@@ -108,57 +117,75 @@ const AddPaymentStagesForm = () => {
               className="topContainer"
               style={{ display: "flex", justifyContent: "space-between" }}
             >
-              <h1>Add Payment Stages</h1>
-              <Button
-                variant="contained"
-                size="small"
-                style={{
-                  backgroundColor: "green",
-                  fontWeight: "600",
-                }}
-                className="mx-2 float-end"
-                onClick={handleSampleDownload}
-              >
-                Download Sample Format
-              </Button>
+              <div className="flex flex-row items-center justify-between w-full my-3">
+                <div className="flex flex-row gap-2 items-center">
+                  <IoIosArrowBack
+                    className="text-2xl cursor-pointer"
+                    onClick={() => router.back()}
+                  />
+                  <h1 className="text-2xl font-semibold font-ubuntu -md:mb-2 -md:text-lg">
+                    Add Payment Stages
+                  </h1>
+                </div>
+                <div className="flex flex-row items-center justify-end">
+                  <button
+                    className="flex flex-row items-center p-2 px-3 font-ubuntu text-sm font-semibold bg-secondary border-[1px] border-secondary text-primary rounded-full cursor-pointer"
+                    onClick={handleSampleDownload}
+                  >
+                    <FiDownload className="text-xl mr-1" />
+                    Download Sample Format
+                  </button>
+                </div>
+              </div>
             </div>
-
-            <div className="box-body table-responsive">
-              <p className="text-center">
-                <span className="fw-bold">Fields - </span>payment, stages
-              </p>
-              <table
-                className="table table-striped table-bordered table-hover m-4"
-                id="sampledata"
-              >
-                <thead>
+            <div>
+              <table className="w-full shadow-md rounded-3xl mb-4">
+                <thead className="h-12 text-primary bg-secondary">
                   <tr>
-                    <th>
-                      <span className="text-danger">*</span>
-                      <span>Payment(In %)</span>
-                    </th>
-                    <th>
-                      <span className="text-danger">*</span>
-                      <span>Stages</span>
-                    </th>
+                    <th className="rounded-tl-3xl">Payment (In %)</th>
+                    <th className="rounded-tr-3xl">Stages</th>
                   </tr>
                 </thead>
-                <tbody>
-                  <tr>
-                    <td>1.5</td>
+                <tbody className="text-center text-secondary font-semibold text-sm [&_tr]:h-14">
+                  <tr className="bg-primary-foreground">
+                    <td>1.5%</td>
+                    <td>Before Initiation</td>
+                  </tr>
+                  <tr className="bg-secondary-foreground">
+                    <td>15%</td>
                     <td>Booking</td>
+                  </tr>
+                  <tr className="bg-primary-foreground">
+                    <td className="rounded-bl-3xl">15%</td>
+                    <td className="rounded-br-3xl">After Piling</td>
                   </tr>
                 </tbody>
               </table>
             </div>
-            <div className="bottomContainer">
-              <div className="bottomRightContainer">
-                <div className="form">
-                  <div className="formInputContainer">
-                    <label>
-                      Floor<span className="text-danger">*</span>
-                    </label>
-                    <select
+            <div className="bg-white shadow-2xl p-5 rounded-3xl">
+              <div className="flex flex-row w-full gap-4">
+                <div className="w-full flex flex-col gap-2">
+                  <label className="text-secondary text-lg font-semibold">
+                    Floor<span className="text-red-500">*</span>
+                  </label>
+                  <Select
+                    onValueChange={e => setFloor(e.target.value)}
+                    className="h-12 "
+                  >
+                    <SelectTrigger className="h-12 border border-primary px-4 text-gray-400 rounded-[7px]">
+                      <SelectValue placeholder="Select" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {floorList?.map((item, index) => {
+                        return (
+                          <SelectItem key={index} value={index}>
+                            {item?.name}
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
+                  {/* <select
                       style={{ width: "100%", height: "30px" }}
                       className="mt-2"
                       name="floor"
@@ -173,20 +200,25 @@ const AddPaymentStagesForm = () => {
                           </option>
                         );
                       })}
-                    </select>
-                  </div>
-                  <div className="formInputContainer">
-                    <label>
-                      Stages<span className="text-danger">*</span>
-                    </label>
-                    <input
-                      type="file"
-                      name="stages"
-                      onChange={e => setStages(e.target.files[0])}
-                    />
-                  </div>
+                    </select> */}
                 </div>
-                <div className="createUserSubmitBTN" onClick={submitFormData}>
+                <div className="w-full h-12 flex flex-col gap-2">
+                  <label className="text-secondary text-lg font-semibold ">
+                    Stages<span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="file"
+                    name="stages"
+                    onChange={e => setStages(e.target.files[0])}
+                    className=" w-full text-gray-400 font-semibold text-sm bg-white border border-primary rounded-[7px] file:cursor-pointer cursor-pointer file:border-0 file:py-[14px] file:px-3 file:mr-4 file:bg-gray-100 file:hover:bg-gray-200 file:text-gray-500"
+                  />
+                </div>
+              </div>
+              <div className="flex flex-row justify-end items-center mt-4">
+                <div
+                  className="p-2  font-semibold bg-secondary text-center border-[1px] border-secondary text-primary rounded-full cursor-pointer w-[84px] "
+                  onClick={submitFormData}
+                >
                   Submit
                 </div>
               </div>

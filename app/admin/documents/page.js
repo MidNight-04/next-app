@@ -26,7 +26,8 @@ import AsideContainer from "../../../components/AsideContainer";
 import { useAuthStore } from "../../../store/useAuthStore";
 import { GrUpdate } from "react-icons/gr";
 import { MdOutlineFileDownload } from "react-icons/md";
-import { alpha, styled } from "@mui/material/styles";
+import { styled } from "@mui/material/styles";
+
 // import pdfjsWorker from "pdfjs-dist/build/pdf.worker.min.mjs";
 
 // pdfjs.GlobalWorkerOptions.workerSrc = new URL(
@@ -300,6 +301,9 @@ const Page = () => {
               "& .MuiDataGrid-columnHeaderTitleContainer": {
                 background: "#0b192c",
                 color: "#93bfcf",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
               },
               "& .MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular MuiTablePagination-toolbar":
                 {
@@ -314,6 +318,11 @@ const Page = () => {
               "& .MuiDataGrid-overlay": {
                 background: "#eee9da",
                 color: "#0b192c",
+              },
+              "& .MuiDataGrid-cell": {
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
               },
             }}
           />
@@ -335,6 +344,7 @@ const Page = () => {
               value={status}
               name="status"
               onChange={e => setStatus(e.target.value)}
+              sx={{ borderRadius: "16px", background: "#f3f4f6" }}
             >
               <MenuItem value="Pending">Pending</MenuItem>
               <MenuItem value="Accepted">Accepted</MenuItem>

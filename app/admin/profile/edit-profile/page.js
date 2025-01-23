@@ -13,6 +13,7 @@ import { toast } from "react-toastify";
 import AsideContainer from "../../../../components/AsideContainer";
 import { FiLoader } from "react-icons/fi"; // will be user a WIP icon
 import { MdSchedule } from "react-icons/md"; //schedule icon
+import { IoIosArrowBack } from "react-icons/io";
 
 const CustomField = styled(TextField)`
   & label.Mui-focused {
@@ -98,10 +99,16 @@ const Page = () => {
 
   return (
     <AsideContainer>
-      <div className="">
-        <h1 className="text-[25px] font-bold my-5 leading-7 font-ubuntu">
-          Edit Profile
-        </h1>
+      <div>
+        <div className="flex flex-row gap-2 items-center">
+          <IoIosArrowBack
+            className="text-2xl cursor-pointer"
+            onClick={() => router.back()}
+          />
+          <h1 className="text-2xl font-semibold my-5 font-ubuntu -md:mb-2 -md:text-lg">
+            Edit Profile
+          </h1>
+        </div>
         {isFetched ? (
           <div className="bg-white rounded-3xl p-8 -md:p-4">
             <div className="form">

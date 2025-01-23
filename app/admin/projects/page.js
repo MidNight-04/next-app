@@ -35,9 +35,9 @@ const style = {
 
 const Page = () => {
   const [project, setProject] = useState([]);
-  const userid = useAuthStore(state => state.token);
+  const id = useAuthStore(state => state.userId);
   const userType = useAuthStore(state => state.userType);
-  const id = "668e250e039e5714c86ccd57";
+  // const id = "668e250e039e5714c86ccd57";
   const [search, setSearch] = useState("");
   const columns = [
     { field: "seriel", headerName: "SNo.", width: 100 },
@@ -50,7 +50,7 @@ const Page = () => {
 
   useEffect(() => {
     getAllProjects();
-  }, []);
+  }, [id, userType]);
 
   const getAllProjects = () => {
     axios
@@ -96,8 +96,6 @@ const Page = () => {
       },
     },
   ];
-
-  console.log(userType);
 
   const searchFunction = e => {
     const { value } = e.target;

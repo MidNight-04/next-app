@@ -266,6 +266,7 @@ const Page = () => {
               ".MuiDataGrid-columnSeparator": {
                 display: "none",
               },
+              "& .MuiDataGrid-filler": { background: "#0b192c" },
               "& .MuiDataGrid-columnHeaderTitle": { color: "#93bfcf" },
               "& .MuiDataGrid-menuOpen": { background: "#0b192c" },
               "&.MuiDataGrid-root": {

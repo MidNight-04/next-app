@@ -102,7 +102,7 @@ const Page = () => {
       <div>
         <div className="flex flex-row gap-2 items-center">
           <IoIosArrowBack
-            className="text-2xl cursor-pointer"
+            className="text-2xl cursor-pointer transition duration-300 hover:scale-150 ease-in-out"
             onClick={() => router.back()}
           />
           <h1 className="text-2xl font-semibold my-5 font-ubuntu -md:mb-2 -md:text-lg">

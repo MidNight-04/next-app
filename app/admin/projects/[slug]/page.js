@@ -402,7 +402,7 @@ const ClientProjectView = () => {
       <div className="flex flex-row my-4 justify-between -md:flex-col -md:pl-0 -md:my-2">
         <div className="flex flex-row gap-2 items-center">
           <IoIosArrowBack
-            className="text-2xl cursor-pointer"
+            className="text-2xl cursor-pointer transition duration-300 hover:scale-150 ease-in-out"
             onClick={() => router.back()}
           />
           <h1 className="text-2xl font-semibold font-ubuntu -md:mb-2 -md:text-lg">

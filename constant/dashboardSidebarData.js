@@ -93,7 +93,7 @@ const adminSidebar = [
         subMenuItem: [],
       },
       {
-        path: "/admin/teammembers",
+        path: "/admin/employee",
         iconName: <HiOutlineUserGroup />,
         feildName: "Employee",
         linkClassName: "adminNavLink",

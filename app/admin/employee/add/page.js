@@ -4,6 +4,8 @@ import axios from "axios";
 import { redirect, useRouter } from "next/navigation";
 import AsideContainer from "../../../../components/AsideContainer";
 import { toast } from "react-toastify";
+import { IoIosArrowBack } from "react-icons/io";
+import { MenuItem, Select } from "@mui/material";
 
 const AddMemberForm = () => {
   const router = useRouter();
@@ -86,103 +88,128 @@ const AddMemberForm = () => {
   };
   return (
     <AsideContainer>
-      {/* <AdminSidebar /> */}
-      <div className="singleContainer">
-        {/* <AdminNavbar /> */}
-        <div className="adminNewUser">
-          <div className="newContainer">
-            <div className="topContainer">
-              <h1>Add Member</h1>
-            </div>
-            <div className="bottomContainer">
-              <div className="bottomRightContainer">
-                <div className="form">
-                  <div className="formInputContainer">
-                    <label>
-                      Name<span className="text-danger">*</span>
-                    </label>
-                    <input
-                      value={data.name}
-                      type="text"
-                      placeholder="Enter Name"
-                      name="name"
-                      onChange={e => handleFormData(e)}
-                    />
-                  </div>
-                  <div className="formInputContainer">
-                    <label>
-                      Employee ID<span className="text-danger">*</span>
-                    </label>
-                    <input
-                      value={data.employeeID}
-                      type="text"
-                      placeholder="Enter Employee ID"
-                      name="employeeID"
-                      onChange={e => handleFormData(e)}
-                    />
-                  </div>
-                  <div className="formInputContainer">
-                    <label htmlFor="role">
-                      Role<span className="text-danger">*</span>
-                    </label>
-                    <select
-                      style={{ width: "100%", height: "30px" }}
-                      className="mt-2"
-                      name="role"
-                      value={data.role}
-                      onChange={e => handleFormData(e)}
-                    >
-                      <option value="">Select Role</option>
-                      {roleList?.map((item, index) => {
-                        return (
-                          <option key={index} value={item?.name}>
-                            {item?.name}
-                          </option>
-                        );
-                      })}
-                    </select>
-                  </div>
-                  <div className="formInputContainer">
-                    <label>
-                      Email<span className="text-danger">*</span>
-                    </label>
-                    <input
-                      value={data.email}
-                      type="email"
-                      placeholder="Enter Email"
-                      name="email"
-                      onChange={e => handleFormData(e)}
-                    />
-                  </div>
-                  <div className="formInputContainer">
-                    <label>
-                      Phone<span className="text-danger">*</span>
-                    </label>
-                    <input
-                      value={data.phone}
-                      type="number"
-                      placeholder="Enter Phone"
-                      name="phone"
-                      onChange={e => handleFormData(e)}
-                    />
-                  </div>
-                  <div className="formInputContainer">
-                    <label>Address</label>
-                    <input
-                      value={data.address}
-                      type="text"
-                      placeholder="Enter Address"
-                      name="address"
-                      onChange={e => handleFormData(e)}
-                    />
-                  </div>
-                </div>
-                <div className="createUserSubmitBTN" onClick={submitFormData}>
-                  Submit
-                </div>
-              </div>
-            </div>
+      <div className="flex flex-row items-center text-2xl font-bold gap-2 my-4">
+        <IoIosArrowBack
+          onClick={() => router.back()}
+          className="cursor-pointer transition duration-300 hover:scale-150 ease-in-out"
+        />
+        <h1>Add Employee </h1>
+      </div>
+      <div className="bg-white rounded-3xl p-5">
+        <div className="grid grid-cols-2 gap-4 [&_label]:font-semibold">
+          <div className="flex flex-col gap-2">
+            <label>Name</label>
+            <input
+              className="h-12 border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100"
+              id="name"
+              value={data.name}
+              type="text"
+              placeholder="Enter Name"
+              name="name"
+              onChange={e => handleFormData(e)}
+            />
           </div>
+          <div className="flex flex-col gap-2">
+            <label>Employee ID</label>
+            <input
+              className="h-12 border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100"
+              id="employeeId"
+              value={data.employeeID}
+              type="text"
+              placeholder="Enter Employee ID"
+              name="employeeID"
+              onChange={e => handleFormData(e)}
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <label htmlFor="role">Role</label>
+            <Select
+              sx={{
+                "borderRadius": "7px",
+                "background": "#f3f4f6",
+                "outline": "none",
+                "& :hover": {
+                  outline: "none",
+                },
+                "& .MuiInputBase-root": {
+                  "outline": "none",
+                  "background": "#cfcfcf",
+                  "& :hover": {
+                    outline: "none",
+                  },
+                },
+                "color": "#4b5563",
+                ".MuiOutlinedInput-notchedOutline": {
+                  border: "1px solid #93bfcf",
+                },
+                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                  border: "1px solid #93bfcf",
+                },
+                "&:hover .MuiOutlinedInput-notchedOutline": {
+                  border: "1px solid #93bfcf",
+                },
+                ".MuiSvgIcon-root ": {
+                  fill: "#93bfcf !important",
+                },
+              }}
+              name="role"
+              value={data.role}
+              onChange={e => handleFormData(e)}
+            >
+              <MenuItem value="">Select Role</MenuItem>
+              {roleList?.map((item, index) => {
+                return (
+                  <MenuItem key={index} value={item?.name}>
+                    {item?.name}
+                  </MenuItem>
+                );
+              })}
+            </Select>
+          </div>
+          <div className="flex flex-col gap-2">
+            <label>Email</label>
+            <input
+              className="h-12 border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100"
+              id="email"
+              value={data.email}
+              type="email"
+              placeholder="Enter Email"
+              name="email"
+              onChange={e => handleFormData(e)}
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <label>Phone</label>
+            <input
+              className="h-12 border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100"
+              id="phone"
+              value={data.phone}
+              type="number"
+              placeholder="Enter Phone"
+              name="phone"
+              onChange={e => handleFormData(e)}
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <label>Address</label>
+            <input
+              className="h-12 border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100"
+              id="address"
+              value={data.address}
+              type="text"
+              placeholder="Enter Address"
+              name="address"
+              onChange={e => handleFormData(e)}
+            />
+          </div>
+        </div>
+        <div className="flex justify-end items-center mt-4">
+          <button
+            className="bg-secondary text-primary font-semibold rounded-3xl px-4 py-3 flex flex-row  items-center"
+            onClick={submitFormData}
+          >
+            Submit
+          </button>
         </div>
       </div>
     </AsideContainer>

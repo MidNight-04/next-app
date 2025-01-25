@@ -2,36 +2,13 @@
 import { useEffect, useState } from "react";
 import { DataGrid, gridClasses } from "@mui/x-data-grid";
 import axios from "axios";
-import {
-  Chip,
-  Button,
-  Modal,
-  Typography,
-  Box,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
-  TextField,
-  Select,
-  MenuItem,
-  styled,
-} from "@mui/material";
+import { Modal, Select, MenuItem, styled } from "@mui/material";
 import { toast } from "react-toastify";
-import Link from "next/link";
 import AsideContainer from "../../../components/AsideContainer";
 import { Add } from "@mui/icons-material";
 import { useRouter } from "next/navigation";
 import { FiEdit } from "react-icons/fi";
 import { MdOutlineDelete } from "react-icons/md";
-import {
-  // Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../../../components/ui/select";
 
 const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
   [`& .${gridClasses.row}.even`]: {
@@ -120,21 +97,21 @@ const MemberTable = () => {
   };
 
   const deleteMember = () => {
-    // axios
-    //   .delete(
-    //     `${process.env.REACT_APP_BASE_PATH}/api/teammember/delete/${userId}`
-    //   )
-    //   .then(response => {
-    //     if (response) {
-    //       toast.warning("Record deleted successfully", {
-    //         position: "top-right",
-    //       });
-    //       getAllMember();
-    //     }
-    //   })
-    //   .catch(error => {
-    //     console.log(error);
-    //   });
+    axios
+      .delete(
+        `${process.env.REACT_APP_BASE_PATH}/api/teammember/delete/${userId}`
+      )
+      .then(response => {
+        if (response) {
+          toast.warning("Record deleted successfully", {
+            position: "top-right",
+          });
+          getAllMember();
+        }
+      })
+      .catch(error => {
+        console.log(error);
+      });
   };
 
   const updateFunction = id => {
@@ -246,13 +223,13 @@ const MemberTable = () => {
         <div className="datatableTitle detail-heading mb-3">
           <div className="flex flex-row justify-between items-center">
             <h1 className="text-[25px] font-ubuntu font-bold my-5 -md:text-lg -lg:my-2">
-              Client List
+              Employee List
             </h1>
             <button
-              className="bg-secondary text-primary rounded-3xl px-4 py-3 flex flex-row  items-center"
+              className="bg-secondary text-primary rounded-3xl px-4 py-3 flex flex-row gap-1 items-center"
               onClick={() => router.push("/admin/employee/add")}
             >
-              <Add sx={{ marginRight: "4px" }} />
+              <Add />
               <span>Add Team Member</span>
             </button>
           </div>
@@ -346,7 +323,7 @@ const MemberTable = () => {
           <div className="bg-white w-1/3 p-8 rounded-3xl outline-none">
             <div>
               <h3 className=" text-2xl font-semibold font-ubuntu">
-                Update Member Data
+                Update Employee Data
               </h3>
               <hr className="my-4" />
             </div>
@@ -460,7 +437,7 @@ const MemberTable = () => {
           <div className="bg-white w-1/3 p-8 rounded-3xl outline-none">
             <div>
               <h3 className=" text-2xl font-semibold font-ubuntu">
-                Delete Member
+                Delete Employee
               </h3>
               <hr className="my-4" />
             </div>

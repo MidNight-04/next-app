@@ -181,141 +181,148 @@ const Page = () => {
 
   return (
     <AsideContainer>
-      <h1 className="text-[25px] font-ubuntu font-bold my-5 -md:text-lg -lg:my-2">
-        Ticket List
-      </h1>
+      <div className="flex flex-row justify-between items-center my-5">
+        <h1 className="text-[25px] font-ubuntu font-bold -md:text-lg -lg:my-2">
+          Ticket List
+        </h1>
+        <div>
+          {userType !== "ROLE_USER" && (
+            <div className="flex flex-row items-center gap-4">
+              <div>
+                <button
+                  onClick={() => handleButtonClick("All Ticket")}
+                  className={cn(
+                    "flex flex-row gap-2 py-2 px-4 text-nowrap bg-primary-foreground text-primary rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl cursor-pointer ",
+                    activeFilter === "All Ticket"
+                      ? "text-green-800 bg-green-200 border-green-800"
+                      : ""
+                  )}
+                >
+                  All Tickets
+                </button>
+              </div>
+              <div>
+                <button
+                  className={cn(
+                    "flex flex-row gap-2 py-2 px-4 text-nowrap bg-primary-foreground text-primary rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl cursor-pointer",
+                    activeFilter === "Overdue Ticket"
+                      ? "text-green-800 bg-green-200 border-green-800"
+                      : ""
+                  )}
+                  onClick={() => handleButtonClick("Overdue Ticket")}
+                >
+                  Overdue Tickets
+                </button>
+              </div>
+              <div>
+                <button
+                  className={cn(
+                    "flex flex-row gap-2 py-2 px-4 text-nowrap bg-primary-foreground text-primary rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl cursor-pointer",
+                    activeFilter === "Pending Ticket"
+                      ? "text-green-800 bg-green-200 border-green-800"
+                      : ""
+                  )}
+                  onClick={() => handleButtonClick("Pending Ticket")}
+                >
+                  Pending Tickets
+                </button>
+              </div>
+              {userType === "ROLE_ADMIN" && (
+                <>
+                  <div>
+                    <button
+                      className={cn(
+                        "flex flex-row gap-2 py-2 px-4 text-nowrap bg-primary-foreground text-primary rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl cursor-pointer",
+                        activeFilter === "project"
+                          ? "text-green-800 bg-green-200 border-green-800"
+                          : ""
+                      )}
+                      onClick={() => toggleDropdown("project")}
+                    >
+                      Project Tickets
+                    </button>
+                    {dropdownOpen.project && (
+                      <ul className="dropdown-menu show">
+                        {projectList?.map(item => (
+                          <li
+                            key={item.siteID}
+                            onClick={() =>
+                              handleItemClick("Project Tickets", item.siteID)
+                            }
+                            className="dropdown-item"
+                          >
+                            <span>{`${item.siteID}`}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                  <div className="dropdown">
+                    <button
+                      className={cn(
+                        "flex flex-row gap-2 py-2 px-4 text-nowrap bg-primary-foreground text-primary rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl cursor-pointer",
+                        activeFilter === "employee"
+                          ? "text-green-800 bg-green-200 border-green-800"
+                          : ""
+                      )}
+                      onClick={() => toggleDropdown("employee")}
+                    >
+                      Employee Tickets
+                    </button>
+                    {dropdownOpen.employee && (
+                      <ul className="dropdown-menu show">
+                        {memberList?.map(item => (
+                          <li
+                            key={item.employeeID}
+                            onClick={() =>
+                              handleItemClick(
+                                "Employee Tickets",
+                                item.employeeID
+                              )
+                            }
+                            className="dropdown-item"
+                          >
+                            <span>{`${item.name} (${item.role})`}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                  <div className="dropdown">
+                    <button
+                      className={cn(
+                        "flex flex-row gap-2 py-2 px-4 text-nowrap bg-primary-foreground text-primary rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl cursor-pointer",
+                        activeFilter === "employee"
+                          ? "text-green-800 bg-green-200 border-green-800"
+                          : ""
+                      )}
+                      onClick={() => toggleDropdown("client")}
+                    >
+                      Client Tickets
+                    </button>
+                    {dropdownOpen.client && (
+                      <ul className="dropdown-menu show">
+                        {clientList?.map(item => (
+                          <li
+                            key={item._id}
+                            onClick={() =>
+                              handleItemClick("Client Tickets", item._id)
+                            }
+                            className="dropdown-item"
+                          >
+                            <span>{`${item.name}`}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
       <div>
-        {userType !== "ROLE_USER" && (
-          <div className="flex flex-row gap-4 mb-4">
-            <div>
-              <button
-                onClick={() => handleButtonClick("All Ticket")}
-                className={cn(
-                  "flex flex-row gap-2 py-2 px-4 text-nowrap bg-primary-foreground text-primary rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl cursor-pointer ",
-                  activeFilter === "All Ticket"
-                    ? "text-green-800 bg-green-200 border-green-800"
-                    : ""
-                )}
-              >
-                All Tickets
-              </button>
-            </div>
-            <div>
-              <button
-                className={cn(
-                  "flex flex-row gap-2 py-2 px-4 text-nowrap bg-primary-foreground text-primary rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl cursor-pointer",
-                  activeFilter === "Overdue Ticket"
-                    ? "text-green-800 bg-green-200 border-green-800"
-                    : ""
-                )}
-                onClick={() => handleButtonClick("Overdue Ticket")}
-              >
-                Overdue Tickets
-              </button>
-            </div>
-            <div>
-              <button
-                className={cn(
-                  "flex flex-row gap-2 py-2 px-4 text-nowrap bg-primary-foreground text-primary rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl cursor-pointer",
-                  activeFilter === "Pending Ticket"
-                    ? "text-green-800 bg-green-200 border-green-800"
-                    : ""
-                )}
-                onClick={() => handleButtonClick("Pending Ticket")}
-              >
-                Pending Tickets
-              </button>
-            </div>
-            {userType === "ROLE_ADMIN" && (
-              <>
-                <div>
-                  <button
-                    className={cn(
-                      "flex flex-row gap-2 py-2 px-4 text-nowrap bg-primary-foreground text-primary rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl cursor-pointer",
-                      activeFilter === "project"
-                        ? "text-green-800 bg-green-200 border-green-800"
-                        : ""
-                    )}
-                    onClick={() => toggleDropdown("project")}
-                  >
-                    Project Tickets
-                  </button>
-                  {dropdownOpen.project && (
-                    <ul className="dropdown-menu show">
-                      {projectList?.map(item => (
-                        <li
-                          key={item.siteID}
-                          onClick={() =>
-                            handleItemClick("Project Tickets", item.siteID)
-                          }
-                          className="dropdown-item"
-                        >
-                          <span>{`${item.siteID}`}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-                <div className="dropdown">
-                  <button
-                    className={cn(
-                      "flex flex-row gap-2 py-2 px-4 text-nowrap bg-primary-foreground text-primary rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl cursor-pointer",
-                      activeFilter === "employee"
-                        ? "text-green-800 bg-green-200 border-green-800"
-                        : ""
-                    )}
-                    onClick={() => toggleDropdown("employee")}
-                  >
-                    Employee Tickets
-                  </button>
-                  {dropdownOpen.employee && (
-                    <ul className="dropdown-menu show">
-                      {memberList?.map(item => (
-                        <li
-                          key={item.employeeID}
-                          onClick={() =>
-                            handleItemClick("Employee Tickets", item.employeeID)
-                          }
-                          className="dropdown-item"
-                        >
-                          <span>{`${item.name} (${item.role})`}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-                <div className="dropdown">
-                  <button
-                    className={cn(
-                      "flex flex-row gap-2 py-2 px-4 text-nowrap bg-primary-foreground text-primary rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl cursor-pointer",
-                      activeFilter === "employee"
-                        ? "text-green-800 bg-green-200 border-green-800"
-                        : ""
-                    )}
-                    onClick={() => toggleDropdown("client")}
-                  >
-                    Client Tickets
-                  </button>
-                  {dropdownOpen.client && (
-                    <ul className="dropdown-menu show">
-                      {clientList?.map(item => (
-                        <li
-                          key={item._id}
-                          onClick={() =>
-                            handleItemClick("Client Tickets", item._id)
-                          }
-                          className="dropdown-item"
-                        >
-                          <span>{`${item.name}`}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              </>
-            )}
-          </div>
-        )}
         <div className="">
           {filteredTickets?.map((dt, idx) => (
             <div key={idx} className="mb-4">

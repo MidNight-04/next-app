@@ -190,7 +190,7 @@ const Page = () => {
       seriel: index + 1,
       name: row?.name,
       uploadedby: row?.uploadingUserName,
-      date: new Date(row?.updatedAt),
+      date: new Date(row?.updatedAt).toDateString(),
       status: row?.status,
       document: row?.document[0],
     });
@@ -331,11 +331,15 @@ const Page = () => {
       </div>
 
       {/* update document accepted status by client dialog */}
-      <Dialog open={documentStatusOpen} onClose={handleDocumentStatusClose}>
-        <div className="text-xl font-bold text-center font-ubuntu px-4 py-3">
-          Update Document Status
-        </div>
-        <DialogContent style={{ width: "600px" }}>
+      <Modal
+        open={documentStatusOpen}
+        onClose={handleDocumentStatusClose}
+        sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+      >
+        <div className="w-1/3 -md:w-11/12 bg-white p-8 rounded-3xl">
+          <h2 className="text-2xl font-bold text-center font-ubuntu mb-4">
+            Update Document Status
+          </h2>
           <FormControl fullWidth className="mt-1 mb-1">
             <InputLabel id="status-select-label">Status</InputLabel>
             <Select
@@ -352,16 +356,22 @@ const Page = () => {
               <MenuItem value="Rejected">Rejected</MenuItem>
             </Select>
           </FormControl>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleDocumentStatusClose} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleDocumentStatusUpdate} color="primary">
-            Update Document Status
-          </Button>
-        </DialogActions>
-      </Dialog>
+          <div className="flex flex-row gap-4 mt-4 justify-end">
+            <button
+              onClick={handleDocumentStatusClose}
+              className="border-2 cursor-pointer font-semibold text-secondary font-ubuntu text-sm px-4 py-2 rounded-3xl bg-transparent border-secondary -md:px-4 -md:py-2 -md:text-sm hover:bg-secondary hover:text-primary"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleDocumentStatusUpdate}
+              className="border-2 cursor-pointer font-semibold text-primary font-ubuntu text-sm px-4 py-2 rounded-3xl bg-secondary border-secondary -md:px-4 -md:py-2 -md:text-sm"
+            >
+              Update Document Status
+            </button>
+          </div>
+        </div>
+      </Modal>
 
       {/* view document content dialog */}
       {/* <Dialog open={documentViewOpen} onClose={handleViewDocumentCancel}>

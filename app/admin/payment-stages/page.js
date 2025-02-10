@@ -493,7 +493,7 @@ const Page = () => {
           </DialogContent>
           <DialogActions>
             <button
-              className="p-2  font-semibold bg-primary-foreground text-center border-[1px] border-secondary text-secondary rounded-full cursor-pointer w-[84px]"
+              className="p-2 font-semibold bg-primary-foreground text-center border-[1px] border-secondary text-secondary rounded-full cursor-pointer w-[84px]"
               onClick={handleCloseDelete}
             >
               Cancel

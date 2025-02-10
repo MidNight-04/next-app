@@ -15,6 +15,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Card, CardActionArea } from "@mui/material";
 import dynamic from "next/dynamic";
+import Slider from "../../components/Slider";
 const Header = dynamic(() => import("../../components/Header"), { ssr: false });
 const Footer = dynamic(() => import("../../components/Footer"), { ssr: false });
 
@@ -73,7 +74,7 @@ const Page = () => {
   return (
     <>
       <Header />
-      <Image
+      {/* <Image
         // src={"/assets/jamar-penny-ZgmGq_eFmUs-unsplash.jpg"}
         src={"/assets/profilebg.jpg"}
         width={1300}
@@ -81,7 +82,8 @@ const Page = () => {
         className="h-[calc(100vh-64px)] w-full top-0 left-0 object-cover -md:h-[55vh]"
         alt="hero"
         loading="eager"
-      />
+      /> */}
+      <Slider />
       <div className="px-4 py-2 flex flex-row justify-between">
         <h4 className="font-bold xl:text-2xl pl-4 -xl:font-semibold">
           Categories
@@ -213,7 +215,6 @@ const Page = () => {
                 )
             )}
       </div>
-
       <div className="px-4 py-2 flex flex-row justify-between">
         <h4 className="font-bold xl:text-2xl pl-4 -xl:font-semibold">
           Designs

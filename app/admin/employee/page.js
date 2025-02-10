@@ -220,19 +220,17 @@ const MemberTable = () => {
   return (
     <AsideContainer>
       <div className="datatable">
-        <div className="datatableTitle detail-heading mb-3">
-          <div className="flex flex-row justify-between items-center">
-            <h1 className="text-[25px] font-ubuntu font-bold my-5 -md:text-lg -lg:my-2">
-              Employee List
-            </h1>
-            <button
-              className="bg-secondary text-primary rounded-3xl px-4 py-3 flex flex-row gap-1 items-center"
-              onClick={() => router.push("/admin/employee/add")}
-            >
-              <Add />
-              <span>Add Team Member</span>
-            </button>
-          </div>
+        <div className="flex flex-row justify-between items-center">
+          <h1 className="text-[25px] font-ubuntu font-bold my-5 -md:text-lg -lg:my-2">
+            Employee List
+          </h1>
+          <button
+            className="bg-secondary text-primary rounded-3xl px-4 py-3 flex flex-row gap-1 items-center"
+            onClick={() => router.push("/admin/employee/add")}
+          >
+            <Add />
+            <span>Add Team Member</span>
+          </button>
         </div>
         <StripedDataGrid
           rows={arrayData}
@@ -434,7 +432,7 @@ const MemberTable = () => {
             alignItems: "center",
           }}
         >
-          <div className="bg-white w-1/3 p-8 rounded-3xl outline-none">
+          <div className="bg-white w-1/3 p-8 rounded-3xl outline-none -md:w-3/4">
             <div>
               <h3 className=" text-2xl font-semibold font-ubuntu">
                 Delete Employee

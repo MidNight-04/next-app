@@ -9,11 +9,14 @@ import { saveAs } from "file-saver";
 import { Button } from "@mui/material";
 import { redirect } from "next/navigation";
 import { IoIosArrowBack } from "react-icons/io";
+import { useRouter } from "next/navigation";
+import { FiDownload } from "react-icons/fi";
 
 const ConstructionStepForm = () => {
   const [name, setName] = useState("");
   const [priority, setPriority] = useState();
   const [points, setPoints] = useState("");
+  const router = useRouter();
 
   const submitFormData = () => {
     // console.log(role)
@@ -97,124 +100,131 @@ const ConstructionStepForm = () => {
 
   return (
     <AsideContainer className="single">
-      {/* <AdminSidebar /> */}
-      <div className="singleContainer">
-        {/* <AdminNavbar /> */}
-        <div className="adminNewUser">
-          <div className="newContainer">
-            <div
-              className="topContainer"
-              style={{ display: "flex", justifyContent: "space-between" }}
+      <div className="flex flex-row justify-between my-4">
+        <div className="flex flex-row items-center text-2xl font-bold gap-2 -md:text-lg">
+          <IoIosArrowBack
+            onClick={() => router.back()}
+            className="cursor-pointer transition duration-300 hover:scale-150 ease-in-out"
+          />
+          <h1>Add Contruction Step</h1>
+        </div>
+        <div className="flex flex-row items-center justify-end -md:text-xs">
+          <button
+            className="flex flex-row items-center p-2 px-3 font-ubuntu text-sm -md:text-xs font-semibold bg-secondary border-[1px] border-secondary text-primary rounded-full cursor-pointer"
+            onClick={handleSampleDownload}
+          >
+            <FiDownload className="text-xl mr-1 -md:text-xs" />
+            Download Sample Format
+          </button>
+        </div>
+      </div>
+      <div className="newContainer">
+        <div className="box-body table-responsive">
+          <table className="w-full" id="sampledata">
+            <thead>
+              <tr className="bg-secondary text-primary font-semibold text-lg -md:text-xs text-wrap py-5 rounded-t-3xl">
+                <th className="py-5 rounded-tl-3xl">
+                  <span>Point</span>
+                </th>
+                <th>
+                  <span>Content</span>
+                </th>
+                <th>
+                  <span>
+                    Duration
+                    <br />
+                    (In Days)
+                  </span>
+                </th>
+                <th>
+                  <span>
+                    Issue Member
+                    <br />
+                    (Devide by /)
+                  </span>
+                </th>
+                <th>
+                  <span>
+                    Check List
+                    <br />
+                    (Yes/No)
+                  </span>
+                </th>
+                <th className="py-5 rounded-tr-3xl">
+                  <span>Check List Name</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white text-center -md:text-xs">
+              <tr>
+                <td className="p-5">1</td>
+                <td>content-1</td>
+                <td>2</td>
+                <td>admin/sr.engineer</td>
+                <td>no</td>
+                <td className=" p-5">checklist-1</td>
+              </tr>
+              <tr className="bg-secondary-foreground">
+                <td className="p-5">2</td>
+                <td>content-2</td>
+                <td>2</td>
+                <td>admin/sr.engineer</td>
+                <td>no</td>
+                <td className="p-5">checklist-2</td>
+              </tr>
+              <tr>
+                <td className="rounded-bl-3xl p-5">3</td>
+                <td>content-3</td>
+                <td>2</td>
+                <td>admin/sr.engineer</td>
+                <td>no</td>
+                <td className="rounded-br-3xl p-5">checklist-3</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div className="bg-white p-5 rounded-3xl shadow-xl mt-8">
+          <div className="grid grid-cols-2 gap-4 mb-4 -md:grid-cols-1">
+            <div className="flex flex-col gap-2 [&_label]:font-semibold">
+              <label>Name</label>
+              <input
+                className="h-[54px] border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100"
+                value={name}
+                type="text"
+                placeholder="Enter step"
+                name="name"
+                onChange={e => setName(e.target.value)}
+              />
+            </div>
+            <div className="flex flex-col gap-2 [&_label]:font-semibold">
+              <label>Priority</label>
+              <input
+                className="h-[54px] border border-primary px-4  text-gray-600 outline-none rounded-[7px] bg-gray-100"
+                value={priority}
+                type="number"
+                placeholder="Enter priority"
+                name="priority"
+                min={1}
+                onChange={e => setPriority(e.target.value)}
+              />
+            </div>
+            <div className="flex flex-col gap-2 [&_label]:font-semibold">
+              <label>Points</label>
+              <input
+                type="file"
+                name="points"
+                onChange={e => setPoints(e.target.files[0])}
+                className="w-full text-gray-400 text-sm bg-gray-100 border py-[6px] px-2 file:cursor-pointer cursor-pointer  file:rounded-[7px] border-primary file:py-2 file:px-3 file:mr-4 file:bg-primary-foreground file:border file:border-primary file:text-secondary file:hover:bg-secondary file:hover:text-primary rounded-[7px]"
+              />
+            </div>
+          </div>
+          <div className="flex flex-row items-center justify-end">
+            <button
+              className="border cursor-pointer font-semibold text-primary font-ubuntu text-sm px-4 py-2 rounded-3xl bg-secondary border-secondary -md:px-4 -md:py-2 -md:text-sm"
+              onClick={submitFormData}
             >
-              <h1>Add Contruction Step</h1>
-              <Button
-                variant="contained"
-                size="small"
-                style={{
-                  backgroundColor: "green",
-                  fontWeight: "600",
-                }}
-                className="mx-2 float-end"
-                onClick={handleSampleDownload}
-              >
-                Download Sample Format
-              </Button>
-            </div>
-
-            <div className="box-body table-responsive">
-              <p className="text-center">
-                <span className="fw-bold">Fields - </span>point, content,
-                duration, issueMember, checkList, checkListName{" "}
-              </p>
-              <table
-                className="table table-striped table-bordered table-hover m-4"
-                id="sampledata"
-              >
-                <thead>
-                  <tr>
-                    <th>
-                      <span className="text-danger">*</span>
-                      <span>Point</span>
-                    </th>
-                    <th>
-                      <span className="text-danger">*</span>
-                      <span>Content</span>
-                    </th>
-                    <th>
-                      <span className="text-danger">*</span>
-                      <span>Duration(In days)</span>
-                    </th>
-                    <th>
-                      <span className="text-danger">*</span>
-                      <span>Issue Member(devide by /)</span>
-                    </th>
-                    <th>
-                      <span className="text-danger">*</span>
-                      <span>Check List(yes/no)</span>
-                    </th>
-                    <th>
-                      {/* <span className="text-danger">*</span> */}
-                      <span>Check List Name</span>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>1</td>
-                    <td>content1</td>
-                    <td>2</td>
-                    <td>admin/sr.engineer</td>
-                    <td>no</td>
-                    <td></td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            <div className="bottomContainer w-100">
-              <div className="bottomRightContainer">
-                <div className="form">
-                  <div className="formInputContainer">
-                    <label>
-                      Name<span className="text-danger">*</span>
-                    </label>
-                    <input
-                      value={name}
-                      type="text"
-                      placeholder="Enter step"
-                      name="name"
-                      onChange={e => setName(e.target.value)}
-                    />
-                  </div>
-                  <div className="formInputContainer">
-                    <label>
-                      Priority<span className="text-danger">*</span>
-                    </label>
-                    <input
-                      value={priority}
-                      type="number"
-                      placeholder="Enter priority"
-                      name="priority"
-                      min={1}
-                      onChange={e => setPriority(e.target.value)}
-                    />
-                  </div>
-                  <div className="formInputContainer">
-                    <label>
-                      Points<span className="text-danger">*</span>
-                    </label>
-                    <input
-                      type="file"
-                      name="points"
-                      onChange={e => setPoints(e.target.files[0])}
-                    />
-                  </div>
-                </div>
-                <div className="createUserSubmitBTN" onClick={submitFormData}>
-                  Submit
-                </div>
-              </div>
-            </div>
+              Submit
+            </button>
           </div>
         </div>
       </div>

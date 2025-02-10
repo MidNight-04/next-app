@@ -3,16 +3,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { DataGrid } from "@mui/x-data-grid";
 import axios from "axios";
 import {
-  Chip,
-  Button,
   Modal,
-  Typography,
-  Box,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
   TextField,
   FormControl,
   FormControlLabel,
@@ -29,18 +20,16 @@ import Link from "next/link";
 import AsideContainer from "../../../components/AsideContainer";
 import { DndContext, useDraggable } from "@dnd-kit/core";
 import SortableList from "../../../components/DND/List";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "../../../components/ui/accordion";
 
-const style = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: 500,
-  bgcolor: "background.paper",
-  border: "2px solid #000",
-  boxShadow: 25,
-  p: 4,
-};
+import { cn } from "../../../lib/utils";
+import { Add } from "@mui/icons-material";
+import { useRouter } from "next/navigation";
 
 const ConstructionStepTable = () => {
   const [data, setData] = useState([]);
@@ -57,6 +46,7 @@ const ConstructionStepTable = () => {
   const [checkListName, setCheckListName] = useState("");
   const [duration, setDuration] = useState("");
   const [currentRotate, setCurrentRotate] = useState(0);
+  const router = useRouter();
 
   useEffect(() => {
     // Initialize showContent state based on the number of project steps
@@ -79,7 +69,8 @@ const ConstructionStepTable = () => {
 
   const getAllConstructionStep = () => {
     axios
-      .get(`${process.env.REACT_APP_BASE_PATH}/api/constructionstep/getSteps`)
+      // .get(`${process.env.REACT_APP_BASE_PATH}/api/constructionstep/getSteps`)
+      .get(`${process.env.REACT_APP_BASE_PATH}/api/constructionstep/getAll`)
       .then(response => {
         setData(response?.data?.data);
         // setData(response?.data?.data?.sort((a, b) => a.priority - b.priority));
@@ -90,6 +81,8 @@ const ConstructionStepTable = () => {
         setData([]);
       });
   };
+
+  console.log(data);
 
   const confirmDelete = id => {
     setId(id);
@@ -244,230 +237,359 @@ const ConstructionStepTable = () => {
     }
   };
 
+  console.log(data);
+
   return (
     <AsideContainer>
-      <div className="datatableTitle detail-heading">
-        <h1 className="font-ubuntu font-bold text-[25px] leading-7">
+      <div className="flex flex-row justify-between items-center">
+        <h1 className="text-[25px] font-ubuntu font-bold my-5 -md:text-lg -lg:my-2 -md:my-3">
           Process List
         </h1>
-        <span>
-          <Link href="/admin/construction-steps/add">
-            <Button
-              variant="contained"
-              size="small"
-              style={{
-                backgroundColor: "#fec20e",
-                fontWeight: "600",
-                marginTop: "-15px",
-              }}
-            >
-              Add Process
-            </Button>
-          </Link>
-        </span>
+        <button
+          className="bg-secondary text-primary rounded-3xl px-4 pr-5 py-3 flex flex-row gap-1 items-center -md:text-xs -md:px-2 -md:py-[6px] -md:[&_svg]:text-sm"
+          onClick={() => router.push("/admin/construction-steps/add")}
+        >
+          <Add />
+          <span>Add Construction Step</span>
+        </button>
       </div>
-      {/* {data?.map((item, index) => {
-        return (
-          <div key={index} className="bg-white w-full ">
-            <div className="flex flex-row justify-between p-3 gap-4">
-              <span className="head">{item.name}</span>
-              {showContent[index] ? (
-                <FaMinus
-                  className="icon"
-                  onClick={() => toggleContent(index)}
-                />
-              ) : (
-                <FaPlus className="icon" onClick={() => toggleContent(index)} />
-              )}
-              <RiDeleteBin6Line
-                className="me-2 fs-5 text-danger"
-                onClick={() => confirmDelete(item?._id)}
-                style={{ cursor: "pointer" }}
-              />
-            </div>
-            {showContent[index] && (
-              <ul>
-                {item.points?.map((itm, idx) => {
-                  return (
-                    <li key={idx} className="bg-white w-full">
-                      {`${itm.content} (`}
-                      <span className="fw-bold">{`Issue Member - `}</span>
-                      {itm.issueMember?.map((mem, ids) => {
-                        return (
-                          <>
-                            <span key={ids} style={{ color: "#fec20e" }}>
-                              {mem}
+      <Accordion type="single" collapsible>
+        {data?.map((item, index) => {
+          return (
+            <AccordionItem
+              key={index}
+              value={item.name}
+              className="bg-white w-full rounded-2xl mb-4 -md:rounded-md"
+            >
+              <AccordionTrigger className="flex flex-row justify-between px-4 py-2 gap-4 rounded-3xl items-center">
+                <div className="flex flex-row justify-between w-full text-lg text-secondary">
+                  <div className="font-semibold flex items-center">
+                    {item.name}
+                  </div>
+                  <div className="p-2 rounded-full text-primary bg-primary-foreground border border-primary">
+                    <RiDeleteBin6Line
+                      onClick={() => confirmDelete(item?._id)}
+                    />
+                  </div>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="bg-[#efefef] pb-0">
+                <div className="pt-8 w-full">
+                  <table className="bg-white rounded-3xl w-full p-5">
+                    <thead className="p-5 rounded-3xl">
+                      <tr className="bg-secondary text-primary rounded-t-3xl p-5 pl-14">
+                        <th className="w-14 text-left md:pl-24 -md:pl-16 text-lg  font-semibold -md:text-sm py-5 rounded-tl-3xl">
+                          Step
+                        </th>
+                        <th className="-md:w-24 text-center text-lg font-semibold -md:text-sm">
+                          Issue Member
+                        </th>
+                        <th className="w-24 text-center text-lg font-semibold -md:text-sm rounded-tr-3xl pr-5">
+                          Action
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="text-center px-5">
+                      {item.points?.map((itm, idx) => (
+                        <tr key={idx} className="px-5 text-center">
+                          <td className="pl-5">
+                            <span className="flex flex-row items-center gap-2 -md:gap-1 ">
+                              <div className="relative -md:w-8">
+                                <div className="h-full w-6 flex items-center justify-center">
+                                  <span
+                                    className={cn(
+                                      "w-[2px] bg-secondary pointer-events-none h-10",
+                                      idx === 0 ? "mt-[100%] h-5" : "",
+                                      idx === item.points.length - 1
+                                        ? "mb-[100%] h-5"
+                                        : ""
+                                    )}
+                                  />
+                                  <span
+                                    className={cn(
+                                      "w-6 h-6 absolute rounded-full shadow-xl text-center border border-dashed border-primary p-[3px]"
+                                      // "before:block before:py-3 before:x-3 before:mx-3 before:border before:border-dashed before:border-red-500"
+                                    )}
+                                  ></span>
+                                  <span className="w-4 absolute h-4 -ml-[1px] rounded-full bg-primary shadow-xl text-center" />
+                                </div>
+                              </div>
+                              <span className="py-3 -md:p-1 truncate -md:w-24">
+                                {itm.content}
+                              </span>
                             </span>
-                            {ids === itm.issueMember?.length - 1 ? "" : "/"}
-                          </>
-                        );
-                      })}
-                      {`)`}
-                      <FaPlus
-                        className="icon mx-2"
-                        onClick={() => AddNewField(item?._id, itm?.point)}
-                        data-tooltip-id="my-tooltip1"
-                        data-tooltip-content="Add New Field"
-                        data-tooltip-place="top"
-                      />
-                      <TiMinus
-                        className="icon"
-                        onClick={() =>
-                          confirmDeleteField(item?._id, itm?.point)
-                        }
-                        data-tooltip-id="my-tooltip2"
-                        data-tooltip-content="Delete Field"
-                        data-tooltip-place="top"
-                      />
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-          </div>
-        );
-      })}
+                          </td>
+                          <td>
+                            {itm.issueMember?.map((mem, ids) => (
+                              <span key={ids}>{`${mem}${
+                                ids === itm.issueMember?.length - 1 ? "" : "/"
+                              }`}</span>
+                            ))}
+                          </td>
+                          <td>
+                            <span className="flex flex-row items-center gap-2 -md:w-24 pr-5 justify-end">
+                              <span className="p-2 rounded-full text-primary bg-primary-foreground border border-primary cursor-pointer">
+                                <FaPlus
+                                  onClick={() =>
+                                    AddNewField(item?._id, itm?.point)
+                                  }
+                                  data-tooltip-id="my-tooltip1"
+                                  data-tooltip-content="Add New Field"
+                                  data-tooltip-place="top"
+                                />
+                              </span>
+                              <span className="p-2 rounded-full text-primary bg-primary-foreground border border-primary cursor-pointer">
+                                <TiMinus
+                                  onClick={e => {
+                                    e.stopPropagation();
+                                    confirmDeleteField(item?._id, itm?.point);
+                                  }}
+                                  data-tooltip-id="my-tooltip2"
+                                  data-tooltip-content="Delete Field"
+                                  data-tooltip-place="top"
+                                />
+                              </span>
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          );
+        })}
+      </Accordion>
       {data?.length === 0 && (
         <p className="text-center mt-5">No record available</p>
-      )} */}
-      <div className="w-full h-full">
+      )}
+      {/* <div className="w-full h-full">
         <SortableList data={data} />
-      </div>
+      </div> */}
       {/* Dialog for process delete */}
-      <Dialog
+      <Modal
         open={open}
         onClose={handleClose}
-        aria-labelledby="responsive-dialog-title"
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
       >
-        <DialogContent>
-          <DialogContentText>Are you sure want to delete ?</DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button autoFocus onClick={handleClose}>
-            Cancel
-          </Button>
-          <Button onClick={handleDelete} autoFocus>
-            Delete
-          </Button>
-        </DialogActions>
-      </Dialog>
+        <div className="bg-white w-1/3 p-8 rounded-3xl outline-none -md:w-3/4">
+          <div>
+            <h3 className=" text-2xl font-semibold font-ubuntu">
+              Delete Process
+            </h3>
+            <hr className="my-4" />
+          </div>
+          <h5>Are your sure you want to delete ?</h5>
+          <div className="flex flex-row gap-2 justify-end mt-4">
+            <button
+              className="bg-primary-foreground border border-secondary text-secondary rounded-3xl px-4 py-2 flex flex-row  items-center"
+              onClick={handleClose}
+            >
+              Cancel
+            </button>
+            <button
+              className="bg-secondary text-primary rounded-3xl px-4 py-2 flex flex-row  items-center"
+              onClick={handleDelete}
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      </Modal>
 
       {/* Add new work field Dialog */}
-      <Dialog open={addFieldOpen} onClose={handleFieldCancel}>
-        <DialogTitle>Add New Step</DialogTitle>
-        <DialogContent style={{ width: "600px" }}>
-          <FormControl fullWidth>
-            <label style={{ fontSize: "18px", color: "#fec20e" }}>Step</label>
-            <TextField
-              name="newField"
-              value={newField}
-              onChange={e => setNewField(e.target.value)}
-            />
-          </FormControl>
-          <FormControl fullWidth className="mt-1 mb-1">
-            {/* <InputLabel id="demo-simple-select-label">CheckList</InputLabel> */}
-            <label style={{ fontSize: "18px", color: "#fec20e" }}>
-              CheckList
-            </label>
-            <Select
-              labelId="demo-simple-select-label"
-              id="demo-simple-select"
-              value={checkList}
-              name="checkList"
-              onChange={e => setCheckList(e.target.value)}
-            >
-              <MenuItem value="">-Select-</MenuItem>
-              <MenuItem value="yes">Yes</MenuItem>
-              <MenuItem value="no">No</MenuItem>
-            </Select>
-          </FormControl>
-          {checkList === "yes" && (
-            <FormControl fullWidth className="mt-1 mb-1">
-              {/* <InputLabel id="demo-simple-select-label">
-                CheckList Name
-              </InputLabel> */}
-              <label style={{ fontSize: "18px", color: "#fec20e" }}>
-                CheckList Name
-              </label>
-              <TextField
-                type="text"
-                name="checkListName"
-                value={checkListName}
-                onChange={e => setCheckListName(e.target.value)}
-              />
-            </FormControl>
-          )}
-          <FormControl fullWidth className="mt-1 mb-1">
-            {/* <InputLabel id="demo-simple-select-label">
-              Duration (In days)
-            </InputLabel> */}
-            <label style={{ fontSize: "18px", color: "#fec20e" }}>
-              Duration (In days)
-            </label>
-            <TextField
-              type="number"
-              name="duration"
-              value={duration}
-              min={1}
-              onChange={e => {
-                if (e.target.value >= 1) {
-                  setDuration(e.target.value);
-                } else {
-                  setDuration(1);
-                }
-              }}
-            />
-          </FormControl>
-          <FormControl fullWidth className="mt-3">
-            <label style={{ fontSize: "18px", color: "#fec20e" }}>
-              Issue Member
-            </label>
-            <FormControlLabel
-              value="admin"
-              control={<Checkbox />}
-              label="Admin"
-              onChange={e => memberChange(e.target.value, e.target.checked)}
-            />
-            {memberList?.map((data, id) => {
-              return (
+      <Modal
+        open={addFieldOpen}
+        onClose={handleFieldCancel}
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <div className="bg-white w-2/3 p-8 rounded-3xl outline-none -lg:w-4/5 -md:w-11/12">
+          <div>
+            <h3 className=" text-2xl font-semibold font-ubuntu">
+              Add New Process
+            </h3>
+            <hr className="my-4" />
+          </div>
+          <div>
+            <div className="grid grid-cols-2 gap-4 -md:grid-cols-1">
+              <div className="flex flex-col gap-2 [&_label]:font-semibold ">
+                <label>Step</label>
+                <input
+                  className="h-[54px] border border-primary px-4  text-gray-600 outline-none rounded-[7px] bg-gray-100"
+                  value={newField}
+                  type="text"
+                  id="step"
+                  placeholder="Enter Step"
+                  name="step"
+                  min={1}
+                  onChange={e => setNewField(e.target.value)}
+                />
+              </div>
+              <FormControl fullWidth className="mt-1 mb-1">
+                <label className="font-semibold mb-2">CheckList</label>
+                <Select
+                  labelId="checklist-select-label"
+                  id="checklist-simple-select"
+                  value={checkList}
+                  name="checkList"
+                  onChange={e => setCheckList(e.target.value)}
+                  sx={{
+                    "borderRadius": "7px",
+                    "background": "#f3f4f6",
+                    "outline": "none",
+                    "& :hover": {
+                      outline: "none",
+                    },
+                    "& .MuiInputBase-root": {
+                      "outline": "none",
+                      "background": "#cfcfcf",
+                      "& :hover": {
+                        outline: "none",
+                      },
+                    },
+                    "color": "#4b5563",
+                    ".MuiOutlinedInput-notchedOutline": {
+                      border: "1px solid #93bfcf",
+                    },
+                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                      border: "1px solid #93bfcf",
+                    },
+                    "&:hover .MuiOutlinedInput-notchedOutline": {
+                      border: "1px solid #93bfcf",
+                    },
+                    ".MuiSvgIcon-root ": {
+                      fill: "#93bfcf !important",
+                    },
+                  }}
+                >
+                  <MenuItem value="yes">Yes</MenuItem>
+                  <MenuItem value="no">No</MenuItem>
+                </Select>
+              </FormControl>
+
+              {checkList === "yes" && (
+                <div className="flex flex-col gap-2 [&_label]:font-semibold">
+                  <label>CheckList Name</label>
+                  <input
+                    className="h-[54px] border border-primary px-4  text-gray-600 outline-none rounded-[7px] bg-gray-100"
+                    value={checkListName}
+                    type="text"
+                    id="checkListName"
+                    placeholder="Enter Checklist Name"
+                    name="checkListName"
+                    min={1}
+                    onChange={e => setCheckListName(e.target.value)}
+                  />
+                </div>
+              )}
+
+              <div className="flex flex-col gap-2 [&_label]:font-semibold">
+                <label>Duration (In days)</label>
+                <input
+                  className="h-[54px] border border-primary px-4  text-gray-600 outline-none rounded-[7px] bg-gray-100"
+                  value={duration}
+                  type="number"
+                  id="duration"
+                  placeholder="Enter Duration"
+                  name="duration"
+                  min={1}
+                  onChange={e => setCheckListName(e.target.value)}
+                />
+              </div>
+            </div>
+            <FormControl fullWidth sx={{ marginTop: "8px" }}>
+              <label className="font-semibold">Issue Member</label>
+              <div className="grid grid-cols-4 w-3/5 -2xl:w-full -lg:grid-cols-3 -md:grid-cols-2">
                 <FormControlLabel
-                  key={id}
-                  value={data.role}
+                  value="admin"
                   control={<Checkbox />}
-                  label={data.role}
+                  label="Admin"
+                  sx={{
+                    "& svg": {
+                      fill: "#93bfcf",
+                    },
+                  }}
                   onChange={e => memberChange(e.target.value, e.target.checked)}
                 />
-              );
-            })}
-          </FormControl>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleFieldCancel} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleUpdateNewField} color="primary">
-            Add
-          </Button>
-        </DialogActions>
-      </Dialog>
+                {memberList?.map((data, id) => {
+                  return (
+                    <FormControlLabel
+                      key={data.role}
+                      value={data.role}
+                      control={<Checkbox />}
+                      label={data.role}
+                      sx={{
+                        "& svg": {
+                          fill: "#93bfcf",
+                        },
+                      }}
+                      onChange={e =>
+                        memberChange(e.target.value, e.target.checked)
+                      }
+                    />
+                  );
+                })}
+              </div>
+            </FormControl>
+          </div>
+          <div className="flex flex-row gap-2 justify-end mt-4 font-semibold">
+            <button
+              className="bg-primary-foreground border border-secondary text-secondary rounded-3xl px-4 py-2 flex flex-row  items-center"
+              onClick={handleFieldCancel}
+            >
+              Cancel
+            </button>
+            <button
+              className="bg-secondary text-primary rounded-3xl px-4 py-2 flex flex-row  items-center"
+              onClick={handleUpdateNewField}
+            >
+              Add
+            </button>
+          </div>
+        </div>
+      </Modal>
+
       {/* Dialog for field delete */}
-      <Dialog
+      <Modal
         open={deleteDialogOpen}
         onClose={handleClose}
-        aria-labelledby="responsive-dialog-title"
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
       >
-        <DialogContent>
-          <DialogContentText>Are you sure want to delete ?</DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button autoFocus onClick={handleClose}>
-            Cancel
-          </Button>
-          <Button onClick={DeleteField} autoFocus>
-            Delete
-          </Button>
-        </DialogActions>
-      </Dialog>
+        <div className="bg-white w-1/3 p-8 rounded-3xl outline-none -md:w-3/4">
+          <div>
+            <h3 className=" text-2xl font-semibold font-ubuntu">Delete Step</h3>
+            <hr className="my-4" />
+          </div>
+          <h5>Are your sure you want to delete ?</h5>
+          <div className="flex flex-row gap-2 justify-end mt-4">
+            <button
+              className="bg-primary-foreground border border-secondary text-secondary rounded-3xl px-4 py-2 flex flex-row  items-center"
+              onClick={handleClose}
+            >
+              Cancel
+            </button>
+            <button
+              className="bg-secondary text-primary rounded-3xl px-4 py-2 flex flex-row  items-center"
+              onClick={DeleteField}
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      </Modal>
     </AsideContainer>
   );
 };

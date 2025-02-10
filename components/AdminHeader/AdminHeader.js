@@ -3,8 +3,7 @@ import { Avatar, Button, Menu, MenuItem } from "@mui/material";
 import React, { useState } from "react";
 import { SidebarTrigger } from "../ui/sidebar";
 import { useAuthStore } from "../../store/useAuthStore";
-import { redirect } from "next/dist/server/api-utils";
-import { useRouter } from "next/navigation";
+import { useRouter, redirect } from "next/navigation";
 import { toast } from "react-toastify";
 
 const AdminHeader = () => {
@@ -92,7 +91,7 @@ const AdminHeader = () => {
               <div
                 onClick={() => {
                   setLogout();
-                  router.push("/homepage");
+                  router.push("/");
                   toast.success("You have been logged out.");
                 }}
                 className="w-full px-4 py-2 text-gray-300 hover:text-white group transition duration-300"

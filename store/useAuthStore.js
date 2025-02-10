@@ -12,7 +12,6 @@ const store = (set, get) => ({
   employeeId: null,
   username: null,
   isAuth: false,
-  otp: null,
 
   setLogIn: ({ userId, email, phone, userType, token, employeeId, username }) =>
     set(state => {

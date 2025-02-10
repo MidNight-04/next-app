@@ -1,5 +1,5 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useLayoutEffect } from "react";
 import image from "../../../public/assets/No_image_available.svg.webp";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "../../../store/useAuthStore";
@@ -13,7 +13,6 @@ import AsideContainer from "../../../components/AsideContainer";
 const Page = () => {
   const router = useRouter();
   const userId = useAuthStore(state => state.userId);
-  const state = useAuthStore(state => state);
   const {
     data: profileData,
     isLoading,
@@ -26,11 +25,9 @@ const Page = () => {
       }),
   });
 
-  useEffect(() => {
-    refetch();
-  });
-
-  console.log(state);
+  // useLayoutEffect(() => {
+  //   refetch();
+  // }, [userId]);
 
   return (
     <AsideContainer>
@@ -53,7 +50,7 @@ const Page = () => {
                   alt="profile-img"
                 />
                 <button
-                  className="border-2 text-nowrap border-primary cursor-pointer text-primary font-ubuntu text-sm px-3 py-1 rounded-3xl hover:bg-secondary hover:text-primary hover:border-secondary -md:px-4 -md:py-1 -md:text-sm"
+                  className="border-2 text-nowrap border-secondary cursor-pointer text-secondary font-semibold text-sm font-ubuntu px-3 py-2 rounded-3xl hover:bg-secondary hover:text-primary hover:border-secondary -md:px-4 -md:py-1 -md:text-sm"
                   onClick={() => router.push("/admin/profile/edit-profile")}
                 >
                   Edit Profile

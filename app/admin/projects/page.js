@@ -20,6 +20,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useAuthStore } from "../../../store/useAuthStore";
 import Image from "next/image";
+import { IoPeopleOutline } from "react-icons/io5";
 import AsideContainer from "../../../components/AsideContainer";
 const style = {
   position: "absolute",
@@ -38,6 +39,7 @@ const Page = () => {
   const id = useAuthStore(state => state.userId);
   const userType = useAuthStore(state => state.userType);
   // const id = "668e250e039e5714c86ccd57";
+  // const id = "65362fba3ffa1cad30f53bac";
   const [search, setSearch] = useState("");
   const columns = [
     { field: "seriel", headerName: "SNo.", width: 100 },
@@ -48,19 +50,33 @@ const Page = () => {
     { field: "floor", headerName: "floor", width: 150 },
   ];
 
+  console.log(userType);
+
   useEffect(() => {
     getAllProjects();
   }, [id, userType]);
 
   const getAllProjects = () => {
-    axios
-      .get(`${process.env.REACT_APP_BASE_PATH}/api/project/client/${id}`)
-      .then(response => {
-        setProject(response?.data?.data);
-      })
-      .catch(error => {
-        console.log(error);
-      });
+    if (userType === "ROLE_CLIENT") {
+      axios
+        .get(`${process.env.REACT_APP_BASE_PATH}/api/project/client/${id}`)
+        .then(response => {
+          setProject(response?.data?.data);
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    } else if (userType === "ROLE_ADMIN") {
+      axios
+        .get(`${process.env.REACT_APP_BASE_PATH}/api/project/getall`)
+        .then(response => {
+          setProject(response?.data?.data);
+          // console.log(response?.data?.data)
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    }
   };
 
   const arrayData = [];
@@ -118,6 +134,7 @@ const Page = () => {
         });
     }
   };
+
   return (
     <AsideContainer>
       <div className="flex flex-row justify-between pt-[20px] mb-[20px] items-center -lg:pt-2 -lg:mb-2">
@@ -210,6 +227,25 @@ const Page = () => {
                             <RiMoneyRupeeCircleLine className="icon" />
                             <p>{item.cost}</p>
                           </span>
+                          {userType !== "ROLE_CLIENT" && (
+                            <span className="flex gap-2 justify-center items-center p-2 bg-primary-foreground rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl -md:p-1 -md:text-xs">
+                              <IoPeopleOutline />
+                              <p>
+                                {
+                                  item.project_status
+                                    .map(item => item.step)
+                                    .flat()
+                                    .find(
+                                      item =>
+                                        item.finalStatus[0].status ===
+                                          "Pending" ||
+                                        item.finalStatus[0].status ==
+                                          "Work in Progress"
+                                    ).issueMember[0]
+                                }
+                              </p>
+                            </span>
+                          )}
                         </div>
                       </div>
                       <div className="flex flex-row gap-8 items-center -md:gap-2">

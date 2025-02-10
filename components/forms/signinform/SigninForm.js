@@ -7,7 +7,7 @@ import { useMutation } from "@tanstack/react-query";
 import { postEndpoint } from "../../../helpers/endpoints";
 import { useState } from "react";
 import LoaderSpinner from "../../../components/loader/LoaderSpinner";
-import { useParams } from "next/navigation";
+import { redirect, useParams } from "next/navigation";
 import { toast } from "react-toastify";
 
 const logInSchema = Yup.object({
@@ -22,6 +22,7 @@ const style = { color: "red", fontSize: ".75rem", paddingLeft: ".25rem" };
 const SigninForm = ({ showOtp }) => {
   const { slug } = useParams();
   const [showLoader, setShowLoader] = useState(false);
+  const isAuth = useAuthStore(state => state.isAuth);
   const setUsername = useAuthStore(state => state.setUsername);
 
   const loginMutation = useMutation({
@@ -43,6 +44,10 @@ const SigninForm = ({ showOtp }) => {
     },
   });
 
+  // if (isAuth) {
+  //   redirect("/admin/projects");
+  // }
+
   return (
     <>
       {showLoader && <LoaderSpinner />}
@@ -58,19 +63,21 @@ const SigninForm = ({ showOtp }) => {
       >
         {({ errors, touched }) => (
           <Form>
-            <div className="[&_input]:focus-visible:border-blue-500">
-              <label htmlFor="username">Username</label>
+            <div className="flex flex-col gap-2">
+              <label htmlFor="username" className="font-semibold">
+                Username
+              </label>
               <Field
-                className="[&_input]:focus-visible:border-blue-500"
+                className="p-2 border bg-[#f3f4f6] border-primary outline-none rounded-[7px]"
                 id="username"
                 name="username"
                 placeholder="Enter Username"
-                style={{
-                  padding: ".5rem",
-                  width: "100%",
-                  border: "1px solid #e5e5e5",
-                  borderRadius: "6px",
-                }}
+                // style={{
+                //   padding: ".5rem",
+                //   width: "100%",
+                //   border: "1px solid #e5e5e5",
+                //   borderRadius: "6px",
+                // }}
               />
               {errors.username && touched.username ? (
                 <div style={style}>{errors.username}</div>
@@ -93,13 +100,14 @@ const SigninForm = ({ showOtp }) => {
                                 <div style={style}>{errors.password}</div>
                                 ) : null}
                                 </div> */}
-            <Button
-              variant="contained"
-              type="submit"
-              sx={{ width: "100%", marginTop: "1rem" }}
-            >
-              Get OTP
-            </Button>
+            <div className="flex justify-end mt-4 w-full">
+              <button
+                className="p-[6px] px-3 bg-secondary rounded-full font-ubuntu text-primary font-semibold"
+                type="submit"
+              >
+                <p>Get OTP</p>
+              </button>
+            </div>
           </Form>
         )}
       </Formik>

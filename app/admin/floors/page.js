@@ -323,7 +323,7 @@ const ProjectFloorList = () => {
           alignItems: "center",
         }}
       >
-        <div className="bg-white w-1/3 p-8 rounded-3xl outline-none">
+        <div className="bg-white w-1/3 p-8 rounded-3xl outline-none -md:w-3/4">
           <div>
             <h3 className=" text-2xl font-semibold font-ubuntu">
               Delete Floor

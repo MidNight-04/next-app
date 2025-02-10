@@ -3,41 +3,23 @@ import React, { useEffect, useState } from "react";
 import { DataGrid } from "@mui/x-data-grid";
 import axios from "axios";
 import {
-  Chip,
   Button,
   Modal,
   Typography,
-  Box,
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogContentText,
   DialogActions,
   TextField,
   FormControl,
 } from "@mui/material";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { FaCalendar, FaMinus, FaPlus, FaRegCalendar } from "react-icons/fa6";
-import { TiArrowSortedDown, TiArrowSortedUp } from "react-icons/ti";
-import { FaRegCalendarAlt, FaRupeeSign } from "react-icons/fa";
+import { FaRupeeSign } from "react-icons/fa";
 import { IoIosArrowBack, IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
-import { FiDownload } from "react-icons/fi";
 import { useParams } from "next/navigation";
 import AsideContainer from "../../../../../components/AsideContainer";
 import { useRouter } from "next/navigation";
-
-const style = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: 500,
-  bgcolor: "background.paper",
-  border: "2px solid #000",
-  boxShadow: 25,
-  p: 4,
-};
 
 const Page = () => {
   const userRole = "client";
@@ -438,7 +420,7 @@ const Page = () => {
                     </div>
                   )}
                   <div className="flex flex-row items-center bg-secondary-foreground  p-2 w-full rounded-b-3xl">
-                    <div className="flex flex-row items-center gap-2 w-full p-5">
+                    <div className="flex flex-row items-center gap-2 w-full p-5 justify-between">
                       Outstanding Amount:
                       <span className="flex flex-row items-center gap">
                         <span>
@@ -448,14 +430,14 @@ const Page = () => {
                           totalPaymentAmount(item.stage)}
                       </span>
                     </div>
-                    {userRole === "client" && (
+                    {/* {userRole === "ROLE_CLIENT" && (
                       <button
                         className="p-[6px] px-3 bg-transparent border-2 border-secondary rounded-full font-ubuntu hover:bg-secondary text-nowrap [&_p]:hover:text-primary [&_svg]:hover:text-primary"
                         onClick={() => payProjectAmount(item.stage)}
                       >
                         <p>Pay Now</p>
                       </button>
-                    )}
+                    )} */}
                   </div>
                 </div>
               );

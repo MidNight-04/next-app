@@ -99,39 +99,37 @@ const OtpForm = () => {
       >
         {({ errors, touched }) => (
           <Form>
-            <div className="[&_input]:focus-visible:border-blue-500">
-              <div className="mt-4">
-                <label htmlFor="otp">OTP</label>
+            <div className="">
+              <div className="flex flex-col gap-2">
+                <label className="font-semibold" htmlFor="otp">
+                  OTP
+                </label>
                 <Field
+                  className="p-2 border bg-[#f3f4f6] border-primary outline-none rounded-[7px]"
                   id="otp"
                   name="otp"
                   placeholder="Enter OTP"
-                  style={{
-                    padding: ".5rem",
-                    width: "100%",
-                    border: "1px solid #e5e5e5",
-                    borderRadius: "6px",
-                  }}
                 />
                 {errors.otp && touched.otp ? (
                   <div style={style}>{errors.otp}</div>
                 ) : null}
               </div>
             </div>
-            <Button
-              variant="contained"
-              type="submit"
-              sx={{ width: "100%", marginTop: "1rem" }}
-            >
-              login
-            </Button>
+            <div className="flex justify-end mt-4">
+              <button
+                className="p-[6px] px-4 bg-secondary rounded-full font-ubuntu text-primary font-semibold"
+                type="submit"
+              >
+                Login
+              </button>
+            </div>
           </Form>
         )}
       </Formik>
       <div className="text-center">
         Didn&apos;t received OTP ?{"  "}
         <span
-          className="text-blue-500 hover:underline cursor-pointer"
+          className="text-primary hover:underline cursor-pointer"
           onClick={() => {
             setShowLoader(true);
             loginMutation.mutate();

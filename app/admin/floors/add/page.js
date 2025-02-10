@@ -1,7 +1,6 @@
 "use client";
 import axios from "axios";
-import { redirect } from "next/dist/server/api-utils";
-import { useRouter } from "next/navigation";
+import { useRouter, redirect } from "next/navigation";
 import { useState } from "react";
 import { toast } from "react-toastify";
 import AsideContainer from "../../../../components/AsideContainer";

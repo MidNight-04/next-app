@@ -1,13 +1,10 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import { DataGrid } from "@mui/x-data-grid";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import {
-  Chip,
   Button,
   Modal,
   Typography,
-  Box,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -18,21 +15,17 @@ import {
 } from "@mui/material";
 import { toast } from "react-toastify";
 import { FaMinus, FaPlus } from "react-icons/fa6";
-// import { Tooltip } from "react-tooltip";
-import { TiArrowSortedDown, TiArrowSortedUp, TiMinus } from "react-icons/ti";
-import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import AsideContainer from "../../../components/AsideContainer";
-const style = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: 500,
-  bgcolor: "background.paper",
-  border: "2px solid #000",
-  boxShadow: 25,
-  p: 4,
-};
+import { useRouter } from "next/navigation";
+import { Add } from "@mui/icons-material";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "../../../components/ui/accordion";
+import { MdDeleteOutline } from "react-icons/md";
+import { cn } from "../../../lib/utils";
 
 const Page = () => {
   const [point, setPoint] = useState("");
@@ -51,6 +44,7 @@ const Page = () => {
   const [checklistItems, setChecklistItems] = useState([
     { heading: "", points: [{ point: "" }] },
   ]);
+  const router = useRouter();
 
   const handleAddChecklistItem = () => {
     setChecklistItems([
@@ -289,293 +283,387 @@ const Page = () => {
   return (
     <>
       <AsideContainer>
-        <div className="datatableTitle detail-heading">
-          <p className="project-list-client">Check List</p>
-          {/* <NavLink to="/admin/project/checklist/add">
-            <Button
-              variant="contained"
-              size="small"
-              style={{
-                backgroundColor: "#fec20e",
-                fontWeight: "600",
-                marginTop: "-15px",
-              }}
-            >
-              Add CheckList
-            </Button>
-          </NavLink> */}
+        <div className="flex flex-row justify-between items-center">
+          <h1 className="text-[25px] font-ubuntu font-bold my-5 -md:text-lg -lg:my-2 -md:my-3">
+            Process List
+          </h1>
+          <button
+            className="bg-secondary text-primary rounded-3xl px-4 pr-5 py-3 flex flex-row gap-1 items-center -md:text-xs -md:px-2 -md:py-[6px] -md:[&_svg]:text-sm"
+            onClick={() => router.push("/admin/inspections/add")}
+          >
+            <Add />
+            Add CheckList
+          </button>
         </div>
         <div className="row mt-4">
-          {uniqueStep?.map((itm, idx) => {
-            return (
-              <>
-                <p key={idx} className="project-list-client">
-                  {itm.checkListStep}
-                  {` Checklist`}
-                </p>
+          {uniqueStep?.map(itm => (
+            <div key={itm.checkListStep}>
+              <h3 className="text-secondary font-bold text-xl font-ubuntu mb-4 -md:text-base">
+                {itm.checkListStep}
+                {` Checklist`}
+              </h3>
+              <Accordion type="single" id="checklist" collapsible>
                 {data
                   ?.filter(dt => dt.checkListStep === itm.checkListStep)
-                  ?.map((item, index) => {
-                    return (
-                      <div key={index} className="col-lg-12">
-                        <div className="v-progress">
-                          <div className="project-step-heading">
-                            <span className="head">{item.name}</span>
-                            <span>
-                              {showContent[index] ? (
-                                <TiArrowSortedUp
-                                  className="icon fs-2 "
-                                  onClick={() => toggleContent(index)}
-                                />
-                              ) : (
-                                <TiArrowSortedDown
-                                  className="icon fs-2 "
-                                  onClick={() => toggleContent(index)}
-                                />
-                              )}
-                              {/* <span
+                  ?.map(item => (
+                    <AccordionItem
+                      value={item.name}
+                      key={item.name}
+                      className="bg-white px-4 py-1 rounded-2xl mb-2"
+                    >
+                      <AccordionTrigger>
+                        <span className="font-semibold font-ubuntu">
+                          {item.name}
+                        </span>
+                        {/* <span
                                 className="process-delete"
                                 onClick={() => confirmDelete(item?._id)}
                               >
                                 Delete
                               </span> */}
+                      </AccordionTrigger>
+                      <AccordionContent>
+                        <div>
+                          <div className="flex flex-row justify-end mb-2">
+                            <span
+                              onClick={() =>
+                                AddNewCheckName(item?._id, item?.name)
+                              }
+                              className="flex flex-row items-center gap-1 text-primary font-semibold text-sm p-2 rounded-full border border-primary bg-primary-foreground [&_svg]:text-primary cursor-pointer"
+                            >
+                              <FaPlus
+                                data-tooltip-id="my-tooltipname"
+                                data-tooltip-content="Add Point"
+                                data-tooltip-place="top"
+                              />
+                              <p>Add Checkpoint</p>
                             </span>
                           </div>
-                          {showContent[index] && (
-                            <>
-                              {" "}
-                              <span
-                                className="float-end text-light fw-bold mb-2"
-                                style={{
-                                  backgroundColor: "#fec20e",
-                                  padding: "0px 4px",
-                                }}
+                          <Accordion type="single" id="checks" collapsible>
+                            {item.checkList?.map(itm => (
+                              <AccordionItem
+                                className="no-underline border-none"
+                                key={itm.heading}
+                                value={itm.heading}
                               >
-                                <FaPlus
-                                  className="icon fs-5"
-                                  onClick={() =>
-                                    AddNewCheckName(item?._id, item?.name)
-                                  }
-                                  data-tooltip-id="my-tooltipname"
-                                  data-tooltip-content="Add Point"
-                                  data-tooltip-place="top"
-                                />
-                                {/* <Tooltip
-                                  id="my-tooltipname"
-                                  className="bg-success p-1"
-                                  style={{ fontSize: "12px" }}
-                                /> */}
-                              </span>
-                              <ul>
-                                {item.checkList?.map((itm, idx) => {
-                                  return (
-                                    <div key={idx}>
-                                      <div className="mb-3 mt-4">
-                                        {itm.heading}
-                                        <FaPlus
-                                          className="icon mx-2"
-                                          onClick={() =>
-                                            AddNewField(
-                                              item?._id,
-                                              itm?.heading,
-                                              item?.name
-                                            )
-                                          }
-                                          data-tooltip-id="my-tooltip1"
-                                          data-tooltip-content="Add new point"
-                                          data-tooltip-place="top"
-                                        />
-                                        {/* <Tooltip id="my-tooltip1" /> */}
-                                      </div>
-                                      {itm?.points?.map((dt, pointIdx) => {
-                                        return (
-                                          <li
-                                            key={pointIdx}
-                                            className="v-progress-item inprogress"
-                                          >
-                                            {dt?.point}
-                                            <TiMinus
-                                              className="icon mx-2 "
-                                              onClick={() =>
-                                                confirmDeleteField(
-                                                  item?._id,
-                                                  itm?.heading,
-                                                  item?.name,
-                                                  dt?.point
-                                                )
-                                              }
-                                              data-tooltip-id="my-tooltip2"
-                                              data-tooltip-content="Delete point"
-                                              data-tooltip-place="top"
+                                <AccordionTrigger className="border border-primary rounded-lg px-2 py-3">
+                                  <div className="flex flex-row justify-between items-center gap-4 w-full">
+                                    <h5 className="text-sm font-semibold">
+                                      {itm.heading}
+                                    </h5>
+                                  </div>
+                                </AccordionTrigger>
+                                <AccordionContent className="pb-0 pl-2">
+                                  <div className="flex flex-row justify-end items-center my-2">
+                                    <span
+                                      onClick={() =>
+                                        AddNewField(
+                                          item?._id,
+                                          itm?.heading,
+                                          item?.name
+                                        )
+                                      }
+                                      className="flex flex-row items-center gap-1 text-primary font-semibold text-sm p-2 rounded-full border border-primary bg-primary-foreground [&_svg]:text-primary cursor-pointer"
+                                    >
+                                      <FaPlus
+                                        data-tooltip-id="my-tooltip1"
+                                        data-tooltip-content="Add new point"
+                                        data-tooltip-place="top"
+                                      />
+                                      <p>Add Point</p>
+                                    </span>
+                                  </div>
+                                  <div>
+                                    {itm?.points?.map((dt, idx) => (
+                                      <div
+                                        key={dt.point}
+                                        className="flex flex-row gap-4 items-center -md:gap-2"
+                                      >
+                                        <div className="relative -md:w-8">
+                                          <div className="h-full w-6 flex items-center justify-center">
+                                            <span
+                                              className={cn(
+                                                "w-[2px] bg-secondary pointer-events-none h-12",
+                                                idx === 0
+                                                  ? "mt-[100%] h-5"
+                                                  : "",
+                                                idx === itm.points.length - 1
+                                                  ? "mb-[100%] h-5"
+                                                  : ""
+                                              )}
                                             />
-                                            {/* <Tooltip id="my-tooltip2" /> */}
-                                          </li>
-                                        );
-                                      })}
-                                    </div>
-                                  );
-                                })}
-                              </ul>
-                            </>
-                          )}
+                                            <span className="w-6 h-6 absolute rounded-full shadow-xl text-center border border-dashed border-primary p-[3px]" />
+                                            <span className="w-4 absolute h-4 -ml-[1px] rounded-full bg-primary shadow-xl text-center" />
+                                          </div>
+                                        </div>
+                                        <div className="flex flex-row items-center justify-between w-full">
+                                          <p className="text-xs font-semibold">
+                                            {dt?.point}
+                                          </p>
+                                          <span
+                                            onClick={() =>
+                                              confirmDeleteField(
+                                                item?._id,
+                                                itm?.heading,
+                                                item?.name,
+                                                dt?.point
+                                              )
+                                            }
+                                            className="flex flex-row items-center gap-1 text-primary font-semibold text-sm p-2 rounded-full border border-primary bg-primary-foreground [&_svg]:text-primary [&_svg]:text-lg cursor-pointer"
+                                          >
+                                            <MdDeleteOutline />
+                                          </span>
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </AccordionContent>
+                              </AccordionItem>
+                            ))}
+                          </Accordion>
                         </div>
-                      </div>
-                    );
-                  })}
-              </>
-            );
-          })}
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+              </Accordion>
+            </div>
+          ))}
           {uniqueStep?.length === 0 && (
             <p className="text-center mt-5">No record available</p>
           )}
         </div>
       </AsideContainer>
+
       {/* Dialog for  delete */}
-      <Dialog
+      <Modal
         open={open}
         onClose={handleClose}
-        aria-labelledby="responsive-dialog-title"
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
       >
-        <DialogContent>
-          <DialogContentText>Are you sure want to delete ?</DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button autoFocus onClick={handleClose}>
-            Cancel
-          </Button>
-          <Button onClick={handleDelete} autoFocus>
-            Delete
-          </Button>
-        </DialogActions>
-      </Dialog>
+        <div className="bg-white w-1/3 p-8 rounded-3xl outline-none -lg:w-3/4">
+          <div>
+            <h3 className=" text-2xl font-semibold font-ubuntu">
+              Delete Checkpoint
+            </h3>
+            <hr className="my-4" />
+          </div>
+          <h5>Are your sure you want to delete ?</h5>
+          <div className="flex flex-row gap-2 justify-end mt-4">
+            <button
+              className="bg-primary-foreground border border-secondary text-secondary rounded-3xl px-4 py-2 flex flex-row  items-center"
+              onClick={handleClose}
+            >
+              Cancel
+            </button>
+            <button
+              className="bg-secondary text-primary rounded-3xl px-4 py-2 flex flex-row  items-center"
+              onClick={handleDelete}
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      </Modal>
 
       {/* Add new work field Dialog */}
-      <Dialog open={addFieldOpen} onClose={handleFieldCancel}>
-        <DialogTitle>Add Inspection Point</DialogTitle>
-        <DialogContent style={{ width: "600px" }}>
+      <Modal
+        open={addFieldOpen}
+        onClose={handleFieldCancel}
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <div className="bg-white -xl:w-1/2 w-1/3 p-8 rounded-3xl outline-none -md:w-11/12">
           {checklistItems.map((item, index) => (
             <FormControl
               fullWidth
               key={index}
               className="p-2 rounded-1 mb-2 check-container mt-1"
             >
-              <Typography>
-                <span>
+              <div className="flex flex-row justify-between mb-2">
+                <span className="font-semibold">
                   Heading
                   <span className="text-danger">*</span>
                 </span>
-                {index === checklistItems.length - 1 && (
-                  <span onClick={handleAddChecklistItem}>
-                    <FaPlus className="fs-5 fw-bold text-success float-end m-1" />
-                  </span>
-                )}
-                {index !== 0 && (
-                  <span onClick={() => handleRemoveChecklistItem(index)}>
-                    <FaMinus className="fs-5 fw-bold text-danger float-end m-1" />
-                  </span>
-                )}
-              </Typography>
-              <TextField
-                placeholder="Enter Heading"
-                name="heading"
-                value={item.heading}
-                onChange={e => {
-                  const newItems = [...checklistItems];
-                  newItems[index].heading = e.target.value;
-                  setChecklistItems(newItems);
-                }}
-              />
+                <div className="flex flex-row gap-2">
+                  {index === checklistItems.length - 1 && (
+                    <span
+                      onClick={handleAddChecklistItem}
+                      className="p-2 rounded-full border border-primary bg-primary-foreground [&_svg]:text-primary cursor-pointer"
+                    >
+                      <FaPlus />
+                    </span>
+                  )}
+                  {index !== 0 && (
+                    <span
+                      onClick={() => handleRemoveChecklistItem(index)}
+                      className="p-2 rounded-full border border-primary bg-primary-foreground [&_svg]:text-primary cursor-pointer"
+                    >
+                      <FaMinus />
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div className="grid grid-cols-1 mb-2">
+                <input
+                  className="h-[54px] border border-primary px-4  text-gray-600 outline-none rounded-[7px] bg-gray-100"
+                  placeholder="Enter Heading"
+                  name="heading"
+                  value={item.heading}
+                  onChange={e => {
+                    const newItems = [...checklistItems];
+                    newItems[index].heading = e.target.value;
+                    setChecklistItems(newItems);
+                  }}
+                />
+              </div>
               {item?.points?.map((itm, idx) => {
                 return (
-                  <FormControl fullWidth key={idx} className="mt-2">
-                    <Typography>
-                      <span>
+                  <div fullWidth key={idx}>
+                    <div className="w-full flex flex-row justify-between items-center mb-2">
+                      <span className="font-semibold">
                         Point {` ${idx + 1}`}
                         <span className="text-danger">*</span>
                       </span>
-                      {idx === item.points?.length - 1 && (
-                        <span onClick={() => handleAddChecklistPoint(index)}>
-                          <FaPlus className="fs-5 fw-bold text-success float-end m-1" />
-                        </span>
-                      )}
-                      {idx !== 0 && (
-                        <span
-                          onClick={() => handleRemoveChecklistPoint(index, idx)}
-                        >
-                          <FaMinus className="fs-5 fw-bold text-danger float-end m-1" />
-                        </span>
-                      )}
-                    </Typography>
-                    <TextField
-                      placeholder="Enter checklist point ..."
-                      name="point"
-                      value={itm.point}
-                      onChange={e => {
-                        const newItems = [...checklistItems];
-                        newItems[index].points[idx].point = e.target.value;
-                        setChecklistItems(newItems);
-                      }}
-                    />
-                  </FormControl>
+                      <div className="flex flex-row gap-2">
+                        {idx === item.points?.length - 1 && (
+                          <span
+                            onClick={() => handleAddChecklistPoint(index)}
+                            className="p-2 rounded-full border border-primary bg-primary-foreground [&_svg]:text-primary cursor-pointer"
+                          >
+                            <FaPlus />
+                          </span>
+                        )}
+                        {idx !== 0 && (
+                          <span
+                            onClick={() =>
+                              handleRemoveChecklistPoint(index, idx)
+                            }
+                            className="p-2 rounded-full border border-primary bg-primary-foreground [&_svg]:text-primary"
+                          >
+                            <FaMinus />
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 my-1">
+                      <input
+                        className="h-[54px] border border-primary px-4  text-gray-600 outline-none rounded-[7px] bg-gray-100"
+                        placeholder="Enter checklist point ..."
+                        name="point"
+                        value={itm.point}
+                        onChange={e => {
+                          const newItems = [...checklistItems];
+                          newItems[index].points[idx].point = e.target.value;
+                          setChecklistItems(newItems);
+                        }}
+                      />
+                    </div>
+                  </div>
                 );
               })}
             </FormControl>
           ))}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleFieldCancel} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleUpdateNewField} color="primary">
-            Add
-          </Button>
-        </DialogActions>
-      </Dialog>
+          <div className="flex flex-row gap-2 justify-end mt-4">
+            <button
+              className="bg-primary-foreground border border-secondary text-secondary rounded-3xl px-4 py-2 flex flex-row  items-center"
+              onClick={handleFieldCancel}
+            >
+              Cancel
+            </button>
+            <button
+              className="bg-secondary text-primary rounded-3xl px-4 py-2 flex flex-row  items-center"
+              onClick={handleUpdateNewField}
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      </Modal>
       {/* Dialog for field delete */}
-      <Dialog
+      <Modal
         open={deleteDialogOpen}
         onClose={handleClose}
-        aria-labelledby="responsive-dialog-title"
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
       >
-        <DialogContent>
-          <DialogContentText>Are you sure want to delete ?</DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button autoFocus onClick={handleClose}>
-            Cancel
-          </Button>
-          <Button onClick={DeleteField} autoFocus>
-            Delete
-          </Button>
-        </DialogActions>
-      </Dialog>
+        <div className="bg-white w-1/3 p-8 rounded-3xl -md:w-3/4 outline-none">
+          <div>
+            <h3 className=" text-2xl font-semibold font-ubuntu">
+              Delete Point
+            </h3>
+            <hr className="my-4" />
+          </div>
+          <h5>Are your sure you want to delete ?</h5>
+          <div className="flex flex-row gap-2 justify-end mt-4">
+            <button
+              className="bg-primary-foreground border border-secondary text-secondary rounded-3xl px-4 py-2 flex flex-row  items-center"
+              onClick={handleClose}
+            >
+              Cancel
+            </button>
+            <button
+              className="bg-secondary text-primary rounded-3xl px-4 py-2 flex flex-row  items-center"
+              onClick={DeleteField}
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      </Modal>
 
       {/* dialog for add point */}
-      <Dialog open={pointAddOpen} onClose={handlePointAddCancel}>
-        <DialogTitle>Add New Point</DialogTitle>
-        <DialogContent style={{ width: "600px" }}>
-          <DialogContentText>
-            <TextField
-              autoFocus
-              margin="dense"
+      <Modal
+        open={pointAddOpen}
+        onClose={handlePointAddCancel}
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <div className="bg-white w-1/3 p-8 rounded-3xl -md:w-3/4 outline-none">
+          <div>
+            <h3 className=" text-2xl font-semibold font-ubuntu">
+              Add New Point
+            </h3>
+            <hr className="my-4" />
+          </div>
+          <div className="grid grid-cols-1">
+            <input
               id="role"
               type="text"
-              fullWidth
+              className="h-[54px] border border-primary px-4  text-gray-600 outline-none rounded-[7px] bg-gray-100"
               name="point"
               value={point}
               onChange={e => setPoint(e.target.value)}
             />
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handlePointAddCancel} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleSubmitPoint} color="primary">
-            Add
-          </Button>
-        </DialogActions>
-      </Dialog>
+          </div>
+          <div className="flex flex-row gap-2 justify-end mt-4">
+            <button
+              className="bg-primary-foreground border border-secondary text-secondary rounded-3xl px-4 py-2 flex flex-row  items-center"
+              onClick={handlePointAddCancel}
+            >
+              Cancel
+            </button>
+            <button
+              className="bg-secondary text-primary rounded-3xl px-4 py-2 flex flex-row  items-center"
+              onClick={handleSubmitPoint}
+            >
+              Add
+            </button>
+          </div>
+        </div>
+      </Modal>
     </>
   );
 };

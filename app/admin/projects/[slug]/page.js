@@ -2,53 +2,42 @@
 import axios from "axios";
 import React, { useEffect, useRef, useState } from "react";
 import {
-  Accordion as MUIaccordian,
-  AccordionDetails,
-  AccordionSummary,
-  Box,
-  Button,
-  Card,
-  Dialog,
   DialogActions,
   DialogContent,
-  DialogContentText,
   DialogTitle,
   FormControl,
   ImageListItem,
   InputLabel,
   MenuItem,
   Select as MUISelect,
-  styled,
   TextField,
   Typography,
   Modal,
+  Dialog,
+  Button,
 } from "@mui/material";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { FaDownload, FaMinus, FaPlus } from "react-icons/fa6";
-import {
-  IoCallOutline,
-  IoCallSharp,
-  IoDocumentTextOutline,
-} from "react-icons/io5";
-import { HiOutlineUserGroup } from "react-icons/hi";
-import { RiLockPasswordLine } from "react-icons/ri";
-import { MdOutlineDateRange } from "react-icons/md";
+import { FaDownload } from "react-icons/fa6";
+import { IoCallSharp } from "react-icons/io5";
 import { IoDocumentsOutline } from "react-icons/io5";
 import { GoPeople } from "react-icons/go";
 import { MdLockOutline } from "react-icons/md";
 import { BsCalendar4Event } from "react-icons/bs";
+import { TbProgress } from "react-icons/tb";
+import { FaCheck } from "react-icons/fa6";
+import { MdDeleteOutline } from "react-icons/md";
+import { FiDownload } from "react-icons/fi";
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 import { TiArrowSortedDown, TiArrowSortedUp } from "react-icons/ti";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import LoaderSpinner from "../../../../components/loader/LoaderSpinner";
-import Image from "next/image";
 import { cn } from "../../../../lib/utils";
 import { Check, PriorityHigh } from "@mui/icons-material";
 import { BsClockHistory } from "react-icons/bs";
+import { saveAs } from "file-saver";
 import AsideContainer from "../../../../components/AsideContainer";
 import {
   Select,
@@ -90,8 +79,6 @@ const monthNames = [
   "December",
 ];
 
-//Show no. of inspections _______________________________________________
-
 const ClientProjectView = () => {
   const linkRef = useRef(null);
   const { slug } = useParams();
@@ -122,20 +109,40 @@ const ClientProjectView = () => {
   const [endDate, setEndDate] = useState(null);
   const [detailsIsloading, setDetailsIsLoading] = useState(true);
   const [expandedDetails, setExpandedDetails] = useState(false);
-  // const [expandedItems, setExpandedItems] = useState(false);
+  const [showInspection, setShowInspection] = useState(null);
+  const [checkListName, setCheckListName] = useState("");
+  const [checkedItems, setCheckedItems] = useState([]);
+  const [inspectionList, setInspectionList] = useState([]);
+  const [workStatusOpen, setWorkStatusOpen] = useState(false);
+  const [documentDialogOpen, setDocumentDialogOpen] = useState(false);
+  const [showImage, setShowImage] = useState(false);
+  const [Loading, setLoading] = useState(false);
+  const [showImageUrl, setShowImageUrl] = useState(null);
+  const [taskDetails, setTaskDetails] = useState([]);
+  const [approveImage, setApproveImage] = useState([]);
+  const [logList, setLogList] = useState([]);
+  const [refresh, setRefresh] = useState(false);
+  const [fileCount, setFileCount] = useState([]);
+  const [currentStatus, setCurrentStatus] = useState(null);
+  const [openAcc, setOpenAcc] = useState(null);
+  const [openAccordion, setOpenAccordion] = useState(null);
+  const [document, setDocument] = useState("");
+  const [documentName, setDocumentName] = useState("");
+  const [activeTab, setActiveTab] = useState("Send Message");
+  const userName = useAuthStore(state => state.username);
+  const userId = useAuthStore(state => state.userId);
+  // const userType = useAuthStore(state => state.userType);
+  const userType = "ROLE_ADMIN";
 
-  const userType = useAuthStore(state => state.userType);
-
-  // const handleItemsChange = panel => (event, isExpanded) => {
-  //   setExpandedItems(isExpanded ? panel : false);
-  // };
+  const toggleShowImage = () => {
+    setShowImage(prev => !prev);
+  };
 
   const handleDetailsChange = (panel, isExpanded) => {
     setExpandedDetails(isExpanded ? panel : false);
   };
 
   useEffect(() => {
-    // Initialize showContent state based on the number of project steps
     if (projectDetails?.project_status) {
       setShowContent(
         new Array(projectDetails?.project_status.length).fill(false)
@@ -151,12 +158,12 @@ const ClientProjectView = () => {
     });
   };
 
-  useEffect(() => {
+  const getprojectDetail = () => {
     axios
       .get(`${process.env.REACT_APP_BASE_PATH}/api/project/databyid/${slug}`)
       .then(response => {
         setProjectDetails(response?.data?.data[0]);
-        // console.log(response?.data?.data);
+        // console.log(response?.data?.data[0]);
         setTotalInspection(response?.data?.data[0]?.inspections?.length);
 
         const durationInMonths = parseInt(response?.data?.data[0]?.duration);
@@ -182,13 +189,36 @@ const ClientProjectView = () => {
         setStartDate(formattedDate1);
         setEndDate(formattedDate);
       })
-      .then(res => setDetailsIsLoading(false))
       .catch(error => {
         console.log(error);
       });
-  }, [slug]);
+  };
 
-  // Set initial value based on pointList if available
+  useEffect(() => {
+    axios
+      .get(`${process.env.REACT_APP_BASE_PATH}/api/log/siteid/${slug}`)
+      .then(async response => {
+        // console.log(response)
+        setLogList(response.data.data);
+        // Calculate the total file count
+        let totalFileCount = 0;
+        response.data?.data?.forEach(data => {
+          if (data?.file?.length > 0) {
+            totalFileCount += data.file.length; // Increment by the number of files in each entry
+          }
+        });
+        // Set the final count once
+        setFileCount(totalFileCount);
+      })
+      .catch(error => {
+        console.log(error);
+      });
+  }, [activeTab, refresh]);
+
+  useEffect(() => {
+    getprojectDetail();
+  }, [slug, refresh]);
+
   useEffect(() => {
     if (pointList && pointList.length > 0) {
       const initialValue = `${pointList[0].point}-${pointList[0].content}`;
@@ -201,7 +231,6 @@ const ClientProjectView = () => {
     const filter = projectDetails?.project_status?.filter(
       obj => obj.name === step
     );
-    // console.log(filter)
     setPointList(filter[0]?.step);
   };
 
@@ -273,7 +302,7 @@ const ClientProjectView = () => {
     setDate(formatedtoday);
   };
 
-  const showWorkData = (point, content, name) => {
+  const showWorkData = (content, name) => {
     setDetailsIsLoading(true);
     // setWorkDetailOpen(true);
     axios
@@ -283,7 +312,8 @@ const ClientProjectView = () => {
           response?.data?.data[0]?.project_status
             ?.filter(item => item.name === name)[0]
             ?.step?.filter(
-              dt => dt.point === point && dt.content === content
+              dt => dt.content === content
+              // dt => dt.point === point && dt.content === content
             )[0]?.finalStatus
         );
       })
@@ -356,50 +386,347 @@ const ClientProjectView = () => {
         headers: { "Content-Type": "multipart/form-data" },
         data: formData,
       };
-      axios
-        .request(config)
-        .then(resp => {
-          toast.success(resp.data.message, {
-            position: "top-center",
-          });
-        })
-        .catch(err => {
-          toast.error("Error while raise query by client", {
-            position: "top-center",
-          });
-          console.log(err);
-        });
-
-      // Close the confirmation dialog
-      setConfirmationOpen(false);
+      // axios
+      //   .request(config)
+      //   .then(resp => {
+      //     toast.success(resp.data.message, {
+      //       position: "top-center",
+      //     });
+      //   })
+      //   .catch(err => {
+      //     toast.error("Error while raise query by client", {
+      //       position: "top-center",
+      //     });
+      //     console.log(err);
+      //   });
+      // setConfirmationOpen(false);
     }
   };
 
   const handleCancel = () => {
-    // Close the confirmation dialog
     setConfirmationOpen(false);
   };
+
   const teamOpenCancel = () => {
     setTeamOpen(false);
   };
+
   const documentOpenCancel = () => {
     setDocumentOpen(false);
   };
-  const handleOpenInspectionDialog = async name => {
+
+  const handleOpenInspectionDialog = () => {
     setInspectionDialogOpen(true);
     var count = 0;
-    var filterData = await projectDetails?.inspections?.filter(
-      itm => itm.checkListStep === name
+    var filterData = projectDetails?.inspections?.filter(
+      itm => itm.checkListStep === showInspection
     );
     setSingleInspection(filterData);
   };
+
   const handleInspectionDialog = () => {
     setInspectionDialogOpen(false);
   };
 
+  const updateWorkStatus = (point, content, name, checkName) => {
+    // console.log(point, content, name, checkName);
+    setCheckListName(checkName);
+    setCheckedItems([]);
+    const lists = projectDetails?.inspections?.filter(
+      data =>
+        data.checkListStep === name &&
+        data.name === checkName &&
+        data.checkListNumber === point
+    );
+    // console.log(lists);
+    setInspectionList(lists);
+    setPoint(point);
+    setContent(content);
+    setName(name);
+    setWorkStatusOpen(true);
+    setImage("");
+    setStatus("");
+    setDate(formatedtoday);
+    axios
+      .get(`${process.env.REACT_APP_BASE_PATH}/api/project/databyid/${slug}`)
+      .then(response => {
+        console.log(
+          response.data.data[0]?.project_status
+            .filter(item => item.name === name)[0]
+            .step?.filter(dt => dt.point === point && dt.content === content)[0]
+            .finalStatus[0]
+        );
+        if (response?.data?.status === 200) {
+          setCurrentStatus(
+            response.data.data[0]?.project_status
+              .filter(item => item.name === name)[0]
+              .step?.filter(
+                dt => dt.point === point && dt.content === content
+              )[0].finalStatus[0].status
+          );
+          setTaskDetails(
+            response?.data?.data[0]?.project_status
+              ?.filter(item => item.name === name)[0]
+              .step?.filter(
+                dt => dt.point === point && dt.content === content
+              )[0]
+              ?.dailyTask?.filter(tdate => tdate.taskDate === formatedtoday)
+          );
+        } else {
+          console.log(response);
+          setTaskDetails([]);
+        }
+      })
+      .catch(error => {
+        console.log(error);
+        toast.error("Error while showing task update", {
+          position: "top-right",
+        });
+      });
+  };
+
+  const updateImageStatus = ({ point, content, name, url }) => {
+    axios
+      .put(
+        `${process.env.REACT_APP_BASE_PATH}/api/project/updateimagestatusbyid`,
+        {
+          id: slug,
+          name,
+          point,
+          content,
+          userName,
+          userId,
+          url,
+        }
+      )
+      .then(response => {
+        if (response?.data?.status === 200) {
+          toast.success("Image Approved Successfully.");
+        }
+      });
+  };
+
+  const workStatusCancel = () => {
+    // Close the task dialog
+    setWorkStatusOpen(false);
+    setCheckListName("");
+    setInspectionList([]);
+  };
+
+  const handleWorkStatusUpdate = () => {
+    setOpenAccordion("");
+    setWorkStatusOpen(false);
+    setLoading(true);
+    // Extract all mandatory points from the checklist
+    const mandatoryPoints = inspectionList[0]?.checkList?.flatMap(
+      checklistItem =>
+        checklistItem.points?.filter(
+          point => point.status?.toLowerCase() === "mandatory"
+        )
+    );
+
+    // Check if any mandatory point is not checked
+    const hasUnCheckedMandatory = mandatoryPoints?.some(mandatoryPoint => {
+      const checkedPoint = checkedItems?.find(
+        point => point.point === mandatoryPoint.point
+      );
+      return !checkedPoint || !checkedPoint.checked;
+    });
+
+    // console.log(status);
+
+    if (!status) {
+      toast.error("Status is required", {
+        position: "top-center",
+      });
+    } else if (approveImage?.length === 0) {
+      toast.error("Approval Image is required", {
+        position: "top-center",
+      });
+    } else if (
+      hasUnCheckedMandatory ||
+      (inspectionList?.length > 0 && checkedItems?.length === 0)
+    ) {
+      toast.error(" Checked all mandatory inspection is required", {
+        position: "top-center",
+      });
+    }
+    // else if (!chatLog) {
+    //   toast.error("Chat Log is required", {
+    //     position: "top-center",
+    //   });
+    // }
+    else {
+      const formData = new FormData();
+      formData.append("id", slug);
+      formData.append("name", name);
+      formData.append("point", point);
+      formData.append("content", content);
+      formData.append("status", status);
+      for (let i = 0; i < approveImage?.length; i++) {
+        formData.append("image", approveImage[i]);
+      }
+      formData.append("date", date);
+      formData.append("checkListName", checkListName);
+      // formData.append("chatLog", chatLog);
+      formData.append("userName", userName);
+      formData.append("userId", userId);
+      if (currentStatus === "Completed") {
+        toast.error("You have already completed this point.");
+        setWorkStatusOpen(false);
+      } else {
+        axios
+          .put(
+            `${process.env.REACT_APP_BASE_PATH}/api/project/updatestatusbyid`,
+            formData
+          )
+          .then(response => {
+            setApproveImage([]);
+            if (response) {
+              axios
+                .get(
+                  `${process.env.REACT_APP_BASE_PATH}/api/project/databyid/${slug}`
+                )
+                .then(response => {
+                  setProjectDetails(response?.data?.data[0]);
+                  // console.log(response?.data?.data);
+                  setRefresh(prev => !prev);
+                })
+                .catch(error => {
+                  toast.error("Error while update project status");
+                });
+              setLoading(false);
+              setName("");
+              setPoint("");
+              setContent("");
+              setStatus("");
+              setCheckListName("");
+              setInspectionList([]);
+              setCheckedItems([]);
+              toast.success(response.data.message);
+            }
+          })
+          .catch(error => {
+            setLoading(false);
+            setName("");
+            setPoint("");
+            setContent("");
+            setStatus("");
+            setCheckListName("");
+            setInspectionList([]);
+            setCheckedItems([]);
+            setApproveImage([]);
+            setWorkStatusOpen(false);
+            console.log(error);
+            toast.error("Error while update project status");
+          });
+      }
+    }
+  };
+
+  const handleWorkStatusChange = e => {
+    const { checked, value } = e.target;
+    // console.log(value)
+    if (checked) {
+      // Add checkbox value to array if checked
+      setApproveImage([...approveImage, value]);
+    } else {
+      // Remove checkbox value from array if unchecked
+      setApproveImage(approveImage.filter(val => val !== value));
+    }
+  };
+
+  const downloadImage = url => {
+    saveAs(url, "site_image.jpg");
+  };
+
+  const deleteStatusImage = async ({ point, content, name }) => {
+    setOpenAccordion("");
+    toggleShowImage();
+    setLoading(true);
+    const formData = new FormData();
+    formData.append("_id", projectDetails._id);
+    formData.append("url", showImageUrl);
+    formData.append("name", name);
+    formData.append("point", point);
+    formData.append("content", content);
+    await fetch(
+      `${process.env.REACT_APP_BASE_PATH}/api/project/deletestatusimage`,
+      {
+        method: "POST",
+        headers: {},
+        body: formData,
+      }
+    ).then(res => {
+      setLoading(false);
+      if (res.ok) {
+        toast.success("Image deleted successfully.");
+      } else {
+        toast.error("Something went wrong while deleting the image.");
+      }
+    });
+  };
+
+  const handleUploadDocument = () => {
+    const formData = new FormData();
+    formData.append("name", documentName);
+    formData.append("client", projectDetails?.client?.id);
+    formData.append("siteID", slug);
+    formData.append("user", userId);
+    formData.append("userName", userName);
+    formData.append("date", formatedtoday);
+    for (let i = 0; i < document?.length; i++) {
+      formData.append("document", document[i]);
+    }
+    let config = {
+      method: "post",
+      maxBodyLength: Infinity,
+      url: `${process.env.REACT_APP_BASE_PATH}/api/admin/project-document/add`,
+      headers: { "Content-Type": "multipart/form-data" },
+      data: formData,
+    };
+    axios
+      .request(config)
+      .then(resp => {
+        // console.log(resp);
+        setDocumentName("");
+        setDocument("");
+        toast.success(resp?.data?.message);
+        setRefresh(!refresh);
+      })
+      .catch(err => {
+        toast.error("Error while uploading document.");
+        console.log(err);
+      });
+    setDocumentDialogOpen(false);
+  };
+
+  const handleDocumentClose = () => {
+    setDocumentDialogOpen(false);
+  };
+
+  const uploadDocument = () => {
+    setDocumentDialogOpen(true);
+    setDocumentName("");
+    setDocument("");
+  };
+
   return (
     <AsideContainer>
-      <div className="flex flex-row my-4 justify-between -md:flex-col -md:pl-0 -md:my-2">
+      {Loading && <LoaderSpinner />}
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
+      <div className="flex flex-row my-4 justify-between -md:flex-col -md:gap-2 -md:pl-0 -md:my-2">
         <div className="flex flex-row gap-2 items-center">
           <IoIosArrowBack
             className="text-2xl cursor-pointer transition duration-300 hover:scale-150 ease-in-out"
@@ -409,7 +736,7 @@ const ClientProjectView = () => {
             Project Details
           </h1>
         </div>
-        <div className="flex flex-row gap-4 -md:gap-2 ">
+        <div className="flex flex-row gap-2 flex-wrap">
           <Link href={`/admin/projects/payment-stages/${slug}`}>
             <button className="px-[15px] py-[12px] bg-transparent border-2 border-secondary rounded-full font-ubuntu -md:px-2 -md:py-[6px] hover:bg-secondary [&_div]:hover:text-primary">
               <div className="text-secondary flex flex-row">
@@ -430,8 +757,11 @@ const ClientProjectView = () => {
           </Link>
           {userType === "ROLE_ADMIN" && (
             <>
-              <Link href={`/admin/projects/payment-details/${slug}`}>
-                <button className="px-[15px] py-[12px] bg-transparent border-2 border-secondary rounded-full font-ubuntu -md:px-2 -md:py-[6px] hover:bg-secondary [&_div]:hover:text-primary">
+              <Link href={`/admin/projects/view-checklist/${slug}`}>
+                <button
+                  // onClick={uploadDocument}
+                  className="px-[15px] py-[12px] bg-transparent border-2 border-secondary rounded-full font-ubuntu -md:px-2 -md:py-[6px] hover:bg-secondary [&_div]:hover:text-primary"
+                >
                   <div className="text-secondary flex flex-row">
                     <p className="text-[13px] font-bold leading-none -md:text-xs">
                       Project Inspections
@@ -439,15 +769,17 @@ const ClientProjectView = () => {
                   </div>
                 </button>
               </Link>
-              <Link href={`/admin/projects/payment-details/${slug}`}>
-                <button className="px-[15px] py-[12px] bg-transparent border-2 border-secondary rounded-full font-ubuntu">
-                  <div className="text-secondary flex flex-row">
-                    <p className="text-[13px] font-bold leading-none">
-                      Add Documents
-                    </p>
-                  </div>
-                </button>
-              </Link>
+
+              <button
+                onClick={uploadDocument}
+                className="px-[15px] py-[12px] bg-transparent border-2 border-secondary rounded-full font-ubuntu -md:px-2 -md:py-[6px] cursor-pointer hover:bg-secondary [&_div]:hover:text-primary"
+              >
+                <div className="text-secondary flex flex-row">
+                  <p className="text-[13px] font-bold leading-none">
+                    Add Documents
+                  </p>
+                </div>
+              </button>
             </>
           )}
           <button
@@ -498,7 +830,15 @@ const ClientProjectView = () => {
           <BsCalendar4Event className="text-[20px]" />
         </div>
         <div className="px-[20px] py-[14px] flex w-full flex-auto items-center self-center justify-center bg-white rounded-[14px]">
-          <Select>
+          <Select
+            onValueChange={value => {
+              if (value === showInspection) {
+                setInspectionDialogOpen(true);
+              } else {
+                handleOpenInspectionDialog();
+              }
+            }}
+          >
             <SelectTrigger className="w-full">
               <SelectValue placeholder="No. of Inspections" />
             </SelectTrigger>
@@ -507,17 +847,30 @@ const ClientProjectView = () => {
                 ?.sort((a, b) => a.priority - b.priority)
                 ?.map((item, index) => {
                   return (
-                    <SelectItem
-                      key={index}
-                      value={item.name}
-                      onClick={() => handleOpenInspectionDialog(item?.name)}
-                    >
+                    <SelectItem key={item.name} value={item.name}>
                       {item.name}
                     </SelectItem>
                   );
                 })}
             </SelectContent>
           </Select>
+          {/* <div>
+            <p className="font-semibold">No. of Inspections</p>
+            <ul className="dropdown-menu">
+              {projectDetails?.project_status
+                ?.sort((a, b) => a.priority - b.priority)
+                ?.map((item, index) => {
+                  return (
+                    <li
+                      key={index}
+                      onClick={() => handleOpenInspectionDialog(item?.name)}
+                    >
+                      <span className="dropdown-item">{item.name}</span>
+                    </li>
+                  );
+                })}
+            </ul>
+          </div> */}
         </div>
         <div className="p-[20px] w-full rounded-[14px] [&_svg]:text-primary font-ubuntu flex flex-row gap-2 items-center self-center justify-between bg-white">
           <span className="font-semibold">Pending Inspection</span>
@@ -575,10 +928,16 @@ const ClientProjectView = () => {
             }
             var percent = ((completePoint * 100) / totalPoint).toFixed(0);
             return (
-              <Accordion type="single" collapsible key={item.name}>
+              <Accordion
+                type="single"
+                collapsible
+                key={item.name}
+                value={openAcc}
+                onValueChange={value => setOpenAcc(value)}
+              >
                 <AccordionItem
                   value={item.name}
-                  className="bg-white rounded-[14px]"
+                  className="bg-white rounded-[14px] mb-2"
                 >
                   <AccordionTrigger className="px-4 ">
                     <div className="flex flex-row justify-between w-full pr-8">
@@ -601,8 +960,8 @@ const ClientProjectView = () => {
                     </div>
                   </AccordionTrigger>
                   <AccordionContent className="py-0">
-                    <div className="bg-[#efefef] h-24 pt-4 ">
-                      <div className=" bg-secondary text-primary h-20 flex flex-row justify-evenly items-center rounded-t-3xl flex-auto text-base font-semibold -md:justify-between">
+                    <div className="bg-[#efefef] h-20 pt-4 ">
+                      <div className=" bg-secondary text-primary h-16 flex flex-row justify-evenly items-center rounded-t-3xl flex-auto text-base font-semibold -md:justify-between">
                         <span className="font-semibold w-24 -sm:hidden" />
                         <span className="font-semibold w-[140px] -md:w-16 -md:ml-8 -sm:ml-16">
                           Point
@@ -615,106 +974,111 @@ const ClientProjectView = () => {
                         </span>
                       </div>
                     </div>
-                    {item.step?.map((itm, idx) => {
-                      let initialDate = new Date(projectDetails?.date);
-                      const dur = itm.duration ? parseInt(itm.duration) : 0;
-                      // Add duration days
-                      initialDate.setDate(initialDate.getDate() + dur);
-                      // Get the final date
-                      let finalDate = initialDate.toISOString().split("T")[0]; // Format to YYYY-MM-DD
-                      return (
-                        <MUIaccordian
-                          key={idx}
-                          expanded={
-                            expandedDetails === `${itm.content}-${itm.point}`
-                          }
-                          onChange={(e, isExpanded) => {
-                            handleDetailsChange(
-                              `${itm.content}-${itm.point}`,
-                              isExpanded
-                            );
-                            showWorkData(itm.point, itm.content, item.name);
-                          }}
-                        >
-                          <AccordionSummary
-                            expandIcon={<ExpandMoreIcon />}
-                            aria-controls={`panel1bh-${item.name}-item-content`}
-                            id={`panel1bh-${item.name}-item-header`}
-                            sx={{
-                              height: "56px",
-                            }}
+                    <Accordion
+                      type="single"
+                      collapsible
+                      value={openAccordion}
+                      onValueChange={value => {
+                        setOpenAccordion(value);
+                        if (value) {
+                          showWorkData(value.split("_")[0], item.name);
+                        }
+                      }}
+                    >
+                      {item.step?.map((itm, idx) => {
+                        let initialDate = new Date(projectDetails?.date);
+                        const dur = itm.duration ? parseInt(itm.duration) : 0;
+                        // Add duration days
+                        initialDate.setDate(initialDate.getDate() + dur);
+                        // Get the final date
+                        let finalDate = initialDate.toISOString().split("T")[0]; // Format to YYYY-MM-DD
+                        return (
+                          <AccordionItem
+                            value={itm.content + "_" + +idx}
+                            key={itm.content + +idx}
+                            className="px-4"
                           >
-                            <div className="flex flex-row justify-evenly w-full">
-                              <div className="relative w-[120px] -md:w-8">
-                                <div className="h-full w-6 flex items-center justify-center">
+                            <AccordionTrigger className="py-0 outline-none">
+                              <div className="flex flex-row justify-evenly w-full">
+                                <div className="relative w-[120px] -md:w-8">
+                                  <div className="h-full w-6 flex items-center justify-center">
+                                    <div
+                                      className={cn(
+                                        "w-[2px] bg-secondary pointer-events-none h-full",
+                                        idx === 0 ? "mt-[100%] h-8" : "",
+                                        idx === item.step.length - 1
+                                          ? "mb-[100%] h-8"
+                                          : "",
+                                        itm.finalStatus[0].status !==
+                                          "Completed"
+                                          ? "bg-secondary"
+                                          : ""
+                                      )}
+                                    />
+                                  </div>
                                   <div
                                     className={cn(
-                                      "w-[2px] bg-secondary pointer-events-none h-full",
-                                      idx === 0 ? "mt-[100%] h-7" : "",
-                                      idx === item.step.length - 1
-                                        ? "mb-[100%] h-7"
-                                        : "",
+                                      "w-8 h-8 absolute top-1/2 md:right-[92px] -md:right-1 -mt-4 rounded-full bg-green-500 shadow-xl text-center",
                                       itm.finalStatus[0].status !== "Completed"
-                                        ? "bg-secondary"
+                                        ? "bg-primary"
                                         : ""
                                     )}
-                                  />
+                                  >
+                                    {/* {console.log(itm.point)} */}
+                                    {itm.finalStatus[0].status ===
+                                      "Pending" && (
+                                      <BsClockHistory className="mt-1 ml-1 text-secondary text-2xl " />
+                                    )}
+                                    {itm.finalStatus[0].status ===
+                                      "Completed" && (
+                                      <Check
+                                        sx={{
+                                          marginTop: "4px",
+                                          fontSize: "24px",
+                                          color: "white",
+                                        }}
+                                      />
+                                    )}
+                                    {itm.finalStatus[0].status ===
+                                      "Work in Progress" && (
+                                      <TbProgress className="mt-1 ml-1 text-secondary text-2xl " />
+                                    )}
+                                  </div>
                                 </div>
-                                <div
-                                  className={cn(
-                                    "w-8 h-8 absolute top-1/2 md:right-[92px] -md:right-1 -mt-4 rounded-full bg-green-500 shadow-xl text-center",
-                                    itm.finalStatus[0].status !== "Completed"
-                                      ? "bg-primary"
-                                      : ""
-                                  )}
-                                >
-                                  {itm.finalStatus[0].status === "Pending" ? (
-                                    <BsClockHistory className="mt-1 ml-1 text-secondary text-2xl " />
-                                  ) : (
-                                    <Check
-                                      sx={{
-                                        marginTop: "4px",
-                                        fontSize: "24px",
-                                        color: "white",
-                                      }}
-                                    />
-                                  )}
+                                <div className="w-[200px] flex items-center -md:w-16">
+                                  <div className="text-sm font-semibold">
+                                    {itm.content}
+                                    {itm.checkList?.toLowerCase() === "yes" && (
+                                      <div>inspections</div>
+                                    )}
+                                  </div>
                                 </div>
-                              </div>
-                              <div className="w-[200px] flex items-center -md:w-16">
-                                <div className="text-sm font-semibold">
-                                  {itm.content}
-                                  {itm.checkList?.toLowerCase() === "yes" && (
-                                    <div>inspections</div>
-                                  )}
+                                <div className="w-[200px] flex self-center justify-center -md:w-16">
+                                  {itm.issueMember?.map((mem, id) => {
+                                    return (
+                                      <div
+                                        key={id}
+                                        className="text-sm font-semibold"
+                                      >
+                                        {mem}
+                                      </div>
+                                    );
+                                  })}
                                 </div>
-                              </div>
-                              <div className="w-[200px] flex self-center justify-center -md:w-16">
-                                {itm.issueMember?.map((mem, id) => {
-                                  return (
-                                    <div
-                                      key={id}
-                                      className="text-sm font-semibold"
-                                    >
-                                      {mem}
+                                <div className="w-[200px] -md:w-28 my-1">
+                                  <div className="flex flex-row mb-2">
+                                    <div className="text-sm font-semibold">
+                                      Date :
                                     </div>
-                                  );
-                                })}
-                              </div>
-                              <div className="w-[200px] -md:w-28">
-                                <div className="flex flex-row mb-2">
-                                  <div className="text-sm font-semibold">
-                                    Date :
+                                    <div className="text-sm"> {finalDate}</div>
                                   </div>
-                                  <div className="text-sm"> {finalDate}</div>
-                                </div>
-                                <div className="flex flex-row">
-                                  <div className="text-sm font-semibold">
-                                    Final :
-                                  </div>
-                                  <div className="text-sm">
-                                    {itm.finalStatus[0].date}{" "}
-                                    {/* {itm.finalStatus[0].date ? (
+                                  <div className="flex flex-row">
+                                    <div className="text-sm font-semibold">
+                                      Final :
+                                    </div>
+                                    <div className="text-sm">
+                                      {itm.finalStatus[0].date}{" "}
+                                      {/* {itm.finalStatus[0].date ? (
                                       new Date(itm.finalStatus[0].date) >
                                       new Date(finalDate) ? (
                                         <div>
@@ -730,43 +1094,357 @@ const ClientProjectView = () => {
                                     ) : (
                                       ""
                                     )} */}
+                                    </div>
                                   </div>
                                 </div>
                               </div>
-                            </div>
-                          </AccordionSummary>
-                          <AccordionDetails>
-                            <div className="p-5 shadow-lg rounded-3xl border-[1px] border-primary mx-6">
-                              <h5 className="text-lg font-bold mb-4">
-                                Details :
-                              </h5>
-                              <div>
-                                <div>{workDetails[0]?.date}</div>
-                                <div>
-                                  {workDetails[0]?.image?.map(img => (
-                                    <img
-                                      src={img}
-                                      alt={img}
-                                      key={img}
-                                      className="w-80 h-full"
-                                    />
-                                  ))}
+                            </AccordionTrigger>
+                            <AccordionContent>
+                              {!detailsIsloading && (
+                                <div className="p-5 shadow-lg rounded-3xl border-[1px] border-primary mx-6 -lg:mx-2 -md:p-3">
+                                  <div className="flex flex-row justify-between items-center">
+                                    <h5 className="text-lg font-bold mb-4">
+                                      Details :
+                                    </h5>
+                                    {userType === "ROLE_ADMIN" ||
+                                    userType === "ROLE_PROJECT MANAGER" ||
+                                    itm.issueMember
+                                      .map(item => item.toLowerCase())
+                                      .includes(
+                                        userType.toLowerCase().split("_")[1]
+                                      ) ? (
+                                      <button
+                                        onClick={() => {
+                                          updateWorkStatus(
+                                            itm.point,
+                                            itm.content,
+                                            item.name,
+                                            itm?.checkListName
+                                          );
+                                        }}
+                                        style={{ cursor: "pointer" }}
+                                        className="px-3 py-2 font-semibold bg-secondary text-primary rounded-full font-ubuntu -md:px-2 -md:py-[6px]"
+                                      >
+                                        Update To Client
+                                      </button>
+                                    ) : (
+                                      ""
+                                    )}
+                                  </div>
+                                  <div>
+                                    <div>
+                                      <span className="font-semibold ">
+                                        Updated on:{" "}
+                                      </span>
+                                      {workDetails[0]?.date}
+                                    </div>
+                                    <div className="relative flex flex-row gap-2 mt-2">
+                                      {workDetails[0]?.image?.map(
+                                        (imgObj, imgidx) => (
+                                          <div key={imgObj.url}>
+                                            {imgObj.isApproved ||
+                                            userType !== "ROLE_CLIENT" ? (
+                                              <div
+                                                className="cursor-pointer [&_span]:hover:block"
+                                                onClick={() => {
+                                                  setShowImageUrl(imgObj.url);
+                                                  toggleShowImage(imgObj.url);
+                                                }}
+                                              >
+                                                {!showImage && (
+                                                  <span className="w-16 rounded-xl h-full bg-black bg-opacity-30 absolute hidden text-primary-foreground text-center">
+                                                    <p className="mt-5 font-semibold">
+                                                      View
+                                                    </p>
+                                                  </span>
+                                                )}
+
+                                                <img
+                                                  src={imgObj.url}
+                                                  alt={imgObj.url}
+                                                  className="w-16 h-16 rounded-xl transition-all duration-300 rounded-lg"
+                                                />
+                                              </div>
+                                            ) : (
+                                              ""
+                                            )}
+
+                                            <Modal
+                                              open={showImage}
+                                              onClose={toggleShowImage}
+                                              sx={{
+                                                "display": "flex",
+                                                "alignItems": "center",
+                                                "justifyContent": "center",
+                                                "& .MuiBackdrop-root": {
+                                                  backgroundColor:
+                                                    "rgba(0, 0, 0, 0.1)",
+                                                },
+                                              }}
+                                            >
+                                              <div className="bg-white rounded-3xl h-5/6 flex flex-col ">
+                                                {/* <Image
+                                                src={img}
+                                                alt="alt"
+                                                width={400}
+                                                height={400}
+                                              /> */}
+                                                <div className="h-full w-full flex items-center justify-center">
+                                                  <img
+                                                    src={showImageUrl}
+                                                    alt={showImageUrl}
+                                                    className="w-auto h-5/6 bg-center"
+                                                  />
+                                                  {/* <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black opacity-60" /> */}
+                                                </div>
+                                                <div className="flex flex-row gap-4 justify-evenly p-4 -md:flex-wrap">
+                                                  {userType === "ROLE_ADMIN" ||
+                                                  userType ===
+                                                    "ROLE_PROJECT MANAGER" ? (
+                                                    <>
+                                                      <div
+                                                        className="py-2 px-4 font-semibold bg-secondary text-primary rounded-full flex flex-row items-center justify-center gap-1 text-nowrap"
+                                                        onClick={() => {
+                                                          updateImageStatus({
+                                                            _id: "id",
+                                                            point: itm.point,
+                                                            content:
+                                                              itm.content,
+                                                            name: item.name,
+                                                            url: imgObj.image,
+                                                          });
+                                                        }}
+                                                      >
+                                                        <FaCheck className="text-xl" />
+                                                        <p>Approve Image</p>
+                                                      </div>
+                                                      <button
+                                                        className="py-2 px-4 font-semibold bg-secondary text-primary rounded-full flex flex-row items-center justify-center gap-1 text-nowrap"
+                                                        onClick={() => {
+                                                          deleteStatusImage({
+                                                            point: itm.point,
+                                                            content:
+                                                              itm.content,
+                                                            name: item.name,
+                                                          });
+                                                        }}
+                                                      >
+                                                        <MdDeleteOutline className="text-xl" />
+                                                        Delete Image
+                                                      </button>
+                                                    </>
+                                                  ) : (
+                                                    ""
+                                                  )}
+                                                  <button
+                                                    className="py-2 px-4 font-semibold bg-secondary text-primary rounded-full flex flex-row items-center justify-center gap-1 text-nowrap"
+                                                    onClick={() => {
+                                                      downloadImage(
+                                                        imgObj.image
+                                                      );
+                                                    }}
+                                                  >
+                                                    <FiDownload className="text-xl" />
+                                                    Download Image
+                                                  </button>
+                                                </div>
+                                              </div>
+                                            </Modal>
+                                          </div>
+                                        )
+                                      )}
+                                    </div>
+                                    <div className="font-semibold mt-2">
+                                      Status : {workDetails[0]?.status}
+                                    </div>
+                                  </div>
                                 </div>
-                                <div className="font-semibold mt-4">
-                                  Status : {workDetails[0]?.status}
-                                </div>
-                              </div>
-                            </div>
-                          </AccordionDetails>
-                        </MUIaccordian>
-                      );
-                    })}
+                              )}
+                            </AccordionContent>
+                          </AccordionItem>
+                        );
+                      })}
+                    </Accordion>
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
             );
           })}
       </div>
+
+      {/* <Modal
+        open={showImage}
+        onClose={toggleShowImage}
+        sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+      >
+        <div className="bg-white rounded-3xl w-2/4 h-4/5">
+          <img
+            src={showImageUrl}
+            alt="site-image"
+            className="w-20 h-full rounded-xl transition-all duration-300 rounded-lg"
+          />
+        </div>
+      </Modal> */}
+
+      <Dialog open={workStatusOpen} onClose={workStatusCancel}>
+        <DialogTitle>Update Project Work By Admin</DialogTitle>
+        <DialogContent style={{ width: "600px" }}>
+          <FormControl fullWidth className="mt-1 mb-1">
+            <Typography id="demo-simple-select-label">
+              Status<span className="text-danger">*</span>
+            </Typography>
+            <MUISelect
+              labelId="demo-simple-select-label"
+              id="demo-simple-select"
+              value={status}
+              name="status"
+              onChange={e => setStatus(e.target.value)}
+            >
+              <MenuItem value="Pending">Pending</MenuItem>
+              <MenuItem value="Work in Progress">Work in Progress</MenuItem>
+              <MenuItem value="Completed">Completed</MenuItem>
+            </MUISelect>
+          </FormControl>
+          <FormControl fullWidth>
+            {taskDetails?.length > 0 ? (
+              taskDetails?.map((item, index) => {
+                return (
+                  <div key={index}>
+                    {item?.taskImage?.map((dt, idx) => {
+                      return (
+                        <ImageListItem
+                          key={idx}
+                          style={{ display: "flex", margin: "10px 0px" }}
+                        >
+                          <input
+                            type="checkbox"
+                            className="me-3"
+                            name="image"
+                            value={dt}
+                            onChange={handleWorkStatusChange}
+                          />
+                          <img
+                            src={dt}
+                            alt="task"
+                            loading="lazy"
+                            style={{ width: "525px" }}
+                          />
+                        </ImageListItem>
+                      );
+                    })}
+                  </div>
+                );
+              })
+            ) : (
+              <>
+                <Typography>
+                  File<span className="text-danger">*</span>
+                </Typography>
+                <TextField
+                  type="file"
+                  c
+                  className=""
+                  name="image"
+                  inputProps={{ multiple: true }}
+                  onChange={e => setApproveImage(e.target.files)}
+                />
+              </>
+            )}
+          </FormControl>
+          <FormControl fullWidth className="mt-1 mb-1">
+            <Typography>
+              Date<span className="text-danger">*</span>
+            </Typography>
+            <TextField
+              type="date"
+              name="date"
+              value={date}
+              onChange={e => setDate(e.target.value)}
+              disabled
+            />
+          </FormControl>
+          <div className="row mt-2">
+            {inspectionList?.length > 0 ? (
+              <>
+                <span className="heads_inspection text-uppercase">
+                  Inspections <span className="text-danger">*</span>
+                </span>
+                {inspectionList[0]?.checkList?.map((item, id) => {
+                  return (
+                    <div key={id} className="col-lg-12 col-md-12">
+                      <span
+                        className="heads_inspection text-warning"
+                        style={{ fontSize: "14px" }}
+                      >
+                        {item?.heading}
+                      </span>
+                      {item?.points?.map((pt, idx) => {
+                        return (
+                          <div key={idx} className="inspection-box-col-points">
+                            <span className="text text-warning">
+                              {idx + 1}
+                              {`- `}
+                            </span>
+                            <span className="number mx-2">
+                              <span>
+                                {pt.point}
+                                {pt?.status?.toLowerCase() === "mandatory" ? (
+                                  <span className="text-danger">*</span>
+                                ) : (
+                                  ""
+                                )}
+                              </span>
+                              <span
+                                className="mx-2"
+                                style={{ marginTop: "3px" }}
+                              >
+                                <input
+                                  type="checkbox"
+                                  id="c1s"
+                                  name={pt.status}
+                                  value={pt.point}
+                                  className="inputs"
+                                  checked={
+                                    !!checkedItems.find(
+                                      item => item.point === pt.point
+                                    )?.checked
+                                  }
+                                  onChange={handleInspectionChange}
+                                />
+                              </span>
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })}
+              </>
+            ) : (
+              ""
+            )}
+          </div>
+          {/* <FormControl fullWidth>
+            <Typography>
+              Log<span className="text-danger">*</span>
+            </Typography>
+            <TextField
+              type="text"
+              className=""
+              name="chatLog"
+              onChange={(e) => setChatLog(e.target.value)}
+            />
+          </FormControl> */}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={workStatusCancel} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleWorkStatusUpdate} color="primary">
+            Update To Client
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* Team list open dialog */}
       <Dialog open={teamOpen} onClose={teamOpenCancel}>
@@ -995,6 +1673,7 @@ const ClientProjectView = () => {
         </DialogActions>
       </Dialog>
 
+      {/* RAISE TIKCET */}
       <Modal
         open={confirmationOpen}
         onClose={handleCancel}
@@ -1098,14 +1777,11 @@ const ClientProjectView = () => {
             />
           </FormControl> */}
             <div className="w-full">
-              {/* <label className="text-base text-[#565656] font-semibold mb-2 block text-center">
-              Image
-            </label> */}
               <input
                 type="file"
                 name="image"
                 onChange={e => setImage(e.target.files)}
-                className="w-full rounded-3xl text-gray-400 font-semibold text-sm bg-white border file:cursor-pointer cursor-pointer file:border-0 file:py-4 file:px-6 file:mr-4 file:bg-gray-100 file:hover:bg-gray-200 file:text-gray-500"
+                className="w-full rounded-2xl text-gray-400 font-semibold text-sm bg-white border file:cursor-pointer cursor-pointer file:border-0 file:py-4 file:px-6 file:mr-4 file:bg-gray-100 file:hover:bg-gray-200 file:text-gray-500"
               />
             </div>
             <FormControl
@@ -1126,13 +1802,20 @@ const ClientProjectView = () => {
               />
             </FormControl>
           </div>
-          <div>
-            <Button onClick={handleCancel} color="primary">
+          <div className="flex flex-row items-center justify-end gap-4">
+            <button
+              onClick={handleCancel}
+              color="primary"
+              className="bg-transparent border-2 border-secondary rounded-full px-4 py-2 text-secondary font-semibold"
+            >
               Cancel
-            </Button>
-            <Button onClick={handleUpdate} color="primary">
+            </button>
+            <button
+              onClick={handleUpdate}
+              className="bg-secondary rounded-full px-4 py-2 text-primary font-semibold border-2 border-secondary"
+            >
               Update
-            </Button>
+            </button>
           </div>
         </div>
       </Modal>
@@ -1211,18 +1894,6 @@ const ClientProjectView = () => {
                 <span></span>
               </p>
             </div>
-            {/* <div className="col-lg-12 col-md-12 inspection-box-col">
-              <p className="text">Closed Tickets:</p>
-              <p className="number">
-                0<span></span>
-              </p>
-            </div>
-            <div className="col-lg-12 col-md-12 inspection-box-col">
-              <p className="text">Open Tickets:</p>
-              <p className="number">
-                0<span></span>
-              </p>
-            </div> */}
           </div>
         </DialogContent>
         <DialogActions>
@@ -1231,220 +1902,55 @@ const ClientProjectView = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      <Modal
+        open={documentDialogOpen}
+        onClose={handleDocumentClose}
+        sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+      >
+        <div className="w-1/3 -md:w-11/12 bg-white p-8 rounded-3xl">
+          <h2 className="text-2xl font-bold text-center font-ubuntu mb-4">
+            Upload Document
+          </h2>
+          <div className="flex flex-col gap-2 [&_label]:font-semibold">
+            <label>Document Name</label>
+            <input
+              className="h-[54px] border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100"
+              value={documentName}
+              type="text"
+              placeholder="Enter Document Name"
+              name="documentName"
+              onChange={e => setDocumentName(e.target.value)}
+            />
+          </div>
+          <div className="flex flex-col gap-2 [&_label]:font-semibold">
+            <label>Document</label>
+            <input
+              type="file"
+              name="document"
+              inputProps={{ multiple: true }}
+              onChange={e => setDocument(e.target.files)}
+              className="w-full text-gray-400 text-sm bg-gray-100 border py-[6px] px-2 file:cursor-pointer cursor-pointer  file:rounded-[7px] border-primary file:py-2 file:px-3 file:mr-4 file:bg-primary-foreground file:border file:border-primary file:text-secondary file:hover:bg-secondary file:hover:text-primary rounded-[7px]"
+            />
+          </div>
+          <div className="flex flex-row gap-4 mt-4 justify-end">
+            <button
+              onClick={handleDocumentClose}
+              className="border-2 cursor-pointer font-semibold text-secondary font-ubuntu text-sm px-4 py-2 rounded-3xl bg-transparent border-secondary -md:px-4 -md:py-2 -md:text-sm hover:bg-secondary hover:text-primary"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleUploadDocument}
+              className="border-2 cursor-pointer font-semibold text-primary font-ubuntu text-sm px-4 py-2 rounded-3xl bg-secondary border-secondary -md:px-4 -md:py-2 -md:text-sm"
+            >
+              Upload Document
+            </button>
+          </div>
+        </div>
+      </Modal>
     </AsideContainer>
   );
 };
 
 export default ClientProjectView;
-
-{
-  /* <Accordion
-                  sx={{ background: "#e5e5e5" }}
-                  key={item.name}
-                  expanded={expandedItems === `${item.name}`}
-                  onChange={handleItemsChange(`${item.name}`)}
-                >
-                  <AccordionSummary
-                    expandIcon={<ExpandMoreIcon />}
-                    aria-controls={`panel1bh-${item.name}-content`}
-                    id={`panel1bh-${item.name}-header`}
-                  >
-                    <div className="flex flex-row justify-between w-full pr-8">
-                      <div className="flex justify-center items-center font-semibold">
-                        {item.name}
-                      </div>
-                      <div style={{ width: 40, height: 40 }}>
-                        <CircularProgressbar
-                          value={percent}
-                          text={`${percent}%`}
-                          styles={{
-                            path: {
-                              stroke: `#fec20e`,
-                              strokeWidth: "10px",
-                              strokeLinecap: "butt",
-                              transition: "stroke-dashoffset 0.5s ease 0s",
-                              transformOrigin: "center center",
-                            },
-                            text: {
-                              fill: "black",
-                              fontSize: "25px",
-                              fontWeight: "800",
-                            },
-                          }}
-                        />
-                      </div>
-                    </div>
-                  </AccordionSummary>
-                  <AccordionDetails>
-                    <div className=" flex flex-row justify-evenly flex-auto mb-2">
-                      <span className="font-semibold w-24" />
-                      <span className="font-semibold w-[140px]">Point</span>
-                      <span className="font-semibold w-[140px] flex self-center justify-center">
-                        Member Issue
-                      </span>
-                      <span className="font-semibold w-[200px]">
-                        Schedule Time
-                      </span>
-                    </div>
-
-                    {item.step?.map((itm, idx) => {
-                      let initialDate = new Date(projectDetails?.date);
-                      const dur = itm.duration ? parseInt(itm.duration) : 0;
-                      // Add duration days
-                      initialDate.setDate(initialDate.getDate() + dur);
-                      // Get the final date
-                      let finalDate = initialDate.toISOString().split("T")[0]; // Format to YYYY-MM-DD
-                      return (
-                        <Accordion
-                          key={idx}
-                          expanded={
-                            expandedDetails === `${itm.content}-${itm.point}`
-                          }
-                          onChange={(e, isExpanded) => {
-                            handleDetailsChange(
-                              `${itm.content}-${itm.point}`,
-                              isExpanded
-                            );
-                            showWorkData(itm.point, itm.content, item.name);
-                          }}
-                        >
-                          <AccordionSummary
-                            expandIcon={<ExpandMoreIcon />}
-                            aria-controls={`panel1bh-${item.name}-item-content`}
-                            id={`panel1bh-${item.name}-item-header`}
-                            sx={{
-                              height: "56px",
-                            }}
-                          >
-                            <div className="flex flex-row justify-evenly w-full">
-                              <div className="relative w-[120px]">
-                                <div className="h-full w-6 flex items-center justify-center">
-                                  <div
-                                    className={cn(
-                                      "w-[2px] bg-green-500 pointer-events-none h-full",
-                                      idx === 0 ? "mt-[100%] h-7" : "",
-                                      idx === item.step.length - 1
-                                        ? "mb-[100%] h-7"
-                                        : "",
-                                      itm.finalStatus[0].status !== "Completed"
-                                        ? "bg-yellow-500"
-                                        : ""
-                                    )}
-                                  />
-                                </div>
-                                <div
-                                  className={cn(
-                                    "w-6 h-6 absolute top-1/2 -mt-3 rounded-full bg-green-500 shadow text-center",
-                                    itm.finalStatus[0].status !== "Completed"
-                                      ? "bg-yellow-500"
-                                      : ""
-                                  )}
-                                >
-                                  {itm.finalStatus[0].status === "Pending" ? (
-                                    <PriorityHigh
-                                      sx={{
-                                        fontSize: "16px",
-                                        color: "red",
-                                      }}
-                                    />
-                                  ) : (
-                                    <Check
-                                      sx={{
-                                        fontSize: "16px",
-                                        color: "white",
-                                      }}
-                                    />
-                                  )}
-                                </div>
-                              </div>
-                              <div className="w-[200px] flex items-center">
-                                <div className="text-sm font-semibold">
-                                  {itm.content}
-                                  {itm.checkList?.toLowerCase() === "yes" && (
-                                    <span
-                                      className="inspection-button mx-3"
-                                      // onClick={() =>
-                                      //   handleOnClickInspection(
-                                      //     itm?.point,
-                                      //     itm?.checkListName,
-                                      //     item?.name
-                                      //   )
-                                      // }
-                                    >
-                                      inspections
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                              <div className="w-[200px] flex self-center justify-center">
-                                {itm.issueMember?.map((mem, id) => {
-                                  return (
-                                    <span
-                                      key={id}
-                                      className="text-sm font-semibold"
-                                    >
-                                      {mem}
-                                    </span>
-                                  );
-                                })}
-                              </div>
-                              <div className="w-[200px]">
-                                <span className="float-start">
-                                  <span className="text-sm font-semibold">
-                                    Date:{" "}
-                                  </span>
-                                  <span className="text-sm">{finalDate}</span>
-                                </span>
-                                <br />
-                                <span className="float-start">
-                                  <span className="text-sm font-semibold">
-                                    Final:{" "}
-                                  </span>
-                                  <span className="text-sm">
-                                    {itm.finalStatus[0].date}{" "}
-                                    {itm.finalStatus[0].date ? (
-                                      new Date(itm.finalStatus[0].date) >
-                                      new Date(finalDate) ? (
-                                        <span className="delay-task">
-                                          {`(-`}
-                                          {(new Date(itm.finalStatus[0].date) -
-                                            new Date(finalDate)) /
-                                            (1000 * 3600 * 24)}
-                                          {` days)`}
-                                        </span>
-                                      ) : (
-                                        <span className="ontime-task">{`(OnTime)`}</span>
-                                      )
-                                    ) : (
-                                      ""
-                                    )}
-                                  </span>
-                                </span>
-                              </div>
-                            </div>
-                          </AccordionSummary>
-                          <AccordionDetails>
-                            <div>
-                              <h5>Details</h5>
-                              <div>
-                                <div>{workDetails[0]?.date}</div>
-                                <div>
-                                  {workDetails[0]?.image?.map(img => (
-                                    <img
-                                      src={img}
-                                      alt={img}
-                                      key={img}
-                                      className="w-80 h-full"
-                                    />
-                                  ))}
-                                </div>
-                                <div>{workDetails[0]?.status}</div>
-                              </div>
-                            </div>
-                          </AccordionDetails>
-                        </Accordion>
-                      );
-                    })}
-                  </AccordionDetails>
-                </Accordion> */
-}

@@ -203,12 +203,20 @@ const Page = () => {
                 </div>
               </div>
             </div>
-            <div>
+            <div className="flex flex-row gap-4">
               <button
-                className="border-2 border-primary cursor-pointer text-primary font-ubuntu text-sm px-3 py-1 rounded-3xl hover:bg-secondary hover:text-primary hover:border-secondary -md:px-4 -md:py-1 -md:text-sm"
+                className="border-2 text-nowrap border-secondary cursor-pointer font-semibold text-sm font-ubuntu px-3 py-2 rounded-3xl bg-secondary text-primary hover:border-secondary -md:px-4 -md:py-1 -md:text-sm"
                 onClick={() => updateForm(userId)}
               >
                 Update
+              </button>
+              <button
+                className="border-2 text-nowrap border-secondary cursor-pointer text-secondary font-semibold text-sm font-ubuntu px-3 py-2 rounded-3xl -md:px-4 -md:py-1 -md:text-sm"
+                onClick={() => {
+                  router.back();
+                }}
+              >
+                Cancel
               </button>
             </div>
           </div>

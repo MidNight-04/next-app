@@ -131,8 +131,8 @@ const ClientProjectView = () => {
   const [activeTab, setActiveTab] = useState("Send Message");
   const userName = useAuthStore(state => state.username);
   const userId = useAuthStore(state => state.userId);
-  // const userType = useAuthStore(state => state.userType);
-  const userType = "ROLE_ADMIN";
+  const userType = useAuthStore(state => state.userType);
+  // const userType = "ROLE_ADMIN";
 
   const toggleShowImage = () => {
     setShowImage(prev => !prev);

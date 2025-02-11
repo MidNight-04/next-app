@@ -65,8 +65,8 @@ const Page = () => {
   const [deleteStatus, setDeleteStatus] = useState("");
   const [name, setName] = useState("");
   const [index, setIndex] = useState("");
-  // const userType = useAuthStore(state => state.userType);
-  const userType = "ROLE_ADMIN";
+  const userType = useAuthStore(state => state.userType);
+  // const userType = "ROLE_ADMIN";
   const router = useRouter();
 
   useEffect(() => {

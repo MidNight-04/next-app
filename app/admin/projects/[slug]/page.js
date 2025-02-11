@@ -1024,7 +1024,6 @@ const ClientProjectView = () => {
                                         : ""
                                     )}
                                   >
-                                    {/* {console.log(itm.point)} */}
                                     {itm.finalStatus[0].status ===
                                       "Pending" && (
                                       <BsClockHistory className="mt-1 ml-1 text-secondary text-2xl " />
@@ -1203,7 +1202,7 @@ const ClientProjectView = () => {
                                                     "ROLE_PROJECT MANAGER" ? (
                                                     <>
                                                       <div
-                                                        className="py-2 px-4 font-semibold bg-secondary text-primary rounded-full flex flex-row items-center justify-center gap-1 text-nowrap"
+                                                        className="py-2 px-4 font-semibold bg-secondary text-primary rounded-full flex flex-row items-center justify-center gap-1 text-nowrap cursor-pointer"
                                                         onClick={() => {
                                                           updateImageStatus({
                                                             _id: "id",
@@ -1211,7 +1210,7 @@ const ClientProjectView = () => {
                                                             content:
                                                               itm.content,
                                                             name: item.name,
-                                                            url: imgObj.image,
+                                                            url: imgObj.url,
                                                           });
                                                         }}
                                                       >

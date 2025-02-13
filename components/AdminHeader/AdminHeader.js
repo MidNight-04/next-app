@@ -62,8 +62,8 @@ const AdminHeader = () => {
           }}
           sx={{
             "& ul": {
-              background: "black",
-              border: "1px solid white  ",
+              // background: "black",
+              border: "1px solid white",
               borderRadius: "4px",
             },
             "& li": {
@@ -71,11 +71,11 @@ const AdminHeader = () => {
             },
           }}
         >
-          <div className="flex flex-col w-full items-center text-center bg-black">
-            <div className="font-semibold text-lg text-yellow-500 px-10 border-b-[1px] pb-2 border-yellow-500">
+          <div className="flex flex-col w-full items-center text-center bg-white">
+            <div className="font-semibold text-lg text-secondary px-10 border-b-[1px] pb-2 border-primary">
               Account
             </div>
-            <MenuItem onClick={handleClose}>
+            {/* <MenuItem onClick={handleClose}>
               <div
                 onClick={() => {
                   // setUrl(path);
@@ -84,9 +84,9 @@ const AdminHeader = () => {
                 className="w-full px-4 py-2 text-gray-300 hover:text-white group transition duration-300"
               >
                 Profile
-                <span className="block max-w-0 group-hover:max-w-full transition-all duration-500 h-0.5 bg-yellow-500" />
+                <span className="block max-w-0 group-hover:max-w-full transition-all duration-500 h-0.5 bg-primary" />
               </div>
-            </MenuItem>
+            </MenuItem> */}
             <MenuItem onClick={handleClose}>
               <div
                 onClick={() => {
@@ -94,10 +94,10 @@ const AdminHeader = () => {
                   router.push("/");
                   toast.success("You have been logged out.");
                 }}
-                className="w-full px-4 py-2 text-gray-300 hover:text-white group transition duration-300"
+                className="w-full px-4 py-2 text-primary hover:text-secondary group transition duration-300"
               >
                 Logout
-                <span className="block max-w-0 group-hover:max-w-full transition-all duration-500 h-0.5 bg-yellow-500" />
+                <span className="block max-w-0 group-hover:max-w-full transition-all duration-500 h-0.5 bg-primary" />
               </div>
             </MenuItem>
           </div>

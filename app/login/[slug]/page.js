@@ -6,6 +6,7 @@ import SigninForm from "../../../components/forms/signinform/SigninForm";
 import OtpForm from "../../../components/forms/otpform/OtpForm";
 import { useAuthStore } from "../../../store/useAuthStore";
 import { redirect } from "next/navigation";
+import Image from "next/image";
 const Header = dynamic(() => import("../../../components/Header"), {
   ssr: false,
 });
@@ -19,6 +20,7 @@ const Page = () => {
   const [showOtp, setShowOtp] = useState(false);
   const type = useAuthStore(state => state.type);
   const isAuth = useAuthStore(state => state.isAuth);
+  const store = useAuthStore(state => state);
 
   if (isAuth) {
     redirect("/admin/projects");
@@ -47,11 +49,25 @@ const Page = () => {
   return (
     <>
       {/* <Header /> */}
-      <div className="bg-gray-100 h-[100vh] p-40 -md:p-8 flex justify-center ">
-        <div className="bg-white p-8 w-[40rem] h-[32rem] rounded-3xl shadow-lg">
-          <div className="flex flex-col w-full flex-auto">
-            <div className="text-primary text-3xl font-semibold mb-12">
-              <h1>Log In</h1>
+      <div className="bg-gray-100 h-screen flex justify-center items-center -md:">
+        <div className="bg-white p-8 w-1/4 -xl:w-2/4 -lg:2/3 -md:w-11/12 h-2/4 rounded-3xl shadow-lg">
+          <div className="flex flex-col w-full flex-auto justify-between h-full">
+            <h1 className="font-ubuntu text-2xl font-semibold text-center text-primary">
+              Welcome to Thikedaar Project Management
+            </h1>
+            <div className="flex flex-col items-center">
+              <div>
+                <Image
+                  src={"/assets/profile-placeholder.png"}
+                  height={100}
+                  width={100}
+                  alt="placeholder"
+                />
+              </div>
+              <h2 className="font-ubuntu text-lg font-semibold">
+                Already a member?
+              </h2>
+              <h3 className="text-lg">Sign in to your account</h3>
             </div>
             {!showOtp ? <SigninForm showOtp={otpHandler} /> : <OtpForm />}
             {!showOtp && (

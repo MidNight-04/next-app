@@ -523,10 +523,10 @@ const ConstructionStepTable = () => {
                 {memberList?.map((data, id) => {
                   return (
                     <FormControlLabel
-                      key={data.role}
-                      value={data.role}
+                      key={data._id}
+                      value={data._id}
                       control={<Checkbox />}
-                      label={data.role}
+                      label={data.name}
                       sx={{
                         "& svg": {
                           fill: "#93bfcf",

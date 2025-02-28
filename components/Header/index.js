@@ -37,6 +37,8 @@ import Link from "next/link";
 import { redirect, usePathname, useRouter } from "next/navigation";
 import { useAuthStore } from "../../store/useAuthStore";
 import { ToastContainer } from "react-toastify";
+import { CgProfile } from "react-icons/cg";
+import { SlLogout } from "react-icons/sl";
 
 const menu = [
   {
@@ -113,7 +115,7 @@ const Header = () => {
   // };
 
   return (
-    <div className="sticky top-0 left-0 z-10 w-full shadow-md bg-black h-16 flex items-center">
+    <header className="sticky top-0 left-0 z-10 w-full shadow-md bg-black h-[74px] flex items-center">
       <ToastContainer
         position="top-right"
         autoClose={2000}
@@ -126,7 +128,7 @@ const Header = () => {
         pauseOnHover
         theme="light"
       />
-      <div className="px-24 grid md:grid-cols-8 grid-flow-row-dense justify-between items-center w-full -xl:px-16 -md:px-12 -xl:flex -sm:px-4">
+      <div className="px-24 grid md:grid-cols-16 grid-flow-row-dense justify-between items-center w-full -xl:px-16 -md:px-12 -xl:flex -sm:px-4">
         {debounceWidth < 1100 && (
           <div
             className="w-auto inline-block cursor-pointer"
@@ -137,9 +139,9 @@ const Header = () => {
         )}
         <div
           onClick={() => router.push("/homepage")}
-          className="group transition duration-300"
+          className="group transition duration-300 col-start-1 col-span-2"
         >
-          <div className="col-span-2 mr-4 -md:col-start-2 -md:col-span-4 -md:w-40 -md:m-0 -xl:text-sm">
+          <div className=" mr-4 -md:col-start-2 -md:col-span-4 -md:w-40 -md:m-0 -xl:text-sm">
             <Image
               src={img2}
               height={32}
@@ -148,6 +150,23 @@ const Header = () => {
               alt="Thikedaar.com"
             />
             <span className="block max-w-0 group-hover:max-w-full transition-all duration-500 h-0.5 bg-yellow-500 -md:ml-2" />
+          </div>
+        </div>
+        <div className="flex col-start-3 col-span-2 p-1 pl-4 w-[305px] h-[46px] rounded-full border-[1px] border-[#EFEFEF] bg-[#f8f8f8] overflow-hidden max-w-md mx-auto text-[#565656]">
+          <input
+            type="text"
+            placeholder="Search"
+            className="w-full outline-none bg-transparent text-sm placeholder:text-[#565656] placeholder:text-base"
+          />
+          <div className="p-[10px] rounded-full border-2 border-[#EFEFEF] flex justify-center">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 192.904 192.904"
+              width="12px"
+              className=" font-bold"
+            >
+              <path d="m190.707 180.101-47.078-47.077c11.702-14.072 18.752-32.142 18.752-51.831C162.381 36.423 125.959 0 81.191 0 36.422 0 0 36.423 0 81.193c0 44.767 36.422 81.187 81.191 81.187 19.688 0 37.759-7.049 51.831-18.751l47.079 47.078a7.474 7.474 0 0 0 5.303 2.197 7.498 7.498 0 0 0 5.303-12.803zM15 81.193C15 44.694 44.693 15 81.191 15c36.497 0 66.189 29.694 66.189 66.193 0 36.496-29.692 66.187-66.189 66.187C44.693 147.38 15 117.689 15 81.193z"></path>
+            </svg>
           </div>
         </div>
         {debounceWidth < 1100 ? (
@@ -224,7 +243,7 @@ const Header = () => {
             </div>
           </Drawer>
         ) : (
-          <div className="flex flex-row col-start-3 col-span-5 justify-between w-100 align-center items-center gap-4">
+          <div className="flex flex-row col-start-7 col-span-5 justify-between w-100 align-center items-center gap-4">
             {menu?.map(m => (
               <div
                 key={m.id}
@@ -298,7 +317,7 @@ const Header = () => {
           ) : null}
         </div> */}
 
-        <div className="col-start-8 items-end flex justify-end">
+        <div className="col-start-12 items-end flex justify-end">
           <>
             <Button
               id="basic-button"
@@ -319,28 +338,29 @@ const Header = () => {
               }}
               sx={{
                 "& ul": {
-                  background: "black",
-                  border: "1px solid white  ",
-                  borderRadius: "4px",
+                  borderRadius: "7px",
                 },
                 "& li": {
                   padding: 0,
                 },
               }}
             >
-              <div className="flex flex-col w-full items-center text-center bg-black">
+              <div className="flex flex-col w-full items-center text-center">
                 {isAuth ? (
                   <>
-                    <div className="font-semibold text-lg text-yellow-500 px-10 border-b-[1px] pb-2 border-yellow-500">
+                    <div className="font-semibold text-lg text-primary px-10 border-b-[1px] pb-2 border-primary">
                       Account
                     </div>
                     <MenuItem onClick={handleClose}>
                       <Link
                         href="/admin/projects"
-                        className="w-full px-4 py-2 text-gray-300 hover:text-white group transition duration-300"
+                        className="w-full px-4 py-2 text-secondary group transition duration-300"
                       >
-                        Profile
-                        <span className="block max-w-0 group-hover:max-w-full transition-all duration-500 h-0.5 bg-yellow-500" />
+                        <span className="flex flex-row gap-2 items-center justify-center">
+                          <CgProfile className="text-2xl" />
+                          Profile
+                        </span>
+                        <span className="block max-w-0 group-hover:max-w-full transition-all duration-500 h-0.5 bg-primary" />
                       </Link>
                     </MenuItem>
                     <MenuItem onClick={handleClose}>
@@ -350,10 +370,13 @@ const Header = () => {
                           toast.success("You have been logged out.");
                           redirect("/homepage");
                         }}
-                        className="w-full px-4 py-2 text-gray-300 hover:text-white group transition duration-300"
+                        className="w-full px-4 py-2 text-secondary group transition duration-300"
                       >
-                        Logout
-                        <span className="block max-w-0 group-hover:max-w-full transition-all duration-500 h-0.5 bg-yellow-500" />
+                        <span className="flex flex-row gap-3 items-center justify-center">
+                          <SlLogout className="text-xl" />
+                          Logout
+                        </span>
+                        <span className="block max-w-0 group-hover:max-w-full transition-all duration-500 h-0.5 bg-primary" />
                       </div>
                     </MenuItem>
                   </>
@@ -396,7 +419,7 @@ const Header = () => {
           </>
         </div>
       </div>
-    </div>
+    </header>
   );
 };
 

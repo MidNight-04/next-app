@@ -4,6 +4,7 @@ import AsideContainer from "../../../../components/AsideContainer";
 import React, { useState } from "react";
 import { FaMinus, FaPlus } from "react-icons/fa6";
 import { toast } from "react-toastify";
+import { IoIosArrowBack } from "react-icons/io";
 import "react-toastify/dist/ReactToastify.css";
 import { useRouter } from "next/navigation";
 
@@ -97,113 +98,123 @@ const AddProjectCheckList = () => {
   };
   return (
     <AsideContainer>
-      <div className="single">
+      <div>
+        <div className="flex flex-row gap-2 items-center my-5">
+          <IoIosArrowBack
+            className="text-2xl cursor-pointer transition duration-300 hover:scale-150 ease-in-out"
+            onClick={() => router.back()}
+          />
+          <h1 className="text-2xl font-semibold font-ubuntu -md:mb-2 -md:text-lg">
+            Add CheckList
+          </h1>
+        </div>
         {/* <AdminSidebar /> */}
-        <div className="singleContainer">
+        <div className="bg-white rounded-[15px] p-5 mb-5">
           {/* <AdminNavbar /> */}
-          <div className="adminNewUser">
-            <div className="newContainer">
-              <div className="topContainer">
-                <h1>Add CheckList</h1>
+          <div className="bottomRightContainer mx-5">
+            <div className="form">
+              <div className="flex flex-col gap-2 [&_label]:font-semibold">
+                <label>CheckList Name</label>
+                <input
+                  value={name}
+                  type="text"
+                  placeholder="Enter checklist name ..."
+                  name="name"
+                  onChange={e => setName(e.target.value)}
+                  className="h-[54px] border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100"
+                />
               </div>
-              <div className="bottomContainer">
-                <div className="bottomRightContainer mx-5">
-                  <div className="form">
-                    <div className="formInputContainer w-100 m-0">
-                      <label>
-                        CheckList Name<span className="text-danger">*</span>
-                      </label>
-                      <input
-                        value={name}
-                        type="text"
-                        placeholder="Enter checklist name ..."
-                        name="name"
-                        onChange={e => setName(e.target.value)}
-                      />
-                    </div>
-                    {checklistItems.map((item, index) => (
-                      <div className="name-container w-100" key={index}>
-                        <div className="formInputContainer w-100">
-                          <label className="checklistLabel">
-                            <span>
-                              CheckList Step
-                              <span className="text-danger">*</span>
-                            </span>
-                            {index === checklistItems.length - 1 && (
-                              <span onClick={handleAddChecklistItem}>
-                                <FaPlus className="fs-5 fw-bold text-success mx-2" />
-                              </span>
-                            )}
-                            {index !== 0 && (
+              {checklistItems.map((item, index) => (
+                <div className="name-container w-100" key={index}>
+                  <div className="flex flex-col gap-2 [&_label]:font-semibold">
+                    <label className="flex flex-row justify-between items-center mt-2">
+                      <span>Checklist Step</span>
+                      <span className="flex flex-row gap-2">
+                        {index === checklistItems.length - 1 && (
+                          <span
+                            onClick={handleAddChecklistItem}
+                            className="p-2 bg-primary-foreground border border-primary rounded-full cursor-pointer [&_svg]:text-primary"
+                          >
+                            <FaPlus />
+                          </span>
+                        )}
+                        {index !== 0 && (
+                          <span
+                            className="p-2 bg-primary-foreground border border-primary rounded-full cursor-pointer [&_svg]:text-primary"
+                            onClick={() => handleRemoveChecklistItem(index)}
+                          >
+                            <FaMinus />
+                          </span>
+                        )}
+                      </span>
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Enter checklist step ..."
+                      name="heading"
+                      value={item.heading}
+                      onChange={e => {
+                        const newItems = [...checklistItems];
+                        newItems[index].heading = e.target.value;
+                        setChecklistItems(newItems);
+                      }}
+                      className="h-[54px] border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100"
+                    />
+                  </div>
+                  {item?.points?.map((itm, idx) => {
+                    return (
+                      <div
+                        className="flex flex-col gap-2 [&_label]:font-semibold"
+                        key={idx}
+                      >
+                        <label className="flex flex-row justify-between items-center mt-2">
+                          <span>CheckList Point</span>
+                          <span className="flex flex-row gap-2">
+                            {idx === item.points?.length - 1 && (
                               <span
-                                onClick={() => handleRemoveChecklistItem(index)}
+                                className="p-2 bg-primary-foreground border border-primary rounded-full cursor-pointer [&_svg]:text-primary"
+                                onClick={() => handleAddChecklistPoint(index)}
                               >
-                                <FaMinus className="fs-5 fw-bold text-danger mx-2" />
+                                <FaPlus />
                               </span>
                             )}
-                          </label>
-                          <input
-                            type="text"
-                            placeholder="Enter checklist step ..."
-                            name="heading"
-                            value={item.heading}
-                            onChange={e => {
-                              const newItems = [...checklistItems];
-                              newItems[index].heading = e.target.value;
-                              setChecklistItems(newItems);
-                            }}
-                          />
-                        </div>
-                        {item?.points?.map((itm, idx) => {
-                          return (
-                            <div className="formInputContainer w-100" key={idx}>
-                              <label className="checklistLabel">
-                                <span>
-                                  CheckList Point
-                                  <span className="text-danger">*</span>
-                                </span>
-                                {idx === item.points?.length - 1 && (
-                                  <span
-                                    onClick={() =>
-                                      handleAddChecklistPoint(index)
-                                    }
-                                  >
-                                    <FaPlus className="fs-5 fw-bold text-success mx-2" />
-                                  </span>
-                                )}
-                                {idx !== 0 && (
-                                  <span
-                                    onClick={() =>
-                                      handleRemoveChecklistPoint(index, idx)
-                                    }
-                                  >
-                                    <FaMinus className="fs-5 fw-bold text-danger mx-2" />
-                                  </span>
-                                )}
-                              </label>
-                              <input
-                                type="text"
-                                placeholder="Enter checklist point ..."
-                                name="point"
-                                value={itm.point}
-                                onChange={e => {
-                                  const newItems = [...checklistItems];
-                                  newItems[index].points[idx].point =
-                                    e.target.value;
-                                  setChecklistItems(newItems);
-                                }}
-                              />
-                            </div>
-                          );
-                        })}
+                            {idx !== 0 && (
+                              <span
+                                className="p-2 bg-primary-foreground border border-primary rounded-full cursor-pointer [&_svg]:text-primary"
+                                onClick={() =>
+                                  handleRemoveChecklistPoint(index, idx)
+                                }
+                              >
+                                <FaMinus />
+                              </span>
+                            )}
+                          </span>
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="Enter checklist point ..."
+                          name="point"
+                          value={itm.point}
+                          onChange={e => {
+                            const newItems = [...checklistItems];
+                            newItems[index].points[idx].point = e.target.value;
+                            setChecklistItems(newItems);
+                          }}
+                          className="h-[54px] border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100"
+                        />
                       </div>
-                    ))}
-                  </div>
-                  <div className="createUserSubmitBTN" onClick={submitFormData}>
-                    Submit
-                  </div>
+                    );
+                  })}
                 </div>
-              </div>
+              ))}
+            </div>
+            <div className="flex flex-row justify-end">
+              <button
+                className="px-4 py-2 border border-secondary bg-secondary text-primary rounded-3xl cursor-pointer mt-4"
+                onClick={submitFormData}
+              >
+                Submit
+              </button>
             </div>
           </div>
         </div>

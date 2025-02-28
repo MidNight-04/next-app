@@ -600,7 +600,6 @@ const Page = () => {
             <h5 className="text-xl font-semibold">
               {detailsData?.data[0]?.name}
             </h5>
-
             <div className="text-[#878787] flex flex-row items-center gap-2 font-semibold">
               {!productRatingIsLoading &&
               productRatingData?.data?.length > 0 ? (
@@ -610,6 +609,16 @@ const Page = () => {
                       (acc, curr) => acc + +curr.rating,
                       0
                     ) / productRatingData.data.length
+                  )}
+                  {console.log(
+                    Array.from({
+                      length: Math.floor(
+                        productRatingData.data.reduce(
+                          (acc, curr) => acc + +curr.rating,
+                          0
+                        ) / productRatingData.data.length
+                      ),
+                    }).length
                   )}
                   <StarIcon
                     className="mb-1 ml-[2px] text-light"
@@ -658,9 +667,9 @@ const Page = () => {
             </div>
             <br />
             <div className="">
-              <h6 className="text-lg font-semibold my-2 leading-none">
+              {/* <h6 className="text-lg font-semibold my-2 leading-none">
                 Specifications -
-              </h6>
+              </h6> */}
 
               <span>
                 {detailsData?.data[0]?.descriptionOne
@@ -720,7 +729,10 @@ const Page = () => {
               </div>
             </div>
             <h5 className="font-semibold text-xl mb-2">Product Description</h5>
-            <TableContainer component={Paper}>
+            <TableContainer
+              component={Box}
+              sx={{ border: "1px solid #efefef", borderRadius: "7px" }}
+            >
               <Table>
                 <TableBody>
                   <TableRow>
@@ -741,7 +753,7 @@ const Page = () => {
                       )
                     </TableCell>
                   </TableRow>
-                  <TableRow>
+                  <TableRow sx={{ backgroundColor: "#eee9da" }}>
                     <TableCell variant="head">Category</TableCell>
                     <TableCell>{detailsData?.data[0]?.category}</TableCell>
                   </TableRow>
@@ -754,7 +766,7 @@ const Page = () => {
                         : ""}
                     </TableCell>
                   </TableRow>
-                  <TableRow>
+                  <TableRow sx={{ backgroundColor: "#eee9da" }}>
                     <TableCell variant="head">Price</TableCell>
                     <TableCell>
                       {/* <FaRupeeSign /> */}
@@ -768,7 +780,7 @@ const Page = () => {
                     <TableCell variant="head">Minimum Quantity</TableCell>
                     <TableCell>{`${detailsData?.data[0]?.minQuantity} ${detailsData?.data[0]?.unit}`}</TableCell>
                   </TableRow>
-                  <TableRow>
+                  <TableRow sx={{ backgroundColor: "#eee9da" }}>
                     <TableCell variant="head">Maximum Quantity</TableCell>
                     <TableCell>{`${detailsData?.data[0]?.maxQuantity} ${detailsData?.data[0]?.unit}`}</TableCell>
                   </TableRow>
@@ -788,6 +800,10 @@ const Page = () => {
                   size="small"
                   min="0"
                   sx={{
+                    "& .MuiFormControl-root": {
+                      outline: "1px solid #efefef",
+                    },
+                    "& .MuiInputBase-input": { background: "#fafafa" },
                     "width": "50%",
                     "& input[type=number]": {
                       WebkitAppearance: "none",
@@ -816,6 +832,10 @@ const Page = () => {
                   value={price}
                   disabled
                   sx={{
+                    "& .MuiFormControl-root": {
+                      outline: "1px solid #efefef",
+                    },
+                    "& .MuiInputBase-input": { background: "#fafafa" },
                     "width": "50%",
                     "appearance": "textfield",
                     "& input::-webkit-outer-spin-button": {

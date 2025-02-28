@@ -78,7 +78,7 @@ const AddMemberForm = () => {
             toast.success(response.data.message, {
               position: "top-right",
             });
-            redirect("/admin/teammembers");
+            router.back();
           }
         })
         .catch(error => {
@@ -159,7 +159,7 @@ const AddMemberForm = () => {
               <MenuItem value="">Select Role</MenuItem>
               {roleList?.map((item, index) => {
                 return (
-                  <MenuItem key={index} value={item?.name}>
+                  <MenuItem key={index} value={item?._id}>
                     {item?.name}
                   </MenuItem>
                 );

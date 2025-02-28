@@ -4,7 +4,16 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import { IoIosArrowBack } from "react-icons/io";
 import { useAuthStore } from "../../../../store/useAuthStore";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../../../components/ui/select";
+import { Checkbox } from "../../../../components/ui/checkbox";
 
 const AddProjectForm = () => {
   const router = useRouter();
@@ -21,14 +30,15 @@ const AddProjectForm = () => {
     amount: "",
     date: "",
     duration: "",
-    manager: [],
-    accountant: [],
-    engineer: [],
-    sr_engineer: [],
-    contractor: [],
-    operation: [],
-    admin: [],
-    sales: [],
+    admin: "",
+    manager: "",
+    architect: "",
+    sr_engineer: "",
+    engineer: "",
+    accountant: "",
+    operation: "",
+    sales: "",
+    contractor: "",
   });
   const [floorList, setFloorList] = useState([]);
   const [memberList, setMemberList] = useState([]);
@@ -54,7 +64,7 @@ const AddProjectForm = () => {
       .get(`${process.env.REACT_APP_BASE_PATH}/api/teammember/getall`)
       .then(response => {
         if (response) {
-          //   console.log(response.data.data);
+          // console.log(response.data.data);
           setMemberList(response.data.data);
         }
       })
@@ -103,7 +113,7 @@ const AddProjectForm = () => {
   // console.log(stages);
   // console.log(data);
   const handleFormData = e => {
-    console.log(e.target.value);
+    // console.log(e.target.value);
     const { name, value, type, checked } = e.target;
 
     if (type === "checkbox") {
@@ -200,12 +210,11 @@ const AddProjectForm = () => {
       //     position: "top-right",
       //   });
     } else {
-      // console.log(data);
       const uploadData = {
         name: data.name,
         siteID: data.siteID,
         location: data.location,
-        client: { name: data.client.split("-")[0], id: clientId },
+        client: data.client,
         plan: data.plan,
         floor: data.floor,
         area: data.area,
@@ -214,6 +223,7 @@ const AddProjectForm = () => {
         duration: data.duration,
         manager: data.manager,
         accountant: data.accountant,
+        architect: data.architect,
         sr_engineer: data.sr_engineer,
         engineer: data.engineer,
         contractor: data.contractor,
@@ -267,9 +277,13 @@ const AddProjectForm = () => {
   };
   return (
     <AsideContainer>
-      <div className="newContainer">
-        <div className="topContainer">
-          <h1 className="font-ubuntu font-bold text-[25px] leading-7 my-4">
+      <div className="mt-5">
+        <div className="flex flex-row gap-2 items-center">
+          <IoIosArrowBack
+            className="text-2xl cursor-pointer transition duration-300 hover:scale-150 ease-in-out"
+            onClick={() => router.back()}
+          />
+          <h1 className="text-2xl font-semibold font-ubuntu -md:mb-2 -md:text-lg">
             Add Project
           </h1>
         </div>
@@ -277,160 +291,140 @@ const AddProjectForm = () => {
           className="text-center"
           style={{ color: "rgb(255, 119, 0)", wordSpacing: "2px" }}
         >
-          <span className="text-danger">*</span>
           Create Process and Checklist point before Project creation
-          <span className="text-danger">*</span>
         </p>
-        <div className="bg-white rounded-[15px] p-5">
+        <div className="bg-white rounded-[15px] p-5 mb-5">
           <div className="col-lg-12">
-            <div className="bottomContainer">
-              <div
-                className="bottomRightContainer"
-                style={{ marginLeft: "0px" }}
-              >
-                <div className="form">
-                  <div className="row">
-                    <div className="formInputContainer w-50 col-lg-6">
-                      <label>
-                        Project Name<span className="text-danger">*</span>
-                      </label>
+            <div>
+              <div style={{ marginLeft: "0px" }}>
+                <div>
+                  <div className="grid grid-cols-2 gap-4 gap-x-8">
+                    <div className="flex flex-col gap-2 [&_label]:font-semibold">
+                      <label>Project Name</label>
                       <input
                         value={data.name}
                         type="text"
                         placeholder="Enter Name"
                         name="name"
                         onChange={e => handleFormData(e)}
+                        className="h-[54px] border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100 font-semibold"
                       />
                     </div>
-                    <div className="formInputContainer w-50 col-lg-6">
-                      <label>
-                        Site ID<span className="text-danger">*</span>
-                      </label>
+                    <div className="flex flex-col gap-2 [&_label]:font-semibold">
+                      <label>Site ID</label>
                       <input
                         value={data.siteID}
                         type="text"
                         placeholder="Enter SiteID"
                         name="siteID"
                         onChange={e => handleFormData(e)}
+                        className="h-[54px] border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100 font-semibold"
                       />
                     </div>
-                    <div className="formInputContainer w-50 col-lg-6">
-                      <label>
-                        Project Location
-                        <span className="text-danger">*</span>
-                      </label>
+                    <div className="flex flex-col gap-2 [&_label]:font-semibold">
+                      <label>Project Location</label>
                       <input
                         value={data.location}
                         type="text"
                         placeholder="Enter project location"
                         name="location"
                         onChange={e => handleFormData(e)}
+                        className="h-[54px] border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100 font-semibold"
                       />
                     </div>
-                    <div className="formInputContainer w-50 col-lg-6">
-                      <label htmlFor="client">
-                        Client<span className="text-danger">*</span>
-                      </label>
-                      <select
-                        style={{ width: "100%", height: "30px" }}
-                        className="mt-2"
-                        name="client"
-                        value={data.client}
-                        onChange={e => handleFormData(e)}
+                    <div className="flex flex-col gap-2 [&_label]:font-semibold">
+                      <label htmlFor="client">Client</label>
+                      <Select
+                        onValueChange={value =>
+                          setData({ ...data, client: value })
+                        }
                       >
-                        <option value="">Select</option>
-                        {clientList?.map((item, index) => {
-                          return (
-                            <option
-                              key={index}
-                              value={`${item.name}-${item?._id}`}
-                            >
+                        <SelectTrigger className="w-full border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100 h-[54px]">
+                          <SelectValue placeholder="Select" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {clientList?.map((item, index) => {
+                            return (
+                              <SelectItem key={index} value={item?._id}>
+                                {item?.name}
+                              </SelectItem>
+                            );
+                          })}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="flex flex-col gap-2 [&_label]:font-semibold">
+                      <label htmlFor="role">Number of Floor</label>
+                      <Select
+                        onValueChange={value =>
+                          setData({ ...data, floor: value })
+                        }
+                      >
+                        <SelectTrigger className="w-full border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100 h-[54px]">
+                          <SelectValue placeholder="Select" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {floorList?.map((item, index) => (
+                            <SelectItem key={index} value={index}>
                               {item?.name}
-                            </option>
-                          );
-                        })}
-                      </select>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
-                    <div className="formInputContainer w-50 col-lg-6">
-                      <label htmlFor="role">
-                        Number of Floor
-                        <span className="text-danger">*</span>
-                      </label>
-                      <select
-                        style={{ width: "100%", height: "30px" }}
-                        className="mt-2"
-                        name="floor"
-                        value={data.floor}
-                        onChange={e => handleFormData(e)}
+                    <div className="flex flex-col gap-2 [&_label]:font-semibold">
+                      <label htmlFor="role">Select Floor Plan</label>
+                      <Select
+                        onValueChange={value =>
+                          setData({ ...data, plan: value })
+                        }
                       >
-                        <option value="">Select</option>
-                        {floorList?.map((item, index) => (
-                          <option key={index} value={index}>
-                            {item?.name}
-                          </option>
-                        ))}
-                      </select>
+                        <SelectTrigger className="w-full border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100 h-[54px]">
+                          <SelectValue placeholder="Select" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {stages?.map((item, index) => (
+                            <SelectItem key={index} value={item._id}>
+                              {item?.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
-                    <div className="formInputContainer w-50 col-lg-6">
-                      <label htmlFor="role">
-                        Select Floor Plan
-                        <span className="text-danger">*</span>
-                      </label>
-                      <select
-                        style={{ width: "100%", height: "30px" }}
-                        className="mt-2"
-                        name="plan"
-                        value={data.plan}
-                        onChange={e => handleFormData(e)}
-                      >
-                        <option value="">Select</option>
-                        {stages?.map((item, index) => (
-                          <option key={index} value={item._id}>
-                            {item?.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="formInputContainer w-50 col-lg-6">
-                      <label>
-                        Project Area<span className="text-danger">*</span>
-                      </label>
+                    <div className="flex flex-col gap-2 [&_label]:font-semibold">
+                      <label>Project Area</label>
                       <input
                         value={data.area}
                         type="text"
                         placeholder="Enter project area"
                         name="area"
                         onChange={e => handleFormData(e)}
+                        className="h-[54px] border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100 font-semibold"
                       />
                     </div>
-                    <div className="formInputContainer w-50 col-lg-6">
-                      <label>
-                        Project Cost<span className="text-danger">*</span>
-                      </label>
+                    <div className="flex flex-col gap-2 [&_label]:font-semibold">
+                      <label>Project Cost</label>
                       <input
                         value={data.cost}
                         type="number"
                         placeholder="Enter project cost"
                         name="cost"
                         onChange={e => handleFormData(e)}
+                        className="h-[54px] border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100 font-semibold"
                       />
                     </div>
-                    <div className="formInputContainer w-50 col-lg-6">
-                      <label>
-                        Start Date<span className="text-danger">*</span>
-                      </label>
+                    <div className="flex flex-col gap-2 [&_label]:font-semibold">
+                      <label>Start Date</label>
                       <input
                         value={data.date}
                         type="date"
                         name="date"
                         onChange={e => handleFormData(e)}
+                        className="h-[54px] border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100 font-semibold"
                       />
                     </div>
-                    <div className="formInputContainer w-100 col-lg-12">
-                      <label>
-                        Duration(In months)
-                        <span className="text-danger">*</span>
-                      </label>
+                    <div className="flex flex-col gap-2 [&_label]:font-semibold">
+                      <label>Duration(In months)</label>
                       <input
                         value={data.duration}
                         type="number"
@@ -438,245 +432,254 @@ const AddProjectForm = () => {
                         min={1}
                         placeholder="Enter Construction duration"
                         onChange={e => handleFormData(e)}
+                        className="h-[54px] border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100 font-semibold"
                       />
                     </div>
                     {/* <div className="formInputContainer col-lg-6">
                       <label htmlFor="role">
-                        Flow Structure<span className="text-danger">*</span>
+                        Flow Structure
                       </label>
                       
                     </div> */}
-                    <div className="formInputContainer w-100 col-lg-12">
-                      <label htmlFor="role">
-                        Project Admin<span className="text-danger">*</span>
-                      </label>
-                      <div className="row">
-                        {memberList
-                          ?.filter(
-                            itm => itm.role?.toLowerCase() === "project admin"
-                          )
-                          ?.map((item, index) => {
-                            return (
-                              <div
-                                className="col-lg-3 form-group d-flex"
-                                key={index}
-                              >
-                                <input
-                                  type="checkbox"
-                                  name="admin"
-                                  value={`${item.name},${item.employeeID}`}
-                                  onChange={e => handleFormData(e)}
-                                  className="m-1"
-                                  style={{ width: "auto" }}
-                                />
-                                <span className="member">{item.name}</span>
-                              </div>
-                            );
-                          })}
+                    <div className="flex flex-col gap-2 [&_label]:font-semibold">
+                      <label htmlFor="role">Project Admin</label>
+                      <div>
+                        <Select
+                          onValueChange={value =>
+                            setData({ ...data, admin: value })
+                          }
+                        >
+                          <SelectTrigger className="w-full border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100 h-[54px]">
+                            <SelectValue placeholder="Select" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {memberList
+                              ?.filter(
+                                itm => itm.role?.name.toLowerCase() === "admin"
+                              )
+                              ?.map((item, index) => (
+                                <SelectItem key={index} value={item._id}>
+                                  {item?.name} ({item.employeeID})
+                                </SelectItem>
+                              ))}
+                          </SelectContent>
+                        </Select>
                       </div>
                     </div>
-                    <div className="formInputContainer w-100 col-lg-12">
-                      <label htmlFor="role">
-                        Project Manager
-                        <span className="text-danger">*</span>
-                      </label>
-                      <div className="row">
-                        {memberList
-                          ?.filter(
-                            itm => itm.role?.toLowerCase() === "project manager"
-                          )
-                          .map((item, index) => {
-                            return (
-                              <div
-                                className="col-lg-3 form-group d-flex"
-                                key={index}
-                              >
-                                <input
-                                  type="checkbox"
-                                  name="manager"
-                                  value={`${item.name},${item.employeeID}`}
-                                  onChange={e => handleFormData(e)}
-                                  className="m-1"
-                                  style={{ width: "auto" }}
-                                />
-                                <span className="member">{item.name}</span>
-                              </div>
-                            );
-                          })}
+                    <div className="flex flex-col gap-2 [&_label]:font-semibold">
+                      <label htmlFor="role">Project Manager</label>
+                      <div>
+                        <Select
+                          onValueChange={value =>
+                            setData({ ...data, manager: value })
+                          }
+                        >
+                          <SelectTrigger className="w-full border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100 h-[54px]">
+                            <SelectValue placeholder="Select" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {memberList
+                              ?.filter(
+                                itm =>
+                                  itm.role?.name.toLowerCase() === "manager"
+                              )
+                              ?.map((item, index) => (
+                                <SelectItem key={index} value={item._id}>
+                                  {item?.name} ({item.employeeID})
+                                </SelectItem>
+                              ))}
+                          </SelectContent>
+                        </Select>
                       </div>
                     </div>
-                    <div className="formInputContainer w-100 col-lg-12">
-                      <label htmlFor="role">
-                        Sr. Engineer<span className="text-danger">*</span>
-                      </label>
-                      <div className="row">
-                        {memberList
-                          ?.filter(
-                            itm => itm.role?.toLowerCase() === "sr. engineer"
-                          )
-                          ?.map((item, index) => {
-                            return (
-                              <div
-                                className="col-lg-3 form-group d-flex"
-                                key={index}
-                              >
-                                <input
-                                  type="checkbox"
-                                  name="sr_engineer"
-                                  value={`${item.name},${item.employeeID}`}
-                                  onChange={e => handleFormData(e)}
-                                  className="m-1"
-                                  style={{ width: "auto" }}
-                                />
-                                <span className="member">{item.name}</span>
-                              </div>
-                            );
-                          })}
+                    <div className="flex flex-col gap-2 [&_label]:font-semibold">
+                      <label htmlFor="role">Architect</label>
+                      <div>
+                        <Select
+                          onValueChange={value =>
+                            setData({ ...data, architect: value })
+                          }
+                        >
+                          <SelectTrigger className="w-full border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100 h-[54px]">
+                            <SelectValue placeholder="Select" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {memberList
+                              ?.filter(
+                                itm =>
+                                  itm.role?.name.toLowerCase() === "architect"
+                              )
+                              ?.map((item, index) => (
+                                <SelectItem key={index} value={item._id}>
+                                  {item?.name} ({item.employeeID})
+                                </SelectItem>
+                              ))}
+                          </SelectContent>
+                        </Select>
                       </div>
                     </div>
-                    <div className="formInputContainer w-100 col-lg-12">
-                      <label htmlFor="role">
-                        Site Engineer<span className="text-danger">*</span>
-                      </label>
-                      <div className="row">
-                        {memberList
-                          ?.filter(
-                            itm => itm.role?.toLowerCase() === "site engineer"
-                          )
-                          ?.map((item, index) => {
-                            return (
-                              <div
-                                className="col-lg-3 form-group d-flex"
-                                key={index}
-                              >
-                                <input
-                                  type="checkbox"
-                                  name="engineer"
-                                  value={`${item.name},${item.employeeID}`}
-                                  onChange={e => handleFormData(e)}
-                                  className="m-1"
-                                  style={{ width: "auto" }}
-                                />
-                                <span className="member">{item.name}</span>
-                              </div>
-                            );
-                          })}
+                    <div className="flex flex-col gap-2 [&_label]:font-semibold">
+                      <label htmlFor="role">Sr. Engineer</label>
+                      <div>
+                        <Select
+                          onValueChange={value =>
+                            setData({ ...data, sr_engineer: value })
+                          }
+                        >
+                          <SelectTrigger className="w-full border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100 h-[54px]">
+                            <SelectValue placeholder="Select" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {memberList
+                              ?.filter(
+                                itm =>
+                                  itm.role?.name.toLowerCase() ===
+                                  "sr. engineer"
+                              )
+                              ?.map((item, index) => (
+                                <SelectItem key={index} value={item._id}>
+                                  {item?.name} ({item.employeeID})
+                                </SelectItem>
+                              ))}
+                          </SelectContent>
+                        </Select>
                       </div>
                     </div>
-                    <div className="formInputContainer w-100 col-lg-12">
-                      <label htmlFor="role">
-                        Accountant<span className="text-danger">*</span>
-                      </label>
-                      <div className="row">
-                        {memberList
-                          ?.filter(
-                            itm => itm.role?.toLowerCase() === "accountant"
-                          )
-                          ?.map((item, index) => {
-                            return (
-                              <div
-                                className="col-lg-3 form-group d-flex"
-                                key={index}
-                              >
-                                <input
-                                  type="checkbox"
-                                  name="accountant"
-                                  value={`${item.name},${item.employeeID}`}
-                                  onChange={e => handleFormData(e)}
-                                  className="m-1"
-                                  style={{ width: "auto" }}
-                                />
-                                <span className="member">{item.name}</span>
-                              </div>
-                            );
-                          })}
+                    <div className="flex flex-col gap-2 [&_label]:font-semibold">
+                      <label htmlFor="role">Site Engineer</label>
+                      <div>
+                        <Select
+                          onValueChange={value =>
+                            setData({ ...data, engineer: value })
+                          }
+                        >
+                          <SelectTrigger className="w-full border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100 h-[54px]">
+                            <SelectValue placeholder="Select" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {memberList
+                              ?.filter(
+                                itm =>
+                                  itm.role?.name.toLowerCase() ===
+                                  "site engineer"
+                              )
+                              ?.map((item, index) => (
+                                <SelectItem key={index} value={item._id}>
+                                  {item?.name} ({item.employeeID})
+                                </SelectItem>
+                              ))}
+                          </SelectContent>
+                        </Select>
                       </div>
                     </div>
-                    <div className="formInputContainer w-100 col-lg-12">
-                      <label htmlFor="role">
-                        Operation<span className="text-danger">*</span>
-                      </label>
-                      <div className="row">
-                        {memberList
-                          ?.filter(
-                            itm => itm.role?.toLowerCase() === "operation"
-                          )
-                          ?.map((item, index) => {
-                            return (
-                              <div
-                                className="col-lg-3 form-group d-flex"
-                                key={index}
-                              >
-                                <input
-                                  type="checkbox"
-                                  name="operation"
-                                  value={`${item.name},${item.employeeID}`}
-                                  onChange={e => handleFormData(e)}
-                                  className="m-1"
-                                  style={{ width: "auto" }}
-                                />
-                                <span className="member">{item.name}</span>
-                              </div>
-                            );
-                          })}
+                    <div className="flex flex-col gap-2 [&_label]:font-semibold">
+                      <label htmlFor="role">Accountant</label>
+                      <div>
+                        <Select
+                          onValueChange={value =>
+                            setData({ ...data, accountant: value })
+                          }
+                        >
+                          <SelectTrigger className="w-full border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100 h-[54px]">
+                            <SelectValue placeholder="Select" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {memberList
+                              ?.filter(
+                                itm =>
+                                  itm.role?.name.toLowerCase() === "accountant"
+                              )
+                              ?.map((item, index) => (
+                                <SelectItem key={index} value={item._id}>
+                                  {item?.name} ({item.employeeID})
+                                </SelectItem>
+                              ))}
+                          </SelectContent>
+                        </Select>
                       </div>
                     </div>
-                    <div className="formInputContainer w-100 col-lg-12">
-                      <label htmlFor="role">
-                        Sales<span className="text-danger">*</span>
-                      </label>
-                      <div className="row">
-                        {memberList
-                          ?.filter(itm => itm.role?.toLowerCase() === "sales")
-                          ?.map((item, index) => {
-                            return (
-                              <div
-                                className="col-lg-3 form-group d-flex"
-                                key={index}
-                              >
-                                <input
-                                  type="checkbox"
-                                  name="sales"
-                                  value={`${item.name},${item.employeeID}`}
-                                  onChange={e => handleFormData(e)}
-                                  className="m-1"
-                                  style={{ width: "auto" }}
-                                />
-                                <span className="member">{item.name}</span>
-                              </div>
-                            );
-                          })}
+                    <div className="flex flex-col gap-2 [&_label]:font-semibold">
+                      <label htmlFor="role">Operation</label>
+                      <div>
+                        <Select
+                          onValueChange={value =>
+                            setData({ ...data, operation: value })
+                          }
+                        >
+                          <SelectTrigger className="w-full border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100 h-[54px]">
+                            <SelectValue placeholder="Select" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {memberList
+                              ?.filter(
+                                itm =>
+                                  itm.role?.name.toLowerCase() === "operations"
+                              )
+                              ?.map((item, index) => (
+                                <SelectItem key={index} value={item._id}>
+                                  {item?.name} ({item.employeeID})
+                                </SelectItem>
+                              ))}
+                          </SelectContent>
+                        </Select>
                       </div>
                     </div>
-                    <div className="formInputContainer w-100 col-lg-12">
-                      <label htmlFor="role">
-                        Contractor<span className="text-danger">*</span>
-                      </label>
-                      <div className="row">
-                        {contractorList?.map((item, index) => {
-                          return (
-                            <div
-                              className="col-lg-3 form-group d-flex"
-                              key={index}
-                            >
-                              <input
-                                type="checkbox"
-                                name="contractor"
-                                value={`${item.name},${item.id}`}
-                                onChange={e => handleFormData(e)}
-                                className="m-1"
-                                style={{ width: "auto" }}
-                              />
-                              <span className="member">{item.name}</span>
-                            </div>
-                          );
-                        })}
+                    <div className="flex flex-col gap-2 [&_label]:font-semibold">
+                      <label htmlFor="role">Sales</label>
+                      <div>
+                        <Select
+                          onValueChange={value =>
+                            setData({ ...data, sales: value })
+                          }
+                        >
+                          <SelectTrigger className="w-full border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100 h-[54px]">
+                            <SelectValue placeholder="Select" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {memberList
+                              ?.filter(
+                                itm => itm.role?.name.toLowerCase() === "sales"
+                              )
+                              ?.map((item, index) => (
+                                <SelectItem key={index} value={item._id}>
+                                  {item?.name} ({item.employeeID})
+                                </SelectItem>
+                              ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-2 [&_label]:font-semibold">
+                      <label htmlFor="role">Contractor</label>
+                      <div>
+                        <Select
+                          onValueChange={value =>
+                            setData({ ...data, contractor: value })
+                          }
+                        >
+                          <SelectTrigger className="w-full border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100 h-[54px]">
+                            <SelectValue placeholder="Select" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {contractorList?.map((item, index) => (
+                              <SelectItem key={index} value={item._id}>
+                                {item?.name} ({item?.companyNameShopName})
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
                     </div>
                   </div>
+                  <div className="flex flex-col gap-4 mt-4"></div>
                 </div>
-                <div className="createUserSubmitBTN" onClick={submitFormData}>
-                  Submit
+                <div className="flex flex-row justify-end">
+                  <button
+                    className="px-4 py-2 border border-secondary bg-secondary text-primary rounded-3xl cursor-pointer mt-4"
+                    onClick={submitFormData}
+                  >
+                    Submit
+                  </button>
                 </div>
               </div>
             </div>

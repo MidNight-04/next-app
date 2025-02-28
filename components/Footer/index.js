@@ -2,6 +2,7 @@
 import Link from "next/link";
 import SocialIcons from "../SocialIcons";
 import imageUrl from "../../constant/imageUrl";
+import Image from "next/image";
 
 const footerMenu = [
   {
@@ -96,67 +97,70 @@ const footerMenu = [
 
 const Footer = () => {
   return (
-    <div className="flex-column bg-black text-yellow-500 h-auto text-center z-50 justify-between px-16 py-4 -lg:px-4 -lg:py-2 mt-auto bottom-0 left-0">
-      <div className="grid grid-cols-3 gap-4">
-        <div className="flex flex-col md:gap-4 text-lg font-semibold -md:gap-4 -md:text-base -sm:text-sm">
-          <span>Privacy Policy</span>
-          <span>Terms Of Use</span>
-          <span>Know More</span>
-          <span>Contact Us</span>
-          <span>Disclaimer</span>
-        </div>
-        <div>
-          <SocialIcons />
-        </div>
-        <div className="flex flex-column flex-wrap h-full lg:gap-4 -lg:gap-2 [&_a]:text-white md:[&_a]:text-lg -md:text-sm -sm:text-xs [&_a]:font-semibold  [&_a:hover]:text-yellow-500">
-          <div className="group transition duration-300 w-fit  self-center">
-            <Link href="/design-your-home">DESIGN YOUR HOME</Link>
-            <span className="block max-w-0 group-hover:max-w-full transition-all duration-500 h-0.5 bg-yellow-500" />
-          </div>
-          <div className="group transition duration-300 w-fit  self-center">
-            <Link href="/all-products"> SHOP MATERIAL</Link>
-            <span className="block max-w-0 group-hover:max-w-full transition-all duration-500 h-0.5 bg-yellow-500" />
-          </div>
-          <div className="group transition duration-300 w-fit  self-center">
-            <Link href="https://thikedaar.com/">TURNKEY SOLUTIONS</Link>
-            <span className="block max-w-0 group-hover:max-w-full transition-all duration-500 h-0.5 bg-yellow-500" />
-          </div>
-          {/* <span><Link to="/material_product"> MATERIAL PRODUCT</Link></span> */}
-          <div className="group transition duration-300 w-fit self-center">
-            <Link
-              href="/architect/sign_up"
-              state={{ onboardingRole: "architect", signUp: true }}
-            >
-              ARCHITECT ONBOARDING
-            </Link>
-            <span className="block max-w-0 group-hover:max-w-full transition-all duration-500 h-0.5 bg-yellow-500" />
-          </div>
-          <div className="group transition duration-300 w-fit  self-center">
-            <Link
-              href="/contractor/sign_up"
-              state={{ onboardingRole: "contractor", signUp: true }}
-            >
-              CONTRACTOR ONBOARDING
-            </Link>
-            <span className="block max-w-0 group-hover:max-w-full transition-all duration-500 h-0.5 bg-yellow-500" />
-          </div>
-          <div className="group transition duration-300 w-fit  self-center">
-            <Link
-              href="/dealer/sign_up"
-              state={{ onboardingRole: "dealer", signUp: true }}
-            >
-              DEALER ONBOARDING
-            </Link>
-            <span className="block max-w-0 group-hover:max-w-full transition-all duration-500 h-0.5 bg-yellow-500" />
-          </div>
-        </div>
-        {/* <i classNameName="fa fa-heart" /> */}
+    <footer className="h-[430px] flex flex-col py-8 px-32 bg-secondary text-primary text-center z-50 justify-between -lg:px-4 -lg:py-2 mt-auto bottom-0 left-0">
+      <div className="flex items-center justify-center mt-4">
+        <Image src={"/assets/LOGO.png"} height={40} width={240} alt="logo" />
       </div>
-      <div className="font-semibold mt-2 -md:text-sm">
+      <hr className="border-gray-600" />
+      <div className="flex flex-row items-center justify-center -md:flex-wrap lg:gap-4 -lg:gap-2 [&_a]:text-primary md:[&_a]:text-lg -md:text-sm -sm:text-xs [&_a]:font-semibold  [&_a:hover]:text-primary">
+        <div className="group transition duration-300 w-fit  self-center">
+          <Link href="/design-your-home">DESIGN YOUR HOME</Link>
+          <span className="block max-w-0 group-hover:max-w-full transition-all duration-500 h-0.5 bg-primary" />
+        </div>
+        <span className="lg:h-3/4 -lg:h-1/6 w-[1px] bg-gray-400" />
+        <div className="group transition duration-300 w-fit  self-center">
+          <Link href="/all-products"> SHOP MATERIAL</Link>
+          <span className="block max-w-0 group-hover:max-w-full transition-all duration-500 h-0.5 bg-primary" />
+        </div>
+        <span className="lg:h-3/4 -lg:h-1/6 w-[1px] bg-gray-400" />
+        <div className="group transition duration-300 w-fit  self-center">
+          <Link href="https://thikedaar.com/">TURNKEY SOLUTIONS</Link>
+          <span className="block max-w-0 group-hover:max-w-full transition-all duration-500 h-0.5 bg-primary" />
+        </div>
+        <span className="lg:h-3/4 -lg:h-1/6 w-[1px] bg-gray-400" />
+        {/* <span><Link to="/material_product"> MATERIAL PRODUCT</Link></span> */}
+        <div className="group transition duration-300 w-fit self-center">
+          <Link
+            href="/architect/sign_up"
+            state={{ onboardingRole: "architect", signUp: true }}
+          >
+            ARCHITECT ONBOARDING
+          </Link>
+          <span className="block max-w-0 group-hover:max-w-full transition-all duration-500 h-0.5 bg-primary" />
+        </div>
+        <span className="lg:h-3/4 -lg:h-1/6 w-[1px] bg-gray-400" />
+        <div className="group transition duration-300 w-fit  self-center">
+          <Link
+            href="/contractor/sign_up"
+            state={{ onboardingRole: "contractor", signUp: true }}
+          >
+            CONTRACTOR ONBOARDING
+          </Link>
+          <span className="block max-w-0 group-hover:max-w-full transition-all duration-500 h-0.5 bg-primary" />
+        </div>
+        <span className="lg:h-3/4 -lg:h-1/6 w-[1px] bg-gray-400" />
+        <div className="group transition duration-300 w-fit  self-center">
+          <Link
+            href="/dealer/sign_up"
+            state={{ onboardingRole: "dealer", signUp: true }}
+          >
+            DEALER ONBOARDING
+          </Link>
+          <span className="block max-w-0 group-hover:max-w-full transition-all duration-500 h-0.5 bg-primary" />
+        </div>
+      </div>
+      <div className="-md:text-sm text-white">
         © 2024 Thikedaar.Com All rights reserved Concept Developed by
         Thikedaar.com.
       </div>
-    </div>
+      <hr className="border-gray-600" />
+      <div className="flex flex-row items-center justify-center gap-4">
+        <Image src={"/ios.svg"} width={135} height={40} alt="ios" />
+        <Image src={"/gplay.svg"} width={135} height={40} alt="gplay" />
+      </div>
+      {/* <i classNameName="fa fa-heart" /> */}
+      <SocialIcons />
+    </footer>
   );
 };
 

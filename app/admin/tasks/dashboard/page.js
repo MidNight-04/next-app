@@ -29,6 +29,7 @@ import AsideContainer from "../../../../components/AsideContainer";
 import { cn } from "../../../../lib/utils";
 import { useRouter } from "next/navigation";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
+import { useAuthStore } from "../../../../store/useAuthStore";
 // import ProgressBar from "../ProgressBar/ProgressBar";
 
 let today = new Date();
@@ -50,16 +51,19 @@ const Page = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [tasks, setTasks] = useState(1);
   const [searchTerm, setSearchTerm] = useState(null);
+  const userType = useAuthStore(state => state.userType);
+  const userId = useAuthStore(state => state.userId);
   const router = useRouter();
+  const url =
+    userType === "ROLE_ADMIN"
+      ? `${process.env.REACT_APP_BASE_PATH}/api/task/getall`
+      : `${process.env.REACT_APP_BASE_PATH}/api/task/employeeID/${userId}`;
   const { data, isFetched, isError, isPreviousData } = useQuery({
     queryKey: ["tasks", currentPage],
     queryFn: async () => {
-      const response = await axios.post(
-        `${process.env.REACT_APP_BASE_PATH}/api/task/getall`,
-        {
-          page: currentPage,
-        }
-      );
+      const response = await axios.post(url, {
+        page: currentPage,
+      });
       return response.data.data;
     },
     keepPreviousData: true,
@@ -319,7 +323,7 @@ const Page = () => {
           Ticket List
         </h1>
         <div>
-          <div className="flex gap-4 p-4 pt-0 flex-col items-center ">
+          {/* <div className="flex gap-4 p-4 pt-0 flex-col items-center ">
             <h2 className="font-ubuntu text-xl font-semibold">
               Ticket Summary
             </h2>
@@ -391,7 +395,7 @@ const Page = () => {
                     : 0}
                 </span>
               </div>
-              {/* <div className="flex flex-row gap-2 px-4 py-2 items-center text-green-600 rounded-full border-[1px] border-green-600 [&_svg]:text-green-600 [&_svg]:text-2xl">
+              <div className="flex flex-row gap-2 px-4 py-2 items-center text-green-600 rounded-full border-[1px] border-green-600 [&_svg]:text-green-600 [&_svg]:text-2xl">
                 <span className="name">
                   <AccessTimeFilled className="fs-5 text-success" /> In Time
                 </span>
@@ -420,10 +424,10 @@ const Page = () => {
                       )?.length
                   }
                 </span>
-              </div> */}
+              </div>
             </div>
-          </div>
-          <div className="flex flex-row justify-evenly p-4 items-center">
+          </div> */}
+          {/* <div className="flex flex-row justify-evenly p-4 items-center">
             <p className="font-ubuntu font-semibold text-lg">Filters :</p>
             {filters.map(filter => (
               <div
@@ -439,7 +443,7 @@ const Page = () => {
                 {filter}
               </div>
             ))}
-          </div>
+          </div> */}
           <div>
             <div className="flex flex-col gap-4 w-full justify-center items-center my-4">
               {isFetched &&
@@ -484,9 +488,16 @@ const Page = () => {
                                 Admin
                               </span>
                             ) : (
-                              <span className="font-semibold text-sm">
-                                {employee.assignedBy?.name}
-                              </span>
+                              <>
+                                {employee.assignedBy?.name ===
+                                "ThikedaarDotCom" ? (
+                                  <span className="font-semibold text-sm">
+                                    Admin
+                                  </span>
+                                ) : (
+                                  <span>{employee.assignedBy?.name}</span>
+                                )}
+                              </>
                             )}
                           </div>
                         </div>
@@ -495,7 +506,7 @@ const Page = () => {
                   </div>
                 ))}
             </div>
-            {data.length > 0 && (
+            {data?.length > 0 && (
               <div className="flex flex-row gap-2 items-center w-full justify-center mb-4">
                 <button
                   onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
@@ -524,9 +535,9 @@ const Page = () => {
             )}
           </div>
           {!isFetched ||
-            (data.length < 1 && (
+            (data?.length < 1 && (
               <p
-                className="text-center text-secondary "
+                className="text-center text-secondary"
                 style={{ marginTop: "200px", fontSize: "18px" }}
               >
                 No Task Assign ...

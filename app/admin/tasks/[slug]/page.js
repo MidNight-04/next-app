@@ -14,12 +14,15 @@ import { useState } from "react";
 import axios from "axios";
 import { useAuthStore } from "../../../../store/useAuthStore";
 import { MdChecklist } from "react-icons/md";
+import { HiOutlineLockOpen } from "react-icons/hi2";
 import { cn } from "../../../../lib/utils";
+import { toast } from "sonner";
 
 const Page = () => {
   const { slug } = useParams();
   const router = useRouter();
   const [openComment, setOpenComment] = useState(false);
+  const [openDelete, setOpenDelete] = useState(false);
   const [type, setType] = useState(null);
   const [comment, setComment] = useState(null);
   const userId = useAuthStore(state => state.userId);
@@ -52,6 +55,10 @@ const Page = () => {
     return <AsideContainer>Error: {error.message}</AsideContainer>;
   }
 
+  const toggleDelete = () => {
+    setOpenDelete(prev => !prev);
+  };
+
   const addComment = () => {
     setOpenComment(prev => !prev);
     const api = axios
@@ -63,6 +70,18 @@ const Page = () => {
       })
       .then(() => {
         refetch();
+      });
+  };
+
+  const deleteTask = () => {
+    setOpenDelete(prev => !prev);
+    const api = axios
+      .delete(`${process.env.REACT_APP_BASE_PATH}/api/task/delete/${slug}`)
+      .then(() => {
+        toast("Task Deleted!", {
+          description: "Task Deleted Successfully.",
+        });
+        router.back();
       });
   };
 
@@ -106,7 +125,13 @@ const Page = () => {
                 height={20}
                 className="rounded-full"
               />
-              {/* <p>{data.data.assignedBy.name}</p> */}
+              <>
+                {data.data.assignedBy?.name === "ThikedaarDotCom" ? (
+                  <span className="font-semibold text-sm">Admin</span>
+                ) : (
+                  <span>{data.data.assignedBy?.name}</span>
+                )}
+              </>
             </div>
           </div>
           <div className="flex flex-row gap-2 items-center">
@@ -123,7 +148,11 @@ const Page = () => {
           <div className="flex flex-row gap-2 items-center">
             <p className="font-ubuntu font-semibold text-gray-600">Status :</p>
             <p className="flex flex-row gap-1 items-center">
-              <RiProgress3Line className="text-primary text-lg" />
+              {data.data.status === "Complete" ? (
+                <FaCheck className="text-xl text-primary" />
+              ) : (
+                <RiProgress3Line className="text-primary text-lg" />
+              )}
               {data.data.status}
             </p>
           </div>
@@ -153,9 +182,22 @@ const Page = () => {
           </div>
         </div>
         <div className="flex flex-row gap-4 mt-4">
-          {console.log(data.data.issueMember._id)}
           {data.data.issueMember._id === userId ||
-            (data.data.assignedBy?._id === userId && (
+            (data.data.assignedBy?._id === userId &&
+              data.data.status !== "Complete" && (
+                <button
+                  className="px-4 py-2 border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-2 items-center"
+                  onClick={() => {
+                    setType("In Progress");
+                    setOpenComment(prev => !prev);
+                  }}
+                >
+                  <RiProgress3Line className="text-xl" />
+                  In Progress
+                </button>
+              ))}
+          {data.data.status === "Complete" &&
+            data.data.assignedBy?._id === userId && (
               <button
                 className="px-4 py-2 border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-2 items-center"
                 onClick={() => {
@@ -163,51 +205,58 @@ const Page = () => {
                   setOpenComment(prev => !prev);
                 }}
               >
-                <RiProgress3Line className="text-xl" />
-                In Progress
+                <HiOutlineLockOpen className="text-xl" />
+                Re-open
               </button>
-            ))}
+            )}
           {data.data.issueMember._id === userId ||
-            (data.data.assignedBy?._id === userId && (
+            (data.data.assignedBy?._id === userId &&
+              data.data.status !== "Complete" && (
+                <button
+                  className="px-4 py-2 border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-2 items-center"
+                  onClick={() => {
+                    setType("Complete");
+                    setOpenComment(prev => !prev);
+                  }}
+                >
+                  <FaCheck className="text-xl" />
+                  Complete
+                </button>
+              ))}
+          {/* {data.data.assignedBy?._id === userId &&
+            data.data.status !== "Complete" && (
+              <button className="px-4 py-2 border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-2 items-center">
+                <MdEdit className="text-xl" />
+                Edit
+              </button>
+            )} */}
+          {data.data.assignedBy?._id === userId &&
+            data.data.status !== "Complete" && (
               <button
                 className="px-4 py-2 border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-2 items-center"
-                onClick={() => {
-                  setType("Complete");
-                  setOpenComment(prev => !prev);
-                }}
+                onClick={() => toggleDelete()}
               >
-                <FaCheck className="text-xl" />
-                Complete
+                <MdDeleteOutline className="text-xl" />
+                Delete
               </button>
-            ))}
-          {data.data.assignedBy?._id === userId && (
-            <button className="px-4 py-2 border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-2 items-center">
-              <MdEdit className="text-xl" />
-              Edit
-            </button>
-          )}
-          {data.data.assignedBy?._id === userId && (
-            <button className="px-4 py-2 border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-2 items-center">
-              <MdDeleteOutline className="text-xl" />
-              Delete
-            </button>
-          )}
+            )}
           {data.data.issueMember._id === userId ||
-            (data.data.assignedBy?._id === userId && (
-              <button
-                className="px-4 py-2 border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-2 items-center"
-                onClick={() => {
-                  setType("Comment");
-                  setOpenComment(prev => !prev);
-                }}
-              >
-                <MdOutlineInsertComment className="text-xl" />
-                Comment
-              </button>
-            ))}
+            (data.data.assignedBy?._id === userId &&
+              data.data.status !== "Complete" && (
+                <button
+                  className="px-4 py-2 border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-2 items-center"
+                  onClick={() => {
+                    setType("Comment");
+                    setOpenComment(prev => !prev);
+                  }}
+                >
+                  <MdOutlineInsertComment className="text-xl" />
+                  Comment
+                </button>
+              ))}
         </div>
       </div>
-      {data.data.comments.length < 0 && (
+      {data.data.comments.length > 0 && (
         <>
           <div className="flex flex-row gap-2 my-4">
             <MdChecklist className="text-3xl text-primary" />
@@ -215,7 +264,7 @@ const Page = () => {
           </div>
           <div className="flex flex-col gap-4">
             {data.data.comments.map(item => (
-              <div key={item.id} className="bg-white rounded-xl p-5">
+              <div key={item._id} className="bg-white rounded-xl p-5">
                 <div className="flex flex-row justify-between items-center">
                   <div className="flex flex-row gap-4 items-center">
                     <Image
@@ -297,6 +346,37 @@ const Page = () => {
               onClick={addComment}
             >
               Add Comment
+            </button>
+          </div>
+        </div>
+      </Modal>
+      <Modal
+        open={openDelete}
+        onClose={toggleDelete}
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <div className="bg-white w-1/3 p-8 rounded-3xl outline-none -md:w-3/4">
+          <div>
+            <h3 className=" text-2xl font-semibold font-ubuntu">Delete Task</h3>
+            <hr className="my-4" />
+          </div>
+          <h5>Are your sure you want to delete ?</h5>
+          <div className="flex flex-row gap-2 justify-end mt-4">
+            <button
+              className="bg-primary-foreground border border-secondary text-secondary rounded-3xl px-4 py-2 flex flex-row  items-center"
+              onClick={toggleDelete}
+            >
+              Cancel
+            </button>
+            <button
+              className="bg-secondary text-primary rounded-3xl px-4 py-2 flex flex-row  items-center"
+              onClick={deleteTask}
+            >
+              Delete
             </button>
           </div>
         </div>

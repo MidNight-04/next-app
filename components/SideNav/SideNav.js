@@ -21,8 +21,8 @@ import { cn } from "../../lib/utils";
 import Image from "next/image";
 
 const SideNav = () => {
-  const type = useAuthStore(state => state);
-  const content = getDashboardSidebar("ROLE_ADMIN");
+  const userType = useAuthStore(state => state.userType);
+  const content = getDashboardSidebar(userType);
   const path = usePathname();
 
   return (

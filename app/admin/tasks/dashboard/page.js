@@ -1,22 +1,14 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import { FaShieldVirus, FaUser, FaUsers } from "react-icons/fa6";
-import {
-  MdCategory,
-  MdOutlineAccessAlarm,
-  MdSkipNext,
-  MdSkipPrevious,
-} from "react-icons/md";
+import React, { useState } from "react";
+import { MdSkipNext, MdSkipPrevious } from "react-icons/md";
 import { TiTick } from "react-icons/ti";
 import {
   AccessTimeFilled,
   Adjust,
-  Category,
   CheckCircle,
   FiberManualRecord,
 } from "@mui/icons-material";
 import { RiProgress6Fill } from "react-icons/ri";
-import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -35,6 +27,9 @@ import {
 } from "@mui/material";
 import AsideContainer from "../../../../components/AsideContainer";
 import { cn } from "../../../../lib/utils";
+import { useRouter } from "next/navigation";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
+import { useAuthStore } from "../../../../store/useAuthStore";
 // import ProgressBar from "../ProgressBar/ProgressBar";
 
 let today = new Date();
@@ -46,129 +41,46 @@ if (mm < 10) mm = "0" + mm;
 let formatedtoday = yyyy + "-" + mm + "-" + dd;
 
 const Page = () => {
-  const [activeTab, setActiveTab] = useState("EmployeeWise");
   const [activeFilter, setActiveFilter] = useState("All Time");
-  const [employees, setEmployees] = useState([]);
-  const [filteredEmployees, setFilteredEmployees] = useState([]);
+  const [filteredtasks, setFilteredTasks] = useState([]);
   const [updateTaskOpen, setUpdateTaskOpen] = useState(false);
   const [status, setStatus] = useState("");
   const [image, setImage] = useState("");
   const [date, setDate] = useState(formatedtoday);
   const [id, setId] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [currentCategoryPage, setCurrentCategoryPage] = useState(1);
-  const itemsPerPage = 9;
-
-  useEffect(() => {
-    getAllTask();
-  }, []);
-
-  // For EmployeeWise tab
-  // For EmployeeWise tab
-  const indexOfLastEmployee = currentPage * itemsPerPage;
-  const indexOfFirstEmployee = indexOfLastEmployee - itemsPerPage;
-  const currentEmployees = filteredEmployees.slice(
-    indexOfFirstEmployee,
-    indexOfLastEmployee
-  );
-  const totalEmployeePages = Math.ceil(filteredEmployees.length / itemsPerPage);
-  const totalPages = Math.ceil(filteredEmployees.length / itemsPerPage);
-
-  // For CategoryWise tab
-  const indexOfLastCategory = currentCategoryPage * itemsPerPage;
-  const indexOfFirstCategory = indexOfLastCategory - itemsPerPage;
-  const currentCategories = filteredEmployees.slice(
-    indexOfFirstCategory,
-    indexOfLastCategory
-  ); // Modify as necessary for categories
-  const totalCategoryPages = Math.ceil(filteredEmployees.length / itemsPerPage); // Modify for category count if needed
-
-  const handlePageChange = pageNumber => {
-    if (activeTab === "EmployeeWise") {
-      setCurrentPage(pageNumber);
-    } else {
-      setCurrentCategoryPage(pageNumber);
-    }
-  };
-  const handleNext = () => {
-    if (activeTab === "EmployeeWise" && currentPage < totalEmployeePages) {
-      setCurrentPage(currentPage + 1);
-    } else if (
-      activeTab === "CategoryWise" &&
-      currentCategoryPage < totalCategoryPages
-    ) {
-      setCurrentCategoryPage(currentCategoryPage + 1);
-    }
-  };
-
-  const handlePrev = () => {
-    if (activeTab === "EmployeeWise" && currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    } else if (activeTab === "CategoryWise" && currentCategoryPage > 1) {
-      setCurrentCategoryPage(currentCategoryPage - 1);
-    }
-  };
-
-  // Function to get the visible page numbers
-  const getVisiblePages = () => {
-    const visiblePages = [];
-    const page =
-      activeTab === "EmployeeWise" ? currentPage : currentCategoryPage;
-    let startPage = Math.max(1, page - 2);
-    let endPage = Math.min(totalPages, page + 2);
-
-    if (endPage - startPage < 4) {
-      if (startPage === 1) {
-        endPage = Math.min(startPage + 4, totalPages);
-      } else if (endPage === totalPages) {
-        startPage = Math.max(endPage - 4, 1);
-      }
-    }
-
-    for (let i = startPage; i <= endPage; i++) {
-      visiblePages.push(i);
-    }
-    return visiblePages;
-  };
-
-  // Reset pagination when the active tab changes
-  useEffect(() => {
-    if (activeTab === "EmployeeWise") {
-      setCurrentPage(1);
-    } else {
-      setCurrentCategoryPage(1);
-    }
-  }, [activeTab]);
-
-  const getAllTask = () => {
-    axios
-      .get(`${process.env.REACT_APP_BASE_PATH}/api/task/getall`)
-      .then(response => {
-        setEmployees(response?.data?.data);
-        setFilteredEmployees(response?.data?.data);
-        // console.log(response?.data?.data)
-      })
-      .catch(error => {
-        console.log(error);
+  const [tasks, setTasks] = useState(1);
+  const [searchTerm, setSearchTerm] = useState(null);
+  const userType = useAuthStore(state => state.userType);
+  const userId = useAuthStore(state => state.userId);
+  const router = useRouter();
+  const url =
+    userType === "ROLE_ADMIN"
+      ? `${process.env.REACT_APP_BASE_PATH}/api/task/getall`
+      : `${process.env.REACT_APP_BASE_PATH}/api/task/employeeID/${userId}`;
+  const { data, isFetched, isError, isPreviousData } = useQuery({
+    queryKey: ["tasks", currentPage],
+    queryFn: async () => {
+      const response = await axios.post(url, {
+        page: currentPage,
       });
-  };
+      return response.data.data;
+    },
+    keepPreviousData: true,
+    placeholderData: keepPreviousData,
+    retry: 3,
+    retryDelay: 1000,
+    staleTime: 1000,
+  });
 
   function formatDate(isoDateString) {
-    // Parse the ISO date string into a Date object
     const date = new Date(isoDateString);
-
-    // Array of weekday names
     const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-
-    // Get date components
-    const weekday = weekdays[date.getUTCDay()]; // Short name of the weekday
-    const month = date.toLocaleString("en-US", { month: "short" }); // Short month name
-    const day = date.getUTCDate(); // Day of the month
-    const year = date.getUTCFullYear(); // Full year
-
-    // Construct the formatted time string
+    const weekday = weekdays[date.getUTCDay()];
+    const month = date.toLocaleString("en-US", { month: "short" });
+    const day = date.getUTCDate();
+    const year = date.getUTCFullYear();
     const formattedTime = date.toLocaleTimeString();
-    // Construct the final formatted date string
     return `${weekday}, ${month} ${day} ${year} ${formattedTime}`;
   }
 
@@ -188,10 +100,6 @@ const Page = () => {
     return { startOfWeek, endOfWeek };
   }
 
-  const handleTabChange = tab => {
-    setActiveTab(tab);
-  };
-
   const updateTaskStatus = id => {
     setId(id);
     setUpdateTaskOpen(true);
@@ -201,7 +109,6 @@ const Page = () => {
   };
 
   const handleCancel = () => {
-    // Close the confirmation dialog
     // setViewTaskOpen(false);
     setUpdateTaskOpen(false);
   };
@@ -263,13 +170,13 @@ const Page = () => {
 
     switch (filter) {
       case "All Time":
-        filteredData = employees;
+        filteredData = data;
         break;
 
       case "Today":
         const todayStart = new Date().setHours(0, 0, 0, 0);
         const todayEnd = new Date().setHours(23, 59, 59, 999);
-        filteredData = employees.filter(data => {
+        filteredData = data.filter(data => {
           const createdAt = new Date(data.createdAt).getTime();
           return createdAt >= todayStart && createdAt <= todayEnd;
         });
@@ -282,7 +189,7 @@ const Page = () => {
         const yesterdayEnd = new Date(
           new Date().setDate(new Date().getDate() - 1)
         ).setHours(23, 59, 59, 999);
-        filteredData = employees.filter(data => {
+        filteredData = data.filter(data => {
           const createdAt = new Date(data.createdAt).getTime();
           return createdAt >= yesterdayStart && createdAt <= yesterdayEnd;
         });
@@ -290,7 +197,7 @@ const Page = () => {
 
       case "This Week":
         const { startOfWeek, endOfWeek } = getCurrentWeekRange();
-        filteredData = employees.filter(data => {
+        filteredData = data.filter(data => {
           const createdAt = new Date(data.createdAt).getTime();
           return (
             createdAt >= startOfWeek.getTime() &&
@@ -309,7 +216,7 @@ const Page = () => {
         const lastWeekEnd = new Date();
         lastWeekEnd.setDate(lastWeekEnd.getDate() - lastWeekEnd.getDay() - 1);
         lastWeekEnd.setHours(23, 59, 59, 999);
-        filteredData = employees.filter(data => {
+        filteredData = data.filter(data => {
           const createdAt = new Date(data.createdAt).getTime();
           return (
             createdAt >= lastWeekStart.getTime() &&
@@ -329,7 +236,7 @@ const Page = () => {
           59,
           999
         );
-        filteredData = employees.filter(data => {
+        filteredData = data.filter(data => {
           const createdAt = new Date(data.createdAt).getTime();
           return (
             createdAt >= startOfMonth.getTime() &&
@@ -353,7 +260,7 @@ const Page = () => {
           59,
           999
         );
-        filteredData = employees.filter(data => {
+        filteredData = data.filter(data => {
           const createdAt = new Date(data.createdAt).getTime();
           return (
             createdAt >= startOfLastMonth.getTime() &&
@@ -373,7 +280,7 @@ const Page = () => {
           59,
           999
         );
-        filteredData = employees.filter(data => {
+        filteredData = data.filter(data => {
           const createdAt = new Date(data.createdAt).getTime();
           return (
             createdAt >= startOfYear.getTime() &&
@@ -383,11 +290,12 @@ const Page = () => {
         break;
 
       default:
-        filteredData = employees;
+        filteredData = tasks;
     }
 
-    setFilteredEmployees(filteredData);
+    setFilteredTasks(filteredData);
   };
+
   const filters = [
     "All Time",
     "Today",
@@ -398,17 +306,35 @@ const Page = () => {
     "Last Month",
     "This Year",
   ];
+
+  const searchTask = e => {
+    const searchValue = e.target.value.toLowerCase();
+    const data = axios.post(
+      `${process.env.REACT_APP_BASE_PATH}/api/task/search/${searchValue}`
+    );
+    setTasks(data);
+    console.log(searchValue);
+  };
+
   return (
     <AsideContainer>
       <div>
         <h1 className="font-ubuntu font-bold text-[25px] leading-7 p-5">
           Ticket List
         </h1>
-        <div className="bg-white rounded-2xl py-4">
-          <div className="flex gap-4 p-4 pt-0 flex-col items-center ">
+        <div>
+          {/* <div className="flex gap-4 p-4 pt-0 flex-col items-center ">
             <h2 className="font-ubuntu text-xl font-semibold">
               Ticket Summary
             </h2>
+            <div className="flex flex-row gap-2 w-full justify-center items-center my-4">
+              <input
+                type="text"
+                placeholder="Search"
+                className="w-full p-2 rounded-lg border border-primary focus:outline-none focus:ring-[1px] focus:ring-secondary"
+                onChange={e => searchTask(e)}
+              />
+            </div>
             <div className="flex flex-row gap-2 w-full justify-evenly items-center my-4">
               <div className="flex flex-row gap-2 px-4 py-2 text-red-600 rounded-full border-[1px] border-red-600 [&_svg]:text-red-600 [&_svg]:text-2xl">
                 <span className="name">
@@ -416,7 +342,7 @@ const Page = () => {
                 </span>
                 <span className="overdue">
                   {
-                    filteredEmployees
+                    filteredtasks
                       ?.filter(
                         itm =>
                           itm.adminStatus.status === "Pending" ||
@@ -433,23 +359,23 @@ const Page = () => {
                   <Adjust className="text-warning" /> Pending
                 </span>
                 <span className="pending">
-                  {filteredEmployees?.filter(
+                  {filteredtasks?.filter(
                     itm => itm.adminStatus.status === "Pending"
                   )?.length > 0
-                    ? filteredEmployees?.filter(
+                    ? filteredtasks?.filter(
                         itm => itm.adminStatus.status === "Pending"
                       )?.length
                     : 0}
                 </span>
               </div>
-              <div className="flex flex-row gap-2 px-4 py-2  text-primary rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl">
+              <div className="flex flex-row gap-2 px-4 py-2 text-primary rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl">
                 <RiProgress6Fill />
                 In Progress
                 <div className="inProgress">
-                  {filteredEmployees?.filter(
+                  {filteredtasks?.filter(
                     itm => itm.adminStatus.status === "InProgress"
                   )?.length > 0
-                    ? filteredEmployees?.filter(
+                    ? filteredtasks?.filter(
                         itm => itm.adminStatus.status === "InProgress"
                       )?.length
                     : 0}
@@ -460,10 +386,10 @@ const Page = () => {
                   <CheckCircle className="fs-5 text-success" /> Completed
                 </span>
                 <span className="completed">
-                  {filteredEmployees?.filter(
+                  {filteredtasks?.filter(
                     itm => itm.adminStatus.status === "Completed"
                   )?.length > 0
-                    ? filteredEmployees?.filter(
+                    ? filteredtasks?.filter(
                         itm => itm.adminStatus.status === "Completed"
                       )?.length
                     : 0}
@@ -475,7 +401,7 @@ const Page = () => {
                 </span>
                 <span className="inTime">
                   {
-                    filteredEmployees
+                    filteredtasks
                       ?.filter(itm => itm.adminStatus.status === "Completed")
                       ?.filter(
                         dt =>
@@ -490,7 +416,7 @@ const Page = () => {
                 </span>
                 <span className="delayed">
                   {
-                    filteredEmployees
+                    filteredtasks
                       ?.filter(itm => itm.adminStatus.status === "Completed")
                       ?.filter(
                         dt =>
@@ -500,15 +426,12 @@ const Page = () => {
                 </span>
               </div>
             </div>
-          </div>
-          <div className="flex flex-row justify-evenly p-4 items-center">
+          </div> */}
+          {/* <div className="flex flex-row justify-evenly p-4 items-center">
             <p className="font-ubuntu font-semibold text-lg">Filters :</p>
             {filters.map(filter => (
               <div
                 key={filter}
-                // className={`buttons ${
-                //   activeFilter === filter ? "active-filter" : ""
-                // }`}
                 className={cn(
                   "flex flex-row gap-2 py-2 px-4  bg-primary-foreground text-primary rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl cursor-pointer",
                   activeFilter === filter
@@ -520,383 +443,109 @@ const Page = () => {
                 {filter}
               </div>
             ))}
-          </div>
-          <div className="flex flex-row border-b-[1px] border-gray-200 my-4 pt-4 px-10">
-            <div
-              className={cn(
-                "border-[1px] border-gray-200 p-4 flex flex-row items-center cursor-pointer",
-                activeTab === "EmployeeWise"
-                  ? "text-green-700 bg-green-200 border-green-800"
-                  : ""
-              )}
-              onClick={() => handleTabChange("EmployeeWise")}
-            >
-              <FaUsers className="me-1" />
-              Employee Wise
-            </div>
-            <div
-              className={cn(
-                "border-[1px] border-gray-200 p-4 flex flex-row items-center cursor-pointer",
-                activeTab === "CategoryWise"
-                  ? "text-green-800 bg-green-200 border-green-800"
-                  : ""
-              )}
-              onClick={() => handleTabChange("CategoryWise")}
-            >
-              <MdCategory className="me-1" />
-              Category Wise
-            </div>
-            {/* <button
-              className={activeTab === "MyReport" ? "active-tab button" : ""}
-              onClick={() => handleTabChange("MyReport")}
-            >
-              <TiTick className="me-1" /> My Report
-            </button> */}
-            {/* <button
-            className={activeTab === "Delegated" ? "active-tab" : ""}
-            onClick={() => handleTabChange("Delegated")}
-          >
-            Delegated
-          </button> */}
-          </div>
-          {activeTab === "EmployeeWise" ? (
-            <>
-              <div className="flex flex-col gap-6">
-                {currentEmployees
-                  .filter(
-                    (item, index, self) =>
-                      // Check if 'data' array is not empty, and compare based on 'id' inside the 'data' array
-                      item.issueMember.length === 0 || // Allow items with empty 'data' arrays
-                      index ===
-                        self.findIndex(
-                          obj =>
-                            obj.issueMember.length > 0 &&
-                            obj.issueMember[0].employeeID ===
-                              item.issueMember[0].employeeID
-                        )
-                  )
-                  .map((employee, index) => {
-                    var total = filteredEmployees?.filter(itm =>
-                      itm.issueMember?.some(obj =>
-                        employee?.issueMember.some(
-                          empObj => empObj.employeeID === obj.employeeID
-                        )
-                      )
-                    );
-                    var over = filteredEmployees?.filter(
-                      itm =>
-                        itm.issueMember?.some(obj =>
-                          employee?.issueMember.some(
-                            empObj => empObj.employeeID === obj.employeeID
-                          )
-                        ) &&
-                        (itm.adminStatus.status === "Pending" ||
-                          itm.adminStatus.status === "InProgress") &&
-                        new Date(formatedtoday) > new Date(itm.dueDate)
-                    );
-                    var inTime = filteredEmployees?.filter(
-                      itm =>
-                        itm.issueMember?.some(obj =>
-                          employee?.issueMember.some(
-                            empObj => empObj.employeeID === obj.employeeID
-                          )
-                        ) &&
-                        itm.adminStatus.status === "Completed" &&
-                        new Date(itm.adminStatus.date) <= new Date(itm.dueDate)
-                    );
-                    var delay = filteredEmployees?.filter(
-                      itm =>
-                        itm.issueMember?.some(obj =>
-                          employee?.issueMember.some(
-                            empObj => empObj.employeeID === obj.employeeID
-                          )
-                        ) &&
-                        itm.adminStatus.status === "Completed" &&
-                        new Date(itm.adminStatus.date) > new Date(itm.dueDate)
-                    );
-                    var pen = filteredEmployees?.filter(
-                      itm =>
-                        itm.issueMember?.some(obj =>
-                          employee?.issueMember.some(
-                            empObj => empObj.employeeID === obj.employeeID
-                          )
-                        ) && itm.adminStatus.status === "Pending"
-                    );
-                    var inp = filteredEmployees?.filter(
-                      itm =>
-                        itm.issueMember?.some(obj =>
-                          employee?.issueMember.some(
-                            empObj => empObj.employeeID === obj.employeeID
-                          )
-                        ) && itm.adminStatus.status === "InProgress"
-                    );
-                    var comp = filteredEmployees?.filter(
-                      itm =>
-                        itm.issueMember?.some(obj =>
-                          employee?.issueMember.some(
-                            empObj => empObj.employeeID === obj.employeeID
-                          )
-                        ) && itm.adminStatus.status === "Completed"
-                    );
-                    var performance =
-                      inTime?.length > 0
-                        ? parseInt((inTime?.length * 100) / total?.length)
-                        : 0;
-                    // console.log(performance)
-                    return (
-                      <div
-                        key={index}
-                        className="bg-white w-full rounded-2xl p-8 flex flex-row justify-between shadow-md"
-                      >
-                        <div className="flex flex-col gap-6">
-                          {/* <div className="employee-initials">{employee.initials}</div> */}
-                          <div className="flex flex-row gap-4">
-                            {employee?.issueMember?.map((dts, id) => {
-                              return (
-                                <div key={id} className="flex flex-row gap-4">
-                                  <span className="h-16 rounded-full w-1 bg-primary" />
-                                  <div className="flex flex-col [&_span]:leading-7 font-ubuntu font-bold text-base text-[#565656]">
-                                    <span className="font-bold text-lg">
-                                      {dts.name}
-                                    </span>
-                                    {dts.name === "ThikedaarDotCom" ? (
-                                      <span className="font-semibold text-sm">
-                                        Admin
-                                      </span>
-                                    ) : (
-                                      <span className="font-semibold text-sm">
-                                        {dts.employeeID}
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                          <div className="flex flex-row gap-2 ">
-                            <span className="flex gap-2 justify-center items-center px-4 py-2 bg-primary-foreground rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl">
-                              <FaShieldVirus className="text-danger" /> Total
-                              Task:{" "}
-                              <span className="overdue">
-                                {total?.length > 0 ? total?.length : 0}
-                              </span>
-                            </span>
-                            <span className="flex gap-2 justify-center items-center px-4 py-2 bg-red-200 rounded-full border-[1px] border-red-600 [&_svg]:text-red-600 [&_svg]:text-2xl">
-                              <FiberManualRecord className="text-danger" />{" "}
-                              Overdue:{" "}
-                              <span className="overdue">
-                                {over?.length > 0 ? over?.length : 0}
-                              </span>
-                            </span>
-                            <span className="flex gap-2 justify-center items-center px-4 py-2 bg-primary-foreground rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl">
-                              <Adjust className="text-warning" /> Pending:{" "}
-                              <span className="pending">
-                                {pen?.length > 0 ? pen?.length : 0}
-                              </span>
-                            </span>
-                            <span className="flex gap-2 justify-center items-center px-4 py-2 bg-primary-foreground rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl">
-                              <RiProgress6Fill className="fs-5 text-warning" />{" "}
-                              In Progress:{" "}
-                              <span className="inProgress">
-                                {inp?.length > 0 ? inp?.length : 0}
-                              </span>
-                            </span>
-                            <span className="flex gap-2 justify-center items-center px-4 py-2 bg-green-200 rounded-full border-[1px] border-green-600 [&_svg]:text-green-600 [&_svg]:text-2xl">
-                              <CheckCircle className="fs-5 text-success" />{" "}
-                              Completed:{" "}
-                              <span className="completed">
-                                {comp?.length > 0 ? comp?.length : 0}
-                              </span>
-                            </span>
-                            <span className="flex gap-2 justify-center items-center px-4 py-2 bg-green-200 rounded-full border-[1px] border-green-600 [&_svg]:text-green-600 [&_svg]:text-2x">
-                              <AccessTimeFilled className="fs-5 text-success" />{" "}
-                              In Time:{" "}
-                              <span className="inTime">
-                                {inTime?.length > 0 ? inTime?.length : 0}
-                              </span>
-                            </span>
-                            <span className="flex gap-2 justify-center items-center px-4 py-2 bg-red-200 rounded-full border-[1px] border-red-600 [&_svg]:text-red-600 [&_svg]:text-2xl">
-                              <AccessTimeFilled className="fs-5 text-danger" />{" "}
-                              Delayed:{" "}
-                              <span className="delayed" s>
-                                {delay?.length > 0 ? delay?.length : 0}
-                              </span>
-                            </span>
-                          </div>
-                        </div>
-                        <div className="w-28 h-28 border-[#fec20e] border-[3px] rounded-full flex p-[2px] justify-center items-center">
-                          <CircularProgressbar
-                            value={performance}
-                            text={`${performance}%`}
-                            strokeWidth={14}
-                            className="font-bold font-ubuntu"
-                            styles={buildStyles({
-                              backgroundColor: "#3e98c7",
-                              textColor: "black",
-                              pathColor:
-                                performance < 50
-                                  ? "red"
-                                  : performance > 50 && performance < 70
-                                  ? "#fec20e"
-                                  : "green",
-                              trailColor: "#d6d6d6",
-                            })}
-                          />
-                        </div>
-                      </div>
-                    );
-                  })}
-              </div>
-              <div className="flex flex-row gap-2 items-center w-full justify-center mt-4">
-                <button
-                  onClick={handlePrev}
-                  disabled={currentPage === 1}
-                  className="p-2"
-                >
-                  <MdSkipPrevious />
-                </button>
-                {getVisiblePages(totalEmployeePages).map(page => (
-                  <button
-                    key={page}
-                    onClick={() => handlePageChange(page)}
-                    className={cn(
-                      "px-2 border-[1px] border-gray-300 bg-gray-100 rounded-sm",
-                      currentPage === page
-                        ? "bg-green-200 border-green-800 text-green-800"
-                        : ""
-                    )}
+          </div> */}
+          <div>
+            <div className="flex flex-col gap-4 w-full justify-center items-center my-4">
+              {isFetched &&
+                data.map((employee, index) => (
+                  <div
+                    key={index}
+                    className="bg-white w-full rounded-2xl p-8 flex flex-row justify-between shadow-md cursor-pointer"
+                    onClick={() => router.push(`/admin/tasks/${employee._id}`)}
                   >
-                    {page}
-                  </button>
-                ))}
-                <button
-                  onClick={handleNext}
-                  disabled={currentPage === totalEmployeePages}
-                >
-                  <MdSkipNext />
-                </button>
-              </div>
-            </>
-          ) : activeTab === "CategoryWise" ? (
-            <>
-              <div className="w-full">
-                {currentCategories.map((employee, index) => {
-                  return (
-                    <div
-                      key={index}
-                      className="bg-white w-full rounded-2xl p-8 flex flex-row justify-between items-center shadow-md mb-4 text-[#565656]"
-                    >
-                      <div className="flex flex-row gap-6 w-full">
-                        <span className="h-20 rounded-full w-1 bg-primary" />
-                        <div className="w-full">
-                          <div className="flex flex-row gap-4 my-2">
-                            <div className="font-ubuntu font-semibold text-lg">
-                              {employee.title}
+                    <div className="flex flex-col gap-6">
+                      <div className="flex flex-row gap-4">
+                        {/* {employee?.issueMember?.map((dts, id) => {
+                          return (
+                            <div key={id} className="flex flex-row gap-4">
+                              <span className="h-16 rounded-full w-1 bg-primary" />
+                              <div className="flex flex-col [&_span]:leading-7 font-ubuntu font-bold text-base text-[#565656]">
+                                <span className="font-bold text-lg">
+                                  {dts.name}
+                                </span>
+                                {dts.name === "ThikedaarDotCom" ? (
+                                  <span className="font-semibold text-sm">
+                                    Admin
+                                  </span>
+                                ) : (
+                                  <span className="font-semibold text-sm">
+                                    {dts.employeeID}
+                                  </span>
+                                )}
+                              </div>
                             </div>
-                            <span
-                              className={cn(
-                                employee.adminStatus?.status === "Pending" &&
-                                  "py-1 px-2 border-[1px] border-red-600 text-red-600 bg-red-200 rounded-md",
-                                employee.adminStatus?.status === "InProgress" &&
-                                  "py-1 px-2 border-[1px] border-[#fec20e] text-[#fec20e] bg-primary-foreground rounded-md",
-                                employee.adminStatus?.status === "Completed" &&
-                                  "py-1 px-2 border-[1px] border-green-800 text-green-800 bg-green-200 rounded-md"
-                              )}
-                            >
-                              {employee.adminStatus?.status}
+                          );
+                        })} */}
+                        <div className="flex flex-row gap-4">
+                          <span className="h-16 rounded-full w-1 bg-primary" />
+                          <div className="flex flex-col [&_span]:leading-7 font-ubuntu font-bold text-base text-[#565656]">
+                            <span className="font-bold text-lg">
+                              {employee.issueMember?.name}
                             </span>
-                          </div>
-                          <div>
-                            <div>
-                              Assigned By{" "}
-                              <span className="text-sm font-semibold ">
-                                {employee?.assignedBy?.name}
+                            {employee.issueMember?.name ===
+                            "ThikedaarDotCom" ? (
+                              <span className="font-semibold text-sm">
+                                Admin
                               </span>
-                            </div>
-                            <div className="flex flex-row mt-8 gap-4">
-                              <span className="flex gap-2 justify-center items-center px-4 py-2 bg-primary-foreground rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl">
-                                <MdOutlineAccessAlarm className="text-secondary fs-5" />
-                                <span className="date mx-1 text-success">
-                                  {formatDate(employee?.createdAt)}
-                                </span>
-                              </span>
-                              <span className="flex gap-2 justify-center items-center px-4 py-2 bg-primary-foreground rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl">
-                                <FaUser className="text-secondary" />
-                                <span className="mx-1">
-                                  {employee?.issueMember[0]?.name}
-                                </span>
-                              </span>
-                              <span className="flex gap-2 justify-center items-center px-4 py-2 bg-primary-foreground rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl">
-                                <Category className="fs-5 text-secondary" />{" "}
-                                {employee?.category}
-                              </span>
-                            </div>
+                            ) : (
+                              <>
+                                {employee.assignedBy?.name ===
+                                "ThikedaarDotCom" ? (
+                                  <span className="font-semibold text-sm">
+                                    Admin
+                                  </span>
+                                ) : (
+                                  <span>{employee.assignedBy?.name}</span>
+                                )}
+                              </>
+                            )}
                           </div>
                         </div>
-                        {filteredEmployees?.filter(itm =>
-                          itm.issueMember.some(obj =>
-                            employee?.issueMember.some(
-                              empObj => empObj.employeeID === obj.employeeID
-                            )
-                          )
-                        )?.length > 0 && employee.category !== "project" ? (
-                          <div>
-                            <button
-                              className="p-[6px] px-3 bg-transparent text-sm text-nowrap border-2 border-primary rounded-full font-ubuntu text-primary"
-                              onClick={() => updateTaskStatus(employee?._id)}
-                            >
-                              Update Status
-                            </button>
-                          </div>
-                        ) : (
-                          ""
-                        )}
                       </div>
                     </div>
-                  );
-                })}
-              </div>
-              <div className="flex flex-row gap-2 items-center w-full justify-center mt-4">
+                  </div>
+                ))}
+            </div>
+            {data?.length > 0 && (
+              <div className="flex flex-row gap-2 items-center w-full justify-center mb-4">
                 <button
-                  onClick={handlePrev}
-                  disabled={currentCategoryPage === 1}
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  className="flex flex-row gap-2 items-center bg-secondary text-primary px-3 py-2 rounded-3xl"
+                  disabled={currentPage === 1}
                 >
                   <MdSkipPrevious />
+                  Last Page
                 </button>
-                {getVisiblePages(totalCategoryPages).map(page => (
-                  <button
-                    key={page}
-                    onClick={() => handlePageChange(page)}
-                    className={cn(
-                      "px-2 border-[1px] border-gray-300 bg-gray-100 rounded-sm",
-                      currentPage === page
-                        ? "bg-green-200 border-green-800 text-green-800"
-                        : ""
-                    )}
-                  >
-                    {page}
-                  </button>
-                ))}
+                <span className="text-secondary font-semibold">
+                  Page {currentPage}
+                </span>
                 <button
-                  onClick={handleNext}
-                  disabled={currentCategoryPage === totalCategoryPages}
+                  onClick={() => {
+                    setCurrentPage(prev => prev + 1);
+                    if (!isPreviousData && data.hasMore) {
+                    }
+                  }}
+                  className="flex flex-row gap-2 items-center bg-secondary text-primary px-3 py-2 rounded-3xl"
+                  // disabled={isPreviousData || !data?.hasMore}
                 >
+                  Next Page
                   <MdSkipNext />
                 </button>
               </div>
-            </>
-          ) : null}
-
-          {filteredEmployees?.length === 0 && (
-            <p
-              className="text-center text-secondary "
-              style={{ marginTop: "200px", fontSize: "18px" }}
-            >
-              No Task Assign ...
-            </p>
-          )}
+            )}
+          </div>
+          {!isFetched ||
+            (data?.length < 1 && (
+              <p
+                className="text-center text-secondary"
+                style={{ marginTop: "200px", fontSize: "18px" }}
+              >
+                No Task Assign ...
+              </p>
+            ))}
         </div>
       </div>
+
       {/* update task status */}
       <Dialog open={updateTaskOpen} onClose={handleCancel}>
         <DialogTitle>Update Task Status</DialogTitle>

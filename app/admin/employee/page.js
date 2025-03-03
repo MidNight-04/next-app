@@ -183,7 +183,7 @@ const MemberTable = () => {
       name: row?.name,
       employeeID: row?.employeeID,
       email: row?.email,
-      role: row?.role,
+      role: row?.role.name,
       phone: row?.phone,
       address: row?.address,
     });

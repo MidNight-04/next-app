@@ -22,7 +22,7 @@ import Image from "next/image";
 
 const SideNav = () => {
   const type = useAuthStore(state => state);
-  const content = getDashboardSidebar("ROLE_CLIENT");
+  const content = getDashboardSidebar("ROLE_ADMIN");
   const path = usePathname();
 
   return (

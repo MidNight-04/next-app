@@ -15,10 +15,13 @@ import {
   Modal,
   Dialog,
   Button,
+  FormControlLabel,
+  Checkbox,
+  DialogContentText,
 } from "@mui/material";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { FaDownload } from "react-icons/fa6";
+import { FaDownload, FaMinus, FaPlus } from "react-icons/fa6";
 import { IoCallSharp } from "react-icons/io5";
 import { IoDocumentsOutline } from "react-icons/io5";
 import { GoPeople } from "react-icons/go";
@@ -38,6 +41,7 @@ import { cn } from "../../../../lib/utils";
 import { Check, PriorityHigh } from "@mui/icons-material";
 import { BsClockHistory } from "react-icons/bs";
 import { saveAs } from "file-saver";
+import { RiDeleteBin6Line, RiLockPasswordLine } from "react-icons/ri";
 import AsideContainer from "../../../../components/AsideContainer";
 import {
   Select,
@@ -129,10 +133,21 @@ const ClientProjectView = () => {
   const [document, setDocument] = useState("");
   const [documentName, setDocumentName] = useState("");
   const [activeTab, setActiveTab] = useState("Send Message");
+  const [stepModal, setStepModal] = useState(false);
+  const [pointName, setPointName] = useState("");
+  const [checkList, setCheckList] = useState("");
+  const [duration, setDuration] = useState("");
+  const [memberList, setMemberList] = useState([]);
+  const [prevContent, setPrevContent] = useState("");
+  const [stepName, setStepName] = useState("");
+  const [issueMember, setIssueMember] = useState([]);
+  const [stepModalDelete, setStepModalDelete] = useState(false);
+  const [deleteStepOpen, setDeleteStepOpen] = useState(false);
+  const [prevPoint, setPrevPoint] = useState(0);
+  const [stepArray, setStepArray] = useState([]);
   const userName = useAuthStore(state => state.username);
   const userId = useAuthStore(state => state.userId);
   const userType = useAuthStore(state => state.userType);
-  // const userType = "ROLE_ADMIN";
 
   const toggleShowImage = () => {
     setShowImage(prev => !prev);
@@ -404,7 +419,19 @@ const ClientProjectView = () => {
   };
 
   const handleCancel = () => {
+    // Close the confirmation dialog
     setConfirmationOpen(false);
+
+    // close step add modal
+    setStepModal(false);
+
+    // close step delete modal
+    setStepModalDelete(false);
+
+    // close step delete modal
+    setDeleteStepOpen(false);
+
+    setIssueMember([]);
   };
 
   const teamOpenCancel = () => {
@@ -711,6 +738,215 @@ const ClientProjectView = () => {
     setDocument("");
   };
 
+  const AddProjectStepSubmit = () => {
+    // console.log(pointName,checkList,checkListName,duration,prevContent,prevPoint,status,issueMember)
+    if (!pointName) {
+      toast.error("Point Name is required", {
+        position: "top-right",
+      });
+    } else if (!checkList) {
+      toast.error("CheckList is required", {
+        position: "top-right",
+      });
+    } else if (checkList === "yes" && !checkListName) {
+      toast.error("CheckList Name is required", {
+        position: "top-right",
+      });
+    } else if (!duration) {
+      toast.error("Duration is required", {
+        position: "top-right",
+      });
+    } else if (issueMember?.length === 0) {
+      toast.error("Issue member is required", {
+        position: "top-right",
+      });
+    } else if (!prevContent) {
+      toast.error("Content is required", {
+        position: "top-right",
+      });
+    } else {
+      const data = {
+        id: slug,
+        stepName: stepName,
+        pointName: pointName,
+        checkList: checkList,
+        checkListName: checkListName,
+        duration: duration,
+        issueMember: issueMember,
+        prevContent: prevContent?.split("$")[0],
+        prevPoint: prevPoint,
+        activeUser: userId,
+        userName: userName,
+        uploadData: {
+          manager: projectDetails?.project_manager,
+          engineer: projectDetails?.site_engineer,
+          sr_engineer: projectDetails?.sr_engineer,
+          contractor: projectDetails?.contractor,
+          operation: projectDetails?.operation,
+          sales: projectDetails?.sales,
+          admin: projectDetails?.project_admin,
+          accountant: projectDetails?.accountant,
+        },
+        date: formatedtoday,
+      };
+      axios
+        .put(
+          `${process.env.REACT_APP_BASE_PATH}/api/project/createnewpoint`,
+          data
+        )
+        .then(response => {
+          if (response.data.status == 200) {
+            toast.success(response.data.message, {
+              position: "top-right",
+            });
+            setStepModal(false);
+            getprojectDetail();
+            setPointList([]);
+            setRefresh(!refresh);
+          }
+        })
+        .catch(error => {
+          toast.error("Error while add new point", {
+            position: "top-right",
+          });
+          console.log(error);
+        });
+    }
+  };
+
+  const AddStepOpenModal = (step, name) => {
+    // console.log(step)
+    setStepModal(true);
+    setStepName(name);
+    setPointList(step);
+    setIssueMember([]);
+    setPrevContent("");
+    axios
+      .get(`${process.env.REACT_APP_BASE_PATH}/api/teammember/getall`)
+      .then(response => {
+        if (response) {
+          console.log(response.data.data);
+          setAllMemberList(response.data.data);
+          const uniqueRoles = response.data.data.filter(
+            (user, index, self) =>
+              index === self.findIndex(u => u.role === user.role)
+          );
+          setMemberList(uniqueRoles);
+        }
+      })
+      .catch(error => {
+        console.log(error);
+      });
+    setPointName("");
+    setCheckList("");
+    setCheckListName("");
+    setDuration("");
+    setContent("");
+    setStatus("");
+    setPoint("");
+  };
+
+  const DeleteStepOpenModal = (step, name) => {
+    setStepModalDelete(true);
+    setStepName(name);
+    setPointList(step);
+    setCheckList("");
+    setCheckListName("");
+  };
+
+  const memberChange = (value, isChecked) => {
+    if (isChecked) {
+      // Add role if checked
+      if (!issueMember.includes(value)) {
+        setIssueMember(prev => [...prev, value]); // Use spread operator to add new value
+      }
+    } else {
+      // Remove role if unchecked
+      setIssueMember(prev =>
+        prev.filter(selectedRole => selectedRole !== value)
+      ); // Use filter to remove value
+    }
+  };
+
+  const getPrevPoint = value => {
+    const pt = value?.split("$")[1];
+    setPrevPoint(pt);
+  };
+
+  const DeleteProjectStepSubmit = () => {
+    const data = {
+      id: slug,
+      name: stepName,
+      point: parseInt(point),
+      content: content?.split("$")[0],
+      checkList: checkList,
+      checkListName: checkListName,
+      activeUser: userId,
+      userName: userName,
+      date: formatedtoday,
+    };
+    axios
+      .put(`${process.env.REACT_APP_BASE_PATH}/api/project/deletepoint`, data)
+      .then(response => {
+        if (response.data.status === 200) {
+          toast.success(response.data.message, {
+            position: "top-right",
+          });
+          setStepModalDelete(false);
+          getprojectDetail();
+          setRefresh(!refresh);
+        }
+      })
+      .catch(error => {
+        toast.error("Error while delete project field", {
+          position: "top-right",
+        });
+        console.log(error);
+      });
+  };
+
+  const getPoint = value => {
+    const pt = value?.split("$")[1];
+    setPoint(pt);
+    let singlePt = pointList?.filter(dt => dt.point === parseInt(pt));
+    // console.log(pointList,singlePt)
+    setCheckList(singlePt[0]?.checkList);
+    setCheckListName(singlePt[0]?.checkListName);
+  };
+
+  const confirmDeleteProjectStep = async (id, name, p_step) => {
+    setDeleteStepOpen(true);
+    setName(name);
+    setStepArray(p_step);
+  };
+
+  const DeleteProjectStep = () => {
+    const data = {
+      id: slug,
+      name: name,
+      project_step: stepArray,
+      // date: formatedtoday,
+      userName: userName,
+      activeUser: userId,
+    };
+    console.log(data);
+    axios
+      .put(`${process.env.REACT_APP_BASE_PATH}/api/project/deletestep`, data)
+      .then(response => {
+        if (response.data.status === 200) {
+          toast.success(response.data.message);
+          setDeleteStepOpen(false);
+          getprojectDetail();
+        }
+      })
+      .catch(error => {
+        toast.error("Error while delete project field", {
+          position: "top-right",
+        });
+        console.log(error);
+      });
+  };
+
   return (
     <AsideContainer>
       {Loading && <LoaderSpinner />}
@@ -939,28 +1175,60 @@ const ClientProjectView = () => {
                   value={item.name}
                   className="bg-white rounded-[14px] mb-2"
                 >
-                  <AccordionTrigger className="px-4 ">
+                  <AccordionTrigger className="px-4">
                     <div className="flex flex-row justify-between w-full pr-8">
                       <div className="flex text-lg font-ubuntu justify-center items-center font-bold">
                         {item.name}
                       </div>
-                      <div style={{ width: 40, height: 40 }}>
-                        <CircularProgressbar
-                          value={percent}
-                          text={`${percent}%`}
-                          strokeWidth={14}
-                          styles={buildStyles({
-                            backgroundColor: "#3e98c7",
-                            textColor: "black",
-                            pathColor: "#93BFCF",
-                            trailColor: "#d6d6d6",
-                          })}
-                        />
+                      <div className="flex flex-row gap-4 items-center">
+                        <div style={{ width: 40, height: 40 }}>
+                          <CircularProgressbar
+                            value={percent}
+                            text={`${percent}%`}
+                            strokeWidth={14}
+                            styles={buildStyles({
+                              backgroundColor: "#3e98c7",
+                              textColor: "black",
+                              pathColor: "#93BFCF",
+                              trailColor: "#d6d6d6",
+                            })}
+                          />
+                        </div>
+                        <span className="p-2 border border-primary rounded-full font-semibold text-primary cursor-pointer">
+                          <RiDeleteBin6Line
+                            onClick={() =>
+                              confirmDeleteProjectStep(
+                                item?.siteID,
+                                item?.name,
+                                item?.step
+                              )
+                            }
+                            style={{ cursor: "pointer" }}
+                          />
+                        </span>
                       </div>
                     </div>
                   </AccordionTrigger>
                   <AccordionContent className="py-0">
-                    <div className="bg-[#efefef] h-20 pt-4 ">
+                    <div className="bg-[#efefef] h-[7rem] pt-2">
+                      <div className="flex flex-row justify-end gap-2 mb-2">
+                        <span
+                          className="border border-primary rounded-full p-2 font-semibold text-primary cursor-pointer"
+                          onClick={() =>
+                            AddStepOpenModal(item?.step, item?.name)
+                          }
+                        >
+                          <FaPlus />
+                        </span>
+                        <span
+                          className="border border-primary rounded-full p-2 font-semibold text-primary cursor-pointer"
+                          onClick={() =>
+                            DeleteStepOpenModal(item?.step, item?.name)
+                          }
+                        >
+                          <FaMinus />
+                        </span>
+                      </div>
                       <div className=" bg-secondary text-primary h-16 flex flex-row justify-evenly items-center rounded-t-3xl flex-auto text-base font-semibold -md:justify-between">
                         <span className="font-semibold w-24 -sm:hidden" />
                         <span className="font-semibold w-[140px] -md:w-16 -md:ml-8 -sm:ml-16">
@@ -1948,6 +2216,175 @@ const ClientProjectView = () => {
           </div>
         </div>
       </Modal>
+
+      <Dialog open={stepModal} onClose={handleCancel}>
+        <DialogTitle>Add Point</DialogTitle>
+        <DialogContent style={{ width: "600px" }}>
+          <FormControl fullWidth className="mt-1 mb-1">
+            {/* <InputLabel id="demo-simple-select-label">Point Name</InputLabel> */}
+            <label style={{ fontSize: "18px", color: "#fec20e" }}>
+              Point Name
+            </label>
+            <TextField
+              type="text"
+              name="pointName"
+              value={pointName}
+              onChange={e => setPointName(e.target.value)}
+            />
+          </FormControl>
+          <FormControl fullWidth className="mt-1 mb-1">
+            {/* <InputLabel id="demo-simple-select-label">CheckList</InputLabel> */}
+            <label style={{ fontSize: "18px", color: "#fec20e" }}>
+              CheckList
+            </label>
+            <MUISelect
+              labelId="demo-simple-select-label"
+              id="demo-simple-select"
+              value={checkList}
+              name="checkList"
+              onChange={e => setCheckList(e.target.value)}
+            >
+              <MenuItem value="yes">Yes</MenuItem>
+              <MenuItem value="no">No</MenuItem>
+            </MUISelect>
+          </FormControl>
+          {checkList === "yes" && (
+            <FormControl fullWidth className="mt-1 mb-1">
+              {/* <InputLabel id="demo-simple-select-label">
+                CheckList Name
+              </InputLabel> */}
+              <label style={{ fontSize: "18px", color: "#fec20e" }}>
+                CheckList Name
+              </label>
+              <TextField
+                type="text"
+                name="checkListName"
+                value={checkListName}
+                onChange={e => setCheckListName(e.target.value)}
+              />
+            </FormControl>
+          )}
+          <FormControl fullWidth className="mt-1 mb-1">
+            {/* <InputLabel id="demo-simple-select-label">
+              Duration (In days)
+            </InputLabel> */}
+            <label style={{ fontSize: "18px", color: "#fec20e" }}>
+              Duration (In days)
+            </label>
+            <TextField
+              type="number"
+              name="duration"
+              value={duration}
+              onChange={e => setDuration(e.target.value)}
+            />
+          </FormControl>
+          <FormControl fullWidth className="mt-1 mb-1">
+            <label style={{ fontSize: "18px", color: "#fec20e" }}>
+              Issue Member
+            </label>
+            <FormControlLabel
+              value="admin"
+              control={<Checkbox />}
+              label="Admin"
+              onChange={e => memberChange(e.target.value, e.target.checked)}
+            />
+            {memberList?.map((data, id) => {
+              return (
+                <FormControlLabel
+                  key={id}
+                  value={data.role}
+                  control={<Checkbox />}
+                  label={data.role}
+                  onChange={e => memberChange(e.target.value, e.target.checked)}
+                />
+              );
+            })}
+          </FormControl>
+          <FormControl fullWidth className="mt-1 mb-1">
+            {/* <InputLabel id="demo-simple-select-label">Content</InputLabel> */}
+            <label style={{ fontSize: "18px", color: "#fec20e" }}>
+              After Content
+            </label>
+            <MUISelect
+              labelId="demo-simple-select-label"
+              id="demo-simple-select"
+              value={prevContent} // Adjust value to reflect state
+              name="prevContent"
+              onChange={e => {
+                setPrevContent(e.target.value);
+                getPrevPoint(e.target.value);
+              }}
+            >
+              {pointList?.map((data, id) => {
+                return (
+                  <MenuItem key={id} value={`${data.content}$${data.point}`}>
+                    {data.content}
+                  </MenuItem>
+                );
+              })}
+            </MUISelect>
+          </FormControl>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancel} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={AddProjectStepSubmit} color="primary">
+            Update
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={stepModalDelete} onClose={handleCancel}>
+        <DialogTitle>Delete Point</DialogTitle>
+        <DialogContent style={{ width: "600px" }}>
+          <FormControl fullWidth className="mt-1 mb-1">
+            {/* <InputLabel id="demo-simple-select-label">Content</InputLabel> */}
+            <label style={{ fontSize: "18px", color: "#fec20e" }}>
+              Content
+            </label>
+            <MUISelect
+              labelId="demo-simple-select-label"
+              id="demo-simple-select"
+              value={content} // Adjust value to reflect state
+              name="content"
+              onChange={e => {
+                setContent(e.target.value);
+                getPoint(e.target.value);
+              }}
+            >
+              {pointList?.map((data, id) => {
+                return (
+                  <MenuItem key={id} value={`${data.content}$${data.point}`}>
+                    {data.content}
+                  </MenuItem>
+                );
+              })}
+            </MUISelect>
+          </FormControl>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancel} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={DeleteProjectStepSubmit} color="primary">
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        open={deleteStepOpen}
+        onClose={handleCancel}
+        aria-labelledby="responsive-dialog-title"
+      >
+        <DialogContent>
+          <DialogContentText>Are you sure want to delete ?</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancel}>Cancel</Button>
+          <Button onClick={DeleteProjectStep}>Delete</Button>
+        </DialogActions>
+      </Dialog>
     </AsideContainer>
   );
 };

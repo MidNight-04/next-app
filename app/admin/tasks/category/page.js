@@ -23,19 +23,10 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Link from "next/link";
 import AsideContainer from "../../../../components/AsideContainer";
-const style = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: 500,
-  bgcolor: "background.paper",
-  border: "2px solid #000",
-  boxShadow: 25,
-  p: 4,
-};
+import { useRouter } from "next/navigation";
 
 const Page = () => {
+  const router = useRouter();
   const [categoryList, setCategoryList] = useState([]);
   const [roleList, setRoleList] = useState([]);
   const [confirmationOpen, setConfirmationOpen] = useState(false);
@@ -174,21 +165,13 @@ const Page = () => {
   return (
     <AsideContainer>
       <div className="datatable">
-        <div className="datatableTitle detail-heading mb-3">
-          <p className="project-list-client">Category List</p>
-          <Link href="/admin/tasks/add">
-            <Button
-              variant="contained"
-              size="small"
-              style={{
-                backgroundColor: "#fec20e",
-                fontWeight: "600",
-                marginTop: "-15px",
-              }}
-            >
-              Add Category
-            </Button>
-          </Link>
+        <div className="flex flex-row gap-2 justify-between items-center my-4">
+          <h1 className="text-2xl font-semibold font-ubuntu -md:mb-2 -md:text-lg">
+            Category List
+          </h1>
+          <button onClick={() => router.push("/admin/tasks/category/add")}>
+            Add Category
+          </button>
         </div>
         <div className="bg-white">
           <DataGrid

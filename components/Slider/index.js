@@ -75,7 +75,7 @@ const Slider = () => {
         <CarouselPrevious className="border-none bg-secondary-foreground hover:bg-secondary hover:scale-125" />
         <CarouselNext className="border-none bg-secondary-foreground hover:bg-secondary hover:scale-125" />
       </Carousel>
-      <div className="py-2 text-center text-sm text-muted-foreground flex flex-row gap-2 items-center justify-center">
+      <div className="py-2 bg-gray-100 text-center text-sm text-muted-foreground flex flex-row gap-2 items-center justify-center">
         {/* Slide {current} of {count} */}
         {Array.from({ length: count }).map((item, i) => (
           <span

@@ -22,17 +22,6 @@ import { useAuthStore } from "../../../store/useAuthStore";
 import Image from "next/image";
 import { IoPeopleOutline } from "react-icons/io5";
 import AsideContainer from "../../../components/AsideContainer";
-const style = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: 500,
-  bgcolor: "background.paper",
-  border: "2px solid #000",
-  boxShadow: 25,
-  p: 4,
-};
 
 const Page = () => {
   const [project, setProject] = useState([]);
@@ -49,8 +38,6 @@ const Page = () => {
     { field: "duration", headerName: "Duration", width: 150 },
     { field: "floor", headerName: "floor", width: 150 },
   ];
-
-  console.log(userType);
 
   useEffect(() => {
     getAllProjects();

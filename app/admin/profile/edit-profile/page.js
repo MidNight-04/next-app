@@ -1,7 +1,7 @@
 "use client";
 import LoaderSpinner from "../../../../components/loader/LoaderSpinner";
 import { useQuery } from "@tanstack/react-query";
-import { Button, styled, TextField } from "@mui/material";
+import { styled, TextField } from "@mui/material";
 import image from "../../../../public/assets/No_image_available.svg.webp";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -29,8 +29,6 @@ const CustomField = styled(TextField)`
 const Page = () => {
   const router = useRouter();
   const userId = useAuthStore(state => state.userId);
-  const state = useAuthStore(state => state);
-  console.log(state);
   const [profileData, setProfileData] = useState({
     profileImage: "",
     name: "",
@@ -42,7 +40,7 @@ const Page = () => {
     queryKey: [`profileData/${userId}`],
     queryFn: () =>
       getClientEndpoint({
-        endpoint: `databyid/${"668e250e039e5714c86ccd57"}`,
+        endpoint: `databyid/${userId}`,
       }),
     initialData: {
       profileImage: image,

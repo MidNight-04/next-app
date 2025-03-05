@@ -69,8 +69,11 @@ const RoleDataTable = () => {
   };
 
   const deleteRole = () => {
+    handleDelete();
     axios
-      .delete(`${process.env.REACT_APP_BASE_PATH}/api/projectrole/delete/${id}`)
+      .delete(
+        `${process.env.REACT_APP_BASE_PATH}/api/projectrole/delete/${userId}`
+      )
       .then(response => {
         if (response) {
           toast.warning("Record deleted successfully", {

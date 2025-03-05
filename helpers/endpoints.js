@@ -75,3 +75,9 @@ export const getClientEndpoint = async ({ endpoint, data }) => {
   );
   return response.data;
 };
+export const getTeamMemberEndpoint = async ({ endpoint, data }) => {
+  const response = await axios.get(
+    `${process.env.REACT_APP_BASE_PATH}/api/teammember/${endpoint}`
+  );
+  return response.data;
+};

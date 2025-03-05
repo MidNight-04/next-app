@@ -1,8 +1,8 @@
 "use client";
 import AsideContainer from "../../../../components/AsideContainer";
 import axios from "axios";
-import { useRouter, redirect } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import React, { useState } from "react";
 import { IoIosArrowBack } from "react-icons/io";
 import { toast } from "react-toastify";
 
@@ -44,6 +44,7 @@ const AddClientForm = () => {
           data,
         })
         .then(response => {
+          router.push("/admin/clients");
           if (response.data.status === 201) {
             setData({
               name: "",
@@ -54,7 +55,6 @@ const AddClientForm = () => {
             toast.success(response.data.message, {
               position: "top-right",
             });
-            redirect("/admin/clients");
           } else {
             toast.error(response.data.message, {
               position: "top-right",
@@ -147,10 +147,10 @@ const AddClientForm = () => {
               />
             </div>
           </div>
-          <div className="flex flex-row justify-end" onClick={submitFormData}>
+          <div className="flex flex-row justify-end">
             <button
               className="bg-secondary  text-primary rounded-3xl px-4 py-3 inline-block font-semibold items-center"
-              onClick={submitFormData}
+              onClick={() => submitFormData()}
             >
               Submit
             </button>

@@ -38,7 +38,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import LoaderSpinner from "../../../../components/loader/LoaderSpinner";
 import { cn } from "../../../../lib/utils";
-import { Check, PriorityHigh } from "@mui/icons-material";
+import { Check } from "@mui/icons-material";
 import { BsClockHistory } from "react-icons/bs";
 import { saveAs } from "file-saver";
 import { RiDeleteBin6Line, RiLockPasswordLine } from "react-icons/ri";
@@ -251,7 +251,6 @@ const ClientProjectView = () => {
 
   const handleStepChange = async value => {
     // const { value } = e.target;
-    console.log(value);
     const pt = value?.split("$")[1];
     setPoint(parseInt(pt));
     if (step) {
@@ -264,7 +263,6 @@ const ClientProjectView = () => {
         if (selectedStep) {
           // setContent(selectedStep.content);
           const member = selectedStep.issueMember;
-          console.log(member);
           let issue = [];
           for (let i = 0; i < member?.length; i++) {
             switch (member[i]?.toLowerCase()) {
@@ -477,12 +475,12 @@ const ClientProjectView = () => {
     axios
       .get(`${process.env.REACT_APP_BASE_PATH}/api/project/databyid/${slug}`)
       .then(response => {
-        console.log(
-          response.data.data[0]?.project_status
-            .filter(item => item.name === name)[0]
-            .step?.filter(dt => dt.point === point && dt.content === content)[0]
-            .finalStatus[0]
-        );
+        // console.log(
+        //   response.data.data[0]?.project_status
+        //     .filter(item => item.name === name)[0]
+        //     .step?.filter(dt => dt.point === point && dt.content === content)[0]
+        //     .finalStatus[0]
+        // );
         if (response?.data?.status === 200) {
           setCurrentStatus(
             response.data.data[0]?.project_status
@@ -500,7 +498,6 @@ const ClientProjectView = () => {
               ?.dailyTask?.filter(tdate => tdate.taskDate === formatedtoday)
           );
         } else {
-          console.log(response);
           setTaskDetails([]);
         }
       })
@@ -1194,8 +1191,9 @@ const ClientProjectView = () => {
                             })}
                           />
                         </div>
-                        <span className="p-2 border border-primary rounded-full font-semibold text-primary cursor-pointer">
-                          <RiDeleteBin6Line
+                        {userType === "ROLE_ADMIN" && (
+                          <span
+                            className="p-2 text-lg border border-primary rounded-full font-semibold text-primary cursor-pointer"
                             onClick={() =>
                               confirmDeleteProjectStep(
                                 item?.siteID,
@@ -1203,9 +1201,10 @@ const ClientProjectView = () => {
                                 item?.step
                               )
                             }
-                            style={{ cursor: "pointer" }}
-                          />
-                        </span>
+                          >
+                            <RiDeleteBin6Line />
+                          </span>
+                        )}
                       </div>
                     </div>
                   </AccordionTrigger>

@@ -39,7 +39,6 @@ const UserOrders = () => {
         id: addressId,
       })
       .then(resp => {
-        console.log(resp?.data?.data);
         setAddress(resp?.data?.data);
         setOpen(true);
       })

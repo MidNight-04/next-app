@@ -489,7 +489,7 @@ const managerSidebar = [
     paraClass: "title",
     menuItem: [
       {
-        path: `/member/profile`,
+        path: "/admin/profile",
         iconName: <DashboardIcon />,
         feildName: "Profile",
         linkClassName: "adminNavLink",
@@ -502,19 +502,19 @@ const managerSidebar = [
     paraClass: "title",
     menuItem: [
       {
-        path: "/member/project/list",
+        path: "/admin/projects",
         iconName: <GroupIcon />,
         feildName: "Projects",
         linkClassName: "adminNavLink",
         subMenuItem: [],
       },
-      {
-        path: "/material-request/list",
-        iconName: <GroupIcon />,
-        feildName: "Material Request",
-        linkClassName: "adminNavLink",
-        subMenuItem: [],
-      },
+      // {
+      //   path: "/material-request/list",
+      //   iconName: <GroupIcon />,
+      //   feildName: "Material Request",
+      //   linkClassName: "adminNavLink",
+      //   subMenuItem: [],
+      // },
     ],
   },
   {
@@ -522,14 +522,14 @@ const managerSidebar = [
     paraClass: "title",
     menuItem: [
       {
-        path: "/member/taskdashboard",
+        path: "/admin/tasks/dashboard",
         iconName: <Dashboard />,
         feildName: "Dashboard",
         linkClassName: "adminNavLink",
         subMenuItem: [],
       },
       {
-        path: "/member/assign/task",
+        path: "/admin/tasks/assign",
         iconName: <AddTask />,
         feildName: "Assign Task",
         linkClassName: "adminNavLink",
@@ -549,7 +549,7 @@ const managerSidebar = [
     paraClass: "title",
     menuItem: [
       {
-        path: "/member/ticket/list",
+        path: "/admin/tickets",
         iconName: <ListAlt />,
         feildName: "Tickets",
         linkClassName: "adminNavLink",
@@ -679,6 +679,68 @@ const dealerSidebar = [
   },
 ];
 
+const siteEngineerSidebar = [
+  {
+    name: "Main",
+    paraClass: "title",
+    menuItem: [
+      {
+        path: "/admin/profile",
+        iconName: <DashboardIcon />,
+        feildName: "Profile",
+        linkClassName: "adminNavLink",
+        subMenuItem: [],
+      },
+    ],
+  },
+  {
+    name: "Project Management",
+    paraClass: "title",
+    menuItem: [
+      {
+        path: "/admin/projects",
+        iconName: <GroupIcon />,
+        feildName: "Projects",
+        linkClassName: "adminNavLink",
+        subMenuItem: [],
+      },
+      // {
+      //   path: "/material-request/list",
+      //   iconName: <GroupIcon />,
+      //   feildName: "Material Request",
+      //   linkClassName: "adminNavLink",
+      //   subMenuItem: [],
+      // },
+    ],
+  },
+  {
+    name: "Task Management",
+    paraClass: "title",
+    menuItem: [
+      {
+        path: "/admin/tasks/dashboard",
+        iconName: <Dashboard />,
+        feildName: "Dashboard",
+        linkClassName: "adminNavLink",
+        subMenuItem: [],
+      },
+    ],
+  },
+  {
+    name: "Tickets Management",
+    paraClass: "title",
+    menuItem: [
+      {
+        path: "/admin/tickets",
+        iconName: <ListAlt />,
+        feildName: "Tickets",
+        linkClassName: "adminNavLink",
+        subMenuItem: [],
+      },
+    ],
+  },
+];
+
 export const getDashboardSidebar = role => {
   switch (role) {
     case "ROLE_ADMIN":
@@ -703,9 +765,15 @@ export const getDashboardSidebar = role => {
       return managerSidebar;
 
     case "ROLE_SITE ENGINEER":
+      return siteEngineerSidebar;
+
+    case "ROLE_OPERATIONS":
       return managerSidebar;
 
-    case "ROLE_OPERATION":
+    case "ROLE_SITE SUPERVISOR":
+      return managerSidebar;
+
+    case "ROLE_HR":
       return managerSidebar;
 
     case "ROLE_ACCOUNTANT":

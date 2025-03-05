@@ -116,7 +116,6 @@ const Page = () => {
   };
 
   const handleDeletePoint = () => {
-    console.log(Id, stage);
     const data = {
       id: Id,
       payment: payment,

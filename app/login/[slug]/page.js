@@ -20,7 +20,6 @@ const Page = () => {
   const [showOtp, setShowOtp] = useState(false);
   const type = useAuthStore(state => state.type);
   const isAuth = useAuthStore(state => state.isAuth);
-  const store = useAuthStore(state => state);
 
   if (isAuth) {
     redirect("/admin/projects");
@@ -50,7 +49,7 @@ const Page = () => {
     <>
       {/* <Header /> */}
       <div className="bg-gray-100 h-screen flex justify-center items-center -md:">
-        <div className="bg-white p-8 w-1/4 -xl:w-2/4 -lg:2/3 -md:w-11/12 h-2/4 rounded-3xl shadow-lg">
+        <div className="bg-white p-8 w-1/4 -xl:w-2/4 -lg:2/3 -md:w-11/12 h-[32rem] rounded-3xl shadow-lg">
           <div className="flex flex-col w-full flex-auto justify-between h-full">
             <h1 className="font-ubuntu text-2xl font-semibold text-center text-primary">
               Welcome to Thikedaar Project Management

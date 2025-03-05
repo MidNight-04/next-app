@@ -2,20 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { DataGrid, gridClasses } from "@mui/x-data-grid";
 import axios from "axios";
-import {
-  Chip,
-  Button,
-  Modal,
-  Typography,
-  Box,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
-  TextField,
-  styled,
-} from "@mui/material";
+import { Modal, styled } from "@mui/material";
 import { toast } from "react-toastify";
 import Link from "next/link";
 import AsideContainer from "../../../components/AsideContainer";
@@ -72,7 +59,7 @@ const ClientTable = () => {
     { field: "name", headerName: "Name", width: 300 },
     { field: "email", headerName: "Email", width: 340 },
     { field: "phone", headerName: "Phone", width: 200 },
-    { field: "address", headerName: "Address", width: 300 },
+    { field: "address", headerName: "Address", width: 260 },
   ];
   useEffect(() => {
     getAllClient();
@@ -96,6 +83,7 @@ const ClientTable = () => {
   };
 
   const deleteClient = () => {
+    deleteHandler();
     axios
       .delete(
         `${process.env.REACT_APP_BASE_PATH}/api/client/delete/${clientId}`
@@ -175,7 +163,7 @@ const ClientTable = () => {
     {
       field: "action",
       headerName: "Action",
-      width: 300,
+      width: 280,
       renderCell: params => {
         return (
           <div className="flex flex-row items-center gap-2">

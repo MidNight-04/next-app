@@ -3,7 +3,7 @@ const nextConfig = {
   reactStrictMode: true,
   env: {
     REACT_APP_BASE_PATH: "https://api.thikedaar.in",
-    // REACT_APP_BASE_PATH: "http://localhost:8080",
+    // REACT_APP_BASE_PATH: "http://localhost:4000",
     NEXTAUTH_SECRET: "QAHzHrsHgYUL3hJcE/RprVVK2vxVyalv/LjsZl11n8U=",
   },
   images: {

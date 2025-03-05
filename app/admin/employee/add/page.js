@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { redirect, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import AsideContainer from "../../../../components/AsideContainer";
 import { toast } from "react-toastify";
 import { IoIosArrowBack } from "react-icons/io";

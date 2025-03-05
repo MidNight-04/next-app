@@ -10,6 +10,7 @@ const AsideContainer = ({ children }) => {
   // if (!isAuth) {
   //   return redirect("/homepage");
   // }
+  // console.log(isAuth);
 
   return (
     <SidebarProvider>

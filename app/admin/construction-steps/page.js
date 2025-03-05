@@ -82,8 +82,6 @@ const ConstructionStepTable = () => {
       });
   };
 
-  console.log(data);
-
   const confirmDelete = id => {
     setId(id);
     setOpen(true);
@@ -116,20 +114,21 @@ const ConstructionStepTable = () => {
     setAddFieldOpen(true);
     setNewField("");
     axios
-      .get(`${process.env.REACT_APP_BASE_PATH}/api/teammember/getall`)
+      .get(`${process.env.REACT_APP_BASE_PATH}/api/roles/getAllRoles`)
       .then(response => {
         if (response) {
-          const uniqueRoles = response.data.data.filter(
-            (user, index, self) =>
-              index === self.findIndex(u => u.role === user.role)
-          );
-          setMemberList(uniqueRoles);
+          // const uniqueRoles = response.data.data.filter(
+          //   (user, index, self) =>
+          //     index === self.findIndex(u => u.role === user.role)
+          // );
+          setMemberList(response.data.data);
         }
       })
       .catch(error => {
         console.log(error);
       });
   };
+
   const confirmDeleteField = (itemId, point) => {
     setId(itemId);
     setPoint(point);
@@ -224,6 +223,7 @@ const ConstructionStepTable = () => {
   };
 
   const memberChange = (value, isChecked) => {
+    console.log(value, isChecked);
     if (isChecked) {
       // Add role if checked
       if (!issueMember.includes(value)) {
@@ -236,8 +236,6 @@ const ConstructionStepTable = () => {
       );
     }
   };
-
-  console.log(data);
 
   return (
     <AsideContainer>
@@ -263,14 +261,15 @@ const ConstructionStepTable = () => {
             >
               <AccordionTrigger className="flex flex-row justify-between px-4 py-2 gap-4 rounded-3xl items-center">
                 <div className="flex flex-row justify-between w-full text-lg text-secondary">
-                  <div className="font-semibold flex items-center">
+                  <span className="font-semibold flex items-center">
                     {item.name}
-                  </div>
-                  <div className="p-2 rounded-full text-primary bg-primary-foreground border border-primary">
-                    <RiDeleteBin6Line
-                      onClick={() => confirmDelete(item?._id)}
-                    />
-                  </div>
+                  </span>
+                  <span
+                    className="p-2 rounded-full text-primary bg-primary-foreground border border-primary"
+                    onClick={() => confirmDelete(item?._id)}
+                  >
+                    <RiDeleteBin6Line />
+                  </span>
                 </div>
               </AccordionTrigger>
               <AccordionContent className="bg-[#efefef] pb-0">
@@ -328,22 +327,26 @@ const ConstructionStepTable = () => {
                           </td>
                           <td>
                             <span className="flex flex-row items-center gap-2 -md:w-24 pr-5 justify-end">
-                              <span className="p-2 rounded-full text-primary bg-primary-foreground border border-primary cursor-pointer">
+                              <span
+                                className="p-2 rounded-full text-primary bg-primary-foreground border border-primary cursor-pointer"
+                                onClick={() =>
+                                  AddNewField(item?._id, itm?.point)
+                                }
+                              >
                                 <FaPlus
-                                  onClick={() =>
-                                    AddNewField(item?._id, itm?.point)
-                                  }
                                   data-tooltip-id="my-tooltip1"
                                   data-tooltip-content="Add New Field"
                                   data-tooltip-place="top"
                                 />
                               </span>
-                              <span className="p-2 rounded-full text-primary bg-primary-foreground border border-primary cursor-pointer">
+                              <span
+                                className="p-2 rounded-full text-primary bg-primary-foreground border border-primary cursor-pointer"
+                                onClick={e => {
+                                  e.stopPropagation();
+                                  confirmDeleteField(item?._id, itm?.point);
+                                }}
+                              >
                                 <TiMinus
-                                  onClick={e => {
-                                    e.stopPropagation();
-                                    confirmDeleteField(item?._id, itm?.point);
-                                  }}
                                   data-tooltip-id="my-tooltip2"
                                   data-tooltip-content="Delete Field"
                                   data-tooltip-place="top"
@@ -415,7 +418,7 @@ const ConstructionStepTable = () => {
         <div className="bg-white w-2/3 p-8 rounded-3xl outline-none -lg:w-4/5 -md:w-11/12">
           <div>
             <h3 className=" text-2xl font-semibold font-ubuntu">
-              Add New Process
+              Add New Process Step
             </h3>
             <hr className="my-4" />
           </div>
@@ -502,29 +505,18 @@ const ConstructionStepTable = () => {
                   placeholder="Enter Duration"
                   name="duration"
                   min={1}
-                  onChange={e => setCheckListName(e.target.value)}
+                  onChange={e => setDuration(e.target.value)}
                 />
               </div>
             </div>
             <FormControl fullWidth sx={{ marginTop: "8px" }}>
               <label className="font-semibold">Issue Member</label>
               <div className="grid grid-cols-4 w-3/5 -2xl:w-full -lg:grid-cols-3 -md:grid-cols-2">
-                <FormControlLabel
-                  value="admin"
-                  control={<Checkbox />}
-                  label="Admin"
-                  sx={{
-                    "& svg": {
-                      fill: "#93bfcf",
-                    },
-                  }}
-                  onChange={e => memberChange(e.target.value, e.target.checked)}
-                />
                 {memberList?.map((data, id) => {
                   return (
                     <FormControlLabel
                       key={data._id}
-                      value={data._id}
+                      value={data.name}
                       control={<Checkbox />}
                       label={data.name}
                       sx={{

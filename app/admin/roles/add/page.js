@@ -22,7 +22,7 @@ const AddRoleForm = () => {
             toast.success(response.data.message, {
               position: "top-right",
             });
-            redirect("/admin/roles");
+            router.push("/admin/roles");
           }
         })
         .catch(error => {

@@ -62,7 +62,7 @@ const MemberTable = () => {
     { field: "role", headerName: "Role", width: 200 },
     { field: "email", headerName: "Email", width: 280 },
     { field: "phone", headerName: "Phone", width: 140 },
-    { field: "address", headerName: "Address", width: 390 },
+    { field: "address", headerName: "Address", width: 360 },
   ];
   useEffect(() => {
     getAllMember();

@@ -16,7 +16,7 @@ import {
 import Link from "next/link";
 import { useAuthStore } from "../../store/useAuthStore";
 import { getDashboardSidebar } from "../../constant/dashboardSidebarData";
-import { redirect, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { cn } from "../../lib/utils";
 import Image from "next/image";
 
@@ -34,7 +34,12 @@ const SideNav = () => {
               href={"/admin/home"}
               className="text-lg pt-[14px] font-semibold"
             >
-              <Image src="/assets/LOGO.png" alt="log" height={30} width={184} />
+              <Image
+                src="/assets/LOGO-1.jpg"
+                alt="log"
+                height={30}
+                width={184}
+              />
             </Link>
           </SidebarHeader>
           <SidebarGroupContent>

@@ -285,7 +285,7 @@ const Page = () => {
                           <RiBuilding4Line />
                         </div>
                         <div className="text-lg font-bold text-secondary">
-                          {item?.floor === "0" ? `Ground ` : `G+${item.floor} `}
+                          {item?.floor === "G" ? `Ground ` : `${item.floor} `}
                           Floor
                         </div>
                       </div>

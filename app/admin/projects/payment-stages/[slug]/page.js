@@ -1,13 +1,9 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { DataGrid } from "@mui/x-data-grid";
 import axios from "axios";
 import {
-  Chip,
   Button,
-  Modal,
   Typography,
-  Box,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -16,26 +12,14 @@ import {
   TextField,
 } from "@mui/material";
 import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import { FaMinus, FaPlus } from "react-icons/fa6";
-import { TiArrowSortedDown, TiArrowSortedUp } from "react-icons/ti";
 import { useAuthStore } from "../../../../../store/useAuthStore";
 import { useParams } from "next/navigation";
 import AsideContainer from "../../../../../components/AsideContainer";
 import { cn } from "../../../../../lib/utils";
 import { IoIosArrowBack } from "react-icons/io";
 import { useRouter } from "next/navigation";
-const style = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: 500,
-  bgcolor: "background.paper",
-  border: "2px solid #000",
-  boxShadow: 25,
-  p: 4,
-};
+import { FiEdit } from "react-icons/fi";
+import { MdOutlineDelete } from "react-icons/md";
 
 let today = new Date();
 let yyyy = today.getFullYear();
@@ -46,8 +30,7 @@ if (mm < 10) mm = "0" + mm;
 let formatedtoday = yyyy + "-" + mm + "-" + dd;
 
 const Page = () => {
-  // const userRole = useAuthStore(state => state.userType);
-  const userRole = "client";
+  const userRole = useAuthStore(state => state.userType);
   const router = useRouter();
   const activeUser = useAuthStore(state => state.userId[0]);
   const userName = useAuthStore(state => state.username[0]);
@@ -302,14 +285,14 @@ const Page = () => {
             </h1>
           </div>
         </div>
-        <div>
+        <div className="mb-6">
           {data?.map((item, index) => {
             return (
               <div key={index}>
                 <div>
                   <div>
                     <div className="bg-white rounded-3xl p-5 text-secondary font-semibold text-lg text-center">
-                      {item?.floor === "0" ? `Ground ` : `G+${item.floor} `}
+                      {item?.floor === "0" ? `Ground ` : `${item.floor} `}
                       Floor
                     </div>
                     {/* <p>
@@ -328,14 +311,14 @@ const Page = () => {
                   </div>
                   {/* {showContent[index] && ( */}
                   <>
-                    {userRole?.substring(5).toLowerCase() === "admin" && (
+                    {/* {userRole === "ROLE_ADMIN" && (
                       <span
                         className="add"
                         onClick={() => handleAddOpen(item?._id, item?.floor)}
                       >
                         Add
                       </span>
-                    )}
+                    )} */}
                     <div className="bg-white  rounded-3xl mt-6">
                       <table className="w-full">
                         <thead>
@@ -343,12 +326,25 @@ const Page = () => {
                             <th className="p-5 rounded-tl-3xl" scope="col">
                               Payment %
                             </th>
-                            <th className="p-5 rounded-tr-3xl" scope="col">
+                            <th
+                              className={cn(
+                                "p-5",
+                                userRole !== "ROLE_ADMIN" && "rounded-tr-3xl"
+                              )}
+                              scope="col"
+                            >
                               Stages
                             </th>
-                            {userRole?.substring(5).toLowerCase() ===
-                            "admin" ? (
-                              <th scope="col">Action</th>
+                            {userRole === "ROLE_ADMIN" ? (
+                              <th
+                                scope="col"
+                                className={cn(
+                                  "p-5",
+                                  userRole === "ROLE_ADMIN" && "rounded-tr-3xl"
+                                )}
+                              >
+                                Action
+                              </th>
                             ) : (
                               ""
                             )}
@@ -386,10 +382,10 @@ const Page = () => {
                                 >
                                   {itm.stage}
                                 </td>
-                                {userRole?.substring(5).toLowerCase() ===
-                                "admin" ? (
-                                  <td className="data-action">
+                                {userRole === "ROLE_ADMIN" ? (
+                                  <td className="flex flex-row gap-2 items-center justify-center h-[52px]">
                                     <span
+                                      className="p-2 rounded-full border border-primary text-primary bg-primary-foreground cursor-pointer"
                                       onClick={() =>
                                         handleUpdateOpen(
                                           item?._id,
@@ -398,10 +394,10 @@ const Page = () => {
                                         )
                                       }
                                     >
-                                      Edit
+                                      <FiEdit className="text-xl" />
                                     </span>
                                     <span
-                                      className="delete"
+                                      className="p-2 rounded-full border border-primary text-primary bg-primary-foreground cursor-pointer"
                                       onClick={() =>
                                         handleConfirmDelete(
                                           item?._id,
@@ -410,7 +406,7 @@ const Page = () => {
                                         )
                                       }
                                     >
-                                      Delete
+                                      <MdOutlineDelete className="text-xl" />
                                     </span>
                                   </td>
                                 ) : (

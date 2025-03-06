@@ -70,7 +70,7 @@ const AddPaymentStagesForm = () => {
           });
           setFloor("");
           setStages("");
-          router.push("/admin/paymentstages/list");
+          router.push("/admin/payment-stages");
         })
         .catch(err => {
           //   console.log(err);
@@ -106,6 +106,7 @@ const AddPaymentStagesForm = () => {
     // Save the Blob as an Excel file
     saveAs(dataBlob, "paymentstagesample.xlsx");
   };
+  console.log(floorList);
   return (
     <AsideContainer>
       {/* <AdminSidebar /> */}
@@ -169,8 +170,8 @@ const AddPaymentStagesForm = () => {
                     Floor<span className="text-red-500">*</span>
                   </label>
                   <Select
-                    onValueChange={e => setFloor(e.target.value)}
-                    className="h-12 "
+                    onValueChange={value => setFloor(value)}
+                    className="h-12"
                   >
                     <SelectTrigger className="h-12 border border-primary px-4 text-gray-400 rounded-[7px]">
                       <SelectValue placeholder="Select" />
@@ -178,7 +179,7 @@ const AddPaymentStagesForm = () => {
                     <SelectContent>
                       {floorList?.map((item, index) => {
                         return (
-                          <SelectItem key={index} value={index}>
+                          <SelectItem key={index} value={item.name}>
                             {item?.name}
                           </SelectItem>
                         );

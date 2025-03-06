@@ -204,7 +204,7 @@ const Page = () => {
                           </span>
                           <span className="flex gap-2 justify-center items-center p-2 bg-primary-foreground rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl -md:p-1 -md:text-xs">
                             <BsBuilding className="icon" />
-                            <p>Floors : {`G + ${item.floor}`}</p>
+                            <p>Floors : {item.floor}</p>
                           </span>
                           <span className="flex gap-2 justify-center items-center p-2 bg-primary-foreground rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl -md:p-1 -md:text-xs">
                             <GiDuration className="icon" />

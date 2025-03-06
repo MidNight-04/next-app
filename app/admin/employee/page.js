@@ -97,6 +97,7 @@ const MemberTable = () => {
   };
 
   const deleteMember = () => {
+    setConfirmationDelete(prev => !prev);
     axios
       .delete(
         `${process.env.REACT_APP_BASE_PATH}/api/teammember/delete/${userId}`
@@ -183,11 +184,13 @@ const MemberTable = () => {
       name: row?.name,
       employeeID: row?.employeeID,
       email: row?.email,
-      role: row?.role.name,
+      role: row?.role?.name,
       phone: row?.phone,
       address: row?.address,
     });
   });
+
+  console.log(memberList);
 
   const actionColumn = [
     {
@@ -376,7 +379,7 @@ const MemberTable = () => {
                   <MenuItem value="">Select Role</MenuItem>
                   {roleList?.map((item, index) => {
                     return (
-                      <MenuItem value={item?.name} key={index}>
+                      <MenuItem value={item?._id} key={index}>
                         {item?.name}
                       </MenuItem>
                     );

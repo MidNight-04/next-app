@@ -17,7 +17,7 @@ import { Checkbox } from "../../../../components/ui/checkbox";
 
 const AddProjectForm = () => {
   const router = useRouter();
-  const userName = useAuthStore(state => state.userName);
+  const userName = useAuthStore(state => state.username);
   const activeUser = useAuthStore(state => state.userId);
   const [data, setData] = useState({
     name: "",
@@ -239,36 +239,36 @@ const AddProjectForm = () => {
           uploadData,
         })
         .then(response => {
-          if (response.data.status === 201) {
-            setData({
-              name: "",
-              siteID: "",
-              location: "",
-              client: "",
-              plan: "",
-              floor: "",
-              area: "",
-              cost: "",
-              date: "",
-              duration: "",
-              manager: [],
-              accountant: [],
-              engineer: [],
-              sr_engineer: [],
-              contractor: [],
-              operation: [],
-              admin: [],
-              sales: [],
-            });
-            toast.success(response.data.message, {
-              position: "top-right",
-            });
-            router.push("/admin/projects");
-          } else {
-            toast.error(response.data.message, {
-              position: "top-right",
-            });
-          }
+          // if (response.data.status === 201) {
+          //   setData({
+          //     name: "",
+          //     siteID: "",
+          //     location: "",
+          //     client: "",
+          //     plan: "",
+          //     floor: "",
+          //     area: "",
+          //     cost: "",
+          //     date: "",
+          //     duration: "",
+          //     manager: [],
+          //     accountant: [],
+          //     engineer: [],
+          //     sr_engineer: [],
+          //     contractor: [],
+          //     operation: [],
+          //     admin: [],
+          //     sales: [],
+          //   });
+          //   toast.success(response.data.message, {
+          //     position: "top-right",
+          //   });
+          //   router.push("/admin/projects");
+          // } else {
+          //   toast.error(response.data.message, {
+          //     position: "top-right",
+          //   });
+          // }
         })
         .catch(error => {
           console.log(error);
@@ -365,7 +365,7 @@ const AddProjectForm = () => {
                         </SelectTrigger>
                         <SelectContent>
                           {floorList?.map((item, index) => (
-                            <SelectItem key={index} value={index}>
+                            <SelectItem key={index} value={item.name}>
                               {item?.name}
                             </SelectItem>
                           ))}

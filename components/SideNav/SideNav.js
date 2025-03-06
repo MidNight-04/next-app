@@ -27,7 +27,7 @@ const SideNav = () => {
 
   return (
     <Sidebar>
-      <SidebarContent className="bg-[#0B192C]">
+      <SidebarContent className="bg-secondary">
         <SidebarGroup className="pr-0 pl-5">
           <SidebarHeader>
             <Link

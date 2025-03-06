@@ -65,13 +65,13 @@ const SigninForm = ({ showOtp }) => {
           <Form>
             <div className="flex flex-col gap-2">
               <label htmlFor="username" className="font-semibold">
-                Username
+                Email or Phone
               </label>
               <Field
                 className="p-2 border bg-[#f3f4f6] border-primary outline-none rounded-[7px]"
                 id="username"
                 name="username"
-                placeholder="Enter Username"
+                placeholder="Enter Email or Phone"
                 // style={{
                 //   padding: ".5rem",
                 //   width: "100%",

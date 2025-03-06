@@ -20,10 +20,11 @@ import { IoIosArrowBack, IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import { useParams } from "next/navigation";
 import AsideContainer from "../../../../../components/AsideContainer";
 import { useRouter } from "next/navigation";
+import { useAuthStore } from "../../../../../store/useAuthStore";
 
 const Page = () => {
-  const userRole = "client";
-  const activeUser = localStorage.getItem("activeUser");
+  const userType = useAuthStore(state => state.userType);
+  const activeUser = useAuthStore(state => state.userId);
   const { slug } = useParams();
   const [data, setData] = useState([]);
   const [showPaymentDetails, setShowPaymentDetails] = useState(false);
@@ -49,37 +50,36 @@ const Page = () => {
       return newState;
     });
   };
+  const fetchData = async () => {
+    try {
+      const projectResponse = await axios.get(
+        `${process.env.REACT_APP_BASE_PATH}/api/project/databyid/${slug}`
+      );
+      setProjectDetails(projectResponse?.data?.data[0]);
+
+      const paymentDetailsResponse = await axios.get(
+        `${process.env.REACT_APP_BASE_PATH}/api/project/paydetailbysiteid/${slug}`
+      );
+      setPayDetails(paymentDetailsResponse?.data?.data);
+
+      const stagesResponse =
+        userType?.substring(5).toLowerCase() === "client"
+          ? await axios.post(
+              `${process.env.REACT_APP_BASE_PATH}/api/project/paymentstages/forclient`,
+              { siteID: slug, clientID: activeUser }
+            )
+          : await axios.get(
+              `${process.env.REACT_APP_BASE_PATH}/api/project/paymentstages/bysiteid/${slug}`
+            );
+
+      setData(stagesResponse?.data?.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const projectResponse = await axios.get(
-          `${process.env.REACT_APP_BASE_PATH}/api/project/databyid/${slug}`
-        );
-        setProjectDetails(projectResponse?.data?.data[0]);
-
-        const paymentDetailsResponse = await axios.get(
-          `${process.env.REACT_APP_BASE_PATH}/api/project/paydetailbysiteid/${slug}`
-        );
-        setPayDetails(paymentDetailsResponse?.data?.data);
-
-        const stagesResponse =
-          userRole?.substring(5).toLowerCase() === "client"
-            ? await axios.post(
-                `${process.env.REACT_APP_BASE_PATH}/api/project/paymentstages/forclient`,
-                { siteID: slug, clientID: activeUser }
-              )
-            : await axios.get(
-                `${process.env.REACT_APP_BASE_PATH}/api/project/paymentstages/bysiteid/${slug}`
-              );
-
-        setData(stagesResponse?.data?.data);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
     fetchData();
-  }, [slug, userRole, activeUser]);
+  }, [slug, userType, activeUser]);
 
   const payProjectAmount = stage => {
     setpayBox(true);
@@ -88,6 +88,15 @@ const Page = () => {
 
   const handleClosePayBox = () => {
     setpayBox(false);
+  };
+
+  const updatePaymentStatus = stage => {
+    const fetch = axios
+      .post(
+        `${process.env.REACT_APP_BASE_PATH}/api/project/updatepaymentstages/bysiteid/${slug}`,
+        { stage }
+      )
+      .then(() => fetchData());
   };
 
   const handlePayment = () => {
@@ -336,15 +345,29 @@ const Page = () => {
             {data[0]?.stages?.map((item, index) => {
               return (
                 <div key={index} className="bg-gray-300 rounded-3xl mb-4">
-                  <div className="bg-secondary rounded-t-3xl font-semibold">
-                    <p className="text-primary p-5">
-                      {item?.stage}
-                      {` (${item?.payment}%)`}
-                    </p>
+                  <div className="bg-secondary rounded-t-3xl font-semibold flex flex-row items-center justify-between">
+                    <div className="text-primary p-5">
+                      <span>
+                        {item?.stage}
+                        {` (${item?.payment}%)`}
+                      </span>
+                      <span className="p-1 border border-primary-foreground rounded-md ml-4 text-secondary-foreground font-ubuntu text-sm">
+                        {item?.paymentStatus}
+                      </span>
+                    </div>
                     {/* <p className="date">
                     <FaRegCalendarAlt className="fs-5" />
                     <span className="mx-2">27 july 2024</span>
                   </p> */}
+                    {userType === "ROLE_ADMIN" &&
+                      item.paymentStatus !== "Paid" && (
+                        <button
+                          onClick={() => updatePaymentStatus(item.stage)}
+                          className="px-3 bg-primary border-2 border-secondary rounded-full font-ubuntu -md:px-2 py-[6px] mx-4"
+                        >
+                          Update Status
+                        </button>
+                      )}
                   </div>
                   <div className="flex flex-row items-center bg-primary-foreground justify-between p-2">
                     <div className="flex flex-row items-center justify-between w-full p-5">
@@ -421,7 +444,10 @@ const Page = () => {
                   )}
                   <div className="flex flex-row items-center bg-secondary-foreground  p-2 w-full rounded-b-3xl">
                     <div className="flex flex-row items-center gap-2 w-full p-5 justify-between">
-                      Outstanding Amount:
+                      {item.paymentStatus !== "Paid"
+                        ? " Outstanding Amount:"
+                        : "Paid Amount"}
+
                       <span className="flex flex-row items-center gap">
                         <span>
                           <FaRupeeSign />
@@ -430,7 +456,7 @@ const Page = () => {
                           totalPaymentAmount(item.stage)}
                       </span>
                     </div>
-                    {/* {userRole === "ROLE_CLIENT" && (
+                    {/* {userType === "ROLE_CLIENT" && (
                       <button
                         className="p-[6px] px-3 bg-transparent border-2 border-secondary rounded-full font-ubuntu hover:bg-secondary text-nowrap [&_p]:hover:text-primary [&_svg]:hover:text-primary"
                         onClick={() => payProjectAmount(item.stage)}

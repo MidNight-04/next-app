@@ -32,8 +32,8 @@ let formatedtoday = yyyy + "-" + mm + "-" + dd;
 const Page = () => {
   const userRole = useAuthStore(state => state.userType);
   const router = useRouter();
-  const activeUser = useAuthStore(state => state.userId[0]);
-  const userName = useAuthStore(state => state.username[0]);
+  const activeUser = useAuthStore(state => state.userId);
+  const userName = useAuthStore(state => state.username);
   const { slug } = useParams();
   const [data, setData] = useState([]);
   const [updateOpen, setUpdateOpen] = useState(false);

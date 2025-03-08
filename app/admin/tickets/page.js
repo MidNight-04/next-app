@@ -26,7 +26,7 @@ const Page = () => {
   const [ticketList, setTicketList] = useState([]);
   const router = useRouter();
   const [status, setStatus] = useState("");
-  const [filteredTickets, setFilteredTickets] = useState([]);
+  const [filteredTickets, setFilteredTickets] = useState(null);
   const [projectList, setProjectList] = useState([]);
   const [memberList, setMemberList] = useState([]);
   const [clientList, setClientList] = useState([]);
@@ -388,7 +388,7 @@ const Page = () => {
               </Link>
             </div>
           ))}
-          {filteredTickets?.length === 0 && (
+          {!filteredTickets && (
             <p className="mt-5 text-warning text-center">
               No ticket available...
             </p>

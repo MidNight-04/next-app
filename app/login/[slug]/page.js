@@ -20,6 +20,8 @@ const Page = () => {
   const [showOtp, setShowOtp] = useState(false);
   const type = useAuthStore(state => state.type);
   const isAuth = useAuthStore(state => state.isAuth);
+  const state = useAuthStore(state => state);
+  console.log(state);
 
   if (isAuth) {
     redirect("/admin/projects");

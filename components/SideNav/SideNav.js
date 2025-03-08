@@ -30,15 +30,11 @@ const SideNav = () => {
       <SidebarContent className="bg-secondary">
         <SidebarGroup className="pr-0 pl-5">
           <SidebarHeader>
-            <Link
-              href={"/admin/home"}
-              className="text-lg pt-[14px] font-semibold"
-            >
-              <Image
-                src="/assets/LOGO-1.jpg"
+            <Link href={"/admin/home"} className="pt-[14px]">
+              <img
+                src="/bldox_light.svg"
                 alt="log"
-                height={30}
-                width={184}
+                className="h-32 w-52 fill-red-500 text-red-500"
               />
             </Link>
           </SidebarHeader>

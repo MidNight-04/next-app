@@ -12,6 +12,8 @@ import {
   DialogActions,
   TextField,
   FormControl,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -33,6 +35,9 @@ const Page = () => {
   const [payBox, setpayBox] = useState(false);
   const [payAmount, setPayAmount] = useState("");
   const [paymentStage, setPaymentStage] = useState("");
+  const [OpenStatus, setOpenStatus] = useState(false);
+  const [stage, setStage] = useState("");
+  const [status, setStatus] = useState("");
   const [pay, setPay] = useState(0);
   const router = useRouter();
 
@@ -90,11 +95,11 @@ const Page = () => {
     setpayBox(false);
   };
 
-  const updatePaymentStatus = stage => {
+  const updatePaymentStatus = () => {
     const fetch = axios
       .post(
         `${process.env.REACT_APP_BASE_PATH}/api/project/updatepaymentstages/bysiteid/${slug}`,
-        { stage }
+        { stage, status }
       )
       .then(() => fetchData());
   };
@@ -362,7 +367,10 @@ const Page = () => {
                     {userType === "ROLE_ADMIN" &&
                       item.paymentStatus !== "Paid" && (
                         <button
-                          onClick={() => updatePaymentStatus(item.stage)}
+                          onClick={() => {
+                            setStage(item.stage);
+                            setOpenStatus(true);
+                          }}
                           className="px-3 bg-primary border-2 border-secondary rounded-full font-ubuntu -md:px-2 py-[6px] mx-4"
                         >
                           Update Status
@@ -398,8 +406,11 @@ const Page = () => {
                       <table className="w-full">
                         <thead>
                           <tr>
-                            <th className="font-semibold">Mode</th>
-                            <th className="font-semibold">Date</th>
+                            <th />
+                            {item.paidOn !== "" && (
+                              <th className="font-semibold">Date</th>
+                            )}
+
                             <th className="font-semibold">Amount</th>
                           </tr>
                         </thead>
@@ -415,26 +426,49 @@ const Page = () => {
                                         ?.paymentMode
                                     }
                                   </td>
-                                  <td>{detail.createdAt}</td>
                                   <td>
                                     <span>
                                       <FaRupeeSign />
                                       {detail.paymentAmount}
                                     </span>
-                                    <span>{/* <FiDownload /> */}</span>
                                   </td>
                                 </tr>
                               );
                             })}
                           <tr className="w-full">
                             <td>
-                              <strong>Total Amount Pay:</strong>
+                              {item.paymentStatus !== "Paid" ? (
+                                <strong>Amount to Pay:</strong>
+                              ) : (
+                                <strong>Amount Paid:</strong>
+                              )}
                             </td>
-                            <td />
+                            {item.paidOn !== "" && (
+                              <td>
+                                {new Date(item.paidOn).toLocaleDateString(
+                                  "en-IN",
+                                  {
+                                    year: "numeric",
+                                    month: "long",
+                                    day: "numeric",
+                                  }
+                                )}
+                              </td>
+                            )}
                             <td>
                               <span className="flex flex-row justify-center items-center">
                                 <FaRupeeSign />
-                                {totalPaymentAmount(item.stage)}
+                                {item.paymentStatus !== "Paid" ? (
+                                  <strong>
+                                    {totalPaymentAmount(item.stage)}
+                                  </strong>
+                                ) : (
+                                  <strong>
+                                    {(item.payment * projectDetails.cost) /
+                                      100 -
+                                      totalPaymentAmount(item.stage)}
+                                  </strong>
+                                )}
                               </span>
                             </td>
                           </tr>
@@ -447,7 +481,6 @@ const Page = () => {
                       {item.paymentStatus !== "Paid"
                         ? " Outstanding Amount:"
                         : "Paid Amount"}
-
                       <span className="flex flex-row items-center gap">
                         <span>
                           <FaRupeeSign />
@@ -471,6 +504,56 @@ const Page = () => {
           </section>
         </div>
       </div>
+      <Modal
+        open={OpenStatus}
+        onClose={() => {}}
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <div className="bg-white w-1/3 p-8 rounded-3xl outline-none -md:w-3/4">
+          <div>
+            <h3 className=" text-2xl font-semibold font-ubuntu">
+              Update Payment Status
+            </h3>
+            <hr className="my-4" />
+          </div>
+          <div className="w-full">
+            <Select
+              labelId="status-simple-select-label"
+              id="status-simple-select"
+              value={status}
+              name="status"
+              onChange={e => setStatus(e.target.value)}
+              sx={{ width: "100%" }}
+            >
+              <MenuItem value="Not Due Yet">Not Due Yet</MenuItem>
+              <MenuItem value="Due">Due</MenuItem>
+              <MenuItem value="Overdue">Overdue</MenuItem>
+              <MenuItem value="Paid">Paid</MenuItem>
+            </Select>
+          </div>
+          <div className="flex flex-row gap-2 justify-end mt-4">
+            <button
+              className="bg-primary-foreground border border-secondary text-secondary rounded-3xl px-4 py-2 flex flex-row  items-center"
+              onClick={() => setOpenStatus(false)}
+            >
+              Cancel
+            </button>
+            <button
+              className="bg-secondary text-primary rounded-3xl px-4 py-2 flex flex-row  items-center"
+              onClick={() => {
+                setOpenStatus(false);
+                updatePaymentStatus();
+              }}
+            >
+              Update Status
+            </button>
+          </div>
+        </div>
+      </Modal>
 
       <Dialog open={payBox} onClose={handleClosePayBox}>
         <DialogTitle className="text-uppercase fs-5 text-center">

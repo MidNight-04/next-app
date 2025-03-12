@@ -2,7 +2,7 @@
 import axios from "axios";
 import { useRouter, redirect } from "next/navigation";
 import { useState } from "react";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import AsideContainer from "../../../../components/AsideContainer";
 import { IoIosArrowBack } from "react-icons/io";
 
@@ -19,7 +19,7 @@ const AddProjectFloorForm = () => {
         .then(response => {
           if (response) {
             setFloor("");
-            toast.success(response.data.message, {
+            toast(response.data.message, {
               position: "top-right",
             });
             redirect("/admin/floors");
@@ -29,7 +29,7 @@ const AddProjectFloorForm = () => {
           console.log(error);
         });
     } else {
-      toast.error("Floor is mandatory", {
+      toast("Floor is mandatory", {
         position: "top-right",
       });
     }

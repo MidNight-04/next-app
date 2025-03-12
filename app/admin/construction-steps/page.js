@@ -11,7 +11,7 @@ import {
   Select,
   MenuItem,
 } from "@mui/material";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import { FaMinus, FaPlus } from "react-icons/fa6";
 // import { Tooltip } from "react-tooltip";
 import { TiMinus } from "react-icons/ti";
@@ -97,9 +97,7 @@ const ConstructionStepTable = () => {
       )
       .then(response => {
         if (response) {
-          toast.warning("Record deleted successfully", {
-            position: "top-right",
-          });
+          toast("Record deleted successfully");
           getAllConstructionStep();
           setOpen(false);
         }
@@ -146,17 +144,13 @@ const ConstructionStepTable = () => {
       )
       .then(response => {
         if (response) {
-          toast.success("Construction field deleted successfully", {
-            position: "top-right",
-          });
+          toast("Construction field deleted successfully");
           setDeleteDialogOpen(false);
           getAllConstructionStep();
         }
       })
       .catch(error => {
-        toast.error("Error while delete construction field", {
-          position: "top-right",
-        });
+        toast("Error while delete construction field");
         console.log(error);
       });
   };
@@ -170,25 +164,15 @@ const ConstructionStepTable = () => {
   };
   const handleUpdateNewField = () => {
     if (!newField) {
-      toast.error("New field is required", {
-        position: "top-center",
-      });
+      toast("New field is required");
     } else if (!checkList) {
-      toast.error("Check List status is required", {
-        position: "top-center",
-      });
+      toast("Check List status is required");
     } else if (checkList === "yes" && !checkListName) {
-      toast.error("CheckList name is required", {
-        position: "top-center",
-      });
+      toast("CheckList name is required");
     } else if (!duration) {
-      toast.error("Duration is required", {
-        position: "top-center",
-      });
+      toast("Duration is required");
     } else if (issueMember?.length === 0) {
-      toast.error("Issue member is required", {
-        position: "top-center",
-      });
+      toast("Issue member is required");
     } else {
       const data = {
         id: id,
@@ -206,17 +190,13 @@ const ConstructionStepTable = () => {
         )
         .then(response => {
           if (response) {
-            toast.success("New construction field added successfully", {
-              position: "top-right",
-            });
+            toast("New construction field added successfully");
             getAllConstructionStep();
             setAddFieldOpen(false);
           }
         })
         .catch(error => {
-          toast.error("Error while add new construction field", {
-            position: "top-right",
-          });
+          toast("Error while add new construction field");
           console.log(error);
         });
     }

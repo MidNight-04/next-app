@@ -3,7 +3,7 @@ import AsideContainer from "../../../../components/AsideContainer";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import { IoIosArrowBack } from "react-icons/io";
 import { useAuthStore } from "../../../../store/useAuthStore";
 import {
@@ -142,73 +142,39 @@ const AddProjectForm = () => {
 
   const submitFormData = () => {
     if (!data.name) {
-      toast.error("Name is required", {
-        position: "top-right",
-      });
-      // } else if (!data.siteID) {
-      //   toast.error("Site ID is required", {
-      //     position: "top-right",
-      //   });
-      // } else if (!data.location) {
-      //   toast.error("Location is required", {
-      //     position: "top-right",
-      //   });
-      // } else if (!data.client) {
-      //   toast.error("Client is required", {
-      //     position: "top-right",
-      //   });
-      // } else if (!data.floor) {
-      //   toast.error("Floor is required", {
-      //     position: "top-right",
-      //   });
-      // } else if (!data.area) {
-      //   toast.error("Area is required", {
-      //     position: "top-right",
-      //   });
-      // } else if (!data.cost) {
-      //   toast.error("Cost is required", {
-      //     position: "top-right",
-      //   });
-      // } else if (!data.date) {
-      //   toast.error("Start date is required", {
-      //     position: "top-right",
-      //   });
-      // } else if (!data.duration) {
-      //   toast.error("Duration is required", {
-      //     position: "top-right",
-      //   });
-      // } else if (data.admin?.length === 0) {
-      //   toast.error("Admin is required", {
-      //     position: "top-right",
-      //   });
-      // } else if (data.manager?.length === 0) {
-      //   toast.error("Project Manager is required", {
-      //     position: "top-right",
-      //   });
-      // } else if (data.sr_engineer?.length === 0) {
-      //   toast.error("Sr. Engineer is required", {
-      //     position: "top-right",
-      //   });
-      // } else if (data.engineer?.length === 0) {
-      //   toast.error("Site Engineer is required", {
-      //     position: "top-right",
-      //   });
-      // } else if (data.accountant?.length === 0) {
-      //   toast.error("Accountant is required", {
-      //     position: "top-right",
-      //   });
-      // } else if (data.operation?.length === 0) {
-      //   toast.error("Operation is required", {
-      //     position: "top-right",
-      //   });
-      // } else if (data.sales?.length === 0) {
-      //   toast.error("Sales is required", {
-      //     position: "top-right",
-      //   });
-      // } else if (data.contractor?.length === 0) {
-      //   toast.error("Contractor is required", {
-      //     position: "top-right",
-      //   });
+      toast("Name is required");
+    } else if (!data.siteID) {
+      toast("Site ID is required");
+    } else if (!data.location) {
+      toast("Location is required");
+    } else if (!data.client) {
+      toast("Client is required");
+    } else if (!data.floor) {
+      toast("Floor is required");
+    } else if (!data.area) {
+      toast("Area is required");
+    } else if (!data.cost) {
+      toast("Cost is required");
+    } else if (!data.date) {
+      toast("Start date is required");
+    } else if (!data.duration) {
+      toast("Duration is required");
+    } else if (data.admin?.length === 0) {
+      toast("Admin is required");
+    } else if (data.manager?.length === 0) {
+      toast("Project Manager is required");
+    } else if (data.sr_engineer?.length === 0) {
+      toast("Sr. Engineer is required");
+    } else if (data.engineer?.length === 0) {
+      toast("Site Engineer is required");
+    } else if (data.accountant?.length === 0) {
+      toast("Accountant is required");
+    } else if (data.operation?.length === 0) {
+      toast("Operation is required");
+    } else if (data.sales?.length === 0) {
+      toast("Sales is required");
+    } else if (data.contractor?.length === 0) {
+      toast("Contractor is required");
     } else {
       const uploadData = {
         name: data.name,
@@ -239,36 +205,32 @@ const AddProjectForm = () => {
           uploadData,
         })
         .then(response => {
-          // if (response.data.status === 201) {
-          //   setData({
-          //     name: "",
-          //     siteID: "",
-          //     location: "",
-          //     client: "",
-          //     plan: "",
-          //     floor: "",
-          //     area: "",
-          //     cost: "",
-          //     date: "",
-          //     duration: "",
-          //     manager: [],
-          //     accountant: [],
-          //     engineer: [],
-          //     sr_engineer: [],
-          //     contractor: [],
-          //     operation: [],
-          //     admin: [],
-          //     sales: [],
-          //   });
-          //   toast.success(response.data.message, {
-          //     position: "top-right",
-          //   });
-          //   router.push("/admin/projects");
-          // } else {
-          //   toast.error(response.data.message, {
-          //     position: "top-right",
-          //   });
-          // }
+          if (response.data.status === 201) {
+            setData({
+              name: "",
+              siteID: "",
+              location: "",
+              client: "",
+              plan: "",
+              floor: "",
+              area: "",
+              cost: "",
+              date: "",
+              duration: "",
+              manager: [],
+              accountant: [],
+              engineer: [],
+              sr_engineer: [],
+              contractor: [],
+              operation: [],
+              admin: [],
+              sales: [],
+            });
+            toast(response.data.message);
+            router.push("/admin/projects");
+          } else {
+            toast(response.data.message);
+          }
         })
         .catch(error => {
           console.log(error);

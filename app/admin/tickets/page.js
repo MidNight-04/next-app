@@ -5,14 +5,6 @@ import NoImage from "../../../public/assets/no-image-available.png";
 import { RiShareForwardFill } from "react-icons/ri";
 import { useAuthStore } from "../../../store/useAuthStore";
 import Link from "next/link";
-import {
-  Card,
-  CardActionArea,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-} from "@mui/material";
 import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import { Label } from "@mui/icons-material";
@@ -26,7 +18,7 @@ const Page = () => {
   const [ticketList, setTicketList] = useState([]);
   const router = useRouter();
   const [status, setStatus] = useState("");
-  const [filteredTickets, setFilteredTickets] = useState([]);
+  const [filteredTickets, setFilteredTickets] = useState(null);
   const [projectList, setProjectList] = useState([]);
   const [memberList, setMemberList] = useState([]);
   const [clientList, setClientList] = useState([]);
@@ -44,15 +36,16 @@ const Page = () => {
         )
         .then(response => {
           if (response?.data.status === 200) {
-            const ftData = response?.data?.data?.flatMap(ticket =>
-              ticket.openTicket.map(openTicket => ({
-                ...openTicket,
-                siteID: ticket.siteID,
-                client: ticket?.client,
-              }))
-            );
-            setTicketList(ftData);
-            setFilteredTickets(ftData);
+            console.log(response);
+            // const ftData = response?.data?.data?.flatMap(ticket =>
+            //   ticket.openTicket.map(openTicket => ({
+            //     ...openTicket,
+            //     siteID: ticket.siteID,
+            //     client: ticket?.client,
+            //   }))
+            // );
+            setTicketList(response);
+            setFilteredTickets(response);
           } else {
             setTicketList([]);
             setFilteredTickets([]);
@@ -100,15 +93,10 @@ const Page = () => {
         )
         .then(response => {
           // console.log(response.data.data);
-          if (response?.data.status === 200) {
-            const ftData = response?.data?.data?.flatMap(ticket =>
-              ticket.openTicket.map(openTicket => ({
-                ...openTicket, // spread the properties of openTicket
-                siteID: ticket.siteID, // add the siteID from the parent object
-              }))
-            );
-            setTicketList(ftData);
-            setFilteredTickets(ftData);
+
+          if (response?.status === 200) {
+            setTicketList(response.data.data);
+            setFilteredTickets(response.data.data);
           } else {
             setTicketList([]);
           }
@@ -118,6 +106,8 @@ const Page = () => {
         });
     }
   }, [userId, userType]);
+
+  console.log(ticketList);
 
   const handleButtonClick = (filter, filterData = null) => {
     setActiveFilter(filter);
@@ -324,7 +314,7 @@ const Page = () => {
       </div>
       <div>
         <div className="">
-          {filteredTickets?.map((dt, idx) => (
+          {ticketList[0]?.openTicket?.map((dt, idx) => (
             <div key={idx} className="mb-4">
               <Link
                 href={`/admin/tickets/${dt._id}`}
@@ -338,13 +328,13 @@ const Page = () => {
                           <span className="h-[5.25rem] rounded-full w-1 bg-primary" />
                           <div className="flex flex-col [&_span]:leading-7 font-ubuntu font-bold text-base text-[#565656]">
                             <span className="font-bold text-lg -md:text-base">
-                              Site ID - {dt.siteID}
+                              Site ID - {ticketList[0].siteID}
                             </span>
                             <span className="font-bold text-lg -md:text-base">
                               Query - {dt.query}
                             </span>
                             <span className="font-bold text-lg -md:text-base">
-                              Status - {dt.finalStatus}
+                              Status - {dt.status}
                             </span>
                           </div>
                         </div>
@@ -355,24 +345,19 @@ const Page = () => {
                           </span>
                           <span className="flex gap-2 justify-center items-center p-2 bg-primary-foreground rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl -md:[&_p]:text-sm -md:[&_svg]:text-sm">
                             <RiShareForwardFill className="icon" />
-                            <p>Status : {`G + ${dt.finalStatus}`}</p>
+                            <p>Status : {dt.status}</p>
                           </span>
                           <span className="flex gap-2 justify-center items-center p-2 bg-primary-foreground rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl -md:[&_p]:text-sm -md:[&_svg]:text-sm">
                             <RiShareForwardFill className="icon" />
                             <p>Query : {dt.query} </p>
                           </span>
-                          {dt.assignMember?.map((item, it) => (
-                            <span
-                              key={item.name}
-                              className="flex gap-2 justify-center items-center p-2 bg-primary-foreground rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl -md:[&_p]:text-sm -md:[&_svg]:text-sm  "
-                            >
-                              <RiShareForwardFill className="icon" />
-                              <p>Assign Member : {item.name}</p>
-                            </span>
-                          ))}
+                          <span className="flex gap-2 justify-center items-center p-2 bg-primary-foreground rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl -md:[&_p]:text-sm -md:[&_svg]:text-sm  ">
+                            <RiShareForwardFill className="icon" />
+                            <p>Assign Member : {dt.assignMember.name}</p>
+                          </span>
                         </div>
                       </div>
-                      <div className="img-hover">
+                      <div>
                         <Image
                           width={300}
                           height={300}
@@ -388,7 +373,7 @@ const Page = () => {
               </Link>
             </div>
           ))}
-          {filteredTickets?.length === 0 && (
+          {!filteredTickets && (
             <p className="mt-5 text-warning text-center">
               No ticket available...
             </p>

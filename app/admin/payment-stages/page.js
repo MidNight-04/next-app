@@ -115,7 +115,7 @@ const Page = () => {
         )
         .then(response => {
           if (response) {
-            toast.warning(response.data.message, {
+            toast(response.data.message, {
               position: "top-right",
             });
             getAllPaymentStage();
@@ -133,7 +133,7 @@ const Page = () => {
         )
         .then(response => {
           if (response) {
-            toast.warning(response.data.message, {
+            toast(response.data.message, {
               position: "top-right",
             });
             getAllPaymentStage();
@@ -152,15 +152,15 @@ const Page = () => {
       0
     );
     if (!payment) {
-      toast.error("Payment % is required", {
+      toast("Payment % is required", {
         position: "top-center",
       });
     } else if (!stage) {
-      toast.error("Payment Stage is required", {
+      toast("Payment Stage is required", {
         position: "top-center",
       });
     } else if (total + +payment - prevPayment > 100) {
-      toast.error("Payment % cannot exceed 100.");
+      toast("Payment % cannot exceed 100.");
     } else {
       const data = {
         id: Id,
@@ -178,7 +178,7 @@ const Page = () => {
           .then(response => {
             if (response) {
               getAllPaymentStage();
-              toast.success(response.data.message, {
+              toast(response.data.message, {
                 position: "top-right",
               });
               setPrevPayment("");
@@ -199,7 +199,7 @@ const Page = () => {
           .then(response => {
             if (response) {
               getAllPaymentStage();
-              toast.success(response.data.message, {
+              toast(response.data.message, {
                 position: "top-right",
               });
               setUpdateOpen(false);

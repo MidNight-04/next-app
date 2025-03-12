@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { DataGrid, gridClasses } from "@mui/x-data-grid";
 import axios from "axios";
 import { Modal, styled } from "@mui/material";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import Link from "next/link";
 import AsideContainer from "../../../components/AsideContainer";
 import { Add } from "@mui/icons-material";
@@ -76,9 +76,7 @@ const RoleDataTable = () => {
       )
       .then(response => {
         if (response) {
-          toast.warning("Record deleted successfully", {
-            position: "top-right",
-          });
+          toast("Record deleted successfully");
           getAllRole();
         }
       })
@@ -116,9 +114,7 @@ const RoleDataTable = () => {
       .then(response => {
         if (response) {
           getAllRole();
-          toast.success(response.data.message, {
-            position: "top-right",
-          });
+          toast(`${response.data.message}`);
         }
       })
       .catch(error => {

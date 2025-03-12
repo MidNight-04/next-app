@@ -4,7 +4,7 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { IoIosArrowBack } from "react-icons/io";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 
 const AddTaskCategoryForm = () => {
   const router = useRouter();
@@ -19,7 +19,7 @@ const AddTaskCategoryForm = () => {
 
   const submitFormData = () => {
     if (!data.name) {
-      toast.error("Name is required", {
+      toast("Name is required", {
         position: "top-right",
       });
     } else {
@@ -31,14 +31,14 @@ const AddTaskCategoryForm = () => {
         .then(response => {
           if (response) {
             if (response.data.status === 204) {
-              toast.error(response.data.message, {
+              toast(response.data.message, {
                 position: "top-right",
               });
             } else {
               setData({
                 name: "",
               });
-              toast.success(response.data.message, {
+              toast(response.data.message, {
                 position: "top-right",
               });
               router.back();

@@ -367,7 +367,7 @@ const Header = () => {
                       <div
                         onClick={() => {
                           setLogout();
-                          toast.success("You have been logged out.");
+                          toast("You have been logged out.");
                           redirect("/homepage");
                         }}
                         className="w-full px-4 py-2 text-secondary group transition duration-300"

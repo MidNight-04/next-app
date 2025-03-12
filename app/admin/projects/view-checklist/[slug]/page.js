@@ -18,7 +18,7 @@ import {
   MenuItem,
   Select,
 } from "@mui/material";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import "react-toastify/dist/ReactToastify.css";
 import { FaMinus, FaPlus } from "react-icons/fa6";
 import { TiArrowSortedDown, TiArrowSortedUp, TiMinus } from "react-icons/ti";
@@ -162,9 +162,7 @@ const SingleProjectChecklistView = () => {
       )
       .then(response => {
         if (response) {
-          toast.warning("Record deleted successfully", {
-            position: "top-right",
-          });
+          toast("Record deleted successfully");
           getAllCheckList();
           setOpen(false);
         }
@@ -222,15 +220,13 @@ const SingleProjectChecklistView = () => {
       )
       .then(response => {
         if (response.data.status === 200) {
-          toast.success(response.data.message, {
-            position: "top-right",
-          });
+          toast(`${response.data.message}`);
           setDeleteDialogOpen(false);
           getAllCheckList();
         }
       })
       .catch(error => {
-        toast.error("Error while delete checklist point", {
+        toast("Error while delete checklist point", {
           position: "top-right",
         });
         console.log(error);
@@ -245,7 +241,7 @@ const SingleProjectChecklistView = () => {
   const handleUpdateNewField = () => {
     const isAnyHeadingEmpty = checklistItems.some(item => !item.heading.trim());
     if (isAnyHeadingEmpty) {
-      toast.error("Inspection heading is required", {
+      toast("Inspection heading is required", {
         position: "top-center",
       });
       return; // Exit early if any heading is empty
@@ -255,7 +251,7 @@ const SingleProjectChecklistView = () => {
       item.points.some(point => !point.point.trim())
     );
     if (isAnyPointEmpty) {
-      toast.error("Inspection point is required", {
+      toast("Inspection point is required", {
         position: "top-center",
       });
       return; // Exit early if any point is empty
@@ -265,7 +261,7 @@ const SingleProjectChecklistView = () => {
       item.points.some(point => !point.status.trim())
     );
     if (isAnyStatusEmpty) {
-      toast.error("Inspection status is required", {
+      toast("Inspection status is required", {
         position: "top-center",
       });
       return; // Exit early if any point is empty
@@ -288,7 +284,7 @@ const SingleProjectChecklistView = () => {
         )
         .then(response => {
           if (response) {
-            toast.success(response.data.message, {
+            toast(response.data.message, {
               position: "top-right",
             });
             setAddFieldOpen(false);
@@ -302,20 +298,18 @@ const SingleProjectChecklistView = () => {
           }
         })
         .catch(error => {
-          toast.error("Error while add Inspection", {
-            position: "top-right",
-          });
+          toast("Error while add Inspection");
           console.log(error);
         });
     }
   };
   const handleSubmitPoint = () => {
     if (!point) {
-      toast.error("Point is required", {
+      toast("Point is required", {
         position: "top-right",
       });
     } else if (!status) {
-      toast.error("Status is required", {
+      toast("Status is required", {
         position: "top-right",
       });
     } else {
@@ -339,7 +333,7 @@ const SingleProjectChecklistView = () => {
         )
         .then(response => {
           if (response) {
-            toast.success(response.data.message, {
+            toast(response.data.message, {
               position: "top-right",
             });
             setPointAddOpen(false);
@@ -349,9 +343,7 @@ const SingleProjectChecklistView = () => {
           }
         })
         .catch(error => {
-          toast.error("Error while add Inspection", {
-            position: "top-right",
-          });
+          toast("Error while add Inspection");
           console.log(error);
         });
     }

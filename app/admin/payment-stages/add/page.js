@@ -3,7 +3,7 @@ import { Button } from "@mui/material";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { useRouter } from "next/navigation";
@@ -44,11 +44,11 @@ const AddPaymentStagesForm = () => {
   const submitFormData = () => {
     // console.log(role)
     if (!floor) {
-      toast.error("Floor is required", {
+      toast("Floor is required", {
         position: "top-center",
       });
     } else if (!stages) {
-      toast.error("Payment stages is required", {
+      toast("Payment stages is required", {
         position: "top-center",
       });
     } else {
@@ -65,7 +65,7 @@ const AddPaymentStagesForm = () => {
           }
         )
         .then(resp => {
-          toast.success(resp.data.message, {
+          toast(resp.data.message, {
             position: "top-center",
           });
           setFloor("");
@@ -74,7 +74,7 @@ const AddPaymentStagesForm = () => {
         })
         .catch(err => {
           //   console.log(err);
-          toast.error("Error while upload construction points", {
+          toast("Error while upload construction points", {
             position: "top-center",
           });
         });

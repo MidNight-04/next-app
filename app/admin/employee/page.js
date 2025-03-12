@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { DataGrid, gridClasses } from "@mui/x-data-grid";
 import axios from "axios";
 import { Modal, Select, MenuItem, styled } from "@mui/material";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import AsideContainer from "../../../components/AsideContainer";
 import { Add } from "@mui/icons-material";
 import { useRouter } from "next/navigation";
@@ -104,9 +104,7 @@ const MemberTable = () => {
       )
       .then(response => {
         if (response) {
-          toast.warning("Record deleted successfully", {
-            position: "top-right",
-          });
+          toast("Record deleted successfully");
           getAllMember();
         }
       })
@@ -156,9 +154,7 @@ const MemberTable = () => {
       .then(response => {
         if (response) {
           getAllMember();
-          toast.success(response.data.message, {
-            position: "top-right",
-          });
+          toast(`${response.data.message}`);
         }
       })
       .catch(error => {

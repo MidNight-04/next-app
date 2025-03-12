@@ -178,14 +178,14 @@ const Page = () => {
               console.error(err);
             });
           if (wish === true) {
-            toast.success(`Design added to your wishlist`);
+            toast(`Design added to your wishlist`);
           } else {
-            toast.error(`Design remove from your wishlist`);
+            toast(`Design remove from your wishlist`);
           }
         })
         .catch(err => {
           console.error(err);
-          toast.error(`Something went wrong`);
+          toast(`Something went wrong`);
         });
     } else {
       // localStorage.setItem("last_url", location.pathname);
@@ -260,7 +260,7 @@ const Page = () => {
               .resultInfo.resultStatus
           ) {
             case "TXN_SUCCESS":
-              toast.success(
+              toast(
                 "Congratulations, your order has been successfully confirmed!"
               );
               makeNotificationMutaton.mutate({
@@ -274,7 +274,7 @@ const Page = () => {
               });
               break;
             case "TXN_FAILURE":
-              toast.error(
+              toast(
                 makeVerifyPaymentMutation.data.data.paymentInformation.body
                   .resultInfo.resultMsg
               );
@@ -286,13 +286,13 @@ const Page = () => {
               );
               break;
             case "NO_RECORD_FOUND":
-              toast.error(
+              toast(
                 makeVerifyPaymentMutation.data.data.paymentInformation.body
                   .resultInfo.resultMsg
               );
               break;
             default:
-              toast.error("Something went wrong. Please try again!");
+              toast("Something went wrong. Please try again!");
               break;
           }
         },
@@ -347,12 +347,10 @@ const Page = () => {
       makeCodPaymentMutaton.mutate({ data });
 
       if (makeCodPaymentMutaton.isError) {
-        toast.error("Something went wrong!, Please try again later.");
+        toast("Something went wrong!, Please try again later.");
       }
       if (makeCodPaymentMutaton.isSuccess) {
-        toast.success(
-          "Congratulations, your order has been successfully confirmed!"
-        );
+        toast("Congratulations, your order has been successfully confirmed!");
         makeNotificationMutaton.mutate({
           data: dealerNotification(architectId, orderId),
         });
@@ -364,7 +362,7 @@ const Page = () => {
         });
       }
     } else {
-      toast.error("Please select Address of Delivery");
+      toast("Please select Address of Delivery");
     }
   };
 
@@ -406,7 +404,7 @@ const Page = () => {
           console.error(err);
         });
     } else {
-      toast.error("Please select Address of Delivery");
+      toast("Please select Address of Delivery");
     }
   };
   const [
@@ -519,7 +517,7 @@ const Page = () => {
   //     .post(`${process.env.REACT_APP_BASE_PATH}/delete-product-rating`, data)
   //     .then((resp) => {
   //       if (resp.data.data) {
-  //         toast.success("Your review has been deleted successfully", {
+  //         toast("Your review has been deleted successfully", {
   //           position: toast.POSITION.TOP_RIGHT,
   //         });
   //       }
@@ -527,7 +525,7 @@ const Page = () => {
   //     })
   //     .catch((err) => {
   //       console.error(err);
-  //       toast.error("Some error occured", {
+  //       toast("Some error occured", {
   //         position: toast.POSITION.TOP_RIGHT,
   //       });
   //     });

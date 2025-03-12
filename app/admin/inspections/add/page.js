@@ -3,7 +3,7 @@ import axios from "axios";
 import AsideContainer from "../../../../components/AsideContainer";
 import React, { useState } from "react";
 import { FaMinus, FaPlus } from "react-icons/fa6";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import { IoIosArrowBack } from "react-icons/io";
 import "react-toastify/dist/ReactToastify.css";
 import { useRouter } from "next/navigation";
@@ -46,7 +46,7 @@ const AddProjectCheckList = () => {
   const submitFormData = () => {
     // Check if name is empty
     if (!name.trim()) {
-      toast.error("Checklist name is required", {
+      toast("Checklist name is required", {
         position: "top-center",
       });
       return; // Exit early if name is empty
@@ -55,7 +55,7 @@ const AddProjectCheckList = () => {
     // Check if any checklist item heading is empty
     const isAnyHeadingEmpty = checklistItems.some(item => !item.heading.trim());
     if (isAnyHeadingEmpty) {
-      toast.error("Checklist item heading is required", {
+      toast("Checklist item heading is required", {
         position: "top-center",
       });
       return; // Exit early if any heading is empty
@@ -66,7 +66,7 @@ const AddProjectCheckList = () => {
       item.points.some(point => !point.point.trim())
     );
     if (isAnyPointEmpty) {
-      toast.error("Checklist item point is required", {
+      toast("Checklist item point is required", {
         position: "top-center",
       });
       return; // Exit early if any point is empty
@@ -82,16 +82,14 @@ const AddProjectCheckList = () => {
         )
         .then(response => {
           if (response) {
-            toast.success(response.data.message, {
+            toast(response.data.message, {
               position: "top-right",
             });
             router.push("/admin/project/checklist");
           }
         })
         .catch(error => {
-          toast.error("Error while add checklist", {
-            position: "top-right",
-          });
+          toast("Error while add checklist");
           console.log(error);
         });
     }

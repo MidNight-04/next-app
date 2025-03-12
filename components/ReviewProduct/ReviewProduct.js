@@ -2,7 +2,7 @@ import * as yup from "yup";
 import { Field, Form, Formik, useField } from "formik";
 import { Button, Card, Rating } from "@mui/material";
 import StarIcon from "@mui/icons-material/Star";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { getUserEndpoint, postUserEndpoint } from "../../helpers/endpoints";
@@ -109,10 +109,10 @@ const ReviewProduct = ({ userId, productId, handleReviewClose }) => {
       });
     },
     onSuccess: () => {
-      toast.success("Your review has been successfully posted");
+      toast("Your review has been successfully posted");
       handleReviewClose();
     },
-    onError: () => toast.error("Some error occured, while getting user data"),
+    onError: () => toast("Some error occured, while getting user data"),
   });
 
   const addNewRating = formData => {
@@ -129,7 +129,7 @@ const ReviewProduct = ({ userId, productId, handleReviewClose }) => {
       }
     } catch (err) {
       console.log(err);
-      toast.error("Some error occured");
+      toast("Some error occured");
     }
   };
 

@@ -8,7 +8,7 @@ import { postEndpoint } from "../../../helpers/endpoints";
 import { useState } from "react";
 import LoaderSpinner from "../../../components/loader/LoaderSpinner";
 import { redirect, useParams } from "next/navigation";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 
 const logInSchema = Yup.object({
   username: Yup.string().required("Username is required."),
@@ -36,11 +36,11 @@ const SigninForm = ({ showOtp }) => {
       setUsername(data.username);
       setShowLoader(false);
       showOtp();
-      toast.success("OTP sent to you registered mobile number.");
+      toast("OTP sent to you registered mobile number.");
     },
     onError: error => {
       setShowLoader(false);
-      toast.error("User not found, Please enter a valid username.");
+      toast("User not found, Please enter a valid username.");
     },
   });
 

@@ -19,7 +19,7 @@ import {
   TableContainer,
   Paper,
 } from "@mui/material";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import "react-toastify/dist/ReactToastify.css";
 import Link from "next/link";
 import AsideContainer from "../../../../components/AsideContainer";
@@ -67,9 +67,7 @@ const Page = () => {
       )
       .then(response => {
         if (response) {
-          toast.warning("Record deleted successfully", {
-            position: "top-right",
-          });
+          toast("Record deleted successfully");
           getAllTaskCategory();
         }
       })
@@ -110,9 +108,7 @@ const Page = () => {
       )
       .then(response => {
         if (response) {
-          toast.success(response.data.message, {
-            position: "top-right",
-          });
+          toast(`${response.data.message}`);
           getAllTaskCategory();
         }
       })

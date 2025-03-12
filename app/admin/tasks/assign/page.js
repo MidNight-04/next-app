@@ -6,7 +6,7 @@ import { FaFile, FaMicrophone } from "react-icons/fa6";
 import { MdAttachFile, MdOutlineAccessAlarm } from "react-icons/md";
 import DatePicker from "react-datepicker";
 // import "react-datepicker/dist/react-datepicker.css";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 import {
@@ -276,7 +276,7 @@ const Page = () => {
       const newReminders = reminders.filter((_, i) => i !== index);
       setReminders(newReminders);
     } else {
-      toast.warning("Not Allowed", {
+      toast("Not Allowed", {
         position: "top-center",
       });
     }
@@ -300,7 +300,7 @@ const Page = () => {
       }));
       setReminderOpen(false);
     } else {
-      toast.error("Field are mandatory", {
+      toast("Field are mandatory", {
         position: "top-center",
       });
     }
@@ -322,27 +322,27 @@ const Page = () => {
       employeeID: activeEmployee ? activeEmployee : activeUser,
     };
     if (!data.title) {
-      toast.error("Task Title is required", {
+      toast("Task Title is required", {
         position: "top-right",
       });
     } else if (!data.description) {
-      toast.error("Title Description is required", {
+      toast("Title Description is required", {
         position: "top-right",
       });
     } else if (!data.member) {
-      toast.error("Member is required", {
+      toast("Member is required", {
         position: "top-right",
       });
     } else if (!data.category) {
-      toast.error("Category is required", {
+      toast("Category is required", {
         position: "top-right",
       });
     } else if (!data.priority) {
-      toast.error("Priority is required", {
+      toast("Priority is required", {
         position: "top-right",
       });
     } else if (!data.dueDate) {
-      toast.error("Due Date is required", {
+      toast("Due Date is required", {
         position: "top-right",
       });
     } else {
@@ -390,12 +390,12 @@ const Page = () => {
             setFileName("");
             setSelectedPriority("");
             setChecked(false);
-            toast.success(response.data.message, {
+            toast(response.data.message, {
               position: "top-right",
             });
             redirect("/admin/taskdashboard");
           } else {
-            toast.error(response.data.message, {
+            toast(response.data.message, {
               position: "top-right",
             });
           }

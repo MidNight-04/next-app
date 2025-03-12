@@ -15,7 +15,7 @@ import {
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import StarIcon from "@mui/icons-material/Star";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import "react-toastify/dist/ReactToastify.css";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import FavoriteIcon from "@mui/icons-material/Favorite";
@@ -163,9 +163,9 @@ const ViewDesignsPage = () => {
       }),
     onSuccess: () => {
       if (designDetails?.wishUser.includes(userId)) {
-        toast.success(`Design added to your wishlist`);
+        toast(`Design added to your wishlist`);
       } else {
-        toast.error(`Design remove from your wishlist`);
+        toast(`Design remove from your wishlist`);
       }
     },
   });
@@ -301,7 +301,7 @@ const ViewDesignsPage = () => {
                 resp.data.data.paymentInformation.body.resultInfo
                   .resultStatus == "TXN_SUCCESS"
               ) {
-                toast.success(
+                toast(
                   "Congratulations, your order has been successfully sent. You will be contacted soon!",
                   {
                     position: toast.POSITION.TOP_RIGHT,
@@ -368,7 +368,7 @@ const ViewDesignsPage = () => {
                 resp.data.data.paymentInformation.body.resultInfo
                   .resultStatus == "TXN_FAILURE"
               ) {
-                toast.error(
+                toast(
                   resp.data.data.paymentInformation.body.resultInfo.resultMsg,
                   {
                     position: toast.POSITION.TOP_RIGHT,
@@ -380,7 +380,7 @@ const ViewDesignsPage = () => {
                 resp.data.data.paymentInformation.body.resultInfo
                   .resultStatus == "PENDING"
               ) {
-                toast.error(
+                toast(
                   resp.data.data.paymentInformation.body.resultInfo.resultMsg,
                   {
                     position: toast.POSITION.TOP_RIGHT,
@@ -392,7 +392,7 @@ const ViewDesignsPage = () => {
                 resp.data.data.paymentInformation.body.resultInfo
                   .resultStatus == "NO_RECORD_FOUND"
               ) {
-                toast.error(
+                toast(
                   resp.data.data.paymentInformation.body.resultInfo.resultMsg,
                   {
                     position: toast.POSITION.TOP_RIGHT,
@@ -402,7 +402,7 @@ const ViewDesignsPage = () => {
             })
             .catch(err => {
               console.error(err);
-              toast.error("Something went wrong. Please try again!", {
+              toast("Something went wrong. Please try again!", {
                 position: toast.POSITION.TOP_RIGHT,
               });
             });
@@ -497,11 +497,11 @@ const ViewDesignsPage = () => {
               console.error(err);
             });
           if (wish === true) {
-            toast.success(`Design added to your wishlist`, {
+            toast(`Design added to your wishlist`, {
               position: "top-right",
             });
           } else {
-            toast.error(`Design remove from your wishlist`, {
+            toast(`Design remove from your wishlist`, {
               position: "top-right",
             });
           }
@@ -517,15 +517,15 @@ const ViewDesignsPage = () => {
 
   const notify = (type, message) => {
     if (type == "success" && message.status == 200) {
-      toast.success(message.data.message, {
+      toast(message.data.message, {
         position: toast.POSITION.TOP_RIGHT,
       });
     } else if (message.status == 202) {
-      toast.error(message.data.message, {
+      toast(message.data.message, {
         position: toast.POSITION.TOP_RIGHT,
       });
     } else {
-      toast.error("Something went wrong!", {
+      toast("Something went wrong!", {
         position: toast.POSITION.TOP_RIGHT,
       });
     }
@@ -634,7 +634,7 @@ const ViewDesignsPage = () => {
         .post(`${process.env.REACT_APP_BASE_PATH}/api/architect/order`, data)
         .then(resp => {
           if (resp) {
-            toast.success(
+            toast(
               "Your query for design has been successfully sent. You will be contacted soon!",
               {
                 position: toast.POSITION.TOP_RIGHT,
@@ -644,7 +644,7 @@ const ViewDesignsPage = () => {
         })
         .catch(err => {
           console.error(err);
-          toast.error("Something went wrong. Please try again!", {
+          toast("Something went wrong. Please try again!", {
             position: toast.POSITION.TOP_RIGHT,
           });
         });

@@ -1,8 +1,7 @@
 "use client";
 import axios from "axios";
 import React, { useState } from "react";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { toast } from "sonner";
 import AsideContainer from "../../../../components/AsideContainer";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
@@ -19,17 +18,11 @@ const ConstructionStepForm = () => {
   const submitFormData = () => {
     // console.log(role)
     if (!name) {
-      toast.error("Name is required", {
-        position: "top-center",
-      });
+      toast("Name is required");
     } else if (!priority) {
-      toast.error("Priority is required", {
-        position: "top-center",
-      });
+      toast("Priority is required");
     } else if (!points) {
-      toast.error("Points is required", {
-        position: "top-center",
-      });
+      toast("Points is required");
     } else {
       // console.log(process,points)
       const formData = new FormData();
@@ -45,18 +38,14 @@ const ConstructionStepForm = () => {
           }
         )
         .then(resp => {
-          toast.success(resp.data.message, {
-            position: "top-center",
-          });
+          toast(`${response.data.message}`);
           setName("");
           setPriority("");
           // redirect("/admin/constructionstep");
         })
         .catch(err => {
           //   console.log(err);
-          toast.error("Error while upload construction points", {
-            position: "top-center",
-          });
+          toast("Error while upload construction points");
         });
     }
   };

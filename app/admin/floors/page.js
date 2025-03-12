@@ -16,7 +16,7 @@ import {
   TextField,
   styled,
 } from "@mui/material";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import Link from "next/link";
 import AsideContainer from "../../../components/AsideContainer";
 import { FiEdit } from "react-icons/fi";
@@ -86,9 +86,7 @@ const ProjectFloorList = () => {
       .delete(`${process.env.REACT_APP_BASE_PATH}/api/floor/delete/${id}`)
       .then(response => {
         if (response) {
-          toast.warning("Record deleted successfully", {
-            position: "top-right",
-          });
+          toast("Record deleted successfully");
           getAllFloor();
         }
       })
@@ -123,9 +121,7 @@ const ProjectFloorList = () => {
       .then(response => {
         if (response) {
           getAllFloor();
-          toast.success(response.data.message, {
-            position: "top-right",
-          });
+          toast(`${response.data.message}`);
         }
       })
       .catch(error => {

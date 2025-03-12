@@ -4,7 +4,7 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { IoIosArrowBack } from "react-icons/io";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 
 const AddClientForm = () => {
   const router = useRouter();
@@ -22,21 +22,13 @@ const AddClientForm = () => {
 
   const submitFormData = () => {
     if (!data.name) {
-      toast.error("Name is required", {
-        position: "top-right",
-      });
+      toast("Name is required");
     } else if (!data.email) {
-      toast.error("Email is required", {
-        position: "top-right",
-      });
+      toast("Email is required");
     } else if (!data.phone) {
-      toast.error("Phone is required", {
-        position: "top-right",
-      });
+      toast("Phone is required");
     } else if (!data.address) {
-      toast.error("Address is required", {
-        position: "top-right",
-      });
+      toast("Address is required");
     } else {
       console.log(data);
       axios
@@ -52,13 +44,9 @@ const AddClientForm = () => {
               phone: "",
               address: "",
             });
-            toast.success(response.data.message, {
-              position: "top-right",
-            });
+            toast(`${response.data.message}`);
           } else {
-            toast.error(response.data.message, {
-              position: "top-right",
-            });
+            toast(`${response.data.message}`);
           }
         })
         .catch(error => {

@@ -19,8 +19,7 @@ import {
   FormControl,
   InputLabel,
 } from "@mui/material";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { toast } from "sonner";
 import { Document, pdfjs } from "react-pdf";
 import AsideContainer from "../../../components/AsideContainer";
 import { useAuthStore } from "../../../store/useAuthStore";
@@ -150,9 +149,7 @@ const Page = () => {
 
   const handleDocumentStatusUpdate = () => {
     if (currentStatus === "Accepted") {
-      toast.warning("Client already accepted document", {
-        position: "top-center",
-      });
+      toast("Client already accepted document");
     } else {
       const data = {
         id: documentID,
@@ -166,15 +163,11 @@ const Page = () => {
         .then(response => {
           setStatus("");
           setCurrentStatus("");
-          toast.success(response?.data?.message, {
-            position: "top-center",
-          });
+          toast(`${response.data.message}`);
           getAllDocument();
         })
         .catch(error => {
-          toast.error("Error while update status", {
-            position: "top-center",
-          });
+          toast("Error while update status");
           console.log(error);
         });
     }

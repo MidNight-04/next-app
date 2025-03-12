@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { SidebarTrigger } from "../ui/sidebar";
 import { useAuthStore } from "../../store/useAuthStore";
 import { useRouter, redirect } from "next/navigation";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 
 const AdminHeader = () => {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -92,7 +92,7 @@ const AdminHeader = () => {
                 onClick={() => {
                   setLogout();
                   router.push("/");
-                  toast.success("You have been logged out.");
+                  toast("You have been logged out.");
                 }}
                 className="w-full px-4 py-2 text-primary hover:text-secondary group transition duration-300"
               >

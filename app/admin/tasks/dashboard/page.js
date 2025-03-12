@@ -11,7 +11,7 @@ import {
 import { RiProgress6Fill } from "react-icons/ri";
 import "react-circular-progressbar/dist/styles.css";
 import axios from "axios";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import "react-toastify/dist/ReactToastify.css";
 import {
   Button,
@@ -115,11 +115,11 @@ const Page = () => {
 
   const handleUpdate = () => {
     if (!status) {
-      toast.error("Status is required", {
+      toast("Status is required", {
         position: "top-center",
       });
     } else if (!image) {
-      toast.error("Image is required", {
+      toast("Image is required", {
         position: "top-center",
       });
     } else {
@@ -142,7 +142,7 @@ const Page = () => {
         .request(config)
         .then(resp => {
           if (resp.data.status === 200) {
-            toast.success(resp?.data?.message, {
+            toast(resp?.data?.message, {
               position: "top-center",
             });
             // Close the confirmation dialog
@@ -150,13 +150,13 @@ const Page = () => {
 
             getAllTask();
           } else {
-            toast.error(resp?.data?.message, {
+            toast(resp?.data?.message, {
               position: "top-center",
             });
           }
         })
         .catch(err => {
-          toast.error("Error while update daily task", {
+          toast("Error while update daily task", {
             position: "top-center",
           });
           console.log(err);

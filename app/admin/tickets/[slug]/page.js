@@ -17,11 +17,25 @@ import {
   Select,
   TextField,
 } from "@mui/material";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
+import Modal from "@mui/material/Modal";
 import { useParams } from "next/navigation";
 import AsideContainer from "../../../../components/AsideContainer";
 import { IoIosArrowBack } from "react-icons/io";
 import { useRouter } from "next/navigation";
+import { useAuthStore } from "../../../../store/useAuthStore";
+import { cn } from "../../../../lib/utils";
+import { MdChecklist } from "react-icons/md";
+import { HiOutlineLockOpen } from "react-icons/hi2";
+import { RiProgress3Line } from "react-icons/ri";
+import { FaCheck } from "react-icons/fa";
+import { MdEdit } from "react-icons/md";
+import { MdDeleteOutline } from "react-icons/md";
+import { MdOutlineInsertComment } from "react-icons/md";
+import { IoLockClosedOutline } from "react-icons/io5";
+import Image from "next/image";
+import { FiDownload } from "react-icons/fi";
+import { saveAs } from "file-saver";
 
 let today = new Date();
 let yyyy = today.getFullYear();
@@ -33,9 +47,9 @@ let formatedtoday = yyyy + "-" + mm + "-" + dd;
 
 const TicketViewClient = () => {
   const { slug } = useParams();
-  const activeUser = "";
   const activeUser1 = "";
-  const userRole = "";
+  const userId = useAuthStore(state => state.userId);
+  const userRole = useAuthStore(state => state.userType);
   // const activeUser = localStorage.getItem("employeeID");
   // const activeUser1 = localStorage.getItem("activeUser");
   // const userRole = localStorage.getItem("role");
@@ -56,17 +70,23 @@ const TicketViewClient = () => {
   const [query, setQuery] = useState("");
   const [work, setWork] = useState("");
   const [ticketDate, setTicketDate] = useState(null);
+  const [openComment, setOpenComment] = useState(false);
+  const [type, setType] = useState(null);
+  const [comment, setComment] = useState(null);
+  const [showImage, setShowImage] = useState(false);
+  const [showImageUrl, setShowImageUrl] = useState(null);
   const router = useRouter();
-  useEffect(() => {
-    axios
+
+  const fetchTicketData = () => {
+    const data = axios
       .get(
         `${process.env.REACT_APP_BASE_PATH}/api/projecttask/viewbyid/${slug}`
       )
       .then(response => {
         // console.log(response?.data.data);
         if (response?.data.status === 200) {
-          setTicketDetails(response?.data?.data[0]);
-          setTicketCreationTime(new Date(response?.data?.data[0]?.date));
+          setTicketDetails(response?.data?.data);
+          setTicketCreationTime(new Date(response?.data?.data?.ticket?.date));
         } else {
           setTicketDetails({});
         }
@@ -74,6 +94,9 @@ const TicketViewClient = () => {
       .catch(error => {
         console.log(error);
       });
+  };
+  useEffect(() => {
+    fetchTicketData();
   }, []);
 
   useEffect(() => {
@@ -110,6 +133,10 @@ const TicketViewClient = () => {
     return formattedDate;
   };
 
+  const toggleShowImage = () => {
+    setShowImage(prev => !prev);
+  };
+
   // Convert milliseconds to hours, minutes, and seconds
   const formatTime = time => {
     const totalSeconds = Math.max(Math.floor(time / 1000), 0);
@@ -124,50 +151,23 @@ const TicketViewClient = () => {
 
   const countdownTime = formatTime(timeLeft);
 
-  const updateTicketBox = ticketDetails => {
-    setTicketUpdateBoxOpen(true);
-    setDate(formatedtoday);
-    setPoint(parseInt(ticketDetails?.point));
-    setContent(ticketDetails?.content);
-    setName(ticketDetails?.step);
-    setTicketId(ticketDetails?._id);
-    setId(ticketDetails?.projectId);
-    setQuery(ticketDetails?.query);
-    setTicketDate(ticketDetails?.date);
-    setWork(ticketDetails?.work);
-  };
-
   const handleCancel = () => {
     setTicketUpdateBoxOpen(false);
   };
 
   const handleUpdateTicket = () => {
-    if (!status) {
-      toast.error("Status is required", {
-        position: "top-center",
-      });
-    } else if (image?.length === 0) {
-      toast.error("Image is required", {
-        position: "top-center",
-      });
+    if (!comment) {
+      toast("Please add a comment before updating the ticket.");
     } else {
+      setOpenComment(prev => !prev);
       const formData = new FormData();
-      formData.append("userRole", userRole?.substring(5)?.toLowerCase());
-      formData.append("id", id);
-      formData.append("ticketId", ticketId);
-      formData.append("name", name);
-      formData.append("point", point);
-      formData.append("content", content);
-      formData.append("query", query);
-      formData.append("work", work);
-      formData.append("ticketDate", ticketDate);
-
-      formData.append("status", status);
-      // formData.append("image", image);
+      formData.append("userId", userId);
+      formData.append("ticketId", slug);
+      formData.append("type", type);
       for (let i = 0; i < image?.length; i++) {
         formData.append("image", image[i]);
       }
-      formData.append("date", date);
+      formData.append("comment", comment);
       let config = {
         method: "put",
         maxBodyLength: Infinity,
@@ -178,32 +178,11 @@ const TicketViewClient = () => {
       axios
         .request(config)
         .then(resp => {
-          // console.log(resp);
-          toast.success(resp?.data?.message, {
-            position: "top-center",
-          });
-
-          axios
-            .get(
-              `${process.env.REACT_APP_BASE_PATH}/api/projecttask/viewbyid/${slug}`
-            )
-            .then(response => {
-              // console.log(response?.data.data);
-              if (response?.data.status === 200) {
-                setTicketDetails(response?.data?.data[0]);
-                setTicketCreationTime(new Date(response?.data?.data[0]?.date));
-              } else {
-                setTicketDetails({});
-              }
-            })
-            .catch(error => {
-              console.log(error);
-            });
+          toast(resp?.data?.message);
+          fetchTicketData();
         })
         .catch(err => {
-          toast.error("Error while update ticket status", {
-            position: "top-center",
-          });
+          toast("Error while update ticket status");
           console.log(err);
         });
       setTicketUpdateBoxOpen(false);
@@ -235,9 +214,10 @@ const TicketViewClient = () => {
     const interval = setInterval(() => getTime(timeLeft), 1000);
     return () => clearInterval(interval);
   }, [timeLeft]);
-  console.log(
-    `${days} Days,${hours} Hours,${minutes} Minutes,${seconds} Seconds`
-  );
+
+  const downloadImage = url => {
+    saveAs(url, "ticket_image.jpg");
+  };
 
   return (
     <AsideContainer>
@@ -251,193 +231,368 @@ const TicketViewClient = () => {
             Ticket Details
           </h1>
         </div>
-
-        <div className="flex flex-row gap-4 justify-between mb-4 items-center -md:flex-col">
-          {/* <div className="grid grid-col-2"> */}
-          <div className="flex flex-row gap-4 flex-wrap -md:[&_div]:p-3 -md:gap-2">
-            <div className="p-[20px] rounded-[14px] [&_svg]:text-primary font-ubuntu flex flex-row gap-2 items-center self-center justify-between bg-white text-nowrap -md:flex-col">
-              <h5 className="font-semibold">Query Point : </h5>
-              <p className="card-text">{ticketDetails?.content}</p>
-            </div>
-            <div className="p-[20px]  rounded-[14px] [&_svg]:text-primary font-ubuntu flex flex-row gap-2 items-center self-center justify-between bg-white text-nowrap -md:flex-col">
-              <h5 className="font-semibold">Query : </h5>
-              <p className="card-text">{ticketDetails?.query}</p>
-            </div>
-            <div className="p-[20px]  rounded-[14px] [&_svg]:text-primary font-ubuntu flex flex-row gap-2 items-center self-center justify-between bg-white text-nowrap -md:flex-col">
-              <h5 className="font-semibold">Work : </h5>
-              <p className="card-text">{ticketDetails?.work}</p>
-            </div>
-            <div className="p-[20px] rounded-[14px] [&_svg]:text-primary font-ubuntu flex flex-row gap-2 items-center self-center justify-between bg-white text-nowrap -md:flex-col">
-              <h5 className="font-semibold">Assign member : </h5>
-              {ticketDetails?.assignMember?.map((data, id) => {
-                return <span key={id}>{`${data.name} `}</span>;
-              })}
-            </div>
-            <div className="p-[20px] rounded-[14px] [&_svg]:text-primary font-ubuntu flex flex-row gap-2 items-center self-center justify-between bg-white text-nowrap -md:flex-col">
-              <h5 className="font-semibold">Ticket Date : </h5>
-              <span>{ChangeDateFormat(ticketDetails?.date)}</span>
-            </div>
-            {ticketDetails?.memberStatus?.length > 0 && (
-              <div className="p-[20px] rounded-[14px] [&_svg]:text-primary font-ubuntu flex flex-row gap-2 items-center self-center justify-between bg-white text-nowrap -md:flex-col">
-                <h5 className="font-semibold">Member Status : </h5>
+        <div className="p-5 rounded-2xl bg-white flex flex-col gap-4 mb-4 ">
+          <div className="flex flex-row w-full gap-4">
+            <div className="flex flex-col gap-4 w-full">
+              <div className="flex flex-row gap-2 items-center">
+                <h5 className="font-semibold">Query Point : </h5>
+                <p className="card-text">{ticketDetails?.ticket?.content}</p>
+              </div>
+              <div className="flex flex-row gap-2 items-center">
+                <h5 className="font-semibold">Query : </h5>
+                <p className="card-text">{ticketDetails?.ticket?.query}</p>
+              </div>
+              <div className="flex flex-row gap-2 items-center">
+                <h5 className="font-semibold">Work : </h5>
+                <p className="card-text">{ticketDetails?.ticket?.work}</p>
+              </div>
+              <div className="flex flex-row gap-2 items-center">
+                <h5 className="font-semibold">Assign member : </h5>
+                {ticketDetails?.ticket?.assignMember?.name}
+              </div>
+              <div className="flex flex-row gap-2 items-center">
+                <h5 className="font-semibold">Ticket Date : </h5>
+                <span>{ChangeDateFormat(ticketDetails?.ticket?.date)}</span>
+              </div>
+              <div className="flex flex-row gap-2 items-center">
+                <h5 className="font-semibold">Status : </h5>
                 <p
                   className={
-                    ticketDetails?.memberStatus[0]?.status === "Pending"
+                    ticketDetails?.finalStatus === "Pending"
                       ? "card-text card-text-ticket _pending"
                       : ticketDetails?.finalStatus === "Process"
                       ? "card-text card-text-ticket _process"
                       : "card-text card-text-ticket _resolve"
                   }
                 >
-                  {ticketDetails?.memberStatus[0]?.status}
+                  {ticketDetails?.ticket?.status}
                 </p>
-                <p>{ticketDetails?.memberStatus[0]?.date}</p>
+                {timeLeft <= 0 && (
+                  <p className="text-red-500 font-semibold">(Overdue)</p>
+                )}
               </div>
-            )}
-            <div className="p-[20px]  rounded-[14px] [&_svg]:text-primary font-ubuntu flex flex-row gap-2 items-center self-center justify-between bg-white text-nowrap">
-              <h5 className="font-semibold">Final Status : </h5>
-              <p
-                className={
-                  ticketDetails?.finalStatus === "Pending"
-                    ? "card-text card-text-ticket _pending"
-                    : ticketDetails?.finalStatus === "Process"
-                    ? "card-text card-text-ticket _process"
-                    : "card-text card-text-ticket _resolve"
-                }
-              >
-                {ticketDetails?.finalStatus}
-              </p>
+              {ticketDetails?.finalStatus === "Completed" && (
+                <div>
+                  <span className="font-semibold">Completed on : </span>
+                  <span>
+                    {ticketDetails?.finalDate === ""
+                      ? ""
+                      : ChangeDateFormat(ticketDetails?.ticket?.completedOn)}
+                  </span>
+                </div>
+              )}
             </div>
-            {ticketDetails?.finalStatus === "Completed" && (
-              <div className="p-[20px]  rounded-[14px] [&_svg]:text-primary font-ubuntu flex flex-row gap-2 items-center self-center justify-between bg-white text-nowrap">
-                <span className="font-semibold">Completed on : </span>
-                <span>
-                  {ticketDetails?.finalDate === ""
-                    ? ""
-                    : ChangeDateFormat(ticketDetails?.finalDate)}
-                </span>
-              </div>
-            )}
+            <div className="h-40 w-40">
+              {!isOverdue && ticketDetails?.finalStatus !== "Completed" ? (
+                <CircularProgressbar
+                  value={100 * (timeLeft / duration)}
+                  text={countdownTime}
+                  styles={buildStyles({
+                    strokeLinecap: "butt",
+                    textSize: "16px",
+                    pathTransitionDuration: 0.5,
+                    textColor: isOverdue ? "red" : "green",
+                    trailColor: "#e5e5e5",
+                  })}
+                />
+              ) : (
+                ""
+              )}
+            </div>
           </div>
-          <div className="h-40 w-40">
-            {isOverdue && ticketDetails?.finalStatus !== "Completed" ? (
-              <CircularProgressbar
-                value={100 * timeLeft}
-                text={countdownTime}
-                styles={buildStyles({
-                  pathColor: isOverdue ? "red" : "#ff0038",
-                  textColor: isOverdue ? "red" : "#ff0038",
-                  trailColor: "#d6d6d6",
-                })}
-              />
-            ) : (
-              ""
-            )}
-          </div>
+          {ticketDetails?.ticket?.status !== "Closed" && (
+            <div className="flex flex-row gap-4 mt-4">
+              {ticketDetails?.ticket?.assignMember?._id === userId ||
+                (ticketDetails?.ticket?.status !== "Complete" && (
+                  <button
+                    className="px-4 py-2 border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-2 items-center"
+                    onClick={() => {
+                      setType("In Progress");
+                      setOpenComment(prev => !prev);
+                    }}
+                  >
+                    <RiProgress3Line className="text-xl" />
+                    In Progress
+                  </button>
+                ))}
+              {ticketDetails?.ticket?.status === "Complete" && (
+                <button
+                  className="px-4 py-2 border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-2 items-center"
+                  onClick={() => {
+                    setType("Reopened");
+                    setOpenComment(prev => !prev);
+                  }}
+                >
+                  <HiOutlineLockOpen className="text-xl" />
+                  Re-open
+                </button>
+              )}
+              {ticketDetails?.ticket?.assignMember?._id === userId ||
+                (ticketDetails?.ticket?.status !== "Complete" && (
+                  <button
+                    className="px-4 py-2 border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-2 items-center"
+                    onClick={() => {
+                      setType("Complete");
+                      setOpenComment(prev => !prev);
+                    }}
+                  >
+                    <FaCheck className="text-xl" />
+                    Complete
+                  </button>
+                ))}
+              {ticketDetails?.ticket?.assignedBy?._id === userId ||
+                (ticketDetails?.ticket?.status !== "Complete" && (
+                  <button
+                    className="px-4 py-2 border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-2 items-center"
+                    onClick={() => {
+                      setType("Closed");
+                      setOpenComment(prev => !prev);
+                    }}
+                  >
+                    <IoLockClosedOutline className="text-xl" />
+                    Close
+                  </button>
+                ))}
+              {/* {data.data.assignedBy?._id === userId &&
+                      data.data.status !== "Complete" && (
+                        <button className="px-4 py-2 border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-2 items-center">
+                          <MdEdit className="text-xl" />
+                          Edit
+                        </button>
+                      )} */}
+              {ticketDetails?.ticket?.status !== "Complete" && (
+                <button
+                  className="px-4 py-2 border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-2 items-center"
+                  onClick={() => toggleDelete()}
+                >
+                  <MdDeleteOutline className="text-xl" />
+                  Delete
+                </button>
+              )}
+              {ticketDetails?.ticket?.assignMember?._id === userId ||
+                (ticketDetails?.ticket?.status !== "Complete" && (
+                  <button
+                    className="px-4 py-2 border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-2 items-center"
+                    onClick={() => {
+                      setType("Comment");
+                      setOpenComment(prev => !prev);
+                    }}
+                  >
+                    <MdOutlineInsertComment className="text-xl" />
+                    Comment
+                  </button>
+                ))}
+            </div>
+          )}
+          {ticketDetails?.ticket?.image?.length > 0 && (
+            <div>
+              <h2 className="font-ubuntu text-lg font-semibold mb-2">
+                Images:
+              </h2>
+              {ticketDetails?.ticket?.image?.map((dt, id) => (
+                <div
+                  className="relative cursor-pointer [&_span]:hover:block w-40"
+                  key={id}
+                  onClick={() => {
+                    setShowImageUrl(dt);
+                    toggleShowImage(dt);
+                  }}
+                >
+                  {!showImage && (
+                    <span className="w-full rounded h-full bg-black bg-opacity-30 absolute hidden text-primary-foreground text-center">
+                      <p className="mt-10 font-semibold">View</p>
+                    </span>
+                  )}
+                  <Image
+                    src={dt}
+                    alt="ticket image"
+                    width={100}
+                    height={120}
+                    className="rounded w-full"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
-      {ticketDetails?.assignMember?.some(
-        obj => obj.employeeID === activeUser || obj.employeeID === activeUser1
-      ) &&
-        ticketDetails?.finalStatus !== "Completed" && (
-          <div className="row">
-            <div className="text-center">
-              <span
-                className="py-2 card-btn-member md mt-2"
-                onClick={e => updateTicketBox(ticketDetails)}
-              >
-                <span className="label fw-normal">Update Ticket</span>
-                <i className="fa fa-arrow-right icon-arrow after" />
-              </span>
+      <div>
+        {ticketDetails?.ticket?.comments?.length > 0 && (
+          <>
+            <div className="flex flex-row gap-2 my-4">
+              <MdChecklist className="text-3xl text-primary" />
+              <h3 className="text-xl font-bold font-ubuntu">Ticket Updates</h3>
             </div>
-          </div>
-        )}
-      <div className="p-8 bg-white rounded-2xl w-full -md:p-4">
-        <div className="grid gap-2 grid-cols-4 -md:grid-cols-2">
-          <div className="mb-4">
-            <h2 className="font-ubuntu font-bold text-xl mb-4">Images : </h2>
-            <div>
-              {ticketDetails?.image?.length > 0
-                ? ticketDetails?.image?.map((dt, id) => {
-                    return <img key={id} src={dt} alt={dt} width={200} />;
-                  })
-                : // <img src={NoImage} alt="no" width={250} />
-                  ""}
+            <div className="flex flex-col gap-4">
+              {ticketDetails?.ticket?.comments?.map(item => (
+                <div key={item._id} className="bg-white rounded-xl p-5 ">
+                  <div className="flex flex-row justify-between items-center">
+                    <div className="flex flex-row gap-4 items-center">
+                      <Image
+                        src={"/assets/profile-placeholder.png"}
+                        alt="profile image"
+                        width={20}
+                        height={20}
+                        className="rounded-full"
+                      />
+                      <div className="text-sm flex flex-col">
+                        <span className="font-semibold">
+                          {item?.createdBy?.name}
+                        </span>
+                        <span>
+                          At{" "}
+                          {new Date(item?.createdAt).toLocaleString("en-US", {
+                            dateStyle: "medium",
+                            timeStyle: "short",
+                          })}
+                        </span>
+                      </div>
+                    </div>
+                    <span
+                      className={cn(
+                        "font-ubuntu text-sm text-white p-1 rounded",
+                        item.type === "In Progress" && "bg-yellow-500",
+                        item.type === "Complete" && "bg-green-600",
+                        item.type === "Comment" && "bg-gray-600",
+                        item.type === "Reopened" && "bg-blue-600",
+                        item.type === "Closed" && "bg-red-600"
+                      )}
+                    >
+                      {item?.type}
+                    </span>
+                  </div>
+                  <div className="flex flex-row justify-between items-center mt-4">
+                    <p>{item?.comment}</p>
+                    {item?.image?.length > 0 && (
+                      <>
+                        {item?.image?.map((img, id) => (
+                          <div
+                            key={img}
+                            className="relative cursor-pointer [&_span]:hover:block w-40"
+                            onClick={() => {
+                              setShowImageUrl(img);
+                              toggleShowImage(img);
+                            }}
+                          >
+                            {!showImage && (
+                              <span className="w-full rounded-xl h-full bg-black bg-opacity-30 absolute hidden text-primary-foreground text-center">
+                                <p className="mt-16 font-semibold">View</p>
+                              </span>
+                            )}
+                            <div className="flex flex-row gap-2">
+                              <Image
+                                src={img}
+                                alt="ticket image"
+                                width={100}
+                                height={120}
+                                className="rounded w-full"
+                              />
+                            </div>
+                          </div>
+                        ))}
+                      </>
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
-          </div>
-        </div>
-        {ticketDetails?.memberStatus?.length > 0 && (
-          <div>
-            {ticketDetails?.memberStatus[0].image?.length > 0
-              ? ticketDetails?.memberStatus[0].image?.map((dt, id) => {
-                  return <img key={id} src={dt} alt={dt} width={200} />;
-                })
-              : // <img src={NoImage} alt="no" width={250} />
-                ""}
-          </div>
-        )}
-        {ticketDetails?.finalStatus === "Completed" && (
-          <div>
-            <h5 className="font-ubuntu font-bold text-xl mb-4 -md:text-lg">
-              Final Complete Image :
-            </h5>
-            <div>
-              {ticketDetails?.finalImage?.length > 0
-                ? ticketDetails?.finalImage?.map((dt, id) => {
-                    return <img key={id} src={dt} alt={dt} />;
-                  })
-                : // <img src={NoImage} alt="no" width={250} />
-                  ""}
-            </div>
-          </div>
+          </>
         )}
       </div>
-
-      {/* update ticket status by member assign */}
-      <Dialog open={ticketUpdateBoxOpen} onClose={handleCancel}>
-        <DialogTitle>Update Ticket Status</DialogTitle>
-        <DialogContent style={{ width: "400px" }}>
-          <FormControl fullWidth className="mt-1 mb-1">
-            <InputLabel id="demo-simple-select-label">Status</InputLabel>
-            <Select
-              labelId="demo-simple-select-label"
-              id="demo-simple-select"
-              value={status}
-              name="status"
-              onChange={e => setStatus(e.target.value)}
+      <Modal
+        open={showImage}
+        onClose={toggleShowImage}
+        sx={{
+          "display": "flex",
+          "alignItems": "center",
+          "justifyContent": "center",
+          "& .MuiBackdrop-root": {
+            backgroundColor: "rgba(0, 0, 0, 0.1)",
+          },
+        }}
+      >
+        <div className="bg-white rounded-3xl h-5/6 flex flex-col ">
+          {/* <Image
+                                                      src={img}
+                                                      alt="alt"
+                                                      width={400}
+                                                      height={400}
+                                                    /> */}
+          <div className="h-full w-full flex items-center justify-center">
+            <img
+              src={showImageUrl}
+              alt={showImageUrl}
+              className="w-auto h-5/6 bg-center"
+            />
+            {/* <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black opacity-60" /> */}
+          </div>
+          <div className="flex flex-row gap-4 justify-evenly p-4 -md:flex-wrap">
+            <button
+              className="py-2 px-4 font-semibold bg-secondary text-primary rounded-full flex flex-row items-center justify-center gap-1 text-nowrap"
+              onClick={() => {
+                downloadImage(showImageUrl);
+              }}
             >
-              <MenuItem value="Pending">Pending</MenuItem>
-              <MenuItem value="Process">Process</MenuItem>
-              <MenuItem value="Completed">Completed</MenuItem>
-            </Select>
-          </FormControl>
+              <FiDownload className="text-xl" />
+              Download Image
+            </button>
+          </div>
+        </div>
+      </Modal>
+      <Modal
+        open={openComment}
+        onClose={() => setOpenComment(prev => !prev)}
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <div className="bg-white 2xl:w-1/3 p-8 rounded-3xl outline-none -md:w-3/4 -lg:w-2/4 -xl:4/6 -2xl:3/6">
+          <div>
+            <h3 className=" text-2xl font-semibold font-ubuntu">
+              Ticket Update
+            </h3>
+            <p>Please add a note before marking the Ticket as Comment</p>
+            <hr className="my-3" />
+          </div>
+          <div className="w-full">
+            <textarea
+              type="text"
+              id="comment"
+              onChange={e => setComment(e.target.value)}
+              maxLength="250"
+              className="w-full resize-none outline-primary border border-gray-400 rounded-lg p-2"
+              rows={6}
+            />
+            <p className="text-xs text-red-500">
+              Should be not more than 250 Charactors.
+            </p>
+          </div>
           <FormControl fullWidth className="mt-1 mb-1">
             <TextField
               type="file"
               name="image"
-              inputProps={{ multiple: true }}
               onChange={e => setImage(e.target.files)}
             />
           </FormControl>
-          <FormControl fullWidth className="mt-1 mb-1">
-            <TextField
-              type="date"
-              name="date"
-              value={date}
-              onChange={e => setDate(e.target.value)}
-              disabled
-            />
-          </FormControl>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCancel} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleUpdateTicket} color="primary">
-            Update
-          </Button>
-        </DialogActions>
-      </Dialog>
+          <div className="flex flex-row gap-2 justify-end mt-4">
+            <button
+              className="bg-primary-foreground border border-secondary text-secondary rounded-3xl px-4 py-2 flex flex-row items-center"
+              onClick={() => setOpenComment(prev => !prev)}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="bg-secondary text-primary rounded-3xl px-4 py-2 flex flex-row  items-center"
+              onClick={handleUpdateTicket}
+            >
+              Add Comment
+            </button>
+          </div>
+        </div>
+      </Modal>
     </AsideContainer>
   );
 };

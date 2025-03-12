@@ -13,7 +13,7 @@ import {
   TextField,
   FormControl,
 } from "@mui/material";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import { FaMinus, FaPlus } from "react-icons/fa6";
 import AsideContainer from "../../../components/AsideContainer";
 import { useRouter } from "next/navigation";
@@ -133,9 +133,7 @@ const Page = () => {
       )
       .then(response => {
         if (response) {
-          toast.warning("Record deleted successfully", {
-            position: "top-right",
-          });
+          toast("Record deleted successfully");
           getAllCheckList();
           setOpen(false);
         }
@@ -179,15 +177,13 @@ const Page = () => {
       )
       .then(response => {
         if (response) {
-          toast.success(response.data.message, {
-            position: "top-right",
-          });
+          toast(`${response.data.message}`);
           setDeleteDialogOpen(false);
           getAllCheckList();
         }
       })
       .catch(error => {
-        toast.error("Error while delete checklist point", {
+        toast("Error while delete checklist point", {
           position: "top-right",
         });
         console.log(error);
@@ -202,7 +198,7 @@ const Page = () => {
   const handleUpdateNewField = () => {
     const isAnyHeadingEmpty = checklistItems.some(item => !item.heading.trim());
     if (isAnyHeadingEmpty) {
-      toast.error("Checklist heading is required", {
+      toast("Checklist heading is required", {
         position: "top-center",
       });
       return; // Exit early if any heading is empty
@@ -212,7 +208,7 @@ const Page = () => {
       item.points.some(point => !point.point.trim())
     );
     if (isAnyPointEmpty) {
-      toast.error("Checklist point is required", {
+      toast("Checklist point is required", {
         position: "top-center",
       });
       return; // Exit early if any point is empty
@@ -229,7 +225,7 @@ const Page = () => {
         )
         .then(response => {
           if (response) {
-            toast.success(response.data.message, {
+            toast(response.data.message, {
               position: "top-right",
             });
             setAddFieldOpen(false);
@@ -238,16 +234,14 @@ const Page = () => {
           }
         })
         .catch(error => {
-          toast.error("Error while add checklist", {
-            position: "top-right",
-          });
+          toast("Error while add checklist");
           console.log(error);
         });
     }
   };
   const handleSubmitPoint = () => {
     if (!point) {
-      toast.error("Point is required", {
+      toast("Point is required", {
         position: "top-right",
       });
     } else {
@@ -264,7 +258,7 @@ const Page = () => {
         )
         .then(response => {
           if (response) {
-            toast.success(response.data.message, {
+            toast(response.data.message, {
               position: "top-right",
             });
             setPointAddOpen(false);
@@ -273,9 +267,7 @@ const Page = () => {
           }
         })
         .catch(error => {
-          toast.error("Error while add checklist", {
-            position: "top-right",
-          });
+          toast("Error while add checklist");
           console.log(error);
         });
     }

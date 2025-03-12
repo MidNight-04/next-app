@@ -108,7 +108,7 @@ const ClientProjectView = () => {
   const [singleInspection, setSingleInspection] = useState(0);
   const [step, setStep] = useState("");
   const [pointList, setPointList] = useState([]);
-  const [assignMember, setAssignMember] = useState([]);
+  const [assignMember, setAssignMember] = useState(null);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [detailsIsloading, setDetailsIsLoading] = useState(true);
@@ -250,48 +250,42 @@ const ClientProjectView = () => {
   };
 
   const handleStepChange = async value => {
-    // const { value } = e.target;
     const pt = value?.split("$")[1];
     setPoint(parseInt(pt));
     if (step) {
       const filtered = projectDetails?.project_status?.find(
         obj => obj.name === step
       )?.step;
-
       if (filtered) {
         const selectedStep = filtered.find(dt => dt.point === parseInt(pt));
         if (selectedStep) {
-          // setContent(selectedStep.content);
           const member = selectedStep.issueMember;
-          let issue = [];
+          let issue;
           for (let i = 0; i < member?.length; i++) {
             switch (member[i]?.toLowerCase()) {
               case "admin":
-                issue.push({
-                  name: "ThikedaarDotCom",
-                  employeeID: "65362fba3ffa1cad30f53bac",
-                });
+                issue = "65362fba3ffa1cad30f53bac";
                 break;
               case "project admin":
-                projectDetails?.project_admin?.forEach(dt => issue.push(dt));
+                issue = projectDetails?.project_admin[0];
                 break;
               case "project manager":
-                projectDetails?.project_manager?.forEach(dt => issue.push(dt));
+                issue = projectDetails?.project_manager[0];
                 break;
               case "sr. engineer":
-                projectDetails?.sr_engineer?.forEach(dt => issue.push(dt));
+                issue = projectDetails?.sr_engineer[0];
                 break;
               case "site engineer":
-                projectDetails?.site_engineer?.forEach(dt => issue.push(dt));
+                issue = projectDetails?.site_engineer[0];
                 break;
               case "accountant":
-                projectDetails?.accountant?.forEach(dt => issue.push(dt));
+                issue = projectDetails?.accountant[0];
                 break;
               case "operation":
-                projectDetails?.operation?.forEach(dt => issue.push(dt));
+                issue = projectDetails?.operation[0];
                 break;
               case "sales":
-                projectDetails?.sales?.forEach(dt => issue.push(dt));
+                issue = projectDetails?.sales[0];
                 break;
               default:
                 break;
@@ -356,21 +350,20 @@ const ClientProjectView = () => {
   };
 
   const handleUpdate = () => {
-    // console.log(status);
     if (!status) {
-      toast.error("Work is required", {
+      toast("Work is required", {
         position: "top-center",
       });
     } else if (!step) {
-      toast.error("Query step log is required", {
+      toast("Query step log is required", {
         position: "top-center",
       });
     } else if (!content) {
-      toast.error("Query content is required", {
+      toast("Query content is required", {
         position: "top-center",
       });
     } else if (!date) {
-      toast.error("Date is required", {
+      toast("Date is required", {
         position: "top-center",
       });
     } else {
@@ -381,7 +374,8 @@ const ClientProjectView = () => {
       formData.append("point", parseInt(point));
       formData.append("content", content?.split("$")[0]);
       // Serialize the entire array as a JSON string
-      formData.append("assignMember", JSON.stringify(assignMember));
+      formData.append("assignedBy", userId);
+      formData.append("assignMember", assignMember);
       // for (let i = 0; i < assignMember?.length; i++) {
       //   formData.append("assignMember", JSON.stringify(assignMember[i]));
       // }
@@ -399,20 +393,20 @@ const ClientProjectView = () => {
         headers: { "Content-Type": "multipart/form-data" },
         data: formData,
       };
-      // axios
-      //   .request(config)
-      //   .then(resp => {
-      //     toast.success(resp.data.message, {
-      //       position: "top-center",
-      //     });
-      //   })
-      //   .catch(err => {
-      //     toast.error("Error while raise query by client", {
-      //       position: "top-center",
-      //     });
-      //     console.log(err);
-      //   });
-      // setConfirmationOpen(false);
+      axios
+        .request(config)
+        .then(resp => {
+          toast(resp.data.message, {
+            position: "top-center",
+          });
+        })
+        .catch(err => {
+          toast("Error while raise query by client", {
+            position: "top-center",
+          });
+          console.log(err);
+        });
+      setConfirmationOpen(false);
     }
   };
 
@@ -503,7 +497,7 @@ const ClientProjectView = () => {
       })
       .catch(error => {
         console.log(error);
-        toast.error("Error while showing task update", {
+        toast("Error while showing task update", {
           position: "top-right",
         });
       });
@@ -525,7 +519,7 @@ const ClientProjectView = () => {
       )
       .then(response => {
         if (response?.data?.status === 200) {
-          toast.success("Image Approved Successfully.");
+          toast("Image Approved Successfully.");
         }
       });
   };
@@ -560,23 +554,23 @@ const ClientProjectView = () => {
     // console.log(status);
 
     if (!status) {
-      toast.error("Status is required", {
+      toast("Status is required", {
         position: "top-center",
       });
-    } else if (approveImage?.length === 0) {
-      toast.error("Approval Image is required", {
-        position: "top-center",
-      });
+      // } else if (approveImage?.length === 0) {
+      //   toast("Approval Image is required", {
+      //     position: "top-center",
+      //   });
     } else if (
       hasUnCheckedMandatory ||
       (inspectionList?.length > 0 && checkedItems?.length === 0)
     ) {
-      toast.error(" Checked all mandatory inspection is required", {
+      toast(" Checked all mandatory inspection is required", {
         position: "top-center",
       });
     }
     // else if (!chatLog) {
-    //   toast.error("Chat Log is required", {
+    //   toast("Chat Log is required", {
     //     position: "top-center",
     //   });
     // }
@@ -596,7 +590,7 @@ const ClientProjectView = () => {
       formData.append("userName", userName);
       formData.append("userId", userId);
       if (currentStatus === "Completed") {
-        toast.error("You have already completed this point.");
+        toast("You have already completed this point.");
         setWorkStatusOpen(false);
       } else {
         axios
@@ -617,7 +611,7 @@ const ClientProjectView = () => {
                   setRefresh(prev => !prev);
                 })
                 .catch(error => {
-                  toast.error("Error while update project status");
+                  toast("Error while update project status");
                 });
               setLoading(false);
               setName("");
@@ -627,7 +621,7 @@ const ClientProjectView = () => {
               setCheckListName("");
               setInspectionList([]);
               setCheckedItems([]);
-              toast.success(response.data.message);
+              toast(`${response.data.message}`);
             }
           })
           .catch(error => {
@@ -642,7 +636,7 @@ const ClientProjectView = () => {
             setApproveImage([]);
             setWorkStatusOpen(false);
             console.log(error);
-            toast.error("Error while update project status");
+            toast("Error while update project status");
           });
       }
     }
@@ -684,9 +678,9 @@ const ClientProjectView = () => {
     ).then(res => {
       setLoading(false);
       if (res.ok) {
-        toast.success("Image deleted successfully.");
+        toast("Image deleted successfully.");
       } else {
-        toast.error("Something went wrong while deleting the image.");
+        toast("Something went wrong while deleting the image.");
       }
     });
   };
@@ -694,7 +688,7 @@ const ClientProjectView = () => {
   const handleUploadDocument = () => {
     const formData = new FormData();
     formData.append("name", documentName);
-    formData.append("client", projectDetails?.client?.id);
+    formData.append("client", projectDetails?.client);
     formData.append("siteID", slug);
     formData.append("user", userId);
     formData.append("userName", userName);
@@ -715,11 +709,11 @@ const ClientProjectView = () => {
         // console.log(resp);
         setDocumentName("");
         setDocument("");
-        toast.success(resp?.data?.message);
+        toast(resp?.data?.message);
         setRefresh(!refresh);
       })
       .catch(err => {
-        toast.error("Error while uploading document.");
+        toast("Error while uploading document.");
         console.log(err);
       });
     setDocumentDialogOpen(false);
@@ -738,27 +732,27 @@ const ClientProjectView = () => {
   const AddProjectStepSubmit = () => {
     // console.log(pointName,checkList,checkListName,duration,prevContent,prevPoint,status,issueMember)
     if (!pointName) {
-      toast.error("Point Name is required", {
+      toast("Point Name is required", {
         position: "top-right",
       });
     } else if (!checkList) {
-      toast.error("CheckList is required", {
+      toast("CheckList is required", {
         position: "top-right",
       });
     } else if (checkList === "yes" && !checkListName) {
-      toast.error("CheckList Name is required", {
+      toast("CheckList Name is required", {
         position: "top-right",
       });
     } else if (!duration) {
-      toast.error("Duration is required", {
+      toast("Duration is required", {
         position: "top-right",
       });
     } else if (issueMember?.length === 0) {
-      toast.error("Issue member is required", {
+      toast("Issue member is required", {
         position: "top-right",
       });
     } else if (!prevContent) {
-      toast.error("Content is required", {
+      toast("Content is required", {
         position: "top-right",
       });
     } else {
@@ -793,7 +787,7 @@ const ClientProjectView = () => {
         )
         .then(response => {
           if (response.data.status == 200) {
-            toast.success(response.data.message, {
+            toast(response.data.message, {
               position: "top-right",
             });
             setStepModal(false);
@@ -803,9 +797,7 @@ const ClientProjectView = () => {
           }
         })
         .catch(error => {
-          toast.error("Error while add new point", {
-            position: "top-right",
-          });
+          toast("Error while add new point");
           console.log(error);
         });
     }
@@ -822,7 +814,6 @@ const ClientProjectView = () => {
       .get(`${process.env.REACT_APP_BASE_PATH}/api/teammember/getall`)
       .then(response => {
         if (response) {
-          console.log(response.data.data);
           setAllMemberList(response.data.data);
           const uniqueRoles = response.data.data.filter(
             (user, index, self) =>
@@ -886,16 +877,14 @@ const ClientProjectView = () => {
       .put(`${process.env.REACT_APP_BASE_PATH}/api/project/deletepoint`, data)
       .then(response => {
         if (response.data.status === 200) {
-          toast.success(response.data.message, {
-            position: "top-right",
-          });
+          toast(`${response.data.message}`);
           setStepModalDelete(false);
           getprojectDetail();
           setRefresh(!refresh);
         }
       })
       .catch(error => {
-        toast.error("Error while delete project field", {
+        toast("Error while delete project field", {
           position: "top-right",
         });
         console.log(error);
@@ -926,18 +915,17 @@ const ClientProjectView = () => {
       userName: userName,
       activeUser: userId,
     };
-    console.log(data);
     axios
       .put(`${process.env.REACT_APP_BASE_PATH}/api/project/deletestep`, data)
       .then(response => {
         if (response.data.status === 200) {
-          toast.success(response.data.message);
+          toast(`${response.data.message}`);
           setDeleteStepOpen(false);
           getprojectDetail();
         }
       })
       .catch(error => {
-        toast.error("Error while delete project field", {
+        toast("Error while delete project field", {
           position: "top-right",
         });
         console.log(error);
@@ -1626,7 +1614,7 @@ const ClientProjectView = () => {
               name="date"
               value={date}
               onChange={e => setDate(e.target.value)}
-              disabled
+              // disabled
             />
           </FormControl>
           <div className="row mt-2">
@@ -1885,7 +1873,8 @@ const ClientProjectView = () => {
                       </span>
                       {item?.status === "Pending" ? (
                         <span className="bg-secondary text-primary-foreground rounded-lg px-2 py-1">
-                          {item?.status} By You
+                          {item?.status} By
+                          {item.clientID == userId ? "You" : "Client"}
                         </span>
                       ) : item?.status === "Accepted" ? (
                         <span className="bg-secondary text-primary-foreground rounded-lg px-2 py-1">

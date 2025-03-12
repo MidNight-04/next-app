@@ -8,7 +8,7 @@ import { postEndpoint } from "../../../helpers/endpoints";
 import { useParams, useRouter } from "next/navigation";
 import LoaderSpinner from "../../../components/loader/LoaderSpinner";
 import { useState } from "react";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 
 const otpSchema = Yup.object({
   username: Yup.string(),
@@ -32,7 +32,7 @@ const OtpForm = () => {
       }),
     onSuccess: data => {
       if (data.message === "You have been logged in") {
-        toast.success("You have logged in successfully!");
+        toast("You have logged in successfully!");
         setLogIn({
           username: data.username,
           token: data?.token,
@@ -54,7 +54,7 @@ const OtpForm = () => {
     },
     onError: () => {
       setShowLoader(false);
-      toast.error("Please enter a valid OTP.");
+      toast("Please enter a valid OTP.");
     },
     // onSettled: () => {
     //   setShowLoader(false);
@@ -72,13 +72,13 @@ const OtpForm = () => {
     onSuccess: data => {
       if (data.status === 200) {
         setShowLoader(false);
-        toast.success("OTP sent to you registered mobile number.");
+        toast("OTP sent to you registered mobile number.");
       }
     },
     onError: data => {
       if (data.status !== 200) {
         setShowLoader(false);
-        toast.success("Something went Wrong please try again later.");
+        toast("Something went Wrong please try again later.");
       }
     },
   });

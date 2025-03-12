@@ -3,7 +3,7 @@
 // import Footer from "../../components/Footer";
 import { useState } from "react";
 import dynamic from "next/dynamic";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import dummyImagePdf from "../../public/assets/dummy-image-pdf.jpg";
 import { FaRetweet } from "react-icons/fa";
 import { AiOutlineExpandAlt } from "react-icons/ai";

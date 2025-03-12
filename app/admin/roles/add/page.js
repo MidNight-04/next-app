@@ -2,7 +2,7 @@
 import axios from "axios";
 import { useRouter, redirect } from "next/navigation";
 import { useState } from "react";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import AsideContainer from "../../../../components/AsideContainer";
 import { IoIosArrowBack } from "react-icons/io";
 
@@ -19,7 +19,7 @@ const AddRoleForm = () => {
         .then(response => {
           if (response) {
             setRole("");
-            toast.success(response.data.message, {
+            toast(response.data.message, {
               position: "top-right",
             });
             router.push("/admin/roles");
@@ -29,7 +29,7 @@ const AddRoleForm = () => {
           console.log(error);
         });
     } else {
-      toast.error("Role is mandatory", {
+      toast("Role is mandatory", {
         position: "top-right",
       });
     }

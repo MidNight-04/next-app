@@ -9,7 +9,7 @@ import { useAuthStore } from "../../../../store/useAuthStore";
 import { getClientEndpoint } from "../../../../helpers/endpoints";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import AsideContainer from "../../../../components/AsideContainer";
 import { FiLoader } from "react-icons/fi"; // will be user a WIP icon
 import { MdSchedule } from "react-icons/md"; //schedule icon
@@ -74,7 +74,7 @@ const Page = () => {
 
   const updateForm = () => {
     if (!profileData.name) {
-      toast.error("Name is required");
+      toast("Name is required");
     } else {
       let config = {
         method: "post",
@@ -86,7 +86,7 @@ const Page = () => {
       axios
         .request(config)
         .then(resp => {
-          toast.success(resp.data.message);
+          toast(resp.data.message);
           router.back();
         })
         .catch(err => {

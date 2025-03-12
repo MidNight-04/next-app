@@ -11,7 +11,6 @@ import {
   DialogActions,
   TextField,
 } from "@mui/material";
-import { toast } from "react-toastify";
 import { useAuthStore } from "../../../../../store/useAuthStore";
 import { useParams } from "next/navigation";
 import AsideContainer from "../../../../../components/AsideContainer";
@@ -19,7 +18,8 @@ import { cn } from "../../../../../lib/utils";
 import { IoIosArrowBack } from "react-icons/io";
 import { useRouter } from "next/navigation";
 import { FiEdit } from "react-icons/fi";
-import { MdOutlineDelete } from "react-icons/md";
+import { MdAdd, MdOutlineDelete } from "react-icons/md";
+import { toast } from "sonner";
 
 let today = new Date();
 let yyyy = today.getFullYear();
@@ -115,9 +115,7 @@ const Page = () => {
       )
       .then(response => {
         if (response) {
-          toast.warning(response.data.message, {
-            position: "top-right",
-          });
+          toast(`${response.data.message}`);
           getAllPaymentStage();
           setPayment("");
           setStage("");
@@ -131,13 +129,9 @@ const Page = () => {
 
   const handleConfirmUpdate = () => {
     if (!payment) {
-      toast.error("Payment % is required", {
-        position: "top-center",
-      });
+      toast("Payment % is required");
     } else if (!stage) {
-      toast.error("Payment Stage is required", {
-        position: "top-center",
-      });
+      toast("Payment Stage is required");
     } else {
       const data = {
         id: Id,
@@ -166,9 +160,7 @@ const Page = () => {
             });
             if (percent > 100) {
               setUpdateOpen(false);
-              toast.error("Overall payment percent exceed 100%", {
-                position: "top-center",
-              });
+              toast("Event has been created.");
             } else {
               axios
                 .put(
@@ -178,9 +170,7 @@ const Page = () => {
                 .then(response => {
                   if (response) {
                     getAllPaymentStage();
-                    toast.success(response.data.message, {
-                      position: "top-right",
-                    });
+                    toast(`${response.data.message}`);
                     setPrevPayment("");
                     setPrevStage("");
                     // Close the confirmation dialog
@@ -204,10 +194,7 @@ const Page = () => {
           .then(response => {
             if (response) {
               getAllPaymentStage();
-              toast.success(response.data.message, {
-                position: "top-right",
-              });
-              // Close the confirmation dialog
+              toast(`${response.data.message}`);
               setUpdateOpen(false);
             }
           })
@@ -247,9 +234,7 @@ const Page = () => {
         });
         if (percent === 100) {
           setUpdateOpen(false);
-          toast.error("Overall payment percent exceed 100%", {
-            position: "top-center",
-          });
+          toast("Overall payment percent exceed 100%");
         } else {
           setUpdateOpen(true);
         }
@@ -295,31 +280,19 @@ const Page = () => {
                       {item?.floor === "0" ? `Ground ` : `${item.floor} `}
                       Floor
                     </div>
-                    {/* <p>
-                      {showContent[index] ? (
-                        <TiArrowSortedUp
-                          className="icon fs-3"
-                          onClick={() => toggleContent(index)}
-                        />
-                      ) : (
-                        <TiArrowSortedDown
-                          className="icon fs-3"
-                          onClick={() => toggleContent(index)}
-                        />
-                      )}
-                    </p> */}
                   </div>
-                  {/* {showContent[index] && ( */}
                   <>
-                    {/* {userRole === "ROLE_ADMIN" && (
-                      <span
-                        className="add"
-                        onClick={() => handleAddOpen(item?._id, item?.floor)}
-                      >
-                        Add
-                      </span>
-                    )} */}
-                    <div className="bg-white  rounded-3xl mt-6">
+                    {userRole === "ROLE_ADMIN" && (
+                      <div className="flex flex-row items-center justify-end">
+                        <span
+                          className="p-2 bg-primary-foreground border border-primary rounded-full cursor-pointer mt-2 [&_svg]:text-primary"
+                          onClick={() => handleAddOpen(item?._id, item?.floor)}
+                        >
+                          <MdAdd />
+                        </span>
+                      </div>
+                    )}
+                    <div className="bg-white rounded-3xl mt-2">
                       <table className="w-full">
                         <thead>
                           <tr className="bg-secondary my-5 text-primary rounded-t-3xl">

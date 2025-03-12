@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import AsideContainer from "../../../../components/AsideContainer";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import { IoIosArrowBack } from "react-icons/io";
 import { MenuItem, Select } from "@mui/material";
 
@@ -40,23 +40,23 @@ const AddMemberForm = () => {
 
   const submitFormData = () => {
     if (!data.name) {
-      toast.error("Name is required", {
+      toast("Name is required", {
         position: "top-right",
       });
     } else if (!data.employeeID) {
-      toast.error("Employee ID is required", {
+      toast("Employee ID is required", {
         position: "top-right",
       });
     } else if (!data.role) {
-      toast.error("Role is required", {
+      toast("Role is required", {
         position: "top-right",
       });
     } else if (!data.email) {
-      toast.error("Email is required", {
+      toast("Email is required", {
         position: "top-right",
       });
     } else if (!data.phone) {
-      toast.error("Phone is required", {
+      toast("Phone is required", {
         position: "top-right",
       });
     } else {
@@ -75,7 +75,7 @@ const AddMemberForm = () => {
               phone: "",
               address: "",
             });
-            toast.success(response.data.message, {
+            toast(response.data.message, {
               position: "top-right",
             });
             router.back();

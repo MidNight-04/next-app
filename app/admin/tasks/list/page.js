@@ -20,7 +20,6 @@ import {
   InputLabel,
 } from "@mui/material";
 import { toast } from "sonner";
-import "react-toastify/dist/ReactToastify.css";
 import AsideContainer from "../../../../components/AsideContainer";
 const style = {
   position: "absolute",

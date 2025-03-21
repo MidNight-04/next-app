@@ -1,19 +1,19 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import NoImage from "../../../public/assets/no-image-available.png";
 import { RiShareForwardFill } from "react-icons/ri";
 import { useAuthStore } from "../../../store/useAuthStore";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Label } from "@mui/icons-material";
 import AsideContainer from "../../../components/AsideContainer";
 import { cn } from "../../../lib/utils";
 
 const Page = () => {
   const userId = useAuthStore(state => state.userId);
   const userType = useAuthStore(state => state.userType);
+  const hasHydrated = useAuthStore.persist.hasHydrated();
   const [activeFilter, setActiveFilter] = useState("All Ticket");
   const [ticketList, setTicketList] = useState([]);
   const router = useRouter();
@@ -29,85 +29,31 @@ const Page = () => {
   });
 
   useEffect(() => {
-    if (userType === "ROLE_USER") {
-      axios
-        .get(
-          `${process.env.REACT_APP_BASE_PATH}/api/projectticket/byclient/all`
-        )
-        .then(response => {
-          if (response?.data.status === 200) {
-            console.log(response);
-            // const ftData = response?.data?.data?.flatMap(ticket =>
-            //   ticket.openTicket.map(openTicket => ({
-            //     ...openTicket,
-            //     siteID: ticket.siteID,
-            //     client: ticket?.client,
-            //   }))
-            // );
-            setTicketList(response);
-            setFilteredTickets(response);
-          } else {
-            setTicketList([]);
-            setFilteredTickets([]);
-          }
-        })
-        .catch(error => {
-          console.log(error);
-        });
+    const fetchTickets = async () => {
+      try {
+        if (userType === "ROLE_USER" || userType === "ROLE_ADMIN") {
+          const response = await axios.get(
+            `${process.env.REACT_APP_BASE_PATH}/api/tickets/getalltickets`
+          );
+          setTicketList(response.data.data);
+        } else if (userType === "ROLE_CLIENT") {
+          const response = await axios.get(
+            `${process.env.REACT_APP_BASE_PATH}/api/tickets/gettickets/${userId}`
+          );
 
-      axios
-        .get(`${process.env.REACT_APP_BASE_PATH}/api/project/getall`)
-        .then(response => {
-          setProjectList(response?.data?.data);
-          // console.log(response?.data?.data)
-        })
-        .catch(error => {
-          console.log(error);
-        });
-
-      axios
-        .get(`${process.env.REACT_APP_BASE_PATH}/api/teammember/getall`)
-        .then(response => {
-          if (response) {
-            setMemberList(response.data.data);
-          }
-        })
-        .catch(error => {
-          console.log(error);
-        });
-
-      axios
-        .get(`${process.env.REACT_APP_BASE_PATH}/api/client/getall`)
-        .then(response => {
-          if (response) {
-            setClientList(response.data.data);
-          }
-        })
-        .catch(error => {
-          console.log(error);
-        });
-    } else {
-      axios
-        .get(
-          `${process.env.REACT_APP_BASE_PATH}/api/projecttask/byclient/${userId}`
-        )
-        .then(response => {
-          // console.log(response.data.data);
-
-          if (response?.status === 200) {
-            setTicketList(response.data.data);
-            setFilteredTickets(response.data.data);
-          } else {
-            setTicketList([]);
-          }
-        })
-        .catch(error => {
-          console.log(error);
-        });
-    }
+          setTicketList(response.data.data);
+        } else {
+          const response = await axios.get(
+            `${process.env.REACT_APP_BASE_PATH}/api/tickets/getmembertickets/${userId}`
+          );
+          setTicketList(response.data.data);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchTickets();
   }, [userId, userType]);
-
-  console.log(ticketList);
 
   const handleButtonClick = (filter, filterData = null) => {
     setActiveFilter(filter);
@@ -176,7 +122,7 @@ const Page = () => {
           Ticket List
         </h1>
         <div>
-          {userType !== "ROLE_USER" && (
+          {userType === "ROLE_USER" && (
             <div className="flex flex-row items-center gap-4">
               <div>
                 <button
@@ -313,8 +259,8 @@ const Page = () => {
         </div>
       </div>
       <div>
-        <div className="">
-          {ticketList[0]?.openTicket?.map((dt, idx) => (
+        <div>
+          {ticketList.map((dt, idx) => (
             <div key={idx} className="mb-4">
               <Link
                 href={`/admin/tickets/${dt._id}`}
@@ -353,7 +299,7 @@ const Page = () => {
                           </span>
                           <span className="flex gap-2 justify-center items-center p-2 bg-primary-foreground rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl -md:[&_p]:text-sm -md:[&_svg]:text-sm  ">
                             <RiShareForwardFill className="icon" />
-                            <p>Assign Member : {dt.assignMember.name}</p>
+                            <p>Assign Member : {dt.assignMember?.name}</p>
                           </span>
                         </div>
                       </div>
@@ -373,7 +319,7 @@ const Page = () => {
               </Link>
             </div>
           ))}
-          {!filteredTickets && (
+          {ticketList.length < 0 && (
             <p className="mt-5 text-warning text-center">
               No ticket available...
             </p>

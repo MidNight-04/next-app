@@ -36,7 +36,6 @@ import { useDebounce } from "../../helpers/useDeboune";
 import Link from "next/link";
 import { redirect, usePathname, useRouter } from "next/navigation";
 import { useAuthStore } from "../../store/useAuthStore";
-import { ToastContainer } from "react-toastify";
 import { CgProfile } from "react-icons/cg";
 import { SlLogout } from "react-icons/sl";
 
@@ -116,18 +115,6 @@ const Header = () => {
 
   return (
     <header className="sticky top-0 left-0 z-10 w-full shadow-md bg-black h-[74px] flex items-center">
-      <ToastContainer
-        position="top-right"
-        autoClose={2000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick={false}
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
-      />
       <div className="px-24 grid md:grid-cols-16 grid-flow-row-dense justify-between items-center w-full -xl:px-16 -md:px-12 -xl:flex -sm:px-4">
         {debounceWidth < 1100 && (
           <div

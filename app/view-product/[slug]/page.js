@@ -5,7 +5,6 @@ import {
   Card,
   CardActionArea,
   Modal,
-  Paper,
   Stack,
   Table,
   TableBody,
@@ -18,11 +17,10 @@ import {
 import StarIcon from "@mui/icons-material/Star";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { ToastContainer, toast } from "react-toastify";
+import { toast } from "sonner";
 import dummyImagePdf from "../../../public/assets/dummy-image-pdf.jpg";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import FavoriteIcon from "@mui/icons-material/Favorite";
-import { FaRupeeSign } from "react-icons/fa";
 import ReviewProduct from "../../../components/ReviewProduct/ReviewProduct";
 import { useMutation, useQueries, useQuery } from "@tanstack/react-query";
 import {
@@ -558,18 +556,6 @@ const Page = () => {
     <>
       <Header />
       <section className="px-4 py-6">
-        <ToastContainer
-          position="top-right"
-          autoClose={5000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick={false}
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme="light"
-        />
         <div className="grid grid-cols-2 gap-8 w-full">
           <div className="flex justify-center items-center">
             {!detailsIsLoading

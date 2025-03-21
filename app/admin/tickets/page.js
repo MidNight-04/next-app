@@ -13,7 +13,7 @@ import { cn } from "../../../lib/utils";
 const Page = () => {
   const userId = useAuthStore(state => state.userId);
   const userType = useAuthStore(state => state.userType);
-  const hasHydrated = useAuthStore.persist.hasHydrated();
+  const hasHydrated = useAuthStore.persist?.hasHydrated();
   const [activeFilter, setActiveFilter] = useState("All Ticket");
   const [ticketList, setTicketList] = useState([]);
   const router = useRouter();

@@ -17,7 +17,7 @@ const Page = () => {
   const router = useRouter();
   const userId = useAuthStore(state => state.userId);
   const userType = useAuthStore(state => state);
-  const hasHydrated = useAuthStore.persist.hasHydrated();
+  const hasHydrated = useAuthStore.persist?.hasHydrated();
   const {
     data: profileData,
     isLoading,

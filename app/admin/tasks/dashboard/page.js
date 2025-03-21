@@ -12,7 +12,6 @@ import { RiProgress6Fill } from "react-icons/ri";
 import "react-circular-progressbar/dist/styles.css";
 import axios from "axios";
 import { toast } from "sonner";
-import "react-toastify/dist/ReactToastify.css";
 import {
   Button,
   Dialog,

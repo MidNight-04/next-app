@@ -19,7 +19,6 @@ import {
   Select,
 } from "@mui/material";
 import { toast } from "sonner";
-import "react-toastify/dist/ReactToastify.css";
 import { FaMinus, FaPlus } from "react-icons/fa6";
 import { TiArrowSortedDown, TiArrowSortedUp, TiMinus } from "react-icons/ti";
 import { IoIosArrowBack, IoIosArrowDown, IoIosArrowUp } from "react-icons/io";

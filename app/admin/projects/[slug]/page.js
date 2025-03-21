@@ -19,8 +19,7 @@ import {
   Checkbox,
   DialogContentText,
 } from "@mui/material";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { toast } from "sonner";
 import { FaDownload, FaMinus, FaPlus } from "react-icons/fa6";
 import { IoCallSharp } from "react-icons/io5";
 import { IoDocumentsOutline } from "react-icons/io5";
@@ -87,7 +86,7 @@ const ClientProjectView = () => {
   const linkRef = useRef(null);
   const { slug } = useParams();
   const router = useRouter();
-  const [projectDetails, setProjectDetails] = useState({});
+  const [projectDetails, setProjectDetails] = useState(null);
   const [confirmationOpen, setConfirmationOpen] = useState(false);
   const [status, setStatus] = useState("");
   const [log, setLog] = useState("");
@@ -136,13 +135,18 @@ const ClientProjectView = () => {
   const [stepModal, setStepModal] = useState(false);
   const [pointName, setPointName] = useState("");
   const [checkList, setCheckList] = useState("");
+  const [stepDuration, setStepDuration] = useState(null);
   const [duration, setDuration] = useState("");
   const [memberList, setMemberList] = useState([]);
   const [prevContent, setPrevContent] = useState("");
   const [stepName, setStepName] = useState("");
-  const [issueMember, setIssueMember] = useState([]);
+  const [issueMember, setIssueMember] = useState(null);
   const [stepModalDelete, setStepModalDelete] = useState(false);
   const [deleteStepOpen, setDeleteStepOpen] = useState(false);
+  const [extensionOpen, setExtensionOpen] = useState(false);
+  const [force, setForce] = useState(false);
+  const [startForceDate, setStartForceDate] = useState(null);
+  const [endForceDate, setEndForceDate] = useState(null);
   const [prevPoint, setPrevPoint] = useState(0);
   const [stepArray, setStepArray] = useState([]);
   const userName = useAuthStore(state => state.username);
@@ -178,7 +182,6 @@ const ClientProjectView = () => {
       .get(`${process.env.REACT_APP_BASE_PATH}/api/project/databyid/${slug}`)
       .then(response => {
         setProjectDetails(response?.data?.data[0]);
-        // console.log(response?.data?.data[0]);
         setTotalInspection(response?.data?.data[0]?.inspections?.length);
 
         const durationInMonths = parseInt(response?.data?.data[0]?.duration);
@@ -213,7 +216,6 @@ const ClientProjectView = () => {
     axios
       .get(`${process.env.REACT_APP_BASE_PATH}/api/log/siteid/${slug}`)
       .then(async response => {
-        // console.log(response)
         setLogList(response.data.data);
         // Calculate the total file count
         let totalFileCount = 0;
@@ -367,7 +369,6 @@ const ClientProjectView = () => {
         position: "top-center",
       });
     } else {
-      // console.log(assignMember);
       const formData = new FormData();
       formData.append("id", slug);
       formData.append("name", step);
@@ -375,7 +376,7 @@ const ClientProjectView = () => {
       formData.append("content", content?.split("$")[0]);
       // Serialize the entire array as a JSON string
       formData.append("assignedBy", userId);
-      formData.append("assignMember", assignMember);
+      formData.append("assignMember", projectDetails.client);
       // for (let i = 0; i < assignMember?.length; i++) {
       //   formData.append("assignMember", JSON.stringify(assignMember[i]));
       // }
@@ -448,7 +449,6 @@ const ClientProjectView = () => {
   };
 
   const updateWorkStatus = (point, content, name, checkName) => {
-    // console.log(point, content, name, checkName);
     setCheckListName(checkName);
     setCheckedItems([]);
     const lists = projectDetails?.inspections?.filter(
@@ -457,7 +457,6 @@ const ClientProjectView = () => {
         data.name === checkName &&
         data.checkListNumber === point
     );
-    // console.log(lists);
     setInspectionList(lists);
     setPoint(point);
     setContent(content);
@@ -469,12 +468,6 @@ const ClientProjectView = () => {
     axios
       .get(`${process.env.REACT_APP_BASE_PATH}/api/project/databyid/${slug}`)
       .then(response => {
-        // console.log(
-        //   response.data.data[0]?.project_status
-        //     .filter(item => item.name === name)[0]
-        //     .step?.filter(dt => dt.point === point && dt.content === content)[0]
-        //     .finalStatus[0]
-        // );
         if (response?.data?.status === 200) {
           setCurrentStatus(
             response.data.data[0]?.project_status
@@ -551,12 +544,9 @@ const ClientProjectView = () => {
       return !checkedPoint || !checkedPoint.checked;
     });
 
-    // console.log(status);
-
     if (!status) {
-      toast("Status is required", {
-        position: "top-center",
-      });
+      toast("Status is required");
+      setLoading(false);
       // } else if (approveImage?.length === 0) {
       //   toast("Approval Image is required", {
       //     position: "top-center",
@@ -590,8 +580,9 @@ const ClientProjectView = () => {
       formData.append("userName", userName);
       formData.append("userId", userId);
       if (currentStatus === "Completed") {
-        toast("You have already completed this point.");
         setWorkStatusOpen(false);
+        setLoading(false);
+        toast("You have already completed this point.");
       } else {
         axios
           .put(
@@ -607,7 +598,6 @@ const ClientProjectView = () => {
                 )
                 .then(response => {
                   setProjectDetails(response?.data?.data[0]);
-                  // console.log(response?.data?.data);
                   setRefresh(prev => !prev);
                 })
                 .catch(error => {
@@ -644,7 +634,6 @@ const ClientProjectView = () => {
 
   const handleWorkStatusChange = e => {
     const { checked, value } = e.target;
-    // console.log(value)
     if (checked) {
       // Add checkbox value to array if checked
       setApproveImage([...approveImage, value]);
@@ -706,7 +695,6 @@ const ClientProjectView = () => {
     axios
       .request(config)
       .then(resp => {
-        // console.log(resp);
         setDocumentName("");
         setDocument("");
         toast(resp?.data?.message);
@@ -730,7 +718,6 @@ const ClientProjectView = () => {
   };
 
   const AddProjectStepSubmit = () => {
-    // console.log(pointName,checkList,checkListName,duration,prevContent,prevPoint,status,issueMember)
     if (!pointName) {
       toast("Point Name is required", {
         position: "top-right",
@@ -743,7 +730,7 @@ const ClientProjectView = () => {
       toast("CheckList Name is required", {
         position: "top-right",
       });
-    } else if (!duration) {
+    } else if (!duration && force !== "yes") {
       toast("Duration is required", {
         position: "top-right",
       });
@@ -762,7 +749,17 @@ const ClientProjectView = () => {
         pointName: pointName,
         checkList: checkList,
         checkListName: checkListName,
-        duration: duration,
+        forceMajeure: {
+          isForceMajeure: force === "yes" ? true : false,
+          startDate: startForceDate,
+          endDate: endForceDate,
+        },
+        duration:
+          force === "yes"
+            ? new Date(endForceDate).getDate() -
+              new Date(startForceDate).getDate() +
+              1
+            : duration,
         issueMember: issueMember,
         prevContent: prevContent?.split("$")[0],
         prevPoint: prevPoint,
@@ -804,7 +801,6 @@ const ClientProjectView = () => {
   };
 
   const AddStepOpenModal = (step, name) => {
-    // console.log(step)
     setStepModal(true);
     setStepName(name);
     setPointList(step);
@@ -814,7 +810,7 @@ const ClientProjectView = () => {
       .get(`${process.env.REACT_APP_BASE_PATH}/api/teammember/getall`)
       .then(response => {
         if (response) {
-          setAllMemberList(response.data.data);
+          // setAllMemberList(response.data.data);
           const uniqueRoles = response.data.data.filter(
             (user, index, self) =>
               index === self.findIndex(u => u.role === user.role)
@@ -842,20 +838,6 @@ const ClientProjectView = () => {
     setCheckListName("");
   };
 
-  const memberChange = (value, isChecked) => {
-    if (isChecked) {
-      // Add role if checked
-      if (!issueMember.includes(value)) {
-        setIssueMember(prev => [...prev, value]); // Use spread operator to add new value
-      }
-    } else {
-      // Remove role if unchecked
-      setIssueMember(prev =>
-        prev.filter(selectedRole => selectedRole !== value)
-      ); // Use filter to remove value
-    }
-  };
-
   const getPrevPoint = value => {
     const pt = value?.split("$")[1];
     setPrevPoint(pt);
@@ -867,6 +849,7 @@ const ClientProjectView = () => {
       name: stepName,
       point: parseInt(point),
       content: content?.split("$")[0],
+      duration: stepDuration,
       checkList: checkList,
       checkListName: checkListName,
       activeUser: userId,
@@ -895,10 +878,12 @@ const ClientProjectView = () => {
     const pt = value?.split("$")[1];
     setPoint(pt);
     let singlePt = pointList?.filter(dt => dt.point === parseInt(pt));
-    // console.log(pointList,singlePt)
+    setStepDuration(singlePt[0]?.duration);
     setCheckList(singlePt[0]?.checkList);
     setCheckListName(singlePt[0]?.checkListName);
   };
+
+  // console.log(content, checkList, checkListName);
 
   const confirmDeleteProjectStep = async (id, name, p_step) => {
     setDeleteStepOpen(true);
@@ -932,21 +917,12 @@ const ClientProjectView = () => {
       });
   };
 
+  let initialDate = new Date(projectDetails?.date);
+  let diff;
+
   return (
     <AsideContainer>
       {Loading && <LoaderSpinner />}
-      <ToastContainer
-        position="top-right"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick={false}
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
-      />
       <div className="flex flex-row my-4 justify-between -md:flex-col -md:gap-2 -md:pl-0 -md:my-2">
         <div className="flex flex-row gap-2 items-center">
           <IoIosArrowBack
@@ -1015,7 +991,7 @@ const ClientProjectView = () => {
           </button>
         </div>
       </div>
-      <div className="grid grid-row grid-cols-5 gap-4 -lg:gap-2 -xl:grid-cols-4 -lg:grid-cols-3 -md:grid-cols-2 justify-evenly -2xl:[&>div]:h-[88px] -lg:[&>div]:p-[10px] -md:[&>div]:h-14 -lg:text-xs ">
+      <div className="grid grid-row grid-cols-6 gap-4 -lg:gap-2 -xl:grid-cols-4 -lg:grid-cols-3 -md:grid-cols-2 justify-evenly [&>div]:h-[88px] -lg:[&>div]:p-[10px] -md:[&>div]:h-14 -lg:text-xs ">
         <div
           className="p-[20px]  w-full rounded-[14px] [&_svg]:text-primary font-ubuntu flex flex-row gap-2 items-center self-center justify-between bg-white cursor-pointer"
           onClick={() => documentDialogFunction()}
@@ -1027,7 +1003,7 @@ const ClientProjectView = () => {
           className="p-[20px] w-full rounded-[14px] [&_svg]:text-primary font-ubuntu flex flex-row gap-2 items-center self-center justify-between bg-white cursor-pointer"
           onClick={() => setTeamOpen(true)}
         >
-          <div className="font-semibold">Teams</div>
+          <div className="font-semibold">Team</div>
           <GoPeople className="text-[20px]" />
         </div>
         <div className="p-[20px] w-full rounded-[14px] [&_svg]:text-primary font-ubuntu flex flex-row gap-2 items-center self-center justify-between bg-white">
@@ -1125,6 +1101,15 @@ const ClientProjectView = () => {
                 dt => dt.finalStatus !== "Completed"
               )?.length
             }
+          </span>
+        </div>
+        <div
+          onClick={() => setExtensionOpen(prev => !prev)}
+          className="p-[20px] w-full rounded-[14px] [&_svg]:text-primary font-ubuntu flex flex-row gap-2 items-center self-center cursor-pointer justify-between bg-white"
+        >
+          <span className="font-semibold">Force Majeure</span>
+          <span className="px-[10px] py-[3px] font-semibold rounded-full border-[1px] border-primary bg-primary-foreground text-primary">
+            {projectDetails?.extension}
           </span>
         </div>
       </div>
@@ -1241,12 +1226,31 @@ const ClientProjectView = () => {
                       }}
                     >
                       {item.step?.map((itm, idx) => {
-                        let initialDate = new Date(projectDetails?.date);
                         const dur = itm.duration ? parseInt(itm.duration) : 0;
-                        // Add duration days
                         initialDate.setDate(initialDate.getDate() + dur);
-                        // Get the final date
-                        let finalDate = initialDate.toISOString().split("T")[0]; // Format to YYYY-MM-DD
+                        const formatToDate = date => {
+                          const day = String(date.getDate()).padStart(2, "0");
+                          const month = String(date.getMonth() + 1).padStart(
+                            2,
+                            "0"
+                          );
+                          const year = date.getFullYear();
+                          return `${day}-${month}-${year}`;
+                        };
+                        if (
+                          itm.finalStatus[0].status === "Completed" &&
+                          new Date(initialDate) >
+                            new Date(itm.finalStatus[0].date)
+                        ) {
+                          diff =
+                            (new Date(initialDate) -
+                              new Date(itm.finalStatus[0].date)) /
+                            (1000 * 60 * 60 * 24);
+                          initialDate.setDate(initialDate.getDate() - diff);
+                        }
+                        const finalDate = initialDate
+                          .toISOString()
+                          .split("T")[0];
                         return (
                           <AccordionItem
                             value={itm.content + "_" + +idx}
@@ -1322,32 +1326,25 @@ const ClientProjectView = () => {
                                 <div className="w-[200px] -md:w-28 my-1">
                                   <div className="flex flex-row mb-2">
                                     <div className="text-sm font-semibold">
-                                      Date :
+                                      ETC :
                                     </div>
-                                    <div className="text-sm"> {finalDate}</div>
+                                    <div className="text-sm">{finalDate}</div>
                                   </div>
                                   <div className="flex flex-row">
                                     <div className="text-sm font-semibold">
-                                      Final :
+                                      DOC :
                                     </div>
                                     <div className="text-sm">
+                                      {/* {console.log(itm.duration)} */}
                                       {itm.finalStatus[0].date}{" "}
-                                      {/* {itm.finalStatus[0].date ? (
+                                      {itm.finalStatus[0].date !== "" &&
                                       new Date(itm.finalStatus[0].date) >
-                                      new Date(finalDate) ? (
-                                        <div>
-                                          {`(-`}
-                                          {(new Date(itm.finalStatus[0].date) -
-                                            new Date(finalDate)) /
-                                            (1000 * 3600 * 24)}
-                                          {` days)`}
-                                        </div>
-                                      ) : (
-                                        <div className="ontime-task">{`(OnTime)`}</div>
-                                      )
-                                    ) : (
-                                      ""
-                                    )} */}
+                                        new Date(finalDate)
+                                        ? "(Delayed)"
+                                        : new Date(itm.finalStatus[0].date) <
+                                          new Date(finalDate)
+                                        ? "(Early)"
+                                        : ""}
                                     </div>
                                   </div>
                                 </div>
@@ -1785,7 +1782,7 @@ const ClientProjectView = () => {
                   );
                 })}
               </div>
-              <div className="mb-2">
+              {/* <div className="mb-2">
                 <span className="font-ubuntu font-semibold">Contractor</span>
                 {projectDetails?.contractor?.map((item, index) => {
                   return (
@@ -1801,7 +1798,7 @@ const ClientProjectView = () => {
                     </div>
                   );
                 })}
-              </div>
+              </div> */}
               <div className="mb-2">
                 <span className="font-ubuntu font-semibold">Operation</span>
                 {projectDetails?.operation?.map((item, index) => {
@@ -2210,9 +2207,7 @@ const ClientProjectView = () => {
         <DialogContent style={{ width: "600px" }}>
           <FormControl fullWidth className="mt-1 mb-1">
             {/* <InputLabel id="demo-simple-select-label">Point Name</InputLabel> */}
-            <label style={{ fontSize: "18px", color: "#fec20e" }}>
-              Point Name
-            </label>
+            <label className="text-primary">Point Name</label>
             <TextField
               type="text"
               name="pointName"
@@ -2222,9 +2217,7 @@ const ClientProjectView = () => {
           </FormControl>
           <FormControl fullWidth className="mt-1 mb-1">
             {/* <InputLabel id="demo-simple-select-label">CheckList</InputLabel> */}
-            <label style={{ fontSize: "18px", color: "#fec20e" }}>
-              CheckList
-            </label>
+            <label className="text-primary">CheckList</label>
             <MUISelect
               labelId="demo-simple-select-label"
               id="demo-simple-select"
@@ -2236,14 +2229,48 @@ const ClientProjectView = () => {
               <MenuItem value="no">No</MenuItem>
             </MUISelect>
           </FormControl>
+          <FormControl fullWidth className="mt-1 mb-1">
+            {/* <InputLabel id="demo-simple-select-label">CheckList</InputLabel> */}
+            <label className="text-primary">Force Majeure</label>
+            <MUISelect
+              labelId="demo-simple-select-label"
+              id="demo-simple-select"
+              value={force}
+              name="checkList"
+              onChange={e => setForce(e.target.value)}
+            >
+              <MenuItem value="yes">Yes</MenuItem>
+              <MenuItem value="no">No</MenuItem>
+            </MUISelect>
+          </FormControl>
+          {force === "yes" && (
+            <>
+              <FormControl fullWidth>
+                <label className="text-primary">Start Date</label>
+                <TextField
+                  type="date"
+                  name="startforcedate"
+                  value={startForceDate}
+                  onChange={e => setStartForceDate(e.target.value)}
+                />
+              </FormControl>
+              <FormControl fullWidth>
+                <label className="text-primary">End Date</label>
+                <TextField
+                  type="date"
+                  name="endforceDate"
+                  value={endForceDate}
+                  onChange={e => setEndForceDate(e.target.value)}
+                />
+              </FormControl>
+            </>
+          )}
           {checkList === "yes" && (
             <FormControl fullWidth className="mt-1 mb-1">
               {/* <InputLabel id="demo-simple-select-label">
                 CheckList Name
               </InputLabel> */}
-              <label style={{ fontSize: "18px", color: "#fec20e" }}>
-                CheckList Name
-              </label>
+              <label className="text-primary">CheckList Name</label>
               <TextField
                 type="text"
                 name="checkListName"
@@ -2252,47 +2279,52 @@ const ClientProjectView = () => {
               />
             </FormControl>
           )}
+          {force !== "yes" && (
+            <FormControl fullWidth className="mt-1 mb-1">
+              <label className="text-primary">Duration (In days)</label>
+              <TextField
+                type="number"
+                name="duration"
+                value={duration}
+                onChange={e => setDuration(e.target.value)}
+              />
+            </FormControl>
+          )}
+
           <FormControl fullWidth className="mt-1 mb-1">
-            {/* <InputLabel id="demo-simple-select-label">
-              Duration (In days)
-            </InputLabel> */}
-            <label style={{ fontSize: "18px", color: "#fec20e" }}>
-              Duration (In days)
-            </label>
-            <TextField
-              type="number"
-              name="duration"
-              value={duration}
-              onChange={e => setDuration(e.target.value)}
-            />
-          </FormControl>
-          <FormControl fullWidth className="mt-1 mb-1">
-            <label style={{ fontSize: "18px", color: "#fec20e" }}>
-              Issue Member
-            </label>
-            <FormControlLabel
-              value="admin"
-              control={<Checkbox />}
-              label="Admin"
-              onChange={e => memberChange(e.target.value, e.target.checked)}
-            />
-            {memberList?.map((data, id) => {
-              return (
-                <FormControlLabel
-                  key={id}
-                  value={data.role}
-                  control={<Checkbox />}
-                  label={data.role}
-                  onChange={e => memberChange(e.target.value, e.target.checked)}
-                />
-              );
-            })}
+            <label className="text-primary">Issue Member</label>
+            {projectDetails && (
+              <MUISelect
+                labelId="issueMember-simple-select-label"
+                id="issueMember-simple-select"
+                value={issueMember}
+                name="issueMember"
+                onChange={e => setIssueMember(e.target.value)}
+              >
+                <MenuItem
+                  value={projectDetails?.project_admin[0]}
+                >{`${projectDetails?.project_admin[0]?.name} (Project Admin)`}</MenuItem>
+                <MenuItem
+                  value={projectDetails?.project_manager[0]}
+                >{`${projectDetails?.project_manager[0]?.name} (Project Manager)`}</MenuItem>
+                <MenuItem
+                  value={projectDetails?.sr_engineer[0]}
+                >{`${projectDetails?.sr_engineer[0]?.name} (Senior Engineer)`}</MenuItem>
+                <MenuItem
+                  value={projectDetails?.site_engineer[0]}
+                >{`${projectDetails?.site_engineer[0]?.name} (Site Engineer)`}</MenuItem>
+                <MenuItem
+                  value={projectDetails?.accountant[0]}
+                >{`${projectDetails?.accountant[0]?.name} (Accountant)`}</MenuItem>
+                <MenuItem
+                  value={projectDetails?.sales[0]}
+                >{`${projectDetails?.sales[0]?.name} (Sales)`}</MenuItem>
+              </MUISelect>
+            )}
           </FormControl>
           <FormControl fullWidth className="mt-1 mb-1">
             {/* <InputLabel id="demo-simple-select-label">Content</InputLabel> */}
-            <label style={{ fontSize: "18px", color: "#fec20e" }}>
-              After Content
-            </label>
+            <label className="text-primary">After Content</label>
             <MUISelect
               labelId="demo-simple-select-label"
               id="demo-simple-select"
@@ -2328,9 +2360,7 @@ const ClientProjectView = () => {
         <DialogContent style={{ width: "600px" }}>
           <FormControl fullWidth className="mt-1 mb-1">
             {/* <InputLabel id="demo-simple-select-label">Content</InputLabel> */}
-            <label style={{ fontSize: "18px", color: "#fec20e" }}>
-              Content
-            </label>
+            <label className="text-primary">Content</label>
             <MUISelect
               labelId="demo-simple-select-label"
               id="demo-simple-select"
@@ -2360,6 +2390,7 @@ const ClientProjectView = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
       <Dialog
         open={deleteStepOpen}
         onClose={handleCancel}
@@ -2373,6 +2404,101 @@ const ClientProjectView = () => {
           <Button onClick={DeleteProjectStep}>Delete</Button>
         </DialogActions>
       </Dialog>
+
+      <Modal
+        open={extensionOpen}
+        onClose={() => setExtensionOpen(prev => !prev)}
+        sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+      >
+        <div className="w-1/3 -md:w-11/12 bg-white p-8 rounded-3xl">
+          <h2 className="text-2xl font-bold text-center font-ubuntu mb-4">
+            Force Majeure Details
+          </h2>
+          {projectDetails?.forceMajeure.length > 0 ? (
+            <div>
+              <table className="bg-white rounded-3xl w-full p-5">
+                <thead className="p-5 rounded-3xl">
+                  <tr className="bg-secondary text-primary rounded-t-3xl p-5 pl-14">
+                    <th className="w-14 text-left pl-5 text-lg  font-semibold -md:text-sm py-4 rounded-tl-3xl">
+                      Reason
+                    </th>
+                    <th className="-md:w-24 text-center text-lg font-semibold -md:text-sm">
+                      Start Date
+                    </th>
+                    <th className="w-24 text-center text-lg font-semibold -md:text-sm rounded-tr-3xl pr-5">
+                      End Date
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="text-center px-5">
+                  {projectDetails?.forceMajeure?.map((item, idx) => (
+                    <tr
+                      key={idx}
+                      className={cn(
+                        "px-5 text-center ",
+                        idx % 2
+                          ? "bg-secondary-foreground"
+                          : "bg-primary-foreground"
+                      )}
+                    >
+                      <td className={cn("pl-5", idx % 2 && "rounded-bl-3xl")}>
+                        <span
+                          className={cn(
+                            "flex flex-row items-center justify-center gap-2 -md:gap-1"
+                          )}
+                        >
+                          <span className="py-3 -md:p-1 truncate -md:w-24">
+                            {item.reason}
+                          </span>
+                        </span>
+                      </td>
+                      <td>
+                        <span className="flex flex-row items-center justify-center gap-2 -md:gap-1 ">
+                          <span className="py-3 -md:p-1 truncate">
+                            {new Date(item.startDate).toLocaleDateString(
+                              "en-US",
+                              {
+                                year: "numeric",
+                                month: "short",
+                                day: "2-digit",
+                              }
+                            )}
+                          </span>
+                        </span>
+                      </td>
+                      <td className={cn("pr-5", idx % 2 && "rounded-br-3xl")}>
+                        <span className="flex flex-row items-center justify-center gap-2 -md:gap-1 ">
+                          <span className="py-3 -md:p-1 truncate -md:w-24">
+                            {new Date(item.endDate).toLocaleDateString(
+                              "en-US",
+                              {
+                                year: "numeric",
+                                month: "short",
+                                day: "2-digit",
+                              }
+                            )}
+                          </span>
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <p className="text-center">No Force Majeure Raised!</p>
+          )}
+
+          <div className="flex flex-row gap-4 mt-4 justify-end">
+            <button
+              onClick={() => setExtensionOpen(prev => !prev)}
+              className="border-2 cursor-pointer font-semibold text-primary font-ubuntu text-sm px-4 py-2 rounded-3xl bg-secondary border-secondary -md:px-4 -md:py-2 -md:text-sm"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </Modal>
     </AsideContainer>
   );
 };

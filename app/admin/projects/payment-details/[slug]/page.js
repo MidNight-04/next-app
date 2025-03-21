@@ -16,7 +16,6 @@ import {
   MenuItem,
 } from "@mui/material";
 import { toast } from "sonner";
-import "react-toastify/dist/ReactToastify.css";
 import { FaRupeeSign } from "react-icons/fa";
 import { IoIosArrowBack, IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import { useParams } from "next/navigation";

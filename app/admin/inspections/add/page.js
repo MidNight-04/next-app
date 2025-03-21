@@ -5,7 +5,6 @@ import React, { useState } from "react";
 import { FaMinus, FaPlus } from "react-icons/fa6";
 import { toast } from "sonner";
 import { IoIosArrowBack } from "react-icons/io";
-import "react-toastify/dist/ReactToastify.css";
 import { useRouter } from "next/navigation";
 
 const AddProjectCheckList = () => {

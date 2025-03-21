@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Button, Card } from "@mui/material";
 import { toast } from "sonner";
-import "react-toastify/dist/ReactToastify.css";
 import { TiHomeOutline } from "react-icons/ti";
 import { BsBuilding, BsCurrencyRupee } from "react-icons/bs";
 import { GiDuration } from "react-icons/gi";

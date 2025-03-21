@@ -16,7 +16,6 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import StarIcon from "@mui/icons-material/Star";
 import { toast } from "sonner";
-import "react-toastify/dist/ReactToastify.css";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import dummyImagePdf from "../../../public/assets/dummy-image-pdf.jpg";

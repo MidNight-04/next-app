@@ -18,7 +18,7 @@ import {
   AccordionSummary,
   AccordionDetails,
 } from "@mui/material";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "sonner";
 import { FaMinus, FaPlus } from "react-icons/fa6";
 import { TiArrowSortedDown, TiArrowSortedUp } from "react-icons/ti";
 import Link from "next/link";
@@ -410,18 +410,6 @@ const Page = () => {
               );
             })}
           </Saccordian>
-          <ToastContainer
-            position="top-right"
-            autoClose={5000}
-            hideProgressBar={false}
-            newestOnTop={false}
-            closeOnClick={false}
-            rtl={false}
-            pauseOnFocusLoss
-            draggable
-            pauseOnHover
-            theme="light"
-          />
         </div>
         <Modal
           open={updateOpen}

@@ -20,7 +20,6 @@ import {
   Paper,
 } from "@mui/material";
 import { toast } from "sonner";
-import "react-toastify/dist/ReactToastify.css";
 import Link from "next/link";
 import AsideContainer from "../../../../components/AsideContainer";
 import { useRouter } from "next/navigation";

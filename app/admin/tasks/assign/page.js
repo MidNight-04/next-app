@@ -5,9 +5,8 @@ import { Cancel, Check, Clear, Flag, Repeat } from "@mui/icons-material";
 import { FaFile, FaMicrophone } from "react-icons/fa6";
 import { MdAttachFile, MdOutlineAccessAlarm } from "react-icons/md";
 import DatePicker from "react-datepicker";
-// import "react-datepicker/dist/react-datepicker.css";
+import "react-datepicker/dist/react-datepicker.css";
 import { toast } from "sonner";
-import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 import {
   Button,
@@ -25,6 +24,16 @@ import { FaPlus, FaTimes } from "react-icons/fa";
 import { AiOutlineCheck } from "react-icons/ai"; // Import check icon
 import { redirect } from "next/navigation";
 import AsideContainer from "../../../../components/AsideContainer";
+import { IoIosArrowBack } from "react-icons/io";
+
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../../../components/ui/select";
+import { useAuthStore } from "../../../../store/useAuthStore";
 
 const styles = {
   container: {
@@ -101,12 +110,8 @@ const Page = () => {
   const [time, setTime] = useState(false);
   const [selectedPriority, setSelectedPriority] = useState("");
   const [checked, setChecked] = useState(false);
-  // const activeUser = localStorage.getItem("activeUser");
-  // const activeEmployee = localStorage.getItem("employeeID");
-  // const userName = localStorage.getItem("userName");
-  const activeUser = "";
-  const activeEmployee = "";
-  const userName = "";
+  const userId = useAuthStore(state => state.userId);
+  const userName = useAuthStore(state => state.username);
 
   const [data, setData] = useState({
     title: "",
@@ -319,7 +324,7 @@ const Page = () => {
   const submitFormData = () => {
     data.assignedBy = {
       name: userName,
-      employeeID: activeEmployee ? activeEmployee : activeUser,
+      employeeID: userId,
     };
     if (!data.title) {
       toast("Task Title is required", {
@@ -346,14 +351,14 @@ const Page = () => {
         position: "top-right",
       });
     } else {
-      let employeeID = activeEmployee ? activeEmployee : activeUser;
+      let employeeID = userId;
       const formData = new FormData();
       formData.append("title", data.title);
       formData.append("description", data.description);
       formData.append("member", data.member?.split("/")[0]);
       formData.append("memberName", data.member?.split("/")[1]);
       formData.append("assignedName", userName);
-      formData.append("assignedID", employeeID);
+      formData.append("assignedID", userId);
       formData.append("category", data.category);
       formData.append("priority", data.priority);
       formData.append("repeatType", data.repeatType);
@@ -408,434 +413,369 @@ const Page = () => {
 
   return (
     <AsideContainer>
-      <div className="datatable">
-        <div className="datatableTitle detail-heading mb-3">
-          <p className="project-list-client">Assign New Task</p>
+      <div className="flex flex-col my-4 justify-between -md:flex-col -md:gap-2 -md:pl-0 -md:my-2">
+        <div className="flex flex-row gap-2 items-center">
+          <IoIosArrowBack
+            className="text-2xl cursor-pointer transition
+            duration-300 hover:scale-150 ease-in-out"
+            onClick={() => router.back()}
+          />
+          <h1 className="text-2xl font-semibold font-ubuntu -md:mb-2 -md:text-lg">
+            Project Details
+          </h1>
         </div>
-        <div className="single">
-          {/* <AdminSidebar /> */}
-          <div className="singleContainer">
-            {/* <AdminNavbar /> */}
-            <div className="adminNewUser">
-              <div className="newContainer">
-                <div className="bottomContainer">
-                  <div className="bottomRightContainer">
-                    <div className="form">
-                      <div className="formInputContainer">
-                        <label>
-                          Task Title<span className="text-danger">*</span>
-                        </label>
-                        <input
-                          value={data.title}
-                          type="text"
-                          //   placeholder="Enter Name"
-                          name="title"
-                          onChange={e => handleFormData(e)}
-                        />
-                      </div>
-                      <div className="formInputContainer">
-                        <label>
-                          Description<span className="text-danger">*</span>
-                        </label>
-                        <input
-                          value={data.description}
-                          type="text"
-                          //   placeholder="Enter Employee ID"
-                          name="description"
-                          onChange={e => handleFormData(e)}
-                        />
-                      </div>
-                      <div className="formInputContainer">
-                        <label htmlFor="role">
-                          Member<span className="text-danger">*</span>
-                        </label>
-                        <select
-                          style={{ width: "100%", height: "30px" }}
-                          className="mt-2"
-                          name="member"
-                          value={data.member}
-                          onChange={e => handleFormData(e)}
-                        >
-                          <option value="">Member</option>
-                          {memberList?.map((item, idx) => {
-                            return (
-                              <option
-                                key={idx}
-                                value={`${item?.employeeID}/${item?.name}`}
-                              >
-                                {`${item?.name} (${item?.role})`}
-                              </option>
-                            );
-                          })}
-                        </select>
-                      </div>
-                      <div className="formInputContainer">
-                        <label>
-                          Category<span className="text-danger">*</span>
-                        </label>
-                        <select
-                          style={{ width: "100%", height: "30px" }}
-                          className="mt-2"
-                          name="category"
-                          value={data.category}
-                          onChange={e => handleFormData(e)}
-                        >
-                          <option value="">Category</option>
-                          {categoryList?.map((itm, idx) => {
-                            return (
-                              <option key={idx} value={itm.name}>
-                                {itm.name}
-                              </option>
-                            );
-                          })}
-                        </select>
-                      </div>
-                      <div className="formInputContainer">
-                        <label>
-                          <Flag />
-                          Priority<span className="text-danger">*</span>
-                        </label>
-                        <div className="task_priority">
-                          <p
-                            className={`priority-option ${
-                              selectedPriority === "High" ? "selected" : ""
-                            }`}
-                            onClick={() => handlePriority("High")}
-                          >
-                            {selectedPriority === "High" && (
-                              <span className="tick">&#10003;</span>
-                            )}
-                            High
-                          </p>
-                          <p
-                            className={`priority-option ${
-                              selectedPriority === "Medium" ? "selected" : ""
-                            }`}
-                            onClick={() => handlePriority("Medium")}
-                          >
-                            {selectedPriority === "Medium" && (
-                              <span className="tick">&#10003;</span>
-                            )}
-                            Medium{" "}
-                          </p>
-                          <p
-                            className={`priority-option ${
-                              selectedPriority === "Low" ? "selected" : ""
-                            }`}
-                            onClick={() => handlePriority("Low")}
-                          >
-                            {selectedPriority === "Low" && (
-                              <span className="tick">&#10003;</span>
-                            )}
-                            Low{" "}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="formInputContainer">
-                        <label className="checkbox">
-                          <Repeat />
-                          Repeat{" "}
-                          <input
-                            type="checkbox"
-                            value={checked}
-                            onClick={() => setChecked(!checked)}
-                            aria-label="Toggle repeat options"
-                          />
-                          <span className="slider"></span>
-                        </label>
-                        {checked && (
-                          <select
-                            style={{ width: "100%", height: "30px" }}
-                            className="mt-2"
-                            name="repeatType"
-                            value={data.repeatType}
-                            onChange={e => handleFormData(e)}
-                            aria-label="Select repeat type"
-                          >
-                            <option value="">Select</option>
-                            <option value="Daily">Daily</option>
-                            <option value="Monthly">Monthly</option>
-                          </select>
-                        )}
-                        {data?.repeatType && time && (
-                          <p className="repeat">
-                            Repeat{" "}
-                            {data.repeatType === "Daily" ? "Time" : "Date"}:{" "}
-                            {selectedDate
-                              ? selectedDate.getDate()
-                              : data.repeatTime}
-                          </p>
-                        )}
-                      </div>
-                      <div className="formInputContainer">
-                        <label>
-                          Due Date<span className="text-danger">*</span>
-                        </label>
-                        <input
-                          value={data.dueDate}
-                          type="date"
-                          name="dueDate"
-                          onChange={e => handleFormData(e)}
-                        />
-                      </div>
-                      <div className="file_block">
-                        <div>
-                          {/* Hide the default file input */}
-                          <input
-                            type="file"
-                            id="fileInput"
-                            style={{ display: "none" }}
-                            name="file"
-                            onChange={e => handleFormData(e)}
-                          />
-                          {/* Custom styled label that acts as a file picker */}
-                          <label
-                            htmlFor="fileInput"
-                            style={{
-                              fontSize: "18px",
-                              cursor: "pointer",
-                            }}
-                            className={
-                              fileSelected
-                                ? "task_file me-3 bg-success text-light"
-                                : "task_file me-3"
-                            }
-                            name="file"
-                          >
-                            <MdAttachFile />
-                          </label>
-                        </div>
-                        <div>
-                          <button
-                            onClick={
-                              isRecording ? stopRecording : startRecording
-                            }
-                            style={{
-                              color: isRecording ? "red" : "black",
-                              fontSize: "18px",
-                            }}
-                            className={
-                              audioURL
-                                ? "task_file me-3 mt-3 bg-success text-light"
-                                : "task_file me-3 mt-3"
-                            }
-                          >
-                            <FaMicrophone />
-                          </button>
-                        </div>
-                        <button
-                          style={{
-                            fontSize: "18px",
-                          }}
-                          className={
-                            reminders?.length > 0 &&
-                            reminders?.some(
-                              obj =>
-                                obj.type &&
-                                obj.type.trim() !== "" &&
-                                obj.time &&
-                                obj.time.trim() !== "" &&
-                                obj.unit &&
-                                obj.unit.trim() !== ""
-                            )
-                              ? "task_file me-3 mt-3 bg-success text-light"
-                              : "task_file me-3 mt-3"
-                          }
-                          onClick={() => {
-                            setReminderOpen(true);
-                            setReminders([{ type: "", time: "", unit: "" }]);
-                          }}
-                        >
-                          <MdOutlineAccessAlarm />
-                        </button>
-                      </div>
-                    </div>
-                    <div className="display_file mt-4 formInputContainer">
-                      {/* Display the selected file name */}
-                      {fileName && (
-                        <p className="file_name_display">
-                          <span className="fw-bold">File: </span>
-                          {fileName}
-                        </p>
-                      )}
-                      {/* Display audio file */}
-                      {audioURL && (
-                        <div className="record_block">
-                          <span className="head">Voice-Note</span>
-                          <audio
-                            controls
-                            src={audioURL}
-                            className="audio-record"
-                          />
-                          {audioURL && (
-                            <>
-                              <span
-                                className="audio_clear"
-                                onClick={clearRecording}
-                                disabled={!audioURL}
-                              >
-                                <Clear
-                                  style={{
-                                    fontSize: "15px",
-                                    fontWeight: "500",
-                                  }}
-                                  className="text-danger me-2"
-                                />
-                                Clear
-                              </span>
-                            </>
-                          )}
-                        </div>
-                      )}
-                      {/* Display reminder */}
-
-                      {reminders?.length > 0 &&
-                        reminders?.some(
-                          obj =>
-                            obj.type &&
-                            obj.type.trim() !== "" &&
-                            obj.time &&
-                            obj.time.trim() !== "" &&
-                            obj.unit &&
-                            obj.unit.trim() !== ""
-                        ) && (
-                          <div className="reminder_block">
-                            {reminders?.map((item, idx) => {
-                              return (
-                                <>
-                                  <span key={idx}>
-                                    <MdOutlineAccessAlarm
-                                      className="me-2"
-                                      style={{ fontSize: "18px" }}
-                                    />
-                                    {`${item.type} ${item.time} ${item.unit}`}
-                                  </span>
-                                  <br />
-                                </>
-                              );
-                            })}
-                          </div>
-                        )}
-                    </div>
-                    <div
-                      className="createUserSubmitBTN"
-                      onClick={submitFormData}
-                    >
-                      Submit
-                    </div>
-                  </div>
-                </div>
+        <div className="bg-white rounded-[15px] p-5 my-5">
+          <div className="">
+            <div className="grid grid-cols-2 gap-x-4">
+              <div className="flex flex-col gap-2 mb-2 [&_label]:font-semibold">
+                <label>Task Title</label>
+                <input
+                  className="h-12 border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100"
+                  value={data.title}
+                  type="text"
+                  name="title"
+                  onChange={e => handleFormData(e)}
+                />
               </div>
+              <div className="flex flex-col gap-2 mb-2 [&_label]:font-semibold">
+                <label>Description</label>
+                <input
+                  value={data.description}
+                  type="text"
+                  className="h-12 border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100"
+                  name="description"
+                  onChange={e => handleFormData(e)}
+                />
+              </div>
+              <div className="flex flex-col gap-2 mb-2 [&_label]:font-semibold">
+                <label htmlFor="role">Member</label>
+                <Select
+                  onValueChange={value => {
+                    setData(prevData => ({
+                      ...prevData,
+                      member: value,
+                    }));
+                  }}
+                >
+                  <SelectTrigger className="w-full border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100 h-[54px]">
+                    <SelectValue placeholder="Select" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {memberList?.map((item, idx) => {
+                      return (
+                        <SelectItem
+                          key={idx}
+                          value={`${item?._id}/${item?.name}`}
+                        >
+                          {`${item?.name} (${item?.role?.name})`}
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex flex-col gap-2 mb-2 [&_label]:font-semibold">
+                <label>Category</label>
+                <Select
+                  onValueChange={value => {
+                    setData(prevData => ({
+                      ...prevData,
+                      category: value,
+                    }));
+                  }}
+                >
+                  <SelectTrigger className="w-full border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100 h-[54px]">
+                    <SelectValue placeholder="Select" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categoryList?.map((itm, idx) => {
+                      return (
+                        <SelectItem key={idx} value={itm.name}>
+                          {itm.name}
+                        </SelectItem>
+                      );
+                    })}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex flex-col gap-2 mb-2 [&_label]:font-semibold">
+                <label>
+                  {/* <Flag /> */}
+                  Priority
+                </label>
+                <Select
+                  onValueChange={value => {
+                    setData(prevData => ({
+                      ...prevData,
+                      priority: value,
+                    }));
+                  }}
+                >
+                  <SelectTrigger className="w-full border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100 h-[54px]">
+                    <SelectValue placeholder="Select" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Low">Low</SelectItem>
+                    <SelectItem value="Medium">Medium</SelectItem>
+                    <SelectItem value="High">High</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex flex-col gap-2 mb-2 [&_label]:font-semibold">
+                <label className="checkbox">
+                  {/* <Repeat /> */}
+                  Repeat
+                </label>
+                <Select
+                  onValueChange={value => {
+                    setData(prevData => ({
+                      ...prevData,
+                      repeatType: value,
+                    }));
+                    if (value === "Monthly") {
+                      setDateOpen(true);
+                    } else if (value === "Daily") {
+                      setTimeOpen(true);
+                    }
+                  }}
+                >
+                  <SelectTrigger className="w-full border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100 h-[54px]">
+                    <SelectValue placeholder="Select" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Daily">Daily</SelectItem>
+                    <SelectItem value="Monthly">Monthly</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                {data?.repeatType && time && (
+                  <p className="font-semibold">
+                    Repeat {data.repeatType === "Daily" ? "Time" : "Date"}:{" "}
+                    {selectedDate ? selectedDate.getDate() : data.repeatTime}
+                  </p>
+                )}
+              </div>
+              <div className="flex flex-col gap-2 mb-2 [&_label]:font-semibold">
+                <label>Due Date</label>
+                <input
+                  value={data.dueDate}
+                  type="date"
+                  name="dueDate"
+                  className="h-12 border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100"
+                  onChange={e => handleFormData(e)}
+                />
+              </div>
+              <div className="flex flex-row justify-center gap-4 items-center mt-6">
+                <div className="flex flex-row items-center">
+                  {/* Hide the default file input */}
+                  <input
+                    type="file"
+                    id="fileInput"
+                    style={{ display: "none" }}
+                    name="file"
+                    onChange={e => handleFormData(e)}
+                  />
+                  {/* Custom styled label that acts as a file picker */}
+                  <label
+                    htmlFor="fileInput"
+                    name="file"
+                    className="p-2 bg-primary-foreground rounded-full border border-primary [&_svg]:text-primary text-xl cursor-pointer"
+                  >
+                    <MdAttachFile />
+                  </label>
+                </div>
+                <div>
+                  <button
+                    onClick={isRecording ? stopRecording : startRecording}
+                    className="p-2 bg-primary-foreground rounded-full border border-primary [&_svg]:text-primary text-xl"
+                  >
+                    <FaMicrophone />
+                  </button>
+                </div>
+                <button
+                  onClick={() => {
+                    setReminderOpen(true);
+                    setReminders([{ type: "", time: "", unit: "" }]);
+                  }}
+                  className="p-2 bg-primary-foreground rounded-full border border-primary [&_svg]:text-primary text-xl"
+                >
+                  <MdOutlineAccessAlarm />
+                </button>
+              </div>
+            </div>
+            <div>
+              {/* Display the selected file name */}
+              {fileName && (
+                <p>
+                  <span>File: </span>
+                  {fileName}
+                </p>
+              )}
+              {/* Display audio file */}
+              {audioURL && (
+                <div>
+                  <span>Voice-Note</span>
+                  <audio controls src={audioURL} />
+                  {audioURL && (
+                    <>
+                      <span onClick={clearRecording} disabled={!audioURL}>
+                        <Clear />
+                        Clear
+                      </span>
+                    </>
+                  )}
+                </div>
+              )}
+              {/* Display reminder */}
+
+              {reminders?.length > 0 &&
+                reminders?.some(
+                  obj =>
+                    obj.type &&
+                    obj.type.trim() !== "" &&
+                    obj.time &&
+                    obj.time.trim() !== "" &&
+                    obj.unit &&
+                    obj.unit.trim() !== ""
+                ) && (
+                  <div className="reminder_block">
+                    {reminders?.map((item, idx) => {
+                      return (
+                        <>
+                          <span key={idx}>
+                            <MdOutlineAccessAlarm />
+                            {`${item.type} ${item.time} ${item.unit}`}
+                          </span>
+                          <br />
+                        </>
+                      );
+                    })}
+                  </div>
+                )}
+            </div>
+            <div className="flex flex-row justify-end" onClick={submitFormData}>
+              <button className="px-4 py-2 border border-secondary bg-secondary text-primary rounded-3xl cursor-pointer mt-4">
+                Submit
+              </button>
             </div>
           </div>
         </div>
-
-        <Dialog open={dateOpen} onClose={handleCancel}>
-          <DialogTitle>Select Date</DialogTitle>
-          <DialogContent style={{ width: "500px", height: "260px" }}>
-            <DatePicker
-              selected={selectedDate}
-              onChange={date => setSelectedDate(date)}
-              dateFormat="dd"
-              showMonthDropdown={false}
-              showYearDropdown={false}
-              placeholderText="Select Date"
-              showMonthYearPicker={false} // Disables month/year picker
-              todayButton="Today"
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleCancel} color="primary">
-              Cancel
-            </Button>
-            <Button onClick={handleSave} color="primary">
-              Save
-            </Button>
-          </DialogActions>
-        </Dialog>
-        <Dialog open={timeOpen} onClose={handleCancel}>
-          <DialogTitle>Select Time</DialogTitle>
-          <DialogContent style={{ width: "500px", height: "260px" }}>
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <StaticTimePicker
-                orientation="landscape"
-                value={selectedTime} // Pass the selected time
-                onChange={handleTimeChange}
-              />
-            </LocalizationProvider>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleCancel} color="primary">
-              Cancel
-            </Button>
-            <Button onClick={handleSave} color="primary">
-              Save
-            </Button>
-          </DialogActions>
-        </Dialog>
-        <Dialog open={reminderOpen} onClose={handleCancel}>
-          <DialogTitle>
-            <MdOutlineAccessAlarm className="me-2 fs-4" />
-            Add Task Reminders
-          </DialogTitle>
-          <DialogContent style={{ width: "500px", height: "250px" }}>
-            <div style={styles.container}>
-              {reminders?.map((reminder, index) => (
-                <div key={index} style={styles.reminderRow}>
-                  <select
-                    value={reminder.type}
-                    onChange={e =>
-                      updateReminder(index, "type", e.target.value)
-                    }
-                    style={styles.select}
-                  >
-                    <option value="">Select</option>
-                    <option value="Email">Email</option>
-                    <option value="WhatsApp">WhatsApp</option>
-                  </select>
-
-                  <input
-                    type="number"
-                    value={reminder.time}
-                    onChange={e =>
-                      updateReminder(index, "time", e.target.value)
-                    }
-                    style={styles.input}
-                  />
-
-                  <select
-                    value={reminder.unit}
-                    onChange={e =>
-                      updateReminder(index, "unit", e.target.value)
-                    }
-                    style={styles.select}
-                  >
-                    <option value="">Select</option>
-                    <option value="minutes">minutes</option>
-                    <option value="hours">hours</option>
-                    <option value="days">days</option>
-                  </select>
-                  {index === 0 ? (
-                    <button onClick={addReminder} style={styles.addButton}>
-                      <FaPlus />
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => removeReminder(index)}
-                      style={styles.deleteButton}
-                    >
-                      <FaTimes />
-                    </button>
-                  )}
-                </div>
-              ))}
-              <button onClick={saveReminders} style={styles.saveButton}>
-                Save Reminders
-              </button>
-            </div>
-          </DialogContent>
-        </Dialog>
       </div>
+
+      <Dialog
+        open={dateOpen}
+        onClose={handleCancel}
+        sx={{
+          "& .MuiDialog-paper": {
+            width: "400px",
+            height: "460px",
+            maxWidth: "100%",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          },
+        }}
+      >
+        <DialogTitle>Select Date</DialogTitle>
+        <DialogContent>
+          <DatePicker
+            selected={selectedDate}
+            onChange={date => setSelectedDate(date)}
+            dateFormat="dd"
+            showMonthDropdown={false}
+            showYearDropdown={false}
+            placeholderText="Select Date"
+            showMonthYearPicker={false} // Disables month/year picker
+            todayButton="Today"
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancel} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleSave} color="primary">
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={timeOpen} onClose={handleCancel}>
+        <DialogTitle>Select Time</DialogTitle>
+        <DialogContent style={{ width: "500px", height: "260px" }}>
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <StaticTimePicker
+              orientation="landscape"
+              value={selectedTime} // Pass the selected time
+              onChange={handleTimeChange}
+            />
+          </LocalizationProvider>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancel} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleSave} color="primary">
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={reminderOpen} onClose={handleCancel}>
+        <DialogTitle>
+          <MdOutlineAccessAlarm className="me-2 fs-4" />
+          Add Task Reminders
+        </DialogTitle>
+        <DialogContent style={{ width: "500px", height: "250px" }}>
+          <div style={styles.container}>
+            {reminders?.map((reminder, index) => (
+              <div key={index} style={styles.reminderRow}>
+                <select
+                  value={reminder.type}
+                  onChange={e => updateReminder(index, "type", e.target.value)}
+                  style={styles.select}
+                >
+                  <option value="">Select</option>
+                  <option value="Email">Email</option>
+                  <option value="WhatsApp">WhatsApp</option>
+                </select>
+
+                <input
+                  type="number"
+                  value={reminder.time}
+                  onChange={e => updateReminder(index, "time", e.target.value)}
+                  style={styles.input}
+                />
+
+                <select
+                  value={reminder.unit}
+                  onChange={e => updateReminder(index, "unit", e.target.value)}
+                  style={styles.select}
+                >
+                  <option value="">Select</option>
+                  <option value="minutes">minutes</option>
+                  <option value="hours">hours</option>
+                  <option value="days">days</option>
+                </select>
+                {index === 0 ? (
+                  <button onClick={addReminder} style={styles.addButton}>
+                    <FaPlus />
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => removeReminder(index)}
+                    style={styles.deleteButton}
+                  >
+                    <FaTimes />
+                  </button>
+                )}
+              </div>
+            ))}
+            <button onClick={saveReminders} style={styles.saveButton}>
+              Save Reminders
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </AsideContainer>
   );
 };

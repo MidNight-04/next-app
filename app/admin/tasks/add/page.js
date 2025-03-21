@@ -3,7 +3,6 @@ import { Button } from "@mui/material";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
-import "react-toastify/dist/ReactToastify.css";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { useRouter } from "next/navigation";

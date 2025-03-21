@@ -4,19 +4,7 @@ import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 import axios from "axios";
 import NoImage from "../../../../public/assets/no-image-available.png";
-import {
-  Button,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-  TextField,
-} from "@mui/material";
+import { FormControl, TextField } from "@mui/material";
 import { toast } from "sonner";
 import Modal from "@mui/material/Modal";
 import { useParams } from "next/navigation";
@@ -47,12 +35,8 @@ let formatedtoday = yyyy + "-" + mm + "-" + dd;
 
 const TicketViewClient = () => {
   const { slug } = useParams();
-  const activeUser1 = "";
   const userId = useAuthStore(state => state.userId);
   const userRole = useAuthStore(state => state.userType);
-  // const activeUser = localStorage.getItem("employeeID");
-  // const activeUser1 = localStorage.getItem("activeUser");
-  // const userRole = localStorage.getItem("role");
   const duration = 72 * 60 * 60 * 1000; // 72 hours in milliseconds
   const [timeLeft, setTimeLeft] = useState(0);
   const [isOverdue, setIsOverdue] = useState(false);
@@ -61,15 +45,6 @@ const TicketViewClient = () => {
   const [ticketUpdateBoxOpen, setTicketUpdateBoxOpen] = useState(false);
   const [status, setStatus] = useState("");
   const [image, setImage] = useState("");
-  const [date, setDate] = useState("");
-  const [id, setId] = useState("");
-  const [ticketId, setTicketId] = useState("");
-  const [point, setPoint] = useState("");
-  const [content, setContent] = useState("");
-  const [name, setName] = useState("");
-  const [query, setQuery] = useState("");
-  const [work, setWork] = useState("");
-  const [ticketDate, setTicketDate] = useState(null);
   const [openComment, setOpenComment] = useState(false);
   const [type, setType] = useState(null);
   const [comment, setComment] = useState(null);
@@ -302,8 +277,8 @@ const TicketViewClient = () => {
           </div>
           {ticketDetails?.ticket?.status !== "Closed" && (
             <div className="flex flex-row gap-4 mt-4">
-              {ticketDetails?.ticket?.assignMember?._id === userId ||
-                (ticketDetails?.ticket?.status !== "Complete" && (
+              {ticketDetails?.ticket?.assignMember?._id === userId &&
+                ticketDetails?.ticket?.status !== "Complete" && (
                   <button
                     className="px-4 py-2 border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-2 items-center"
                     onClick={() => {
@@ -314,21 +289,22 @@ const TicketViewClient = () => {
                     <RiProgress3Line className="text-xl" />
                     In Progress
                   </button>
-                ))}
-              {ticketDetails?.ticket?.status === "Complete" && (
-                <button
-                  className="px-4 py-2 border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-2 items-center"
-                  onClick={() => {
-                    setType("Reopened");
-                    setOpenComment(prev => !prev);
-                  }}
-                >
-                  <HiOutlineLockOpen className="text-xl" />
-                  Re-open
-                </button>
-              )}
-              {ticketDetails?.ticket?.assignMember?._id === userId ||
-                (ticketDetails?.ticket?.status !== "Complete" && (
+                )}
+              {ticketDetails?.ticket?.status === "Complete" &&
+                ticketDetails?.ticket?.assignedBy?._id === userId && (
+                  <button
+                    className="px-4 py-2 border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-2 items-center"
+                    onClick={() => {
+                      setType("Reopened");
+                      setOpenComment(prev => !prev);
+                    }}
+                  >
+                    <HiOutlineLockOpen className="text-xl" />
+                    Re-open
+                  </button>
+                )}
+              {ticketDetails?.ticket?.assignMember?._id === userId &&
+                ticketDetails?.ticket?.status !== "Complete" && (
                   <button
                     className="px-4 py-2 border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-2 items-center"
                     onClick={() => {
@@ -339,9 +315,9 @@ const TicketViewClient = () => {
                     <FaCheck className="text-xl" />
                     Complete
                   </button>
-                ))}
-              {ticketDetails?.ticket?.assignedBy?._id === userId ||
-                (ticketDetails?.ticket?.status !== "Complete" && (
+                )}
+              {ticketDetails?.ticket?.assignedBy?._id === userId &&
+                ticketDetails?.ticket?.status !== "Complete" && (
                   <button
                     className="px-4 py-2 border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-2 items-center"
                     onClick={() => {
@@ -352,7 +328,7 @@ const TicketViewClient = () => {
                     <IoLockClosedOutline className="text-xl" />
                     Close
                   </button>
-                ))}
+                )}
               {/* {data.data.assignedBy?._id === userId &&
                       data.data.status !== "Complete" && (
                         <button className="px-4 py-2 border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-2 items-center">
@@ -360,7 +336,7 @@ const TicketViewClient = () => {
                           Edit
                         </button>
                       )} */}
-              {ticketDetails?.ticket?.status !== "Complete" && (
+              {/* {ticketDetails?.ticket?.status !== "Complete" && (
                 <button
                   className="px-4 py-2 border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-2 items-center"
                   onClick={() => toggleDelete()}
@@ -368,20 +344,23 @@ const TicketViewClient = () => {
                   <MdDeleteOutline className="text-xl" />
                   Delete
                 </button>
-              )}
+              )} */}
               {ticketDetails?.ticket?.assignMember?._id === userId ||
-                (ticketDetails?.ticket?.status !== "Complete" && (
-                  <button
-                    className="px-4 py-2 border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-2 items-center"
-                    onClick={() => {
-                      setType("Comment");
-                      setOpenComment(prev => !prev);
-                    }}
-                  >
-                    <MdOutlineInsertComment className="text-xl" />
-                    Comment
-                  </button>
-                ))}
+              ticketDetails?.ticket?.assignedBy?._id === userId
+                ? ticketDetails?.ticket?.status !== "Complete" &&
+                  ticketDetails?.ticket?.status !== "Closed" && (
+                    <button
+                      className="px-4 py-2 border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-2 items-center"
+                      onClick={() => {
+                        setType("Comment");
+                        setOpenComment(prev => !prev);
+                      }}
+                    >
+                      <MdOutlineInsertComment className="text-xl" />
+                      Comment
+                    </button>
+                  )
+                : ""}
             </div>
           )}
           {ticketDetails?.ticket?.image?.length > 0 && (

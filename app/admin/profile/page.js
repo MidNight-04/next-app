@@ -17,6 +17,7 @@ const Page = () => {
   const router = useRouter();
   const userId = useAuthStore(state => state.userId);
   const userType = useAuthStore(state => state);
+  const hasHydrated = useAuthStore.persist.hasHydrated();
   const {
     data: profileData,
     isLoading,
@@ -41,13 +42,11 @@ const Page = () => {
         });
         return response.data;
       }
-      throw new Error("Invalid user type");
     },
     retry: 3,
+    enabled: hasHydrated,
     staleTime: 10000,
   });
-
-  console.log(profileData);
 
   useLayoutEffect(() => {
     refetch();

@@ -9,7 +9,7 @@ import { FaCheck } from "react-icons/fa";
 import { MdEdit } from "react-icons/md";
 import { MdDeleteOutline } from "react-icons/md";
 import { MdOutlineInsertComment } from "react-icons/md";
-import { Modal } from "@mui/material";
+import { Button, Modal } from "@mui/material";
 import { useState } from "react";
 import axios from "axios";
 import { useAuthStore } from "../../../../store/useAuthStore";
@@ -17,6 +17,13 @@ import { MdChecklist } from "react-icons/md";
 import { HiOutlineLockOpen } from "react-icons/hi2";
 import { cn } from "../../../../lib/utils";
 import { toast } from "sonner";
+import { FiDownload } from "react-icons/fi";
+import { saveAs } from "file-saver";
+import { FaImages } from "react-icons/fa";
+import { FaMicrophone } from "react-icons/fa";
+import { IoIosAttach } from "react-icons/io";
+import LoaderSpinner from "../../../../components/loader/LoaderSpinner";
+import AudioRecorder from "../../../../components/AudioRecorder/AudioRecorder";
 
 const Page = () => {
   const { slug } = useParams();
@@ -25,7 +32,13 @@ const Page = () => {
   const [openDelete, setOpenDelete] = useState(false);
   const [type, setType] = useState(null);
   const [comment, setComment] = useState(null);
+  const [showImage, setShowImage] = useState(false);
+  const [showImageUrl, setShowImageUrl] = useState(null);
   const userId = useAuthStore(state => state.userId);
+  const userType = useAuthStore(state => state.userType);
+  const [points, setPoints] = useState("");
+  const [Loading, setLoading] = useState(false);
+  const [audioData, setAudioData] = useState(null);
   const { data, error, isFetched, refetch } = useQuery({
     queryKey: [`gettaskbyid/${slug}`],
     queryFn: async () =>
@@ -60,14 +73,24 @@ const Page = () => {
   };
 
   const addComment = () => {
+    const formData = new FormData();
+    formData.append("userId", userId);
+    formData.append("taskId", slug);
+    formData.append("type", type);
+    formData.append("comment", comment);
+    formData.append("audio", audioData.blob, "recording.wav");
+    for (let i = 0; i < points?.length; i++) {
+      formData.append("image", points[i]);
+    }
     setOpenComment(prev => !prev);
     const api = axios
-      .post(`${process.env.REACT_APP_BASE_PATH}/api/task/taskaddcomment`, {
-        userId,
-        taskId: slug,
-        type,
-        comment,
-      })
+      .post(
+        `${process.env.REACT_APP_BASE_PATH}/api/task/taskaddcomment`,
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      )
       .then(() => {
         refetch();
       });
@@ -85,15 +108,41 @@ const Page = () => {
       });
   };
 
+  const toggleShowImage = () => {
+    setShowImage(prev => !prev);
+  };
+
+  const downloadImage = url => {
+    saveAs(url, "site_image.jpg");
+  };
+
+  const deleteCommentImage = id => {
+    toggleShowImage();
+    const api = axios
+      .post(
+        `${process.env.REACT_APP_BASE_PATH}/api/task/deletetaskcommentimage`,
+        { commentId: id, imageUrl: showImageUrl }
+      )
+      .then(res => {
+        refetch();
+        toast("Image deleted successfully.");
+      });
+  };
+
+  const handleAudioRecorded = data => {
+    setAudioData(data);
+  };
+
   return (
     <AsideContainer>
+      {Loading && <LoaderSpinner />}
       <div className="flex flex-row gap-2 items-center my-4">
         <IoIosArrowBack
           className="text-2xl cursor-pointer transition duration-300 hover:scale-150 ease-in-out"
           onClick={() => router.back()}
         />
         <h1 className="text-2xl font-semibold font-ubuntu -md:mb-2 -md:text-lg">
-          Project Details
+          {userType === "ROLE_CLIENT" ? "Step Details" : "Task Details"}
         </h1>
       </div>
       <div className="bg-white p-8 rounded-2xl shadow-md">
@@ -231,7 +280,8 @@ const Page = () => {
               </button>
             )} */}
           {data.data.assignedBy?._id === userId &&
-            data.data.status !== "Complete" && (
+            data.data.status !== "Complete" &&
+            data.data.category !== "Project" && (
               <button
                 className="px-4 py-2 border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-2 items-center"
                 onClick={() => toggleDelete()}
@@ -260,48 +310,145 @@ const Page = () => {
         <>
           <div className="flex flex-row gap-2 my-4">
             <MdChecklist className="text-3xl text-primary" />
-            <h3 className="text-xl font-bold font-ubuntu">Task Updates</h3>
+            <h3 className="text-xl font-bold font-ubuntu">
+              {userType === "ROLE_CLIENT" ? "Step Updates" : "Task Updates"}
+            </h3>
           </div>
           <div className="flex flex-col gap-4">
             {data.data.comments.map(item => (
-              <div key={item._id} className="bg-white rounded-xl p-5">
-                <div className="flex flex-row justify-between items-center">
-                  <div className="flex flex-row gap-4 items-center">
-                    <Image
-                      src={"/assets/profile-placeholder.png"}
-                      alt="project image"
-                      width={20}
-                      height={20}
-                      className="rounded-full"
-                    />
-                    <div className="text-sm flex flex-col">
-                      <span className="font-semibold">
-                        {item.createdBy?.name}
-                      </span>
-                      <span>
-                        At{" "}
-                        {new Date(item.createdAt).toLocaleString("en-US", {
-                          dateStyle: "medium",
-                          timeStyle: "short",
-                        })}
-                      </span>
+              <>
+                {item.approved.isApproved ||
+                  (userType !== "ROLE_CLEINT" && (
+                    <div key={item._id} className="bg-white rounded-xl p-5">
+                      <div className="flex flex-row justify-between items-center">
+                        <div className="flex flex-row gap-4 items-center">
+                          <Image
+                            src={"/assets/profile-placeholder.png"}
+                            alt="project image"
+                            width={20}
+                            height={20}
+                            className="rounded-full"
+                          />
+                          <div className="text-sm flex flex-col">
+                            <span className="font-semibold">
+                              {item.createdBy?.name}
+                            </span>
+                            <span>
+                              At{" "}
+                              {new Date(item.createdAt).toLocaleString(
+                                "en-US",
+                                {
+                                  dateStyle: "medium",
+                                  timeStyle: "short",
+                                }
+                              )}
+                            </span>
+                          </div>
+                        </div>
+                        <span
+                          className={cn(
+                            "font-ubuntu text-sm text-white p-1 rounded",
+                            item.type === "In Progress" && "bg-yellow-500",
+                            item.type === "Complete" && "bg-green-600",
+                            item.type === "Comment" && "bg-gray-600"
+                          )}
+                        >
+                          {item.type}
+                        </span>
+                      </div>
+                      <p>{item.comment}</p>
+                      <div className="flex flex-row items-center gap-4 justify-between">
+                        {item.audio && (
+                          <audio controls src={item.audio} className="w-2/4" />
+                        )}
+                        <div className="relative flex flex-row gap-2 mt-2">
+                          {item?.images?.map((imgObj, imgidx) => (
+                            <div key={imgObj}>
+                              <div
+                                className="cursor-pointer [&_span]:hover:block"
+                                onClick={() => {
+                                  setShowImageUrl(imgObj);
+                                  toggleShowImage(imgObj);
+                                }}
+                              >
+                                {!showImage && (
+                                  <span className="w-16 rounded-xl h-full bg-black bg-opacity-30 absolute hidden text-primary-foreground text-center">
+                                    <p className="mt-5 font-semibold">View</p>
+                                  </span>
+                                )}
+                                <Image
+                                  src={imgObj}
+                                  alt={imgObj}
+                                  width={64}
+                                  height={64}
+                                  className="w-16 h-16 rounded-xl transition-all duration-300"
+                                />
+                              </div>
+                              <Modal
+                                open={showImage}
+                                onClose={toggleShowImage}
+                                sx={{
+                                  "display": "flex",
+                                  "alignItems": "center",
+                                  "justifyContent": "center",
+                                  "& .MuiBackdrop-root": {
+                                    backgroundColor: "rgba(0, 0, 0, 0.1)",
+                                  },
+                                }}
+                              >
+                                <div className="bg-white rounded-3xl h-5/6 flex flex-col ">
+                                  <div className="h-full w-full flex items-center justify-center">
+                                    <Image
+                                      src={showImageUrl}
+                                      alt="alt"
+                                      width={1000}
+                                      height={1000}
+                                      className="w-auto h-5/6 bg-center"
+                                    />
+                                  </div>
+                                  <div className="flex flex-row gap-4 justify-evenly p-4 -md:flex-wrap">
+                                    {userType === "ROLE_ADMIN" ||
+                                    userType === "ROLE_PROJECT MANAGER" ? (
+                                      <>
+                                        <button
+                                          className="py-2 px-4 font-semibold bg-secondary text-primary rounded-full flex flex-row items-center justify-center gap-1 text-nowrap"
+                                          onClick={() => {
+                                            deleteCommentImage(item._id);
+                                          }}
+                                        >
+                                          <MdDeleteOutline className="text-xl" />
+                                          Delete Image
+                                        </button>
+                                      </>
+                                    ) : (
+                                      ""
+                                    )}
+                                    <button
+                                      className="py-2 px-4 font-semibold bg-secondary text-primary rounded-full flex flex-row items-center justify-center gap-1 text-nowrap"
+                                      onClick={() => {
+                                        downloadImage(imgObj.image);
+                                      }}
+                                    >
+                                      <FiDownload className="text-xl" />
+                                      Download Image
+                                    </button>
+                                  </div>
+                                </div>
+                              </Modal>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                  <span
-                    className={cn(
-                      "font-ubuntu text-sm text-white p-1 rounded",
-                      item.type === "In Progress" && "bg-yellow-500",
-                      item.type === "Complete" && "bg-green-600",
-                      item.type === "Comment" && "bg-gray-600"
-                    )}
-                  >
-                    {item.type}
-                  </span>
-                </div>
-                <p>{item.comment}</p>
-              </div>
+                  ))}
+              </>
             ))}
           </div>
+          {data.data.comments.length < 0 && (
+            <p className="text-center font-ubuntu font-semibold">
+              No Update Posted Yet!
+            </p>
+          )}
         </>
       )}
       <Modal
@@ -319,7 +466,42 @@ const Page = () => {
             <p>Please add a note before marking the task as Comment</p>
             <hr className="my-3" />
           </div>
-
+          <div className="flex flex-row gap-2 [&_label]:font-semibold mb-2">
+            <div className="relative inline-block">
+              <input
+                id="file-upload"
+                type="file"
+                hidden
+                multiple
+                onChange={e => setPoints(e.target.files)}
+              />
+              <label
+                htmlFor="file-upload"
+                className="bg-secondary p-4 rounded-full inline-block w-[3.12rem] text-primary text-lg cursor-pointer"
+              >
+                <FaImages />
+              </label>
+            </div>
+            <AudioRecorder onAudioRecorded={handleAudioRecorded} />
+            <div className="relative inline-block">
+              <input
+                id="file-upload"
+                type="file"
+                hidden
+                multiple
+                onChange={e => setPoints(e.target.files)}
+              />
+              <label
+                htmlFor="file-upload"
+                className="bg-secondary p-4 rounded-full inline-block w-[3.12rem] text-primary text-lg cursor-pointer"
+              >
+                <IoIosAttach />
+              </label>
+            </div>
+          </div>
+          {audioData && (
+            <audio controls src={audioData.url} className="mb-2 w-full" />
+          )}
           <div className="w-full">
             <textarea
               type="text"

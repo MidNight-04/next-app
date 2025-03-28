@@ -421,7 +421,7 @@ const Page = () => {
             onClick={() => router.back()}
           />
           <h1 className="text-2xl font-semibold font-ubuntu -md:mb-2 -md:text-lg">
-            Project Details
+            Assign Task
           </h1>
         </div>
         <div className="bg-white rounded-[15px] p-5 my-5">

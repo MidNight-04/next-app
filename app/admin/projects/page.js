@@ -1,24 +1,17 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Button, Card } from "@mui/material";
-import { toast } from "sonner";
-import { TiHomeOutline } from "react-icons/ti";
-import { BsBuilding, BsCurrencyRupee } from "react-icons/bs";
+import { BsBuilding } from "react-icons/bs";
 import { GiDuration } from "react-icons/gi";
 import { RiMoneyRupeeCircleLine } from "react-icons/ri";
 import { PiMapPinSimpleAreaLight } from "react-icons/pi";
 import { MdDeleteOutline } from "react-icons/md";
-import PIcon from "../../../public/assets/project-icon.webp";
-import { Circle } from "rc-progress";
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 import AddIcon from "@mui/icons-material/Add";
 import { FiArrowUpRight } from "react-icons/fi";
 import Link from "next/link";
-import { useParams } from "next/navigation";
 import { useAuthStore } from "../../../store/useAuthStore";
-import Image from "next/image";
 import { IoPeopleOutline } from "react-icons/io5";
 import AsideContainer from "../../../components/AsideContainer";
 
@@ -166,7 +159,7 @@ const Page = () => {
               for (let j = 0; j < item.project_status[i]?.step?.length; j++) {
                 totalPoint += 1;
                 if (
-                  item.project_status[i]?.step[j]?.finalStatus[0]?.status ===
+                  item.project_status[i]?.step[j]?.taskId?.status ===
                   "Completed"
                 ) {
                   completePoint += 1;
@@ -223,11 +216,9 @@ const Page = () => {
                                     .flat()
                                     .find(
                                       item =>
-                                        item.finalStatus[0].status ===
-                                          "Pending" ||
-                                        item.finalStatus[0].status ==
-                                          "Work in Progress"
-                                    ).issueMember[0]
+                                        item.taskId.status === "Pending" ||
+                                        item.taskId.status === "In Progress"
+                                    ).taskId.issueMember.name
                                 }
                               </p>
                             </span>

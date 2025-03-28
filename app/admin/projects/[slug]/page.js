@@ -118,8 +118,8 @@ const ClientProjectView = () => {
   const [inspectionList, setInspectionList] = useState([]);
   const [workStatusOpen, setWorkStatusOpen] = useState(false);
   const [documentDialogOpen, setDocumentDialogOpen] = useState(false);
-  const [showImage, setShowImage] = useState(false);
   const [Loading, setLoading] = useState(false);
+  const [showImage, setShowImage] = useState(false);
   const [showImageUrl, setShowImageUrl] = useState(null);
   const [taskDetails, setTaskDetails] = useState([]);
   const [approveImage, setApproveImage] = useState([]);
@@ -877,13 +877,11 @@ const ClientProjectView = () => {
   const getPoint = value => {
     const pt = value?.split("$")[1];
     setPoint(pt);
-    let singlePt = pointList?.filter(dt => dt.point === parseInt(pt));
+    let singlePt = pointList?.filter(dt => parseInt(dt.point) === parseInt(pt));
     setStepDuration(singlePt[0]?.duration);
-    setCheckList(singlePt[0]?.checkList);
-    setCheckListName(singlePt[0]?.checkListName);
+    setCheckList(singlePt[0]?.taskId.checkList?.isCheckList);
+    setCheckListName(singlePt[0]?.taskId.checkList?.checkListName);
   };
-
-  // console.log(content, checkList, checkListName);
 
   const confirmDeleteProjectStep = async (id, name, p_step) => {
     setDeleteStepOpen(true);
@@ -1128,7 +1126,7 @@ const ClientProjectView = () => {
             var completePoint = 0;
             for (let j = 0; j < item?.step?.length; j++) {
               totalPoint += 1;
-              if (item?.step[j]?.finalStatus[0]?.status === "Completed") {
+              if (item?.step[j]?.taskId?.status === "Completed") {
                 completePoint += 1;
               }
             }
@@ -1203,28 +1201,21 @@ const ClientProjectView = () => {
                       </div>
                       <div className=" bg-secondary text-primary h-16 flex flex-row justify-evenly items-center rounded-t-3xl flex-auto text-base font-semibold -md:justify-between">
                         <span className="font-semibold w-24 -sm:hidden" />
-                        <span className="font-semibold w-[140px] -md:w-16 -md:ml-8 -sm:ml-16">
+                        <span className="font-semibold w-[200px] text-center -md:w-16 -md:ml-8 -sm:ml-16">
                           Point
                         </span>
-                        <span className="font-semibold w-[140px] flex self-center justify-center -md:w-20 text-center">
+                        <span className="font-semibold w-[200px] flex self-center justify-center -md:w-20 text-center">
                           Member Issue
                         </span>
-                        <span className="font-semibold w-[200px] -md:w-24 -md:mr-16">
+                        <span className="font-semibold w-[200px] text-center -md:w-24 -md:mr-16">
                           Schedule Time
+                        </span>
+                        <span className="font-semibold w-[70px] text-center -md:w-24 -md:mr-16">
+                          Action
                         </span>
                       </div>
                     </div>
-                    <Accordion
-                      type="single"
-                      collapsible
-                      value={openAccordion}
-                      onValueChange={value => {
-                        setOpenAccordion(value);
-                        if (value) {
-                          showWorkData(value.split("_")[0], item.name);
-                        }
-                      }}
-                    >
+                    <div>
                       {item.step?.map((itm, idx) => {
                         const dur = itm.duration ? parseInt(itm.duration) : 0;
                         initialDate.setDate(initialDate.getDate() + dur);
@@ -1238,13 +1229,12 @@ const ClientProjectView = () => {
                           return `${day}-${month}-${year}`;
                         };
                         if (
-                          itm.finalStatus[0].status === "Completed" &&
-                          new Date(initialDate) >
-                            new Date(itm.finalStatus[0].date)
+                          itm.taskId.status === "Completed" &&
+                          new Date(initialDate) > new Date(itm.taskId.createdAt)
                         ) {
                           diff =
                             (new Date(initialDate) -
-                              new Date(itm.finalStatus[0].date)) /
+                              new Date(itm.taskId.createdAt)) /
                             (1000 * 60 * 60 * 24);
                           initialDate.setDate(initialDate.getDate() - diff);
                         }
@@ -1252,270 +1242,105 @@ const ClientProjectView = () => {
                           .toISOString()
                           .split("T")[0];
                         return (
-                          <AccordionItem
-                            value={itm.content + "_" + +idx}
-                            key={itm.content + +idx}
-                            className="px-4"
+                          <div
+                            key={itm.taskId.title + +idx}
+                            className="flex flex-row justify-evenly w-full py-0 outline-none"
                           >
-                            <AccordionTrigger className="py-0 outline-none">
-                              <div className="flex flex-row justify-evenly w-full">
-                                <div className="relative w-[120px] -md:w-8">
-                                  <div className="h-full w-6 flex items-center justify-center">
-                                    <div
-                                      className={cn(
-                                        "w-[2px] bg-secondary pointer-events-none h-full",
-                                        idx === 0 ? "mt-[100%] h-8" : "",
-                                        idx === item.step.length - 1
-                                          ? "mb-[100%] h-8"
-                                          : "",
-                                        itm.finalStatus[0].status !==
-                                          "Completed"
-                                          ? "bg-secondary"
-                                          : ""
-                                      )}
-                                    />
-                                  </div>
-                                  <div
-                                    className={cn(
-                                      "w-8 h-8 absolute top-1/2 md:right-[92px] -md:right-1 -mt-4 rounded-full bg-green-500 shadow-xl text-center",
-                                      itm.finalStatus[0].status !== "Completed"
-                                        ? "bg-primary"
-                                        : ""
-                                    )}
-                                  >
-                                    {itm.finalStatus[0].status ===
-                                      "Pending" && (
-                                      <BsClockHistory className="mt-1 ml-1 text-secondary text-2xl " />
-                                    )}
-                                    {itm.finalStatus[0].status ===
-                                      "Completed" && (
-                                      <Check
-                                        sx={{
-                                          marginTop: "4px",
-                                          fontSize: "24px",
-                                          color: "white",
-                                        }}
-                                      />
-                                    )}
-                                    {itm.finalStatus[0].status ===
-                                      "Work in Progress" && (
-                                      <TbProgress className="mt-1 ml-1 text-secondary text-2xl " />
-                                    )}
-                                  </div>
-                                </div>
-                                <div className="w-[200px] flex items-center -md:w-16">
+                            <div className="relative w-[120px] -md:w-8">
+                              <div className="h-full w-6 flex items-center justify-center">
+                                <div
+                                  className={cn(
+                                    "w-[2px] bg-secondary pointer-events-none h-full",
+                                    idx === 0 ? "mt-[100%] h-8" : "",
+                                    idx === item.step.length - 1
+                                      ? "mb-[100%] h-8"
+                                      : "",
+                                    itm.taskId.status !== "Completed"
+                                      ? "bg-secondary"
+                                      : ""
+                                  )}
+                                />
+                              </div>
+                              <div
+                                className={cn(
+                                  "w-8 h-8 absolute top-1/2 md:right-[92px] -md:right-1 -mt-4 rounded-full bg-green-500 shadow-xl text-center",
+                                  itm.taskId.status !== "Completed"
+                                    ? "bg-primary"
+                                    : ""
+                                )}
+                              >
+                                {itm.taskId.status === "Pending" && (
+                                  <BsClockHistory className="mt-1 ml-1 text-secondary text-2xl " />
+                                )}
+                                {itm.taskId.status === "Completed" && (
+                                  <Check
+                                    sx={{
+                                      marginTop: "4px",
+                                      fontSize: "24px",
+                                      color: "white",
+                                    }}
+                                  />
+                                )}
+                                {itm.taskId.statu === "Work in Progress" && (
+                                  <TbProgress className="mt-1 ml-1 text-secondary text-2xl " />
+                                )}
+                              </div>
+                            </div>
+                            <div className="w-[200px] flex items-center -md:w-16">
+                              <div className="text-sm font-semibold">
+                                {itm.taskId.title}
+                                {itm.checkList?.toLowerCase() === "yes" && (
+                                  <div>inspections</div>
+                                )}
+                              </div>
+                            </div>
+                            <div className="w-[200px] flex self-center justify-center -md:w-16">
+                              {`${itm.taskId.issueMember?.name}`}
+                            </div>
+                            <div className="w-[200px] -md:w-28 my-1 flex items-center flex-col">
+                              <div className="text-left">
+                                <div className="flex flex-row mb-2">
                                   <div className="text-sm font-semibold">
-                                    {itm.content}
-                                    {itm.checkList?.toLowerCase() === "yes" && (
-                                      <div>inspections</div>
-                                    )}
+                                    ETC :
                                   </div>
+                                  <div className="text-sm">{finalDate}</div>
                                 </div>
-                                <div className="w-[200px] flex self-center justify-center -md:w-16">
-                                  {itm.issueMember?.map((mem, id) => {
-                                    return (
-                                      <div
-                                        key={id}
-                                        className="text-sm font-semibold"
-                                      >
-                                        {mem}
-                                      </div>
-                                    );
-                                  })}
-                                </div>
-                                <div className="w-[200px] -md:w-28 my-1">
-                                  <div className="flex flex-row mb-2">
-                                    <div className="text-sm font-semibold">
-                                      ETC :
-                                    </div>
-                                    <div className="text-sm">{finalDate}</div>
+                                <div className="flex flex-row">
+                                  <div className="text-sm font-semibold">
+                                    DOC :
                                   </div>
-                                  <div className="flex flex-row">
-                                    <div className="text-sm font-semibold">
-                                      DOC :
-                                    </div>
-                                    <div className="text-sm">
-                                      {/* {console.log(itm.duration)} */}
-                                      {itm.finalStatus[0].date}{" "}
-                                      {itm.finalStatus[0].date !== "" &&
-                                      new Date(itm.finalStatus[0].date) >
+                                  <div className="text-sm">
+                                    {console.log(itm.taskId)}
+                                    {itm?.taskId?.updatedAt !== "" &&
+                                      new Date(
+                                        itm.taskId.updatedAt
+                                      ).toLocaleDateString()}{" "}
+                                    {/* {itm.taskId.updatedOn !== "" &&
+                                      new Date(itm.taskId.updatedOn) >
                                         new Date(finalDate)
                                         ? "(Delayed)"
-                                        : new Date(itm.finalStatus[0].date) <
+                                        : new Date(itm.taskId.updatedOn) <
                                           new Date(finalDate)
                                         ? "(Early)"
-                                        : ""}
-                                    </div>
+                                        : ""} */}
                                   </div>
                                 </div>
                               </div>
-                            </AccordionTrigger>
-                            <AccordionContent>
-                              {!detailsIsloading && (
-                                <div className="p-5 shadow-lg rounded-3xl border-[1px] border-primary mx-6 -lg:mx-2 -md:p-3">
-                                  <div className="flex flex-row justify-between items-center">
-                                    <h5 className="text-lg font-bold mb-4">
-                                      Details :
-                                    </h5>
-                                    {userType === "ROLE_ADMIN" ||
-                                    userType === "ROLE_PROJECT MANAGER" ||
-                                    itm.issueMember
-                                      .map(item => item.toLowerCase())
-                                      .includes(
-                                        userType.toLowerCase().split("_")[1]
-                                      ) ? (
-                                      <button
-                                        onClick={() => {
-                                          updateWorkStatus(
-                                            itm.point,
-                                            itm.content,
-                                            item.name,
-                                            itm?.checkListName
-                                          );
-                                        }}
-                                        style={{ cursor: "pointer" }}
-                                        className="px-3 py-2 font-semibold bg-secondary text-primary rounded-full font-ubuntu -md:px-2 -md:py-[6px]"
-                                      >
-                                        Update To Client
-                                      </button>
-                                    ) : (
-                                      ""
-                                    )}
-                                  </div>
-                                  <div>
-                                    <div>
-                                      <span className="font-semibold ">
-                                        Updated on:{" "}
-                                      </span>
-                                      {workDetails[0]?.date}
-                                    </div>
-                                    <div className="relative flex flex-row gap-2 mt-2">
-                                      {workDetails[0]?.image?.map(
-                                        (imgObj, imgidx) => (
-                                          <div key={imgObj.url}>
-                                            {imgObj.isApproved ||
-                                            userType !== "ROLE_CLIENT" ? (
-                                              <div
-                                                className="cursor-pointer [&_span]:hover:block"
-                                                onClick={() => {
-                                                  setShowImageUrl(imgObj.url);
-                                                  toggleShowImage(imgObj.url);
-                                                }}
-                                              >
-                                                {!showImage && (
-                                                  <span className="w-16 rounded-xl h-full bg-black bg-opacity-30 absolute hidden text-primary-foreground text-center">
-                                                    <p className="mt-5 font-semibold">
-                                                      View
-                                                    </p>
-                                                  </span>
-                                                )}
-
-                                                <img
-                                                  src={imgObj.url}
-                                                  alt={imgObj.url}
-                                                  className="w-16 h-16 rounded-xl transition-all duration-300 rounded-lg"
-                                                />
-                                              </div>
-                                            ) : (
-                                              ""
-                                            )}
-
-                                            <Modal
-                                              open={showImage}
-                                              onClose={toggleShowImage}
-                                              sx={{
-                                                "display": "flex",
-                                                "alignItems": "center",
-                                                "justifyContent": "center",
-                                                "& .MuiBackdrop-root": {
-                                                  backgroundColor:
-                                                    "rgba(0, 0, 0, 0.1)",
-                                                },
-                                              }}
-                                            >
-                                              <div className="bg-white rounded-3xl h-5/6 flex flex-col ">
-                                                {/* <Image
-                                                src={img}
-                                                alt="alt"
-                                                width={400}
-                                                height={400}
-                                              /> */}
-                                                <div className="h-full w-full flex items-center justify-center">
-                                                  <img
-                                                    src={showImageUrl}
-                                                    alt={showImageUrl}
-                                                    className="w-auto h-5/6 bg-center"
-                                                  />
-                                                  {/* <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black opacity-60" /> */}
-                                                </div>
-                                                <div className="flex flex-row gap-4 justify-evenly p-4 -md:flex-wrap">
-                                                  {userType === "ROLE_ADMIN" ||
-                                                  userType ===
-                                                    "ROLE_PROJECT MANAGER" ? (
-                                                    <>
-                                                      <div
-                                                        className="py-2 px-4 font-semibold bg-secondary text-primary rounded-full flex flex-row items-center justify-center gap-1 text-nowrap cursor-pointer"
-                                                        onClick={() => {
-                                                          updateImageStatus({
-                                                            _id: "id",
-                                                            point: itm.point,
-                                                            content:
-                                                              itm.content,
-                                                            name: item.name,
-                                                            url: imgObj.url,
-                                                          });
-                                                        }}
-                                                      >
-                                                        <FaCheck className="text-xl" />
-                                                        <p>Approve Image</p>
-                                                      </div>
-                                                      <button
-                                                        className="py-2 px-4 font-semibold bg-secondary text-primary rounded-full flex flex-row items-center justify-center gap-1 text-nowrap"
-                                                        onClick={() => {
-                                                          deleteStatusImage({
-                                                            point: itm.point,
-                                                            content:
-                                                              itm.content,
-                                                            name: item.name,
-                                                          });
-                                                        }}
-                                                      >
-                                                        <MdDeleteOutline className="text-xl" />
-                                                        Delete Image
-                                                      </button>
-                                                    </>
-                                                  ) : (
-                                                    ""
-                                                  )}
-                                                  <button
-                                                    className="py-2 px-4 font-semibold bg-secondary text-primary rounded-full flex flex-row items-center justify-center gap-1 text-nowrap"
-                                                    onClick={() => {
-                                                      downloadImage(
-                                                        imgObj.image
-                                                      );
-                                                    }}
-                                                  >
-                                                    <FiDownload className="text-xl" />
-                                                    Download Image
-                                                  </button>
-                                                </div>
-                                              </div>
-                                            </Modal>
-                                          </div>
-                                        )
-                                      )}
-                                    </div>
-                                    <div className="font-semibold mt-2">
-                                      Status : {workDetails[0]?.status}
-                                    </div>
-                                  </div>
-                                </div>
-                              )}
-                            </AccordionContent>
-                          </AccordionItem>
+                            </div>
+                            <div className="flex items-center w-[70px]">
+                              <button
+                                className="bg-secondary rounded-3xl text-primary px-3 py-2"
+                                onClick={() => {
+                                  router.push(`/admin/tasks/${itm.taskId._id}`);
+                                }}
+                              >
+                                Details
+                              </button>
+                            </div>
+                          </div>
                         );
                       })}
-                    </Accordion>
+                    </div>
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
@@ -1593,7 +1418,6 @@ const ClientProjectView = () => {
                 </Typography>
                 <TextField
                   type="file"
-                  c
                   className=""
                   name="image"
                   inputProps={{ multiple: true }}
@@ -2337,8 +2161,8 @@ const ClientProjectView = () => {
             >
               {pointList?.map((data, id) => {
                 return (
-                  <MenuItem key={id} value={`${data.content}$${data.point}`}>
-                    {data.content}
+                  <MenuItem key={id} value={`${data.taskId._id}$${data.point}`}>
+                    {data.taskId.title}
                   </MenuItem>
                 );
               })}
@@ -2373,8 +2197,8 @@ const ClientProjectView = () => {
             >
               {pointList?.map((data, id) => {
                 return (
-                  <MenuItem key={id} value={`${data.content}$${data.point}`}>
-                    {data.content}
+                  <MenuItem key={id} value={`${data.taskId._id}$${data.point}`}>
+                    {data.taskId.title}
                   </MenuItem>
                 );
               })}

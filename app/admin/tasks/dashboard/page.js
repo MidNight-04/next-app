@@ -319,7 +319,7 @@ const Page = () => {
     <AsideContainer>
       <div>
         <h1 className="font-ubuntu font-bold text-[25px] leading-7 p-5">
-          Ticket List
+          Task List
         </h1>
         <div>
           {/* <div className="flex gap-4 p-4 pt-0 flex-col items-center ">

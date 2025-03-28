@@ -1,5 +1,4 @@
 "use client";
-import { Button, Card } from "@mui/material";
 import dynamic from "next/dynamic";
 import { useState } from "react";
 import SigninForm from "../../../components/forms/signinform/SigninForm";
@@ -7,6 +6,7 @@ import OtpForm from "../../../components/forms/otpform/OtpForm";
 import { useAuthStore } from "../../../store/useAuthStore";
 import { redirect } from "next/navigation";
 import Image from "next/image";
+
 const Header = dynamic(() => import("../../../components/Header"), {
   ssr: false,
 });
@@ -14,16 +14,13 @@ const Footer = dynamic(() => import("../../../components/Footer"), {
   ssr: false,
 });
 
-const style = { color: "red", fontSize: ".75rem", paddingLeft: ".25rem" };
-
 const Page = () => {
   const [showOtp, setShowOtp] = useState(false);
   const type = useAuthStore(state => state.type);
   const isAuth = useAuthStore(state => state.isAuth);
-  const state = useAuthStore(state => state);
-  console.log(state);
+  const hasHydrated = useAuthStore.persist?.hasHydrated();
 
-  if (isAuth) {
+  if (hasHydrated && isAuth) {
     redirect("/admin/projects");
   }
 

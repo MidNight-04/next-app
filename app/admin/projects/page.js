@@ -50,7 +50,15 @@ const Page = () => {
         .get(`${process.env.REACT_APP_BASE_PATH}/api/project/getall`)
         .then(response => {
           setProject(response?.data?.data);
-          // console.log(response?.data?.data)
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    } else {
+      axios
+        .get(`${process.env.REACT_APP_BASE_PATH}/api/project/member/${id}`)
+        .then(response => {
+          setProject(response?.data?.data);
         })
         .catch(error => {
           console.log(error);

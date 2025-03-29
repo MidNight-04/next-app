@@ -1,6 +1,6 @@
-"use client";
-import axios from "axios";
-import React, { useEffect, useRef, useState } from "react";
+'use client';
+import axios from 'axios';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   DialogActions,
   DialogContent,
@@ -18,68 +18,68 @@ import {
   FormControlLabel,
   Checkbox,
   DialogContentText,
-} from "@mui/material";
-import { toast } from "sonner";
-import { FaDownload, FaMinus, FaPlus } from "react-icons/fa6";
-import { IoCallSharp } from "react-icons/io5";
-import { IoDocumentsOutline } from "react-icons/io5";
-import { GoPeople } from "react-icons/go";
-import { MdLockOutline } from "react-icons/md";
-import { BsCalendar4Event } from "react-icons/bs";
-import { TbProgress } from "react-icons/tb";
-import { FaCheck } from "react-icons/fa6";
-import { MdDeleteOutline } from "react-icons/md";
-import { FiDownload } from "react-icons/fi";
-import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
-import "react-circular-progressbar/dist/styles.css";
-import { TiArrowSortedDown, TiArrowSortedUp } from "react-icons/ti";
-import { useParams } from "next/navigation";
-import Link from "next/link";
-import LoaderSpinner from "../../../../components/loader/LoaderSpinner";
-import { cn } from "../../../../lib/utils";
-import { Check } from "@mui/icons-material";
-import { BsClockHistory } from "react-icons/bs";
-import { saveAs } from "file-saver";
-import { RiDeleteBin6Line, RiLockPasswordLine } from "react-icons/ri";
-import AsideContainer from "../../../../components/AsideContainer";
+} from '@mui/material';
+import { toast } from 'sonner';
+import { FaDownload, FaMinus, FaPlus } from 'react-icons/fa6';
+import { IoCallSharp } from 'react-icons/io5';
+import { IoDocumentsOutline } from 'react-icons/io5';
+import { GoPeople } from 'react-icons/go';
+import { MdLockOutline } from 'react-icons/md';
+import { BsCalendar4Event } from 'react-icons/bs';
+import { TbProgress } from 'react-icons/tb';
+import { FaCheck } from 'react-icons/fa6';
+import { MdDeleteOutline } from 'react-icons/md';
+import { FiDownload } from 'react-icons/fi';
+import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
+import 'react-circular-progressbar/dist/styles.css';
+import { TiArrowSortedDown, TiArrowSortedUp } from 'react-icons/ti';
+import { useParams } from 'next/navigation';
+import Link from 'next/link';
+import LoaderSpinner from '../../../../components/loader/LoaderSpinner';
+import { cn } from '../../../../lib/utils';
+import { Check } from '@mui/icons-material';
+import { BsClockHistory } from 'react-icons/bs';
+import { saveAs } from 'file-saver';
+import { RiDeleteBin6Line, RiLockPasswordLine } from 'react-icons/ri';
+import AsideContainer from '../../../../components/AsideContainer';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../../../../components/ui/select";
+} from '../../../../components/ui/select';
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "../../../../components/ui/accordion";
-import { useAuthStore } from "../../../../store/useAuthStore";
-import { IoIosArrowBack } from "react-icons/io";
-import { useRouter } from "next/navigation";
+} from '../../../../components/ui/accordion';
+import { useAuthStore } from '../../../../store/useAuthStore';
+import { IoIosArrowBack } from 'react-icons/io';
+import { useRouter } from 'next/navigation';
 
 let today = new Date();
 let yyyy = today.getFullYear();
 let mm = today.getMonth() + 1;
 let dd = today.getDate();
-if (dd < 10) dd = "0" + dd;
-if (mm < 10) mm = "0" + mm;
-let formatedtoday = yyyy + "-" + mm + "-" + dd;
+if (dd < 10) dd = '0' + dd;
+if (mm < 10) mm = '0' + mm;
+let formatedtoday = yyyy + '-' + mm + '-' + dd;
 
 const monthNames = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
 ];
 
 const ClientProjectView = () => {
@@ -88,14 +88,14 @@ const ClientProjectView = () => {
   const router = useRouter();
   const [projectDetails, setProjectDetails] = useState(null);
   const [confirmationOpen, setConfirmationOpen] = useState(false);
-  const [status, setStatus] = useState("");
-  const [log, setLog] = useState("");
-  const [image, setImage] = useState("");
-  const [date, setDate] = useState("");
-  const [id, setId] = useState("");
-  const [point, setPoint] = useState("");
-  const [content, setContent] = useState("");
-  const [name, setName] = useState("");
+  const [status, setStatus] = useState('');
+  const [log, setLog] = useState('');
+  const [image, setImage] = useState('');
+  const [date, setDate] = useState('');
+  const [id, setId] = useState('');
+  const [point, setPoint] = useState('');
+  const [content, setContent] = useState('');
+  const [name, setName] = useState('');
   const [workDetailOpen, setWorkDetailOpen] = useState(false);
   const [workDetails, setWorkDetails] = useState([]);
   const [showContent, setShowContent] = useState([]);
@@ -105,7 +105,7 @@ const ClientProjectView = () => {
   const [inspectionDialogOpen, setInspectionDialogOpen] = useState(false);
   const [totalInspection, setTotalInspection] = useState(0);
   const [singleInspection, setSingleInspection] = useState(0);
-  const [step, setStep] = useState("");
+  const [step, setStep] = useState('');
   const [pointList, setPointList] = useState([]);
   const [assignMember, setAssignMember] = useState(null);
   const [startDate, setStartDate] = useState(null);
@@ -113,7 +113,7 @@ const ClientProjectView = () => {
   const [detailsIsloading, setDetailsIsLoading] = useState(true);
   const [expandedDetails, setExpandedDetails] = useState(false);
   const [showInspection, setShowInspection] = useState(null);
-  const [checkListName, setCheckListName] = useState("");
+  const [checkListName, setCheckListName] = useState('');
   const [checkedItems, setCheckedItems] = useState([]);
   const [inspectionList, setInspectionList] = useState([]);
   const [workStatusOpen, setWorkStatusOpen] = useState(false);
@@ -129,17 +129,17 @@ const ClientProjectView = () => {
   const [currentStatus, setCurrentStatus] = useState(null);
   const [openAcc, setOpenAcc] = useState(null);
   const [openAccordion, setOpenAccordion] = useState(null);
-  const [document, setDocument] = useState("");
-  const [documentName, setDocumentName] = useState("");
-  const [activeTab, setActiveTab] = useState("Send Message");
+  const [document, setDocument] = useState('');
+  const [documentName, setDocumentName] = useState('');
+  const [activeTab, setActiveTab] = useState('Send Message');
   const [stepModal, setStepModal] = useState(false);
-  const [pointName, setPointName] = useState("");
-  const [checkList, setCheckList] = useState("");
+  const [pointName, setPointName] = useState('');
+  const [checkList, setCheckList] = useState('');
   const [stepDuration, setStepDuration] = useState(null);
-  const [duration, setDuration] = useState("");
+  const [duration, setDuration] = useState('');
   const [memberList, setMemberList] = useState([]);
-  const [prevContent, setPrevContent] = useState("");
-  const [stepName, setStepName] = useState("");
+  const [prevContent, setPrevContent] = useState('');
+  const [stepName, setStepName] = useState('');
   const [issueMember, setIssueMember] = useState(null);
   const [stepModalDelete, setStepModalDelete] = useState(false);
   const [deleteStepOpen, setDeleteStepOpen] = useState(false);
@@ -192,14 +192,14 @@ const ClientProjectView = () => {
         );
 
         // Format the date as dd/mm/yyyy
-        const day = String(newDate.getDate()).padStart(2, "0");
-        const month = String(newDate.getMonth() + 1).padStart(2, "0"); // Months are 0-indexed
+        const day = String(newDate.getDate()).padStart(2, '0');
+        const month = String(newDate.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
         const year = newDate.getFullYear();
 
         //
         // Format the date as dd/mm/yyyy
-        const day1 = String(newDate1.getDate()).padStart(2, "0");
-        const month1 = String(newDate1.getMonth() + 1).padStart(2, "0"); // Months are 0-indexed
+        const day1 = String(newDate1.getDate()).padStart(2, '0');
+        const month1 = String(newDate1.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
         const year1 = newDate1.getFullYear();
 
         const formattedDate1 = `${day1}/${month1}/${year1}`;
@@ -252,7 +252,7 @@ const ClientProjectView = () => {
   };
 
   const handleStepChange = async value => {
-    const pt = value?.split("$")[1];
+    const pt = value?.split('$')[1];
     setPoint(parseInt(pt));
     if (step) {
       const filtered = projectDetails?.project_status?.find(
@@ -265,28 +265,28 @@ const ClientProjectView = () => {
           let issue;
           for (let i = 0; i < member?.length; i++) {
             switch (member[i]?.toLowerCase()) {
-              case "admin":
-                issue = "65362fba3ffa1cad30f53bac";
+              case 'admin':
+                issue = '65362fba3ffa1cad30f53bac';
                 break;
-              case "project admin":
+              case 'project admin':
                 issue = projectDetails?.project_admin[0];
                 break;
-              case "project manager":
+              case 'project manager':
                 issue = projectDetails?.project_manager[0];
                 break;
-              case "sr. engineer":
+              case 'sr. engineer':
                 issue = projectDetails?.sr_engineer[0];
                 break;
-              case "site engineer":
+              case 'site engineer':
                 issue = projectDetails?.site_engineer[0];
                 break;
-              case "accountant":
+              case 'accountant':
                 issue = projectDetails?.accountant[0];
                 break;
-              case "operation":
+              case 'operation':
                 issue = projectDetails?.operation[0];
                 break;
-              case "sales":
+              case 'sales':
                 issue = projectDetails?.sales[0];
                 break;
               default:
@@ -300,14 +300,14 @@ const ClientProjectView = () => {
   };
 
   const updateStatus = () => {
-    setPoint("");
+    setPoint('');
     setPointList([]);
-    setContent("");
-    setStep("");
+    setContent('');
+    setStep('');
     setConfirmationOpen(true);
-    setImage("");
-    setStatus("");
-    setLog("");
+    setImage('');
+    setStatus('');
+    setLog('');
     setDate(formatedtoday);
   };
 
@@ -353,57 +353,57 @@ const ClientProjectView = () => {
 
   const handleUpdate = () => {
     if (!status) {
-      toast("Work is required", {
-        position: "top-center",
+      toast('Work is required', {
+        position: 'top-center',
       });
     } else if (!step) {
-      toast("Query step log is required", {
-        position: "top-center",
+      toast('Query step log is required', {
+        position: 'top-center',
       });
     } else if (!content) {
-      toast("Query content is required", {
-        position: "top-center",
+      toast('Query content is required', {
+        position: 'top-center',
       });
     } else if (!date) {
-      toast("Date is required", {
-        position: "top-center",
+      toast('Date is required', {
+        position: 'top-center',
       });
     } else {
       const formData = new FormData();
-      formData.append("id", slug);
-      formData.append("name", step);
-      formData.append("point", parseInt(point));
-      formData.append("content", content?.split("$")[0]);
+      formData.append('id', slug);
+      formData.append('name', step);
+      formData.append('point', parseInt(point));
+      formData.append('content', content?.split('$')[0]);
       // Serialize the entire array as a JSON string
-      formData.append("assignedBy", userId);
-      formData.append("assignMember", projectDetails.client);
+      formData.append('assignedBy', userId);
+      formData.append('assignMember', projectDetails.client);
       // for (let i = 0; i < assignMember?.length; i++) {
       //   formData.append("assignMember", JSON.stringify(assignMember[i]));
       // }
-      formData.append("status", status);
+      formData.append('status', status);
       for (let i = 0; i < image?.length; i++) {
-        formData.append("image", image[i]);
+        formData.append('image', image[i]);
       }
-      formData.append("log", log);
-      formData.append("date", date);
+      formData.append('log', log);
+      formData.append('date', date);
 
       let config = {
-        method: "put",
+        method: 'put',
         maxBodyLength: Infinity,
         url: `${process.env.REACT_APP_BASE_PATH}/api/project/client-query`,
-        headers: { "Content-Type": "multipart/form-data" },
+        headers: { 'Content-Type': 'multipart/form-data' },
         data: formData,
       };
       axios
         .request(config)
         .then(resp => {
           toast(resp.data.message, {
-            position: "top-center",
+            position: 'top-center',
           });
         })
         .catch(err => {
-          toast("Error while raise query by client", {
-            position: "top-center",
+          toast('Error while raise query by client', {
+            position: 'top-center',
           });
           console.log(err);
         });
@@ -462,8 +462,8 @@ const ClientProjectView = () => {
     setContent(content);
     setName(name);
     setWorkStatusOpen(true);
-    setImage("");
-    setStatus("");
+    setImage('');
+    setStatus('');
     setDate(formatedtoday);
     axios
       .get(`${process.env.REACT_APP_BASE_PATH}/api/project/databyid/${slug}`)
@@ -490,8 +490,8 @@ const ClientProjectView = () => {
       })
       .catch(error => {
         console.log(error);
-        toast("Error while showing task update", {
-          position: "top-right",
+        toast('Error while showing task update', {
+          position: 'top-right',
         });
       });
   };
@@ -512,7 +512,7 @@ const ClientProjectView = () => {
       )
       .then(response => {
         if (response?.data?.status === 200) {
-          toast("Image Approved Successfully.");
+          toast('Image Approved Successfully.');
         }
       });
   };
@@ -520,19 +520,19 @@ const ClientProjectView = () => {
   const workStatusCancel = () => {
     // Close the task dialog
     setWorkStatusOpen(false);
-    setCheckListName("");
+    setCheckListName('');
     setInspectionList([]);
   };
 
   const handleWorkStatusUpdate = () => {
-    setOpenAccordion("");
+    setOpenAccordion('');
     setWorkStatusOpen(false);
     setLoading(true);
     // Extract all mandatory points from the checklist
     const mandatoryPoints = inspectionList[0]?.checkList?.flatMap(
       checklistItem =>
         checklistItem.points?.filter(
-          point => point.status?.toLowerCase() === "mandatory"
+          point => point.status?.toLowerCase() === 'mandatory'
         )
     );
 
@@ -545,7 +545,7 @@ const ClientProjectView = () => {
     });
 
     if (!status) {
-      toast("Status is required");
+      toast('Status is required');
       setLoading(false);
       // } else if (approveImage?.length === 0) {
       //   toast("Approval Image is required", {
@@ -555,8 +555,8 @@ const ClientProjectView = () => {
       hasUnCheckedMandatory ||
       (inspectionList?.length > 0 && checkedItems?.length === 0)
     ) {
-      toast(" Checked all mandatory inspection is required", {
-        position: "top-center",
+      toast(' Checked all mandatory inspection is required', {
+        position: 'top-center',
       });
     }
     // else if (!chatLog) {
@@ -566,23 +566,23 @@ const ClientProjectView = () => {
     // }
     else {
       const formData = new FormData();
-      formData.append("id", slug);
-      formData.append("name", name);
-      formData.append("point", point);
-      formData.append("content", content);
-      formData.append("status", status);
+      formData.append('id', slug);
+      formData.append('name', name);
+      formData.append('point', point);
+      formData.append('content', content);
+      formData.append('status', status);
       for (let i = 0; i < approveImage?.length; i++) {
-        formData.append("image", approveImage[i]);
+        formData.append('image', approveImage[i]);
       }
-      formData.append("date", date);
-      formData.append("checkListName", checkListName);
+      formData.append('date', date);
+      formData.append('checkListName', checkListName);
       // formData.append("chatLog", chatLog);
-      formData.append("userName", userName);
-      formData.append("userId", userId);
-      if (currentStatus === "Completed") {
+      formData.append('userName', userName);
+      formData.append('userId', userId);
+      if (currentStatus === 'Completed') {
         setWorkStatusOpen(false);
         setLoading(false);
-        toast("You have already completed this point.");
+        toast('You have already completed this point.');
       } else {
         axios
           .put(
@@ -601,14 +601,14 @@ const ClientProjectView = () => {
                   setRefresh(prev => !prev);
                 })
                 .catch(error => {
-                  toast("Error while update project status");
+                  toast('Error while update project status');
                 });
               setLoading(false);
-              setName("");
-              setPoint("");
-              setContent("");
-              setStatus("");
-              setCheckListName("");
+              setName('');
+              setPoint('');
+              setContent('');
+              setStatus('');
+              setCheckListName('');
               setInspectionList([]);
               setCheckedItems([]);
               toast(`${response.data.message}`);
@@ -616,17 +616,17 @@ const ClientProjectView = () => {
           })
           .catch(error => {
             setLoading(false);
-            setName("");
-            setPoint("");
-            setContent("");
-            setStatus("");
-            setCheckListName("");
+            setName('');
+            setPoint('');
+            setContent('');
+            setStatus('');
+            setCheckListName('');
             setInspectionList([]);
             setCheckedItems([]);
             setApproveImage([]);
             setWorkStatusOpen(false);
             console.log(error);
-            toast("Error while update project status");
+            toast('Error while update project status');
           });
       }
     }
@@ -644,64 +644,64 @@ const ClientProjectView = () => {
   };
 
   const downloadImage = url => {
-    saveAs(url, "site_image.jpg");
+    saveAs(url, 'site_image.jpg');
   };
 
   const deleteStatusImage = async ({ point, content, name }) => {
-    setOpenAccordion("");
+    setOpenAccordion('');
     toggleShowImage();
     setLoading(true);
     const formData = new FormData();
-    formData.append("_id", projectDetails._id);
-    formData.append("url", showImageUrl);
-    formData.append("name", name);
-    formData.append("point", point);
-    formData.append("content", content);
+    formData.append('_id', projectDetails._id);
+    formData.append('url', showImageUrl);
+    formData.append('name', name);
+    formData.append('point', point);
+    formData.append('content', content);
     await fetch(
       `${process.env.REACT_APP_BASE_PATH}/api/project/deletestatusimage`,
       {
-        method: "POST",
+        method: 'POST',
         headers: {},
         body: formData,
       }
     ).then(res => {
       setLoading(false);
       if (res.ok) {
-        toast("Image deleted successfully.");
+        toast('Image deleted successfully.');
       } else {
-        toast("Something went wrong while deleting the image.");
+        toast('Something went wrong while deleting the image.');
       }
     });
   };
 
   const handleUploadDocument = () => {
     const formData = new FormData();
-    formData.append("name", documentName);
-    formData.append("client", projectDetails?.client);
-    formData.append("siteID", slug);
-    formData.append("user", userId);
-    formData.append("userName", userName);
-    formData.append("date", formatedtoday);
+    formData.append('name', documentName);
+    formData.append('client', projectDetails?.client);
+    formData.append('siteID', slug);
+    formData.append('user', userId);
+    formData.append('userName', userName);
+    formData.append('date', formatedtoday);
     for (let i = 0; i < document?.length; i++) {
-      formData.append("document", document[i]);
+      formData.append('document', document[i]);
     }
     let config = {
-      method: "post",
+      method: 'post',
       maxBodyLength: Infinity,
       url: `${process.env.REACT_APP_BASE_PATH}/api/admin/project-document/add`,
-      headers: { "Content-Type": "multipart/form-data" },
+      headers: { 'Content-Type': 'multipart/form-data' },
       data: formData,
     };
     axios
       .request(config)
       .then(resp => {
-        setDocumentName("");
-        setDocument("");
+        setDocumentName('');
+        setDocument('');
         toast(resp?.data?.message);
         setRefresh(!refresh);
       })
       .catch(err => {
-        toast("Error while uploading document.");
+        toast('Error while uploading document.');
         console.log(err);
       });
     setDocumentDialogOpen(false);
@@ -713,34 +713,34 @@ const ClientProjectView = () => {
 
   const uploadDocument = () => {
     setDocumentDialogOpen(true);
-    setDocumentName("");
-    setDocument("");
+    setDocumentName('');
+    setDocument('');
   };
 
   const AddProjectStepSubmit = () => {
     if (!pointName) {
-      toast("Point Name is required", {
-        position: "top-right",
+      toast('Point Name is required', {
+        position: 'top-right',
       });
     } else if (!checkList) {
-      toast("CheckList is required", {
-        position: "top-right",
+      toast('CheckList is required', {
+        position: 'top-right',
       });
-    } else if (checkList === "yes" && !checkListName) {
-      toast("CheckList Name is required", {
-        position: "top-right",
+    } else if (checkList === 'yes' && !checkListName) {
+      toast('CheckList Name is required', {
+        position: 'top-right',
       });
-    } else if (!duration && force !== "yes") {
-      toast("Duration is required", {
-        position: "top-right",
+    } else if (!duration && force !== 'yes') {
+      toast('Duration is required', {
+        position: 'top-right',
       });
     } else if (issueMember?.length === 0) {
-      toast("Issue member is required", {
-        position: "top-right",
+      toast('Issue member is required', {
+        position: 'top-right',
       });
     } else if (!prevContent) {
-      toast("Content is required", {
-        position: "top-right",
+      toast('Content is required', {
+        position: 'top-right',
       });
     } else {
       const data = {
@@ -750,18 +750,18 @@ const ClientProjectView = () => {
         checkList: checkList,
         checkListName: checkListName,
         forceMajeure: {
-          isForceMajeure: force === "yes" ? true : false,
+          isForceMajeure: force === 'yes' ? true : false,
           startDate: startForceDate,
           endDate: endForceDate,
         },
         duration:
-          force === "yes"
+          force === 'yes'
             ? new Date(endForceDate).getDate() -
               new Date(startForceDate).getDate() +
               1
             : duration,
         issueMember: issueMember,
-        prevContent: prevContent?.split("$")[0],
+        prevContent: prevContent?.split('$')[0],
         prevPoint: prevPoint,
         activeUser: userId,
         userName: userName,
@@ -785,7 +785,7 @@ const ClientProjectView = () => {
         .then(response => {
           if (response.data.status == 200) {
             toast(response.data.message, {
-              position: "top-right",
+              position: 'top-right',
             });
             setStepModal(false);
             getprojectDetail();
@@ -794,7 +794,7 @@ const ClientProjectView = () => {
           }
         })
         .catch(error => {
-          toast("Error while add new point");
+          toast('Error while add new point');
           console.log(error);
         });
     }
@@ -805,7 +805,7 @@ const ClientProjectView = () => {
     setStepName(name);
     setPointList(step);
     setIssueMember([]);
-    setPrevContent("");
+    setPrevContent('');
     axios
       .get(`${process.env.REACT_APP_BASE_PATH}/api/teammember/getall`)
       .then(response => {
@@ -821,25 +821,25 @@ const ClientProjectView = () => {
       .catch(error => {
         console.log(error);
       });
-    setPointName("");
-    setCheckList("");
-    setCheckListName("");
-    setDuration("");
-    setContent("");
-    setStatus("");
-    setPoint("");
+    setPointName('');
+    setCheckList('');
+    setCheckListName('');
+    setDuration('');
+    setContent('');
+    setStatus('');
+    setPoint('');
   };
 
   const DeleteStepOpenModal = (step, name) => {
     setStepModalDelete(true);
     setStepName(name);
     setPointList(step);
-    setCheckList("");
-    setCheckListName("");
+    setCheckList('');
+    setCheckListName('');
   };
 
   const getPrevPoint = value => {
-    const pt = value?.split("$")[1];
+    const pt = value?.split('$')[1];
     setPrevPoint(pt);
   };
 
@@ -848,7 +848,7 @@ const ClientProjectView = () => {
       id: slug,
       name: stepName,
       point: parseInt(point),
-      content: content?.split("$")[0],
+      content: content?.split('$')[0],
       duration: stepDuration,
       checkList: checkList,
       checkListName: checkListName,
@@ -867,15 +867,15 @@ const ClientProjectView = () => {
         }
       })
       .catch(error => {
-        toast("Error while delete project field", {
-          position: "top-right",
+        toast('Error while delete project field', {
+          position: 'top-right',
         });
         console.log(error);
       });
   };
 
   const getPoint = value => {
-    const pt = value?.split("$")[1];
+    const pt = value?.split('$')[1];
     setPoint(pt);
     let singlePt = pointList?.filter(dt => parseInt(dt.point) === parseInt(pt));
     setStepDuration(singlePt[0]?.duration);
@@ -908,8 +908,8 @@ const ClientProjectView = () => {
         }
       })
       .catch(error => {
-        toast("Error while delete project field", {
-          position: "top-right",
+        toast('Error while delete project field', {
+          position: 'top-right',
         });
         console.log(error);
       });
@@ -950,7 +950,7 @@ const ClientProjectView = () => {
               </div>
             </button>
           </Link>
-          {userType === "ROLE_ADMIN" && (
+          {userType === 'ROLE_ADMIN' && (
             <>
               <Link href={`/admin/projects/view-checklist/${slug}`}>
                 <button
@@ -1096,7 +1096,7 @@ const ClientProjectView = () => {
           <span className="px-[10px] py-[3px] font-semibold rounded-full border-[1px] border-primary bg-primary-foreground text-primary">
             {
               projectDetails?.openTicket?.filter(
-                dt => dt.finalStatus !== "Completed"
+                dt => dt.finalStatus !== 'Completed'
               )?.length
             }
           </span>
@@ -1126,7 +1126,7 @@ const ClientProjectView = () => {
             var completePoint = 0;
             for (let j = 0; j < item?.step?.length; j++) {
               totalPoint += 1;
-              if (item?.step[j]?.taskId?.status === "Completed") {
+              if (item?.step[j]?.taskId?.status === 'Completed') {
                 completePoint += 1;
               }
             }
@@ -1155,14 +1155,14 @@ const ClientProjectView = () => {
                             text={`${percent}%`}
                             strokeWidth={14}
                             styles={buildStyles({
-                              backgroundColor: "#3e98c7",
-                              textColor: "black",
-                              pathColor: "#93BFCF",
-                              trailColor: "#d6d6d6",
+                              backgroundColor: '#3e98c7',
+                              textColor: 'black',
+                              pathColor: '#93BFCF',
+                              trailColor: '#d6d6d6',
                             })}
                           />
                         </div>
-                        {userType === "ROLE_ADMIN" && (
+                        {userType === 'ROLE_ADMIN' && (
                           <span
                             className="p-2 text-lg border border-primary rounded-full font-semibold text-primary cursor-pointer"
                             onClick={() =>
@@ -1220,16 +1220,16 @@ const ClientProjectView = () => {
                         const dur = itm.duration ? parseInt(itm.duration) : 0;
                         initialDate.setDate(initialDate.getDate() + dur);
                         const formatToDate = date => {
-                          const day = String(date.getDate()).padStart(2, "0");
+                          const day = String(date.getDate()).padStart(2, '0');
                           const month = String(date.getMonth() + 1).padStart(
                             2,
-                            "0"
+                            '0'
                           );
                           const year = date.getFullYear();
                           return `${day}-${month}-${year}`;
                         };
                         if (
-                          itm.taskId.status === "Completed" &&
+                          itm.taskId.status === 'Completed' &&
                           new Date(initialDate) > new Date(itm.taskId.createdAt)
                         ) {
                           diff =
@@ -1240,7 +1240,7 @@ const ClientProjectView = () => {
                         }
                         const finalDate = initialDate
                           .toISOString()
-                          .split("T")[0];
+                          .split('T')[0];
                         return (
                           <div
                             key={itm.taskId.title + +idx}
@@ -1250,38 +1250,38 @@ const ClientProjectView = () => {
                               <div className="h-full w-6 flex items-center justify-center">
                                 <div
                                   className={cn(
-                                    "w-[2px] bg-secondary pointer-events-none h-full",
-                                    idx === 0 ? "mt-[100%] h-8" : "",
+                                    'w-[2px] bg-secondary pointer-events-none h-full',
+                                    idx === 0 ? 'mt-[100%] h-8' : '',
                                     idx === item.step.length - 1
-                                      ? "mb-[100%] h-8"
-                                      : "",
-                                    itm.taskId.status !== "Completed"
-                                      ? "bg-secondary"
-                                      : ""
+                                      ? 'mb-[100%] h-8'
+                                      : '',
+                                    itm.taskId.status !== 'Completed'
+                                      ? 'bg-secondary'
+                                      : ''
                                   )}
                                 />
                               </div>
                               <div
                                 className={cn(
-                                  "w-8 h-8 absolute top-1/2 md:right-[92px] -md:right-1 -mt-4 rounded-full bg-green-500 shadow-xl text-center",
-                                  itm.taskId.status !== "Completed"
-                                    ? "bg-primary"
-                                    : ""
+                                  'w-8 h-8 absolute top-1/2 md:right-[92px] -md:right-1 -mt-4 rounded-full bg-green-500 shadow-xl text-center',
+                                  itm.taskId.status !== 'Completed'
+                                    ? 'bg-primary'
+                                    : ''
                                 )}
                               >
-                                {itm.taskId.status === "Pending" && (
+                                {itm.taskId.status === 'Pending' && (
                                   <BsClockHistory className="mt-1 ml-1 text-secondary text-2xl " />
                                 )}
-                                {itm.taskId.status === "Completed" && (
+                                {itm.taskId.status === 'Completed' && (
                                   <Check
                                     sx={{
-                                      marginTop: "4px",
-                                      fontSize: "24px",
-                                      color: "white",
+                                      marginTop: '4px',
+                                      fontSize: '24px',
+                                      color: 'white',
                                     }}
                                   />
                                 )}
-                                {itm.taskId.statu === "Work in Progress" && (
+                                {itm.taskId.statu === 'Work in Progress' && (
                                   <TbProgress className="mt-1 ml-1 text-secondary text-2xl " />
                                 )}
                               </div>
@@ -1289,7 +1289,7 @@ const ClientProjectView = () => {
                             <div className="w-[200px] flex items-center -md:w-16">
                               <div className="text-sm font-semibold">
                                 {itm.taskId.title}
-                                {itm.checkList?.toLowerCase() === "yes" && (
+                                {itm.checkList?.toLowerCase() === 'yes' && (
                                   <div>inspections</div>
                                 )}
                               </div>
@@ -1310,19 +1310,24 @@ const ClientProjectView = () => {
                                     DOC :
                                   </div>
                                   <div className="text-sm">
-                                    {console.log(itm.taskId)}
-                                    {itm?.taskId?.updatedAt !== "" &&
+                                    {itm?.taskId?.updatedOn !== '' &&
+                                      itm?.taskId?.status === 'Complete' &&
                                       new Date(
-                                        itm.taskId.updatedAt
-                                      ).toLocaleDateString()}{" "}
-                                    {/* {itm.taskId.updatedOn !== "" &&
-                                      new Date(itm.taskId.updatedOn) >
-                                        new Date(finalDate)
-                                        ? "(Delayed)"
-                                        : new Date(itm.taskId.updatedOn) <
-                                          new Date(finalDate)
-                                        ? "(Early)"
-                                        : ""} */}
+                                        itm.taskId.updatedOn
+                                      ).toLocaleDateString()}{' '}
+                                    {itm.taskId.updatedOn !== '' &&
+                                    itm?.taskId?.status === 'Complete' &&
+                                    new Date(itm.taskId.updatedOn) >
+                                      new Date(finalDate)
+                                      ? '(Delayed)'
+                                      : new Date(itm.taskId.updatedOn) <
+                                          new Date(finalDate) &&
+                                        itm?.taskId?.status === 'Complete'
+                                      ? '(Early)'
+                                      : itm.taskId.updatedOn !== '' &&
+                                        itm?.taskId?.status === 'Complete'
+                                      ? '(On Time)'
+                                      : ''}
                                   </div>
                                 </div>
                               </div>
@@ -1364,7 +1369,7 @@ const ClientProjectView = () => {
 
       <Dialog open={workStatusOpen} onClose={workStatusCancel}>
         <DialogTitle>Update Project Work By Admin</DialogTitle>
-        <DialogContent style={{ width: "600px" }}>
+        <DialogContent style={{ width: '600px' }}>
           <FormControl fullWidth className="mt-1 mb-1">
             <Typography id="demo-simple-select-label">
               Status<span className="text-danger">*</span>
@@ -1390,7 +1395,7 @@ const ClientProjectView = () => {
                       return (
                         <ImageListItem
                           key={idx}
-                          style={{ display: "flex", margin: "10px 0px" }}
+                          style={{ display: 'flex', margin: '10px 0px' }}
                         >
                           <input
                             type="checkbox"
@@ -1403,7 +1408,7 @@ const ClientProjectView = () => {
                             src={dt}
                             alt="task"
                             loading="lazy"
-                            style={{ width: "525px" }}
+                            style={{ width: '525px' }}
                           />
                         </ImageListItem>
                       );
@@ -1449,7 +1454,7 @@ const ClientProjectView = () => {
                     <div key={id} className="col-lg-12 col-md-12">
                       <span
                         className="heads_inspection text-warning"
-                        style={{ fontSize: "14px" }}
+                        style={{ fontSize: '14px' }}
                       >
                         {item?.heading}
                       </span>
@@ -1463,15 +1468,15 @@ const ClientProjectView = () => {
                             <span className="number mx-2">
                               <span>
                                 {pt.point}
-                                {pt?.status?.toLowerCase() === "mandatory" ? (
+                                {pt?.status?.toLowerCase() === 'mandatory' ? (
                                   <span className="text-danger">*</span>
                                 ) : (
-                                  ""
+                                  ''
                                 )}
                               </span>
                               <span
                                 className="mx-2"
-                                style={{ marginTop: "3px" }}
+                                style={{ marginTop: '3px' }}
                               >
                                 <input
                                   type="checkbox"
@@ -1496,7 +1501,7 @@ const ClientProjectView = () => {
                 })}
               </>
             ) : (
-              ""
+              ''
             )}
           </div>
           {/* <FormControl fullWidth>
@@ -1526,14 +1531,14 @@ const ClientProjectView = () => {
         <DialogTitle
           className="text-center"
           sx={{
-            fontSize: "18px",
-            fontWeight: "600",
-            letterSpacing: "1px",
+            fontSize: '18px',
+            fontWeight: '600',
+            letterSpacing: '1px',
           }}
         >
           Team Members
         </DialogTitle>
-        <DialogContent style={{ width: "600px" }}>
+        <DialogContent style={{ width: '600px' }}>
           <div className="rounded-3xl">
             <div className="row">
               <div className="mb-2">
@@ -1546,7 +1551,7 @@ const ClientProjectView = () => {
                     >
                       <span className="mt-1">{item.name}</span>
                       <span className="p-2 bg-green-600 rounded-full cursor-pointer">
-                        {" "}
+                        {' '}
                         <IoCallSharp className="text-white" />
                       </span>
                     </div>
@@ -1565,7 +1570,7 @@ const ClientProjectView = () => {
                     >
                       <span className="pdm-name mt-1">{item.name}</span>
                       <span className="p-2 bg-green-600 rounded-full cursor-pointer">
-                        {" "}
+                        {' '}
                         <IoCallSharp className="text-white" />
                       </span>
                     </div>
@@ -1582,7 +1587,7 @@ const ClientProjectView = () => {
                     >
                       <span className="pdm-name mt-1">{item.name}</span>
                       <span className="p-2 bg-green-600 rounded-full cursor-pointer">
-                        {" "}
+                        {' '}
                         <IoCallSharp className="text-white" />
                       </span>
                     </div>
@@ -1599,7 +1604,7 @@ const ClientProjectView = () => {
                     >
                       <span className="pdm-name mt-1">{item.name}</span>
                       <span className="p-2 bg-green-600 rounded-full cursor-pointer">
-                        {" "}
+                        {' '}
                         <IoCallSharp className="text-white" />
                       </span>
                     </div>
@@ -1633,7 +1638,7 @@ const ClientProjectView = () => {
                     >
                       <span className="pdm-name mt-1">{item.name}</span>
                       <span className="p-2 bg-green-600 rounded-full cursor-pointer">
-                        {" "}
+                        {' '}
                         <IoCallSharp className="text-white" />
                       </span>
                     </div>
@@ -1650,7 +1655,7 @@ const ClientProjectView = () => {
                     >
                       <span className="pdm-name mt-1">{item.name}</span>
                       <span className="p-2 bg-green-600 rounded-full cursor-pointer">
-                        {" "}
+                        {' '}
                         <IoCallSharp className="text-white" />
                       </span>
                     </div>
@@ -1672,14 +1677,14 @@ const ClientProjectView = () => {
         <DialogTitle
           className="text-center"
           style={{
-            fontSize: "18px",
-            fontWeight: "600",
-            letterSpacing: "1px",
+            fontSize: '18px',
+            fontWeight: '600',
+            letterSpacing: '1px',
           }}
         >
           Documents
         </DialogTitle>
-        <DialogContent style={{ width: "600px" }}>
+        <DialogContent style={{ width: '600px' }}>
           <div className="mt-2">
             <div>
               {documentList?.map((item, index) => {
@@ -1692,12 +1697,12 @@ const ClientProjectView = () => {
                       <span className="font-ubuntu text-lg font-semibold">
                         {item?.name}
                       </span>
-                      {item?.status === "Pending" ? (
+                      {item?.status === 'Pending' ? (
                         <span className="bg-secondary text-primary-foreground rounded-lg px-2 py-1">
                           {item?.status} By
-                          {item.clientID == userId ? "You" : "Client"}
+                          {item.clientID == userId ? 'You' : 'Client'}
                         </span>
-                      ) : item?.status === "Accepted" ? (
+                      ) : item?.status === 'Accepted' ? (
                         <span className="bg-secondary text-primary-foreground rounded-lg px-2 py-1">
                           {item?.status} By You
                         </span>
@@ -1710,17 +1715,17 @@ const ClientProjectView = () => {
                     <div className="flex flex-row justify-between">
                       <span
                         className="pdm-name"
-                        style={{ fontSize: "12px" }}
+                        style={{ fontSize: '12px' }}
                       >{`${new Date(item?.updatedAt).getDate()} ${
                         monthNames[new Date(item.updatedAt).getMonth()]
                       }, ${new Date(item.updatedAt).getFullYear()}`}</span>
-                      <a ref={linkRef} style={{ display: "none" }}></a>
+                      <a ref={linkRef} style={{ display: 'none' }}></a>
                       <span
                         className="bg-green-600 p-2 rounded-full cursor-pointer"
                         onClick={() => {
                           const pdfUrl = item?.document[0];
                           linkRef.current.href = pdfUrl;
-                          linkRef.current.download = "document.pdf";
+                          linkRef.current.download = 'document.pdf';
                           linkRef.current.click();
                         }}
                       >
@@ -1730,7 +1735,7 @@ const ClientProjectView = () => {
                     <hr />
                     <span className="pdm-name">
                       <span className="font-ubuntu font-semibold">
-                        Uploaded by :{" "}
+                        Uploaded by :{' '}
                       </span>
                       <span className="pteam-member-uploaded">
                         {item.uploadingUserName}
@@ -1755,7 +1760,7 @@ const ClientProjectView = () => {
         onClose={handleCancel}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
-        sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+        sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
       >
         <div className="w-[40%] bg-white p-8 rounded-3xl">
           <h2 className="text-2xl font-bold text-center font-ubuntu mb-4">
@@ -1772,7 +1777,7 @@ const ClientProjectView = () => {
                 name="status"
                 variant="outlined"
                 onChange={e => setStatus(e.target.value)}
-                sx={{ borderRadius: "16px", background: "#f3f4f6" }}
+                sx={{ borderRadius: '16px', background: '#f3f4f6' }}
               >
                 <MenuItem value="Rework">Rework</MenuItem>
                 <MenuItem value="Extra Work">Extra Work</MenuItem>
@@ -1792,7 +1797,7 @@ const ClientProjectView = () => {
                   setStep(e.target.value);
                   getPointListByStep(e.target.value);
                 }}
-                sx={{ borderRadius: "16px", background: "#f3f4f6" }}
+                sx={{ borderRadius: '16px', background: '#f3f4f6' }}
               >
                 {projectDetails?.project_status?.map((data, id) => {
                   return (
@@ -1815,7 +1820,7 @@ const ClientProjectView = () => {
                   setContent(e.target.value);
                   handleStepChange(e.target.value);
                 }}
-                sx={{ borderRadius: "16px", background: "#f3f4f6" }}
+                sx={{ borderRadius: '16px', background: '#f3f4f6' }}
               >
                 {pointList?.map((data, id) => {
                   return (
@@ -1829,9 +1834,9 @@ const ClientProjectView = () => {
             <FormControl
               fullWidth
               sx={{
-                "& .MuiInputBase-root": {
-                  borderRadius: "16px",
-                  background: "#f3f4f6",
+                '& .MuiInputBase-root': {
+                  borderRadius: '16px',
+                  background: '#f3f4f6',
                 },
               }}
             >
@@ -1841,7 +1846,7 @@ const ClientProjectView = () => {
                 value={log}
                 placeholder="Queries"
                 onChange={e => setLog(e.target.value)}
-                sx={{ borderRadius: "16px", background: "#f3f4f6" }}
+                sx={{ borderRadius: '16px', background: '#f3f4f6' }}
               />
             </FormControl>
             {/* <FormControl fullWidth className="mt-1 mb-1">
@@ -1863,9 +1868,9 @@ const ClientProjectView = () => {
             <FormControl
               fullWidth
               sx={{
-                "& .MuiInputBase-root": {
-                  borderRadius: "16px",
-                  background: "#f3f4f6",
+                '& .MuiInputBase-root': {
+                  borderRadius: '16px',
+                  background: '#f3f4f6',
                 },
               }}
             >
@@ -1899,12 +1904,12 @@ const ClientProjectView = () => {
       {/* Work details view dialog */}
       <Dialog open={workDetailOpen} onClose={workDetailCancel}>
         <DialogTitle>Work Details</DialogTitle>
-        <DialogContent style={{ width: "600px" }}>
+        <DialogContent style={{ width: '600px' }}>
           {workDetails?.map((item, index) => {
             return (
               <div key={index}>
                 <InputLabel className="text-dark fw-bold">Status</InputLabel>
-                <Typography className="mx-1" style={{ fontSize: "14px" }}>
+                <Typography className="mx-1" style={{ fontSize: '14px' }}>
                   {item.status}
                 </Typography>
                 <InputLabel className="text-dark fw-bold mt-3">
@@ -1914,13 +1919,13 @@ const ClientProjectView = () => {
                   return (
                     <ImageListItem
                       key={idx}
-                      style={{ display: "flex", margin: "10px 0px" }}
+                      style={{ display: 'flex', margin: '10px 0px' }}
                     >
                       <img
                         src={dt}
                         alt="task"
                         loading="lazy"
-                        style={{ width: "525px" }}
+                        style={{ width: '525px' }}
                       />
                     </ImageListItem>
                   );
@@ -1941,7 +1946,7 @@ const ClientProjectView = () => {
         <DialogTitle className="text-uppercase fs-5 text-center">
           Inspection Details
         </DialogTitle>
-        <DialogContent style={{ width: "500px" }}>
+        <DialogContent style={{ width: '500px' }}>
           <div className="row">
             <div className="col-lg-12 col-md-12 inspection-box-col">
               <p className="text">No. of inspections:</p>
@@ -1982,7 +1987,7 @@ const ClientProjectView = () => {
       <Modal
         open={documentDialogOpen}
         onClose={handleDocumentClose}
-        sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+        sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
       >
         <div className="w-1/3 -md:w-11/12 bg-white p-8 rounded-3xl">
           <h2 className="text-2xl font-bold text-center font-ubuntu mb-4">
@@ -2028,7 +2033,7 @@ const ClientProjectView = () => {
 
       <Dialog open={stepModal} onClose={handleCancel}>
         <DialogTitle>Add Point</DialogTitle>
-        <DialogContent style={{ width: "600px" }}>
+        <DialogContent style={{ width: '600px' }}>
           <FormControl fullWidth className="mt-1 mb-1">
             {/* <InputLabel id="demo-simple-select-label">Point Name</InputLabel> */}
             <label className="text-primary">Point Name</label>
@@ -2067,7 +2072,7 @@ const ClientProjectView = () => {
               <MenuItem value="no">No</MenuItem>
             </MUISelect>
           </FormControl>
-          {force === "yes" && (
+          {force === 'yes' && (
             <>
               <FormControl fullWidth>
                 <label className="text-primary">Start Date</label>
@@ -2089,7 +2094,7 @@ const ClientProjectView = () => {
               </FormControl>
             </>
           )}
-          {checkList === "yes" && (
+          {checkList === 'yes' && (
             <FormControl fullWidth className="mt-1 mb-1">
               {/* <InputLabel id="demo-simple-select-label">
                 CheckList Name
@@ -2103,7 +2108,7 @@ const ClientProjectView = () => {
               />
             </FormControl>
           )}
-          {force !== "yes" && (
+          {force !== 'yes' && (
             <FormControl fullWidth className="mt-1 mb-1">
               <label className="text-primary">Duration (In days)</label>
               <TextField
@@ -2181,7 +2186,7 @@ const ClientProjectView = () => {
 
       <Dialog open={stepModalDelete} onClose={handleCancel}>
         <DialogTitle>Delete Point</DialogTitle>
-        <DialogContent style={{ width: "600px" }}>
+        <DialogContent style={{ width: '600px' }}>
           <FormControl fullWidth className="mt-1 mb-1">
             {/* <InputLabel id="demo-simple-select-label">Content</InputLabel> */}
             <label className="text-primary">Content</label>
@@ -2232,7 +2237,7 @@ const ClientProjectView = () => {
       <Modal
         open={extensionOpen}
         onClose={() => setExtensionOpen(prev => !prev)}
-        sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+        sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
       >
         <div className="w-1/3 -md:w-11/12 bg-white p-8 rounded-3xl">
           <h2 className="text-2xl font-bold text-center font-ubuntu mb-4">
@@ -2259,16 +2264,16 @@ const ClientProjectView = () => {
                     <tr
                       key={idx}
                       className={cn(
-                        "px-5 text-center ",
+                        'px-5 text-center ',
                         idx % 2
-                          ? "bg-secondary-foreground"
-                          : "bg-primary-foreground"
+                          ? 'bg-secondary-foreground'
+                          : 'bg-primary-foreground'
                       )}
                     >
-                      <td className={cn("pl-5", idx % 2 && "rounded-bl-3xl")}>
+                      <td className={cn('pl-5', idx % 2 && 'rounded-bl-3xl')}>
                         <span
                           className={cn(
-                            "flex flex-row items-center justify-center gap-2 -md:gap-1"
+                            'flex flex-row items-center justify-center gap-2 -md:gap-1'
                           )}
                         >
                           <span className="py-3 -md:p-1 truncate -md:w-24">
@@ -2280,25 +2285,25 @@ const ClientProjectView = () => {
                         <span className="flex flex-row items-center justify-center gap-2 -md:gap-1 ">
                           <span className="py-3 -md:p-1 truncate">
                             {new Date(item.startDate).toLocaleDateString(
-                              "en-US",
+                              'en-US',
                               {
-                                year: "numeric",
-                                month: "short",
-                                day: "2-digit",
+                                year: 'numeric',
+                                month: 'short',
+                                day: '2-digit',
                               }
                             )}
                           </span>
                         </span>
                       </td>
-                      <td className={cn("pr-5", idx % 2 && "rounded-br-3xl")}>
+                      <td className={cn('pr-5', idx % 2 && 'rounded-br-3xl')}>
                         <span className="flex flex-row items-center justify-center gap-2 -md:gap-1 ">
                           <span className="py-3 -md:p-1 truncate -md:w-24">
                             {new Date(item.endDate).toLocaleDateString(
-                              "en-US",
+                              'en-US',
                               {
-                                year: "numeric",
-                                month: "short",
-                                day: "2-digit",
+                                year: 'numeric',
+                                month: 'short',
+                                day: '2-digit',
                               }
                             )}
                           </span>

@@ -1,29 +1,29 @@
-"use client";
-import { useParams, useRouter } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
-import { IoIosArrowBack } from "react-icons/io";
-import AsideContainer from "../../../../components/AsideContainer";
-import Image from "next/image";
-import { RiProgress3Line } from "react-icons/ri";
-import { FaCheck } from "react-icons/fa";
-import { MdEdit } from "react-icons/md";
-import { MdDeleteOutline } from "react-icons/md";
-import { MdOutlineInsertComment } from "react-icons/md";
-import { Button, Modal } from "@mui/material";
-import { useState } from "react";
-import axios from "axios";
-import { useAuthStore } from "../../../../store/useAuthStore";
-import { MdChecklist } from "react-icons/md";
-import { HiOutlineLockOpen } from "react-icons/hi2";
-import { cn } from "../../../../lib/utils";
-import { toast } from "sonner";
-import { FiDownload } from "react-icons/fi";
-import { saveAs } from "file-saver";
-import { FaImages } from "react-icons/fa";
-import { FaMicrophone } from "react-icons/fa";
-import { IoIosAttach } from "react-icons/io";
-import LoaderSpinner from "../../../../components/loader/LoaderSpinner";
-import AudioRecorder from "../../../../components/AudioRecorder/AudioRecorder";
+'use client';
+import { useParams, useRouter } from 'next/navigation';
+import { useQuery } from '@tanstack/react-query';
+import { IoIosArrowBack } from 'react-icons/io';
+import AsideContainer from '../../../../components/AsideContainer';
+import Image from 'next/image';
+import { RiProgress3Line } from 'react-icons/ri';
+import { FaCheck } from 'react-icons/fa';
+import { MdEdit } from 'react-icons/md';
+import { MdDeleteOutline } from 'react-icons/md';
+import { MdOutlineInsertComment } from 'react-icons/md';
+import { Button, Modal } from '@mui/material';
+import { useState } from 'react';
+import axios from 'axios';
+import { useAuthStore } from '../../../../store/useAuthStore';
+import { MdChecklist } from 'react-icons/md';
+import { HiOutlineLockOpen } from 'react-icons/hi2';
+import { cn } from '../../../../lib/utils';
+import { toast } from 'sonner';
+import { FiDownload } from 'react-icons/fi';
+import { saveAs } from 'file-saver';
+import { FaImages } from 'react-icons/fa';
+import { FaMicrophone } from 'react-icons/fa';
+import { IoIosAttach } from 'react-icons/io';
+import LoaderSpinner from '../../../../components/loader/LoaderSpinner';
+import AudioRecorder from '../../../../components/AudioRecorder/AudioRecorder';
 
 const Page = () => {
   const { slug } = useParams();
@@ -36,7 +36,7 @@ const Page = () => {
   const [showImageUrl, setShowImageUrl] = useState(null);
   const userId = useAuthStore(state => state.userId);
   const userType = useAuthStore(state => state.userType);
-  const [points, setPoints] = useState("");
+  const [points, setPoints] = useState('');
   const [Loading, setLoading] = useState(false);
   const [audioData, setAudioData] = useState(null);
   const { data, error, isFetched, refetch } = useQuery({
@@ -47,12 +47,12 @@ const Page = () => {
       )
         .then(res => {
           if (!res.ok) {
-            throw new Error("Network response was not ok");
+            throw new Error('Network response was not ok');
           }
           return res.json();
         })
         .catch(error => {
-          throw new Error("Failed to fetch data");
+          throw new Error('Failed to fetch data');
         }),
   });
 
@@ -74,13 +74,13 @@ const Page = () => {
 
   const addComment = () => {
     const formData = new FormData();
-    formData.append("userId", userId);
-    formData.append("taskId", slug);
-    formData.append("type", type);
-    formData.append("comment", comment);
-    formData.append("audio", audioData.blob, "recording.wav");
+    formData.append('userId', userId);
+    formData.append('taskId', slug);
+    formData.append('type', type);
+    formData.append('comment', comment);
+    formData.append('audio', audioData.blob, 'recording.wav');
     for (let i = 0; i < points?.length; i++) {
-      formData.append("image", points[i]);
+      formData.append('image', points[i]);
     }
     setOpenComment(prev => !prev);
     const api = axios
@@ -88,7 +88,7 @@ const Page = () => {
         `${process.env.REACT_APP_BASE_PATH}/api/task/taskaddcomment`,
         formData,
         {
-          headers: { "Content-Type": "multipart/form-data" },
+          headers: { 'Content-Type': 'multipart/form-data' },
         }
       )
       .then(() => {
@@ -101,8 +101,8 @@ const Page = () => {
     const api = axios
       .delete(`${process.env.REACT_APP_BASE_PATH}/api/task/delete/${slug}`)
       .then(() => {
-        toast("Task Deleted!", {
-          description: "Task Deleted Successfully.",
+        toast('Task Deleted!', {
+          description: 'Task Deleted Successfully.',
         });
         router.back();
       });
@@ -113,7 +113,7 @@ const Page = () => {
   };
 
   const downloadImage = url => {
-    saveAs(url, "site_image.jpg");
+    saveAs(url, 'site_image.jpg');
   };
 
   const deleteCommentImage = id => {
@@ -125,7 +125,7 @@ const Page = () => {
       )
       .then(res => {
         refetch();
-        toast("Image deleted successfully.");
+        toast('Image deleted successfully.');
       });
   };
 
@@ -142,7 +142,7 @@ const Page = () => {
           onClick={() => router.back()}
         />
         <h1 className="text-2xl font-semibold font-ubuntu -md:mb-2 -md:text-lg">
-          {userType === "ROLE_CLIENT" ? "Step Details" : "Task Details"}
+          {userType === 'ROLE_CLIENT' ? 'Step Details' : 'Task Details'}
         </h1>
       </div>
       <div className="bg-white p-8 rounded-2xl shadow-md">
@@ -154,7 +154,7 @@ const Page = () => {
                   Assigned To :
                 </p>
                 <Image
-                  src={"/assets/profile-placeholder.png"}
+                  src={'/assets/profile-placeholder.png'}
                   alt="project image"
                   width={20}
                   height={20}
@@ -168,14 +168,14 @@ const Page = () => {
                 Assigned By :
               </p>
               <Image
-                src={"/assets/profile-placeholder.png"}
+                src={'/assets/profile-placeholder.png'}
                 alt="project image"
                 width={20}
                 height={20}
                 className="rounded-full"
               />
               <>
-                {data.data.assignedBy?.name === "ThikedaarDotCom" ? (
+                {data.data.assignedBy?.name === 'ThikedaarDotCom' ? (
                   <span className="font-semibold text-sm">Admin</span>
                 ) : (
                   <span>{data.data.assignedBy?.name}</span>
@@ -188,16 +188,16 @@ const Page = () => {
               Created At :
             </p>
             <p>
-              {`${new Date(data.data.createdAt).toLocaleString("en-US", {
-                dateStyle: "medium",
-                timeStyle: "short",
+              {`${new Date(data.data.createdAt).toLocaleString('en-US', {
+                dateStyle: 'medium',
+                timeStyle: 'short',
               })}`}
             </p>
           </div>
           <div className="flex flex-row gap-2 items-center">
             <p className="font-ubuntu font-semibold text-gray-600">Status :</p>
             <p className="flex flex-row gap-1 items-center">
-              {data.data.status === "Complete" ? (
+              {data.data.status === 'Complete' ? (
                 <FaCheck className="text-xl text-primary" />
               ) : (
                 <RiProgress3Line className="text-primary text-lg" />
@@ -231,26 +231,27 @@ const Page = () => {
           </div>
         </div>
         <div className="flex flex-row gap-4 mt-4">
-          {data.data.issueMember._id === userId ||
-            (data.data.assignedBy?._id === userId &&
-              data.data.status !== "Complete" && (
-                <button
-                  className="px-4 py-2 border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-2 items-center"
-                  onClick={() => {
-                    setType("In Progress");
-                    setOpenComment(prev => !prev);
-                  }}
-                >
-                  <RiProgress3Line className="text-xl" />
-                  In Progress
-                </button>
-              ))}
-          {data.data.status === "Complete" &&
+          {console.log(data.data.issueMember._id === userId)}
+          {(data.data.issueMember._id === userId ||
+            data.data.assignedBy?._id === userId) &&
+            data.data.status !== 'Complete' && (
+              <button
+                className="px-4 py-2 border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-2 items-center"
+                onClick={() => {
+                  setType('In Progress');
+                  setOpenComment(prev => !prev);
+                }}
+              >
+                <RiProgress3Line className="text-xl" />
+                In Progress
+              </button>
+            )}
+          {data.data.status === 'Complete' &&
             data.data.assignedBy?._id === userId && (
               <button
                 className="px-4 py-2 border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-2 items-center"
                 onClick={() => {
-                  setType("In Progress");
+                  setType('In Progress');
                   setOpenComment(prev => !prev);
                 }}
               >
@@ -258,20 +259,20 @@ const Page = () => {
                 Re-open
               </button>
             )}
-          {data.data.issueMember._id === userId ||
-            (data.data.assignedBy?._id === userId &&
-              data.data.status !== "Complete" && (
-                <button
-                  className="px-4 py-2 border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-2 items-center"
-                  onClick={() => {
-                    setType("Complete");
-                    setOpenComment(prev => !prev);
-                  }}
-                >
-                  <FaCheck className="text-xl" />
-                  Complete
-                </button>
-              ))}
+          {(data.data.issueMember._id === userId ||
+            data.data.assignedBy?._id === userId) &&
+            data.data.status !== 'Complete' && (
+              <button
+                className="px-4 py-2 border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-2 items-center"
+                onClick={() => {
+                  setType('Complete');
+                  setOpenComment(prev => !prev);
+                }}
+              >
+                <FaCheck className="text-xl" />
+                Complete
+              </button>
+            )}
           {/* {data.data.assignedBy?._id === userId &&
             data.data.status !== "Complete" && (
               <button className="px-4 py-2 border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-2 items-center">
@@ -280,8 +281,8 @@ const Page = () => {
               </button>
             )} */}
           {data.data.assignedBy?._id === userId &&
-            data.data.status !== "Complete" &&
-            data.data.category !== "Project" && (
+            data.data.status !== 'Complete' &&
+            data.data.category !== 'Project' && (
               <button
                 className="px-4 py-2 border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-2 items-center"
                 onClick={() => toggleDelete()}
@@ -290,20 +291,20 @@ const Page = () => {
                 Delete
               </button>
             )}
-          {data.data.issueMember._id === userId ||
-            (data.data.assignedBy?._id === userId &&
-              data.data.status !== "Complete" && (
-                <button
-                  className="px-4 py-2 border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-2 items-center"
-                  onClick={() => {
-                    setType("Comment");
-                    setOpenComment(prev => !prev);
-                  }}
-                >
-                  <MdOutlineInsertComment className="text-xl" />
-                  Comment
-                </button>
-              ))}
+          {(data.data.issueMember._id === userId ||
+            data.data.assignedBy?._id === userId) &&
+            data.data.status !== 'Complete' && (
+              <button
+                className="px-4 py-2 border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-2 items-center"
+                onClick={() => {
+                  setType('Comment');
+                  setOpenComment(prev => !prev);
+                }}
+              >
+                <MdOutlineInsertComment className="text-xl" />
+                Comment
+              </button>
+            )}
         </div>
       </div>
       {data.data.comments.length > 0 && (
@@ -311,19 +312,19 @@ const Page = () => {
           <div className="flex flex-row gap-2 my-4">
             <MdChecklist className="text-3xl text-primary" />
             <h3 className="text-xl font-bold font-ubuntu">
-              {userType === "ROLE_CLIENT" ? "Step Updates" : "Task Updates"}
+              {userType === 'ROLE_CLIENT' ? 'Step Updates' : 'Task Updates'}
             </h3>
           </div>
           <div className="flex flex-col gap-4">
             {data.data.comments.map(item => (
               <>
                 {item.approved.isApproved ||
-                  (userType !== "ROLE_CLEINT" && (
+                  (userType !== 'ROLE_CLEINT' && (
                     <div key={item._id} className="bg-white rounded-xl p-5">
                       <div className="flex flex-row justify-between items-center">
                         <div className="flex flex-row gap-4 items-center">
                           <Image
-                            src={"/assets/profile-placeholder.png"}
+                            src={'/assets/profile-placeholder.png'}
                             alt="project image"
                             width={20}
                             height={20}
@@ -334,12 +335,12 @@ const Page = () => {
                               {item.createdBy?.name}
                             </span>
                             <span>
-                              At{" "}
+                              At{' '}
                               {new Date(item.createdAt).toLocaleString(
-                                "en-US",
+                                'en-US',
                                 {
-                                  dateStyle: "medium",
-                                  timeStyle: "short",
+                                  dateStyle: 'medium',
+                                  timeStyle: 'short',
                                 }
                               )}
                             </span>
@@ -347,10 +348,10 @@ const Page = () => {
                         </div>
                         <span
                           className={cn(
-                            "font-ubuntu text-sm text-white p-1 rounded",
-                            item.type === "In Progress" && "bg-yellow-500",
-                            item.type === "Complete" && "bg-green-600",
-                            item.type === "Comment" && "bg-gray-600"
+                            'font-ubuntu text-sm text-white p-1 rounded',
+                            item.type === 'In Progress' && 'bg-yellow-500',
+                            item.type === 'Complete' && 'bg-green-600',
+                            item.type === 'Comment' && 'bg-gray-600'
                           )}
                         >
                           {item.type}
@@ -388,11 +389,11 @@ const Page = () => {
                                 open={showImage}
                                 onClose={toggleShowImage}
                                 sx={{
-                                  "display": "flex",
-                                  "alignItems": "center",
-                                  "justifyContent": "center",
-                                  "& .MuiBackdrop-root": {
-                                    backgroundColor: "rgba(0, 0, 0, 0.1)",
+                                  'display': 'flex',
+                                  'alignItems': 'center',
+                                  'justifyContent': 'center',
+                                  '& .MuiBackdrop-root': {
+                                    backgroundColor: 'rgba(0, 0, 0, 0.1)',
                                   },
                                 }}
                               >
@@ -407,8 +408,8 @@ const Page = () => {
                                     />
                                   </div>
                                   <div className="flex flex-row gap-4 justify-evenly p-4 -md:flex-wrap">
-                                    {userType === "ROLE_ADMIN" ||
-                                    userType === "ROLE_PROJECT MANAGER" ? (
+                                    {userType === 'ROLE_ADMIN' ||
+                                    userType === 'ROLE_PROJECT MANAGER' ? (
                                       <>
                                         <button
                                           className="py-2 px-4 font-semibold bg-secondary text-primary rounded-full flex flex-row items-center justify-center gap-1 text-nowrap"
@@ -421,7 +422,7 @@ const Page = () => {
                                         </button>
                                       </>
                                     ) : (
-                                      ""
+                                      ''
                                     )}
                                     <button
                                       className="py-2 px-4 font-semibold bg-secondary text-primary rounded-full flex flex-row items-center justify-center gap-1 text-nowrap"
@@ -455,9 +456,9 @@ const Page = () => {
         open={openComment}
         onClose={() => setOpenComment(prev => !prev)}
         sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
         }}
       >
         <div className="bg-white 2xl:w-1/3 p-8 rounded-3xl outline-none -md:w-3/4 -lg:w-2/4 -xl:4/6 -2xl:3/6">
@@ -536,9 +537,9 @@ const Page = () => {
         open={openDelete}
         onClose={toggleDelete}
         sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
         }}
       >
         <div className="bg-white w-1/3 p-8 rounded-3xl outline-none -md:w-3/4">

@@ -1,37 +1,37 @@
-"use client";
-import React, { useEffect, useState } from "react";
-import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
-import "react-circular-progressbar/dist/styles.css";
-import axios from "axios";
-import NoImage from "../../../../public/assets/no-image-available.png";
-import { FormControl, TextField } from "@mui/material";
-import { toast } from "sonner";
-import Modal from "@mui/material/Modal";
-import { useParams } from "next/navigation";
-import AsideContainer from "../../../../components/AsideContainer";
-import { IoIosArrowBack } from "react-icons/io";
-import { useRouter } from "next/navigation";
-import { useAuthStore } from "../../../../store/useAuthStore";
-import { cn } from "../../../../lib/utils";
-import { MdChecklist } from "react-icons/md";
-import { HiOutlineLockOpen } from "react-icons/hi2";
-import { RiProgress3Line } from "react-icons/ri";
-import { FaCheck } from "react-icons/fa";
-import { MdEdit } from "react-icons/md";
-import { MdDeleteOutline } from "react-icons/md";
-import { MdOutlineInsertComment } from "react-icons/md";
-import { IoLockClosedOutline } from "react-icons/io5";
-import Image from "next/image";
-import { FiDownload } from "react-icons/fi";
-import { saveAs } from "file-saver";
+'use client';
+import React, { useEffect, useState } from 'react';
+import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
+import 'react-circular-progressbar/dist/styles.css';
+import axios from 'axios';
+import NoImage from '../../../../public/assets/no-image-available.png';
+import { FormControl, TextField } from '@mui/material';
+import { toast } from 'sonner';
+import Modal from '@mui/material/Modal';
+import { useParams } from 'next/navigation';
+import AsideContainer from '../../../../components/AsideContainer';
+import { IoIosArrowBack } from 'react-icons/io';
+import { useRouter } from 'next/navigation';
+import { useAuthStore } from '../../../../store/useAuthStore';
+import { cn } from '../../../../lib/utils';
+import { MdChecklist } from 'react-icons/md';
+import { HiOutlineLockOpen } from 'react-icons/hi2';
+import { RiProgress3Line } from 'react-icons/ri';
+import { FaCheck } from 'react-icons/fa';
+import { MdEdit } from 'react-icons/md';
+import { MdDeleteOutline } from 'react-icons/md';
+import { MdOutlineInsertComment } from 'react-icons/md';
+import { IoLockClosedOutline } from 'react-icons/io5';
+import Image from 'next/image';
+import { FiDownload } from 'react-icons/fi';
+import { saveAs } from 'file-saver';
 
 let today = new Date();
 let yyyy = today.getFullYear();
 let mm = today.getMonth() + 1;
 let dd = today.getDate();
-if (dd < 10) dd = "0" + dd;
-if (mm < 10) mm = "0" + mm;
-let formatedtoday = yyyy + "-" + mm + "-" + dd;
+if (dd < 10) dd = '0' + dd;
+if (mm < 10) mm = '0' + mm;
+let formatedtoday = yyyy + '-' + mm + '-' + dd;
 
 const TicketViewClient = () => {
   const { slug } = useParams();
@@ -43,13 +43,14 @@ const TicketViewClient = () => {
   const [ticketCreationTime, setTicketCreationTime] = useState(null);
   const [ticketDetails, setTicketDetails] = useState({});
   const [ticketUpdateBoxOpen, setTicketUpdateBoxOpen] = useState(false);
-  const [status, setStatus] = useState("");
-  const [image, setImage] = useState("");
+  const [status, setStatus] = useState('');
+  const [image, setImage] = useState('');
   const [openComment, setOpenComment] = useState(false);
   const [type, setType] = useState(null);
   const [comment, setComment] = useState(null);
   const [showImage, setShowImage] = useState(false);
   const [showImageUrl, setShowImageUrl] = useState(null);
+
   const router = useRouter();
 
   const fetchTicketData = () => {
@@ -103,8 +104,8 @@ const TicketViewClient = () => {
     const date = new Date(timestamp);
 
     // Format the date
-    const options = { year: "numeric", month: "long", day: "numeric" };
-    const formattedDate = date.toLocaleDateString("en-US", options);
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    const formattedDate = date.toLocaleDateString('en-US', options);
     return formattedDate;
   };
 
@@ -119,9 +120,9 @@ const TicketViewClient = () => {
     const minutes = Math.floor((totalSeconds % 3600) / 60);
     const seconds = totalSeconds % 60;
 
-    return `${hours}:${String(minutes).padStart(2, "0")}:${String(
+    return `${hours}:${String(minutes).padStart(2, '0')}:${String(
       seconds
-    ).padStart(2, "0")}`;
+    ).padStart(2, '0')}`;
   };
 
   const countdownTime = formatTime(timeLeft);
@@ -132,22 +133,22 @@ const TicketViewClient = () => {
 
   const handleUpdateTicket = () => {
     if (!comment) {
-      toast("Please add a comment before updating the ticket.");
+      toast('Please add a comment before updating the ticket.');
     } else {
       setOpenComment(prev => !prev);
       const formData = new FormData();
-      formData.append("userId", userId);
-      formData.append("ticketId", slug);
-      formData.append("type", type);
+      formData.append('userId', userId);
+      formData.append('ticketId', slug);
+      formData.append('type', type);
       for (let i = 0; i < image?.length; i++) {
-        formData.append("image", image[i]);
+        formData.append('image', image[i]);
       }
-      formData.append("comment", comment);
+      formData.append('comment', comment);
       let config = {
-        method: "put",
+        method: 'put',
         maxBodyLength: Infinity,
         url: `${process.env.REACT_APP_BASE_PATH}/api/project/ticketupdatemember/byid`,
-        headers: { "Content-Type": "multipart/form-data" },
+        headers: { 'Content-Type': 'multipart/form-data' },
         data: formData,
       };
       axios
@@ -157,7 +158,7 @@ const TicketViewClient = () => {
           fetchTicketData();
         })
         .catch(err => {
-          toast("Error while update ticket status");
+          toast('Error while update ticket status');
           console.log(err);
         });
       setTicketUpdateBoxOpen(false);
@@ -175,10 +176,10 @@ const TicketViewClient = () => {
     const minutes = Math.floor((-time / (1000 * 60)) % 60);
     const seconds = Math.floor((-time / 1000) % 60);
 
-    const daysText = days < 10 ? "0" + days : days;
-    const hoursText = hours < 10 ? "0" + hours : hours;
-    const minutesText = minutes < 10 ? "0" + minutes : minutes;
-    const secondsTexts = seconds < 10 ? "0" + seconds : seconds;
+    const daysText = days < 10 ? '0' + days : days;
+    const hoursText = hours < 10 ? '0' + hours : hours;
+    const minutesText = minutes < 10 ? '0' + minutes : minutes;
+    const secondsTexts = seconds < 10 ? '0' + seconds : seconds;
 
     setHours(Math.floor((-time / (1000 * 60 * 60)) % 24));
     setMinutes(Math.floor((-time / (1000 * 60)) % 60));
@@ -191,7 +192,7 @@ const TicketViewClient = () => {
   }, [timeLeft]);
 
   const downloadImage = url => {
-    saveAs(url, "ticket_image.jpg");
+    saveAs(url, 'ticket_image.jpg');
   };
 
   return (
@@ -233,11 +234,11 @@ const TicketViewClient = () => {
                 <h5 className="font-semibold">Status : </h5>
                 <p
                   className={
-                    ticketDetails?.finalStatus === "Pending"
-                      ? "card-text card-text-ticket _pending"
-                      : ticketDetails?.finalStatus === "Process"
-                      ? "card-text card-text-ticket _process"
-                      : "card-text card-text-ticket _resolve"
+                    ticketDetails?.finalStatus === 'Pending'
+                      ? 'card-text card-text-ticket _pending'
+                      : ticketDetails?.finalStatus === 'Process'
+                      ? 'card-text card-text-ticket _process'
+                      : 'card-text card-text-ticket _resolve'
                   }
                 >
                   {ticketDetails?.ticket?.status}
@@ -246,43 +247,43 @@ const TicketViewClient = () => {
                   <p className="text-red-500 font-semibold">(Overdue)</p>
                 )}
               </div>
-              {ticketDetails?.finalStatus === "Completed" && (
+              {ticketDetails?.finalStatus === 'Completed' && (
                 <div>
                   <span className="font-semibold">Completed on : </span>
                   <span>
-                    {ticketDetails?.finalDate === ""
-                      ? ""
+                    {ticketDetails?.finalDate === ''
+                      ? ''
                       : ChangeDateFormat(ticketDetails?.ticket?.completedOn)}
                   </span>
                 </div>
               )}
             </div>
             <div className="h-40 w-40">
-              {!isOverdue && ticketDetails?.finalStatus !== "Completed" ? (
+              {!isOverdue && ticketDetails?.finalStatus !== 'Completed' ? (
                 <CircularProgressbar
                   value={100 * (timeLeft / duration)}
                   text={countdownTime}
                   styles={buildStyles({
-                    strokeLinecap: "butt",
-                    textSize: "16px",
+                    strokeLinecap: 'butt',
+                    textSize: '16px',
                     pathTransitionDuration: 0.5,
-                    textColor: isOverdue ? "red" : "green",
-                    trailColor: "#e5e5e5",
+                    textColor: isOverdue ? 'red' : 'green',
+                    trailColor: '#e5e5e5',
                   })}
                 />
               ) : (
-                ""
+                ''
               )}
             </div>
           </div>
-          {ticketDetails?.ticket?.status !== "Closed" && (
+          {ticketDetails?.ticket?.status !== 'Closed' && (
             <div className="flex flex-row gap-4 mt-4">
               {ticketDetails?.ticket?.assignMember?._id === userId &&
-                ticketDetails?.ticket?.status !== "Complete" && (
+                ticketDetails?.ticket?.status !== 'Complete' && (
                   <button
                     className="px-4 py-2 border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-2 items-center"
                     onClick={() => {
-                      setType("In Progress");
+                      setType('In Progress');
                       setOpenComment(prev => !prev);
                     }}
                   >
@@ -290,12 +291,12 @@ const TicketViewClient = () => {
                     In Progress
                   </button>
                 )}
-              {ticketDetails?.ticket?.status === "Complete" &&
+              {ticketDetails?.ticket?.status === 'Complete' &&
                 ticketDetails?.ticket?.assignedBy?._id === userId && (
                   <button
                     className="px-4 py-2 border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-2 items-center"
                     onClick={() => {
-                      setType("Reopened");
+                      setType('Reopened');
                       setOpenComment(prev => !prev);
                     }}
                   >
@@ -304,11 +305,11 @@ const TicketViewClient = () => {
                   </button>
                 )}
               {ticketDetails?.ticket?.assignMember?._id === userId &&
-                ticketDetails?.ticket?.status !== "Complete" && (
+                ticketDetails?.ticket?.status !== 'Complete' && (
                   <button
                     className="px-4 py-2 border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-2 items-center"
                     onClick={() => {
-                      setType("Complete");
+                      setType('Complete');
                       setOpenComment(prev => !prev);
                     }}
                   >
@@ -317,11 +318,11 @@ const TicketViewClient = () => {
                   </button>
                 )}
               {ticketDetails?.ticket?.assignedBy?._id === userId &&
-                ticketDetails?.ticket?.status !== "Complete" && (
+                ticketDetails?.ticket?.status !== 'Complete' && (
                   <button
                     className="px-4 py-2 border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-2 items-center"
                     onClick={() => {
-                      setType("Closed");
+                      setType('Closed');
                       setOpenComment(prev => !prev);
                     }}
                   >
@@ -347,12 +348,12 @@ const TicketViewClient = () => {
               )} */}
               {ticketDetails?.ticket?.assignMember?._id === userId ||
               ticketDetails?.ticket?.assignedBy?._id === userId
-                ? ticketDetails?.ticket?.status !== "Complete" &&
-                  ticketDetails?.ticket?.status !== "Closed" && (
+                ? ticketDetails?.ticket?.status !== 'Complete' &&
+                  ticketDetails?.ticket?.status !== 'Closed' && (
                     <button
                       className="px-4 py-2 border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-2 items-center"
                       onClick={() => {
-                        setType("Comment");
+                        setType('Comment');
                         setOpenComment(prev => !prev);
                       }}
                     >
@@ -360,7 +361,7 @@ const TicketViewClient = () => {
                       Comment
                     </button>
                   )
-                : ""}
+                : ''}
             </div>
           )}
           {ticketDetails?.ticket?.image?.length > 0 && (
@@ -408,7 +409,7 @@ const TicketViewClient = () => {
                   <div className="flex flex-row justify-between items-center">
                     <div className="flex flex-row gap-4 items-center">
                       <Image
-                        src={"/assets/profile-placeholder.png"}
+                        src={'/assets/profile-placeholder.png'}
                         alt="profile image"
                         width={20}
                         height={20}
@@ -419,22 +420,22 @@ const TicketViewClient = () => {
                           {item?.createdBy?.name}
                         </span>
                         <span>
-                          At{" "}
-                          {new Date(item?.createdAt).toLocaleString("en-US", {
-                            dateStyle: "medium",
-                            timeStyle: "short",
+                          At{' '}
+                          {new Date(item?.createdAt).toLocaleString('en-US', {
+                            dateStyle: 'medium',
+                            timeStyle: 'short',
                           })}
                         </span>
                       </div>
                     </div>
                     <span
                       className={cn(
-                        "font-ubuntu text-sm text-white p-1 rounded",
-                        item.type === "In Progress" && "bg-yellow-500",
-                        item.type === "Complete" && "bg-green-600",
-                        item.type === "Comment" && "bg-gray-600",
-                        item.type === "Reopened" && "bg-blue-600",
-                        item.type === "Closed" && "bg-red-600"
+                        'font-ubuntu text-sm text-white p-1 rounded',
+                        item.type === 'In Progress' && 'bg-yellow-500',
+                        item.type === 'Complete' && 'bg-green-600',
+                        item.type === 'Comment' && 'bg-gray-600',
+                        item.type === 'Reopened' && 'bg-blue-600',
+                        item.type === 'Closed' && 'bg-red-600'
                       )}
                     >
                       {item?.type}
@@ -482,11 +483,11 @@ const TicketViewClient = () => {
         open={showImage}
         onClose={toggleShowImage}
         sx={{
-          "display": "flex",
-          "alignItems": "center",
-          "justifyContent": "center",
-          "& .MuiBackdrop-root": {
-            backgroundColor: "rgba(0, 0, 0, 0.1)",
+          'display': 'flex',
+          'alignItems': 'center',
+          'justifyContent': 'center',
+          '& .MuiBackdrop-root': {
+            backgroundColor: 'rgba(0, 0, 0, 0.1)',
           },
         }}
       >
@@ -522,9 +523,9 @@ const TicketViewClient = () => {
         open={openComment}
         onClose={() => setOpenComment(prev => !prev)}
         sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
         }}
       >
         <div className="bg-white 2xl:w-1/3 p-8 rounded-3xl outline-none -md:w-3/4 -lg:w-2/4 -xl:4/6 -2xl:3/6">

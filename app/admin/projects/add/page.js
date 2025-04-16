@@ -1,50 +1,50 @@
-"use client";
-import AsideContainer from "../../../../components/AsideContainer";
-import axios from "axios";
-import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
-import { toast } from "sonner";
-import { IoIosArrowBack } from "react-icons/io";
-import { useAuthStore } from "../../../../store/useAuthStore";
+'use client';
+import AsideContainer from '../../../../components/AsideContainer';
+import axios from 'axios';
+import { useRouter } from 'next/navigation';
+import React, { useEffect, useState } from 'react';
+import { toast } from 'sonner';
+import { IoIosArrowBack } from 'react-icons/io';
+import { useAuthStore } from '../../../../store/useAuthStore';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../../../../components/ui/select";
-import { Checkbox } from "../../../../components/ui/checkbox";
+} from '../../../../components/ui/select';
+import { Checkbox } from '../../../../components/ui/checkbox';
 
 const AddProjectForm = () => {
   const router = useRouter();
   const userName = useAuthStore(state => state.username);
   const activeUser = useAuthStore(state => state.userId);
   const [data, setData] = useState({
-    name: "",
-    siteID: "",
-    location: "",
-    client: "",
-    plan: "",
-    floor: "",
-    area: "",
-    amount: "",
-    date: "",
-    duration: "",
-    admin: "",
-    manager: "",
-    architect: "",
-    sr_engineer: "",
-    engineer: "",
-    accountant: "",
-    operation: "",
-    sales: "",
-    contractor: "",
+    name: '',
+    siteID: '',
+    location: '',
+    client: '',
+    plan: '',
+    floor: '',
+    area: '',
+    amount: '',
+    date: '',
+    duration: '',
+    admin: '',
+    manager: '',
+    architect: '',
+    sr_engineer: '',
+    engineer: '',
+    accountant: '',
+    operation: '',
+    sales: '',
+    contractor: '',
   });
   const [floorList, setFloorList] = useState([]);
   const [memberList, setMemberList] = useState([]);
   const [contractorList, setContractorList] = useState([]);
   const [clientList, setClientList] = useState([]);
-  const [clientId, setClientId] = useState("");
+  const [clientId, setClientId] = useState('');
   const [stages, setStages] = useState([]);
 
   useEffect(() => {
@@ -89,7 +89,7 @@ const AddProjectForm = () => {
           // console.log(response.data.data);
           setContractorList(
             response.data.data?.filter(
-              item => item.approvalStatus === "Approved"
+              item => item.approvalStatus === 'Approved'
             )
           );
         }
@@ -116,9 +116,9 @@ const AddProjectForm = () => {
     // console.log(e.target.value);
     const { name, value, type, checked } = e.target;
 
-    if (type === "checkbox") {
-      const memberName = value.split(",")[0];
-      const memberId = value.split(",")[1];
+    if (type === 'checkbox') {
+      const memberName = value.split(',')[0];
+      const memberId = value.split(',')[1];
       const data = {
         name: memberName,
         employeeID: memberId,
@@ -130,9 +130,9 @@ const AddProjectForm = () => {
           ? [...prevData[name], data] // Add to array if checked
           : prevData[name].filter(item => item.employeeID !== memberId), // Remove from array if unchecked
       }));
-    } else if (name === "client") {
+    } else if (name === 'client') {
       setData({ ...data, [name]: value });
-      const clientId = value.split("-")[1];
+      const clientId = value.split('-')[1];
       setClientId(clientId);
     } else {
       // Handle other inputs
@@ -142,39 +142,39 @@ const AddProjectForm = () => {
 
   const submitFormData = () => {
     if (!data.name) {
-      toast("Name is required");
+      toast('Name is required');
     } else if (!data.siteID) {
-      toast("Site ID is required");
+      toast('Site ID is required');
     } else if (!data.location) {
-      toast("Location is required");
+      toast('Location is required');
     } else if (!data.client) {
-      toast("Client is required");
+      toast('Client is required');
     } else if (!data.floor) {
-      toast("Floor is required");
+      toast('Floor is required');
     } else if (!data.area) {
-      toast("Area is required");
+      toast('Area is required');
     } else if (!data.cost) {
-      toast("Cost is required");
+      toast('Cost is required');
     } else if (!data.date) {
-      toast("Start date is required");
+      toast('Start date is required');
     } else if (!data.duration) {
-      toast("Duration is required");
+      toast('Duration is required');
     } else if (data.admin?.length === 0) {
-      toast("Admin is required");
+      toast('Admin is required');
     } else if (data.manager?.length === 0) {
-      toast("Project Manager is required");
+      toast('Project Manager is required');
     } else if (data.sr_engineer?.length === 0) {
-      toast("Sr. Engineer is required");
+      toast('Sr. Engineer is required');
     } else if (data.engineer?.length === 0) {
-      toast("Site Engineer is required");
+      toast('Site Engineer is required');
     } else if (data.accountant?.length === 0) {
-      toast("Accountant is required");
+      toast('Accountant is required');
     } else if (data.operation?.length === 0) {
-      toast("Operation is required");
+      toast('Operation is required');
     } else if (data.sales?.length === 0) {
-      toast("Sales is required");
+      toast('Sales is required');
     } else if (data.contractor?.length === 0) {
-      toast("Contractor is required");
+      toast('Contractor is required');
     } else {
       const uploadData = {
         name: data.name,
@@ -207,27 +207,28 @@ const AddProjectForm = () => {
         .then(response => {
           if (response.data.status === 201) {
             setData({
-              name: "",
-              siteID: "",
-              location: "",
-              client: "",
-              plan: "",
-              floor: "",
-              area: "",
-              cost: "",
-              date: "",
-              duration: "",
+              name: '',
+              siteID: '',
+              location: '',
+              client: '',
+              plan: '',
+              floor: '',
+              area: '',
+              cost: '',
+              date: '',
+              duration: '',
               manager: [],
               accountant: [],
               engineer: [],
               sr_engineer: [],
+              architect: [],
               contractor: [],
               operation: [],
               admin: [],
               sales: [],
             });
             toast(response.data.message);
-            router.push("/admin/projects");
+            router.push('/admin/projects');
           } else {
             toast(response.data.message);
           }
@@ -251,14 +252,14 @@ const AddProjectForm = () => {
         </div>
         <p
           className="text-center"
-          style={{ color: "rgb(255, 119, 0)", wordSpacing: "2px" }}
+          style={{ color: 'rgb(255, 119, 0)', wordSpacing: '2px' }}
         >
           Create Process and Checklist point before Project creation
         </p>
         <div className="bg-white rounded-[15px] p-5 mb-5">
           <div className="col-lg-12">
             <div>
-              <div style={{ marginLeft: "0px" }}>
+              <div style={{ marginLeft: '0px' }}>
                 <div>
                   <div className="grid grid-cols-2 gap-4 gap-x-8">
                     <div className="flex flex-col gap-2 [&_label]:font-semibold">
@@ -417,7 +418,7 @@ const AddProjectForm = () => {
                           <SelectContent>
                             {memberList
                               ?.filter(
-                                itm => itm.role?.name.toLowerCase() === "admin"
+                                itm => itm.role?.name.toLowerCase() === 'admin'
                               )
                               ?.map((item, index) => (
                                 <SelectItem key={index} value={item._id}>
@@ -443,7 +444,7 @@ const AddProjectForm = () => {
                             {memberList
                               ?.filter(
                                 itm =>
-                                  itm.role?.name.toLowerCase() === "manager"
+                                  itm.role?.name.toLowerCase() === 'manager'
                               )
                               ?.map((item, index) => (
                                 <SelectItem key={index} value={item._id}>
@@ -469,7 +470,7 @@ const AddProjectForm = () => {
                             {memberList
                               ?.filter(
                                 itm =>
-                                  itm.role?.name.toLowerCase() === "architect"
+                                  itm.role?.name.toLowerCase() === 'architect'
                               )
                               ?.map((item, index) => (
                                 <SelectItem key={index} value={item._id}>
@@ -496,7 +497,7 @@ const AddProjectForm = () => {
                               ?.filter(
                                 itm =>
                                   itm.role?.name.toLowerCase() ===
-                                  "sr. engineer"
+                                  'sr. engineer'
                               )
                               ?.map((item, index) => (
                                 <SelectItem key={index} value={item._id}>
@@ -523,7 +524,7 @@ const AddProjectForm = () => {
                               ?.filter(
                                 itm =>
                                   itm.role?.name.toLowerCase() ===
-                                  "site engineer"
+                                  'site engineer'
                               )
                               ?.map((item, index) => (
                                 <SelectItem key={index} value={item._id}>
@@ -549,7 +550,7 @@ const AddProjectForm = () => {
                             {memberList
                               ?.filter(
                                 itm =>
-                                  itm.role?.name.toLowerCase() === "accountant"
+                                  itm.role?.name.toLowerCase() === 'accountant'
                               )
                               ?.map((item, index) => (
                                 <SelectItem key={index} value={item._id}>
@@ -575,7 +576,7 @@ const AddProjectForm = () => {
                             {memberList
                               ?.filter(
                                 itm =>
-                                  itm.role?.name.toLowerCase() === "operations"
+                                  itm.role?.name.toLowerCase() === 'operations'
                               )
                               ?.map((item, index) => (
                                 <SelectItem key={index} value={item._id}>
@@ -600,7 +601,7 @@ const AddProjectForm = () => {
                           <SelectContent>
                             {memberList
                               ?.filter(
-                                itm => itm.role?.name.toLowerCase() === "sales"
+                                itm => itm.role?.name.toLowerCase() === 'sales'
                               )
                               ?.map((item, index) => (
                                 <SelectItem key={index} value={item._id}>

@@ -1,4 +1,5 @@
 'use client';
+import React from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { IoIosArrowBack } from 'react-icons/io';
@@ -9,7 +10,14 @@ import { FaCheck } from 'react-icons/fa';
 import { MdEdit } from 'react-icons/md';
 import { MdDeleteOutline } from 'react-icons/md';
 import { MdOutlineInsertComment } from 'react-icons/md';
-import { Button, Modal } from '@mui/material';
+import {
+  Button,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Modal,
+  Select,
+} from '@mui/material';
 import { useState } from 'react';
 import axios from 'axios';
 import { useAuthStore } from '../../../../store/useAuthStore';
@@ -39,6 +47,9 @@ const Page = () => {
   const [points, setPoints] = useState('');
   const [Loading, setLoading] = useState(false);
   const [audioData, setAudioData] = useState(null);
+  const [teammembers, setTeammembers] = useState([]);
+  const [showChangeMember, setshowChangeMember] = useState(false);
+  const [newMember, setNewMember] = useState(null);
   const { data, error, isFetched, refetch } = useQuery({
     queryKey: [`gettaskbyid/${slug}`],
     queryFn: async () =>
@@ -78,7 +89,9 @@ const Page = () => {
     formData.append('taskId', slug);
     formData.append('type', type);
     formData.append('comment', comment);
-    formData.append('audio', audioData.blob, 'recording.wav');
+    if (audioData) {
+      formData.append('audio', audioData.blob, 'recording.wav');
+    }
     for (let i = 0; i < points?.length; i++) {
       formData.append('image', points[i]);
     }
@@ -92,6 +105,8 @@ const Page = () => {
         }
       )
       .then(() => {
+        setPoints('');
+        setAudioData(null);
         refetch();
       });
   };
@@ -131,6 +146,56 @@ const Page = () => {
 
   const handleAudioRecorded = data => {
     setAudioData(data);
+  };
+
+  const approveComment = async id => {
+    const data = axios
+      .post(`${process.env.REACT_APP_BASE_PATH}/api/task/approvetaskcomment`, {
+        commentId: id,
+        userId,
+      })
+      .then(res => {
+        refetch();
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  };
+
+  const deleteComment = async id => {
+    const data = axios
+      .post(`${process.env.REACT_APP_BASE_PATH}/api/task/deletetaskcomment`, {
+        commentId: id,
+      })
+      .then(res => {
+        refetch();
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  };
+
+  const reassignTask = async () => {
+    const data = axios
+      .post(`${process.env.REACT_APP_BASE_PATH}/api/task/reassignTask`, {
+        taskId: slug,
+        userId,
+        newAssigneeId: newMember,
+      })
+      .then(res => {
+        refetch();
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  };
+
+  const getTeammembers = async () => {
+    const response = await axios.get(
+      `${process.env.REACT_APP_BASE_PATH}/api/teammember/getall`
+    );
+    console.log(response.data.data);
+    setTeammembers(response.data.data);
   };
 
   return (
@@ -231,7 +296,6 @@ const Page = () => {
           </div>
         </div>
         <div className="flex flex-row gap-4 mt-4">
-          {console.log(data.data.issueMember._id === userId)}
           {(data.data.issueMember._id === userId ||
             data.data.assignedBy?._id === userId) &&
             data.data.status !== 'Complete' && (
@@ -291,6 +355,19 @@ const Page = () => {
                 Delete
               </button>
             )}
+          {(userType === 'ROLE_USER' || userType === 'ROLE_ADMIN') &&
+            data.data.status !== 'Complete' && (
+              <button
+                className="px-4 py-2 border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-2 items-center"
+                onClick={() => {
+                  getTeammembers();
+                  setshowChangeMember(true);
+                }}
+              >
+                <MdEdit className="text-xl" />
+                Reassign
+              </button>
+            )}
           {(data.data.issueMember._id === userId ||
             data.data.assignedBy?._id === userId) &&
             data.data.status !== 'Complete' && (
@@ -308,7 +385,7 @@ const Page = () => {
         </div>
       </div>
       {data.data.comments.length > 0 && (
-        <>
+        <div id="comments">
           <div className="flex flex-row gap-2 my-4">
             <MdChecklist className="text-3xl text-primary" />
             <h3 className="text-xl font-bold font-ubuntu">
@@ -317,10 +394,13 @@ const Page = () => {
           </div>
           <div className="flex flex-col gap-4">
             {data.data.comments.map(item => (
-              <>
-                {item.approved.isApproved ||
-                  (userType !== 'ROLE_CLEINT' && (
-                    <div key={item._id} className="bg-white rounded-xl p-5">
+              <React.Fragment key={item._id}>
+                {(item.approved.isApproved || userType !== 'ROLE_CLEINT') && (
+                  <div
+                    key={item._id}
+                    className="bg-white rounded-xl p-5 flex flex-row w-full min-h-40 gap-4"
+                  >
+                    <div className="flex flex-col w-full">
                       <div className="flex flex-row justify-between items-center">
                         <div className="flex flex-row gap-4 items-center">
                           <Image
@@ -351,98 +431,125 @@ const Page = () => {
                             'font-ubuntu text-sm text-white p-1 rounded',
                             item.type === 'In Progress' && 'bg-yellow-500',
                             item.type === 'Complete' && 'bg-green-600',
-                            item.type === 'Comment' && 'bg-gray-600'
+                            item.type === 'Comment' && 'bg-gray-600',
+                            item.type === 'Task Updated' && 'bg-blue-500'
                           )}
                         >
                           {item.type}
                         </span>
                       </div>
-                      <p>{item.comment}</p>
-                      <div className="flex flex-row items-center gap-4 justify-between">
-                        {item.audio && (
-                          <audio controls src={item.audio} className="w-2/4" />
-                        )}
-                        <div className="relative flex flex-row gap-2 mt-2">
-                          {item?.images?.map((imgObj, imgidx) => (
-                            <div key={imgObj}>
-                              <div
-                                className="cursor-pointer [&_span]:hover:block"
-                                onClick={() => {
-                                  setShowImageUrl(imgObj);
-                                  toggleShowImage(imgObj);
-                                }}
-                              >
-                                {!showImage && (
-                                  <span className="w-16 rounded-xl h-full bg-black bg-opacity-30 absolute hidden text-primary-foreground text-center">
-                                    <p className="mt-5 font-semibold">View</p>
-                                  </span>
-                                )}
-                                <Image
-                                  src={imgObj}
-                                  alt={imgObj}
-                                  width={64}
-                                  height={64}
-                                  className="w-16 h-16 rounded-xl transition-all duration-300"
-                                />
-                              </div>
-                              <Modal
-                                open={showImage}
-                                onClose={toggleShowImage}
-                                sx={{
-                                  'display': 'flex',
-                                  'alignItems': 'center',
-                                  'justifyContent': 'center',
-                                  '& .MuiBackdrop-root': {
-                                    backgroundColor: 'rgba(0, 0, 0, 0.1)',
-                                  },
-                                }}
-                              >
-                                <div className="bg-white rounded-3xl h-5/6 flex flex-col ">
-                                  <div className="h-full w-full flex items-center justify-center">
-                                    <Image
-                                      src={showImageUrl}
-                                      alt="alt"
-                                      width={1000}
-                                      height={1000}
-                                      className="w-auto h-5/6 bg-center"
-                                    />
-                                  </div>
-                                  <div className="flex flex-row gap-4 justify-evenly p-4 -md:flex-wrap">
-                                    {userType === 'ROLE_ADMIN' ||
-                                    userType === 'ROLE_PROJECT MANAGER' ? (
-                                      <>
-                                        <button
-                                          className="py-2 px-4 font-semibold bg-secondary text-primary rounded-full flex flex-row items-center justify-center gap-1 text-nowrap"
-                                          onClick={() => {
-                                            deleteCommentImage(item._id);
-                                          }}
-                                        >
-                                          <MdDeleteOutline className="text-xl" />
-                                          Delete Image
-                                        </button>
-                                      </>
-                                    ) : (
-                                      ''
-                                    )}
-                                    <button
-                                      className="py-2 px-4 font-semibold bg-secondary text-primary rounded-full flex flex-row items-center justify-center gap-1 text-nowrap"
-                                      onClick={() => {
-                                        downloadImage(imgObj.image);
-                                      }}
-                                    >
-                                      <FiDownload className="text-xl" />
-                                      Download Image
-                                    </button>
-                                  </div>
+                      <div>
+                        <p>{item.comment}</p>
+                        <div className="flex flex-row items-center gap-4 justify-between">
+                          {item.audio && (
+                            <audio
+                              controls
+                              src={item.audio}
+                              className="w-2/4"
+                            />
+                          )}
+                          <div className="relative flex flex-row gap-2 mt-2">
+                            {item?.images?.map((imgObj, imgidx) => (
+                              <div key={imgObj}>
+                                <div
+                                  className="cursor-pointer [&_span]:hover:block"
+                                  onClick={() => {
+                                    setShowImageUrl(imgObj);
+                                    toggleShowImage(imgObj);
+                                  }}
+                                >
+                                  {!showImage && (
+                                    <span className="w-16 rounded-xl h-full bg-black bg-opacity-30 absolute hidden text-primary-foreground text-center">
+                                      <p className="mt-5 font-semibold">View</p>
+                                    </span>
+                                  )}
+                                  <Image
+                                    src={imgObj}
+                                    alt={imgObj}
+                                    width={64}
+                                    height={64}
+                                    className="w-16 h-16 rounded-xl transition-all duration-300"
+                                  />
                                 </div>
-                              </Modal>
-                            </div>
-                          ))}
+                                <Modal
+                                  open={showImage}
+                                  onClose={toggleShowImage}
+                                  sx={{
+                                    'display': 'flex',
+                                    'alignItems': 'center',
+                                    'justifyContent': 'center',
+                                    '& .MuiBackdrop-root': {
+                                      backgroundColor: 'rgba(0, 0, 0, 0.1)',
+                                    },
+                                  }}
+                                >
+                                  <div className="bg-white rounded-3xl h-5/6 flex flex-col ">
+                                    <div className="h-full w-full flex items-center justify-center">
+                                      <Image
+                                        src={showImageUrl}
+                                        alt="alt"
+                                        width={1000}
+                                        height={1000}
+                                        className="w-auto h-5/6 bg-center"
+                                      />
+                                    </div>
+                                    <div className="flex flex-row gap-4 justify-evenly p-4 -md:flex-wrap">
+                                      {userType === 'ROLE_ADMIN' ||
+                                      userType === 'ROLE_PROJECT MANAGER' ? (
+                                        <>
+                                          <button
+                                            className="py-2 px-4 font-semibold bg-secondary text-primary rounded-full flex flex-row items-center justify-center gap-1 text-nowrap"
+                                            onClick={() => {
+                                              deleteCommentImage(item._id);
+                                            }}
+                                          >
+                                            <MdDeleteOutline className="text-xl" />
+                                            Delete Image
+                                          </button>
+                                        </>
+                                      ) : (
+                                        ''
+                                      )}
+                                      <button
+                                        className="py-2 px-4 font-semibold bg-secondary text-primary rounded-full flex flex-row items-center justify-center gap-1 text-nowrap"
+                                        onClick={() => {
+                                          downloadImage(imgObj.image);
+                                        }}
+                                      >
+                                        <FiDownload className="text-xl" />
+                                        Download Image
+                                      </button>
+                                    </div>
+                                  </div>
+                                </Modal>
+                              </div>
+                            ))}
+                          </div>
                         </div>
                       </div>
                     </div>
-                  ))}
-              </>
+                    {(userType === 'ROLE_ADMIN' ||
+                      userType === 'ROLE_PROJECT MANAGER') &&
+                      item.type !== 'Task Updated' &&
+                      !item.approved.isApproved && (
+                        <div className="flex flex-col items-center justify-between">
+                          <span
+                            className="text-primary bg-secondary p-3 rounded-full text-lg cursor-pointer"
+                            onClick={() => approveComment(item._id)}
+                          >
+                            <FaCheck />
+                          </span>
+                          <span
+                            className="text-primary bg-secondary p-3 rounded-full text-xl cursor-pointer"
+                            onClick={() => deleteComment(item._id)}
+                          >
+                            <MdDeleteOutline />
+                          </span>
+                        </div>
+                      )}
+                  </div>
+                )}
+              </React.Fragment>
             ))}
           </div>
           {data.data.comments.length < 0 && (
@@ -450,7 +557,7 @@ const Page = () => {
               No Update Posted Yet!
             </p>
           )}
-        </>
+        </div>
       )}
       <Modal
         open={openComment}
@@ -529,6 +636,60 @@ const Page = () => {
               onClick={addComment}
             >
               Add Comment
+            </button>
+          </div>
+        </div>
+      </Modal>
+      <Modal
+        open={showChangeMember}
+        onClose={() => setshowChangeMember(false)}
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <div className="bg-white w-1/3 p-8 rounded-3xl outline-none -md:w-3/4">
+          <div>
+            <h3 className=" text-2xl font-semibold font-ubuntu">
+              Reassign Task
+            </h3>
+            <hr className="my-4" />
+          </div>
+          <FormControl fullWidth>
+            <InputLabel id="newmember-simple-select-label">
+              Team Members
+            </InputLabel>
+            {console.log(teammembers)}
+            <Select
+              labelId="newmember-simple-select-label"
+              id="newmember-simple-select"
+              label="newmember"
+              value={newMember}
+              name="newmember"
+              variant="outlined"
+              onChange={e => setNewMember(e.target.value)}
+              sx={{ borderRadius: '16px', background: '#f3f4f6' }}
+            >
+              {teammembers.map(item => (
+                <MenuItem key={item._id} value={item._id}>
+                  {`${item.name} (${item.role.name})`}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <div className="flex flex-row gap-2 justify-end mt-4">
+            <button
+              className="bg-primary-foreground border border-secondary text-secondary rounded-3xl px-4 py-2 flex flex-row  items-center"
+              onClick={() => setshowChangeMember(false)}
+            >
+              Cancel
+            </button>
+            <button
+              className="bg-secondary text-primary rounded-3xl px-4 py-2 flex flex-row  items-center"
+              onClick={reassignTask}
+            >
+              Submit
             </button>
           </div>
         </div>

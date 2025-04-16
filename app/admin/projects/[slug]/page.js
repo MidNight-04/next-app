@@ -24,7 +24,7 @@ import { FaDownload, FaMinus, FaPlus } from 'react-icons/fa6';
 import { IoCallSharp } from 'react-icons/io5';
 import { IoDocumentsOutline } from 'react-icons/io5';
 import { GoPeople } from 'react-icons/go';
-import { MdLockOutline } from 'react-icons/md';
+import { MdLockOutline, MdOutlineEdit } from 'react-icons/md';
 import { BsCalendar4Event } from 'react-icons/bs';
 import { TbProgress } from 'react-icons/tb';
 import { FaCheck } from 'react-icons/fa6';
@@ -37,7 +37,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import LoaderSpinner from '../../../../components/loader/LoaderSpinner';
 import { cn } from '../../../../lib/utils';
-import { Check } from '@mui/icons-material';
+import { Check, Edit } from '@mui/icons-material';
 import { BsClockHistory } from 'react-icons/bs';
 import { saveAs } from 'file-saver';
 import { RiDeleteBin6Line, RiLockPasswordLine } from 'react-icons/ri';
@@ -152,6 +152,10 @@ const ClientProjectView = () => {
   const userName = useAuthStore(state => state.username);
   const userId = useAuthStore(state => state.userId);
   const userType = useAuthStore(state => state.userType);
+  const [openChangeMember, setOpenChangeMember] = useState(false);
+  const [issue, setIssue] = useState(null);
+  const [newMember, setNewMember] = useState(null);
+  const [teammembersByRole, setTeammembersByRole] = useState([]);
 
   const toggleShowImage = () => {
     setShowImage(prev => !prev);
@@ -915,6 +919,39 @@ const ClientProjectView = () => {
       });
   };
 
+  const getTeammembersByRole = async id => {
+    try {
+      const response = await axios.post(
+        `${process.env.REACT_APP_BASE_PATH}/api/teammember/getTeammemberByRole`,
+        {
+          role: id,
+        }
+      );
+      setTeammembersByRole(response.data.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const changeIssueMember = async () => {
+    const data = {
+      userId: userId,
+      siteId: slug,
+      issue: issue.role.name,
+      newMember,
+    };
+    try {
+      const response = await axios.post(
+        `${process.env.REACT_APP_BASE_PATH}/api/project/changeissuemember`,
+        data
+      );
+      // setIssue(response.data.data);
+      getprojectDetail();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   let initialDate = new Date(projectDetails?.date);
   let diff;
 
@@ -1204,10 +1241,10 @@ const ClientProjectView = () => {
                         <span className="font-semibold w-[200px] text-center -md:w-16 -md:ml-8 -sm:ml-16">
                           Point
                         </span>
-                        <span className="font-semibold w-[200px] flex self-center justify-center -md:w-20 text-center">
+                        <span className="font-semibold w-[200px] flex ml-6 -md:w-20 text-left">
                           Member Issue
                         </span>
-                        <span className="font-semibold w-[200px] text-center -md:w-24 -md:mr-16">
+                        <span className="font-semibold w-[200px] text-left -md:w-24 -md:mr-16">
                           Schedule Time
                         </span>
                         <span className="font-semibold w-[70px] text-center -md:w-24 -md:mr-16">
@@ -1255,7 +1292,7 @@ const ClientProjectView = () => {
                                     idx === item.step.length - 1
                                       ? 'mb-[100%] h-8'
                                       : '',
-                                    itm.taskId.status !== 'Completed'
+                                    itm.taskId.status !== 'Complete'
                                       ? 'bg-secondary'
                                       : ''
                                   )}
@@ -1264,7 +1301,7 @@ const ClientProjectView = () => {
                               <div
                                 className={cn(
                                   'w-8 h-8 absolute top-1/2 md:right-[92px] -md:right-1 -mt-4 rounded-full bg-green-500 shadow-xl text-center',
-                                  itm.taskId.status !== 'Completed'
+                                  itm.taskId.status !== 'Complete'
                                     ? 'bg-primary'
                                     : ''
                                 )}
@@ -1272,7 +1309,7 @@ const ClientProjectView = () => {
                                 {itm.taskId.status === 'Pending' && (
                                   <BsClockHistory className="mt-1 ml-1 text-secondary text-2xl " />
                                 )}
-                                {itm.taskId.status === 'Completed' && (
+                                {itm.taskId.status === 'Complete' && (
                                   <Check
                                     sx={{
                                       marginTop: '4px',
@@ -1281,7 +1318,7 @@ const ClientProjectView = () => {
                                     }}
                                   />
                                 )}
-                                {itm.taskId.statu === 'Work in Progress' && (
+                                {itm.taskId.status === 'In Progress' && (
                                   <TbProgress className="mt-1 ml-1 text-secondary text-2xl " />
                                 )}
                               </div>
@@ -1294,10 +1331,10 @@ const ClientProjectView = () => {
                                 )}
                               </div>
                             </div>
-                            <div className="w-[200px] flex self-center justify-center -md:w-16">
+                            <div className="w-[200px] flex self-center justify-start -md:w-16">
                               {`${itm.taskId.issueMember?.name}`}
                             </div>
-                            <div className="w-[200px] -md:w-28 my-1 flex items-center flex-col">
+                            <div className="w-[200px] -md:w-28 my-1 flex items-start flex-col">
                               <div className="text-left">
                                 <div className="flex flex-row mb-2">
                                   <div className="text-sm font-semibold">
@@ -1312,9 +1349,9 @@ const ClientProjectView = () => {
                                   <div className="text-sm">
                                     {itm?.taskId?.updatedOn !== '' &&
                                       itm?.taskId?.status === 'Complete' &&
-                                      new Date(
-                                        itm.taskId.updatedOn
-                                      ).toLocaleDateString()}{' '}
+                                      new Date(itm.taskId.updatedOn)
+                                        .toISOString()
+                                        .split('T')[0]}{' '}
                                     {itm.taskId.updatedOn !== '' &&
                                     itm?.taskId?.status === 'Complete' &&
                                     new Date(itm.taskId.updatedOn) >
@@ -1549,9 +1586,21 @@ const ClientProjectView = () => {
                       className="flex flex-row items-center justify-between"
                       key={index}
                     >
-                      <span className="mt-1">{item.name}</span>
+                      <div className="mt-1 flex flex-row items-center gap-4">
+                        <span>{item.name}</span>
+                        <span
+                          className="bg-secondary text-primary p-2 rounded-full cursor-pointer"
+                          onClick={() => {
+                            setIssue(item);
+                            setOpenChangeMember(true);
+                            getTeammembersByRole(item.role._id);
+                            teamOpenCancel();
+                          }}
+                        >
+                          <MdOutlineEdit />
+                        </span>
+                      </div>
                       <span className="p-2 bg-green-600 rounded-full cursor-pointer">
-                        {' '}
                         <IoCallSharp className="text-white" />
                       </span>
                     </div>
@@ -1568,9 +1617,52 @@ const ClientProjectView = () => {
                       className="flex flex-row items-center justify-between"
                       key={index}
                     >
-                      <span className="pdm-name mt-1">{item.name}</span>
+                      <div className="mt-1 flex flex-row items-center gap-4">
+                        <span>{item.name}</span>
+                        <span
+                          className="bg-secondary text-primary p-2 rounded-full cursor-pointer"
+                          onClick={() => {
+                            setIssue(item);
+                            setOpenChangeMember(true);
+                            getTeammembersByRole(item.role._id);
+                            teamOpenCancel();
+                          }}
+                        >
+                          <MdOutlineEdit />
+                        </span>
+                      </div>
                       <span className="p-2 bg-green-600 rounded-full cursor-pointer">
-                        {' '}
+                        <IoCallSharp className="text-white" />
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="mb-2">
+                <span className="font-ubuntu font-semibold">
+                  Architect/Designer
+                </span>
+                {projectDetails?.architect?.map((item, index) => {
+                  return (
+                    <div
+                      className="flex flex-row items-center justify-between"
+                      key={index}
+                    >
+                      <div className="mt-1 flex flex-row items-center gap-4">
+                        <span>{item.name}</span>
+                        <span
+                          className="bg-secondary text-primary p-2 rounded-full cursor-pointer"
+                          onClick={() => {
+                            setIssue(item);
+                            setOpenChangeMember(true);
+                            getTeammembersByRole(item.role._id);
+                            teamOpenCancel();
+                          }}
+                        >
+                          <MdOutlineEdit />
+                        </span>
+                      </div>
+                      <span className="p-2 bg-green-600 rounded-full cursor-pointer">
                         <IoCallSharp className="text-white" />
                       </span>
                     </div>
@@ -1585,9 +1677,21 @@ const ClientProjectView = () => {
                       className="flex flex-row items-center justify-between"
                       key={index}
                     >
-                      <span className="pdm-name mt-1">{item.name}</span>
+                      <div className="mt-1 flex flex-row items-center gap-4">
+                        <span>{item.name}</span>
+                        <span
+                          className="bg-secondary text-primary p-2 rounded-full cursor-pointer"
+                          onClick={() => {
+                            setIssue(item);
+                            setOpenChangeMember(true);
+                            getTeammembersByRole(item.role._id);
+                            teamOpenCancel();
+                          }}
+                        >
+                          <MdOutlineEdit />
+                        </span>
+                      </div>
                       <span className="p-2 bg-green-600 rounded-full cursor-pointer">
-                        {' '}
                         <IoCallSharp className="text-white" />
                       </span>
                     </div>
@@ -1602,9 +1706,21 @@ const ClientProjectView = () => {
                       className="flex flex-row items-center justify-between"
                       key={index}
                     >
-                      <span className="pdm-name mt-1">{item.name}</span>
+                      <div className="mt-1 flex flex-row items-center gap-4">
+                        <span>{item.name}</span>
+                        <span
+                          className="bg-secondary text-primary p-2 rounded-full cursor-pointer"
+                          onClick={() => {
+                            setIssue(item);
+                            setOpenChangeMember(true);
+                            getTeammembersByRole(item.role._id);
+                            teamOpenCancel();
+                          }}
+                        >
+                          <MdOutlineEdit />
+                        </span>
+                      </div>
                       <span className="p-2 bg-green-600 rounded-full cursor-pointer">
-                        {' '}
                         <IoCallSharp className="text-white" />
                       </span>
                     </div>
@@ -1636,7 +1752,20 @@ const ClientProjectView = () => {
                       className="flex flex-row items-center justify-between"
                       key={index}
                     >
-                      <span className="pdm-name mt-1">{item.name}</span>
+                      <div className="mt-1 flex flex-row items-center gap-4">
+                        <span>{item.name}</span>
+                        <span
+                          className="bg-secondary text-primary p-2 rounded-full cursor-pointer"
+                          onClick={() => {
+                            setIssue(item);
+                            setOpenChangeMember(true);
+                            getTeammembersByRole(item.role._id);
+                            teamOpenCancel();
+                          }}
+                        >
+                          <MdOutlineEdit />
+                        </span>
+                      </div>
                       <span className="p-2 bg-green-600 rounded-full cursor-pointer">
                         {' '}
                         <IoCallSharp className="text-white" />
@@ -1653,7 +1782,20 @@ const ClientProjectView = () => {
                       className="flex flex-row items-center justify-between"
                       key={index}
                     >
-                      <span className="pdm-name mt-1">{item.name}</span>
+                      <div className="mt-1 flex flex-row items-center gap-4">
+                        <span>{item.name}</span>
+                        <span
+                          className="bg-secondary text-primary p-2 rounded-full cursor-pointer"
+                          onClick={() => {
+                            setIssue(item);
+                            setOpenChangeMember(true);
+                            getTeammembersByRole(item.role._id);
+                            teamOpenCancel();
+                          }}
+                        >
+                          <MdOutlineEdit />
+                        </span>
+                      </div>
                       <span className="p-2 bg-green-600 rounded-full cursor-pointer">
                         {' '}
                         <IoCallSharp className="text-white" />
@@ -1671,7 +1813,52 @@ const ClientProjectView = () => {
           </Button>
         </DialogActions>
       </Dialog>
-
+      <Dialog
+        open={openChangeMember}
+        onClose={() => setOpenChangeMember(false)}
+      >
+        <DialogTitle
+          className="text-center"
+          sx={{
+            fontSize: '18px',
+            fontWeight: '600',
+            letterSpacing: '1px',
+          }}
+        >
+          Change {issue?.role?.name}
+        </DialogTitle>
+        <DialogContent style={{ width: '600px' }}>
+          <FormControl fullWidth>
+            <InputLabel id="newmember-simple-select-label">
+              {issue?.role.name}
+            </InputLabel>
+            <MUISelect
+              labelId="newmember-simple-select-label"
+              id="newmember-simple-select"
+              label="newmember"
+              value={newMember}
+              name="newmember"
+              variant="outlined"
+              onChange={e => setNewMember(e.target.value)}
+              sx={{ borderRadius: '16px', background: '#f3f4f6' }}
+            >
+              {teammembersByRole.map(item => (
+                <MenuItem key={item._id} value={item._id}>
+                  {item.name}
+                </MenuItem>
+              ))}
+            </MUISelect>
+          </FormControl>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenChangeMember(false)} color="primary">
+            Cancel
+          </Button>
+          <Button color="primary" onClick={changeIssueMember}>
+            Submit
+          </Button>
+        </DialogActions>
+      </Dialog>
       {/* Project document dialog */}
       <Dialog open={documentOpen} onClose={documentOpenCancel}>
         <DialogTitle
@@ -1816,7 +2003,7 @@ const ClientProjectView = () => {
                 label="Content"
                 value={content} // Adjust value to reflect state
                 name="content"
-                onChange={async e => {
+                onChange={e => {
                   setContent(e.target.value);
                   handleStepChange(e.target.value);
                 }}

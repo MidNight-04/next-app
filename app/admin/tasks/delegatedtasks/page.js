@@ -16,6 +16,8 @@ import {
   TabsTrigger,
 } from '../../../../components/ui/tabs';
 import { SearchOutlined } from '@mui/icons-material';
+import { IoFilterOutline } from 'react-icons/io5';
+import TaskFilterPopup from '../../../../components/filter/Filter';
 import LoaderSpinner from '../../../../components/loader/LoaderSpinner';
 import { SlCalender } from 'react-icons/sl';
 import { IoIosPricetag } from 'react-icons/io';
@@ -27,12 +29,8 @@ import { FaCircle } from 'react-icons/fa6';
 import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 import { FaExclamationCircle } from 'react-icons/fa';
 import { FaUserCircle } from 'react-icons/fa';
-import { RiTeamFill } from 'react-icons/ri';
-import { PiTagChevronFill } from 'react-icons/pi';
-import { FaCheckCircle } from 'react-icons/fa';
-import { IoCalendarClearOutline } from 'react-icons/io5';
-import { FaRegCalendarAlt } from 'react-icons/fa';
-import { FaRegClock } from 'react-icons/fa';
+
+// import ProgressBar from "../ProgressBar/ProgressBar";
 
 const Page = () => {
   const router = useRouter();
@@ -42,36 +40,16 @@ const Page = () => {
   const [activeTab, setActiveTab] = useState('Pending');
   const [currentPage, setCurrentPage] = useState(1);
   const [tasks, setTasks] = useState(1);
-  const [taskData, setTaskData] = useState({});
-  const [team, setTeam] = useState([]);
-
-  useEffect(() => {
-    const fetchTeam = async () => {
-      try {
-        const response = await axios.get(
-          `${process.env.REACT_APP_BASE_PATH}/api/teammember/getall`
-        );
-        setTeam(response.data);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-    fetchTeam();
-  }, [userId]);
-
-  useEffect(() => {
-    const fetchTeam = async () => {
-      try {
-        const response = await axios.get(
-          `${process.env.REACT_APP_BASE_PATH}/api/task/getalltaskcount`
-        );
-        setTaskData(response.data.taskGroups);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-    fetchTeam();
-  }, [userId]);
+  const [searchTerm, setSearchTerm] = useState(null);
+  const [openFilter, setOpenFilter] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [customFilters, setCustomFilters] = useState({
+    selectedCategory: '',
+    assignedBy: '',
+    assignedTo: '',
+    frequency: '',
+    priority: '',
+  });
 
   let url;
 
@@ -107,11 +85,11 @@ const Page = () => {
 
   const user = userType !== 'ROLE_ADMIN' ? userId : null;
   const { data, isFetched, isError, isPreviousData, isFetching } = useQuery({
-    queryKey: ['tasks', activeFilter, currentPage],
+    queryKey: ['delegatedTasks', activeFilter, currentPage],
     queryFn: async () => {
       const response = await axios.post(url, {
         page: currentPage,
-        userId: user,
+        assignedTo: user,
         ...customFilters,
       });
       return response.data;
@@ -131,14 +109,14 @@ const Page = () => {
   });
 
   const filters = [
-    'Today',
     'Yesterday',
-    // 'Tomorrow',
+    'Today',
+    'Tomorrow',
     'This Week',
     'This Month',
     'Last Month',
     'Next Week',
-    'All Time',
+    // 'All Time',
   ];
 
   const searchTask = e => {
@@ -148,6 +126,11 @@ const Page = () => {
     );
     setTasks(data);
     console.log(searchValue);
+  };
+
+  const handleFilterChange = filter => {
+    setCustomFilters(filter);
+    setActiveFilter('Custom');
   };
 
   if (isFetching && !isError) {
@@ -171,7 +154,7 @@ const Page = () => {
     return color;
   }
 
-  const stringAvatar = name => {
+  function stringAvatar(name) {
     const splitName = name.split(' ');
     const initials = splitName
       .map(n => n[0])
@@ -189,14 +172,14 @@ const Page = () => {
       },
       children: `${firstLetter}${secondLetter}`,
     };
-  };
+  }
 
   return (
     <AsideContainer>
-      {/* <div>
+      <div>
         <div className="flex flex-row gap-2 w-full items-center my-4 justify-between">
           <h1 className="font-ubuntu font-bold text-[25px] leading-7 p-5 text-nowrap">
-            Task Dashboard
+            Delegated Tasks
           </h1>
           <div className="relative w-72 ">
             <SearchOutlined
@@ -227,6 +210,15 @@ const Page = () => {
                 {filter}
               </span>
             ))}
+            <span
+              className="flex flex-row items-center gap-2 bg-secondary text-primary px-3 py-2 rounded-3xl cursor-pointer"
+              onClick={() => {
+                setOpenFilter(true);
+              }}
+            >
+              Filter
+              <IoFilterOutline />
+            </span>
           </div>
           <div>
             <Tabs
@@ -234,32 +226,25 @@ const Page = () => {
               onValueChange={value => setActiveTab(value)}
               className="flex flex-col w-full justify-center items-center my-4"
             >
-              <TabsList className="grid grid-cols-6 -2xl:w-1/2 -lg:w-full">
-                <TabsTrigger value="Employee Wise">
-                  <RiTeamFill className="text-secondary mr-1" />
-                  Employee Wise
+              <TabsList className="grid grid-cols-4 -2xl:w-1/2 -lg:w-full">
+                <TabsTrigger value="Overdue">
+                  <FaExclamationCircle className="text-secondary mr-1" />
+                  OverDue
                 </TabsTrigger>
-                <TabsTrigger value="Category Wise">
-                  <PiTagChevronFill className="text-secondary mr-1" />
-                  Category Wise
+                <TabsTrigger value="Pending">
+                  <FaCircle className="text-secondary mr-1" />
+                  Pending
                 </TabsTrigger>
-                <TabsTrigger value="Delegated">
-                  <FaCheckCircle className="text-secondary mr-1" /> Delegated
+                <TabsTrigger value="In Progress">
+                  <AiOutlineLoading3Quarters className="text-secondary mr-1" />{' '}
+                  In Progress
                 </TabsTrigger>
-                <TabsTrigger value="Monthly Report">
-                  <IoCalendarClearOutline className="text-secondary mr-1" />
-                  Monthly Report
-                </TabsTrigger>
-                <TabsTrigger value="Daily Report">
-                  <FaRegCalendarAlt className="text-secondary mr-1" />
-                  Daily Report
-                </TabsTrigger>
-                <TabsTrigger value="OverDue Report">
-                  <FaRegClock className="text-secondary mr-1" />
-                  OverDue Report
+                <TabsTrigger value="Complete">
+                  <FaCircleCheck className="text-secondary mr-1" />
+                  Completed
                 </TabsTrigger>
               </TabsList>
-              <TabsContent value="Employee Wise" className="w-full">
+              <TabsContent value="Overdue" className="w-full">
                 <div className="flex flex-col gap-4 w-full justify-center items-center my-4">
                   {isFetched &&
                     data.length > 0 &&
@@ -383,7 +368,7 @@ const Page = () => {
                   </div>
                 )}
               </TabsContent>
-              <TabsContent value="Category Wise" className="w-full">
+              <TabsContent value="Pending" className="w-full">
                 <div className="flex flex-col gap-4 w-full justify-center items-center my-4">
                   {isFetched &&
                     data.length > 0 &&
@@ -507,7 +492,7 @@ const Page = () => {
                   </div>
                 )}
               </TabsContent>
-              <TabsContent value="Delegated" className="w-full">
+              <TabsContent value="In Progress" className="w-full">
                 <div className="flex flex-col gap-4 w-full justify-center items-center my-4">
                   {isFetched &&
                     data.length > 0 &&
@@ -631,255 +616,7 @@ const Page = () => {
                   </div>
                 )}
               </TabsContent>
-              <TabsContent value="Monthly Report" className="w-full">
-                <div className="flex flex-col gap-4 w-full justify-center items-center my-4">
-                  {isFetched &&
-                    data.length > 0 &&
-                    data
-                      .filter(item => item.status === activeTab)
-                      .map((item, index) => (
-                        <div
-                          key={index}
-                          className="bg-white w-full rounded-2xl p-8 flex flex-row justify-between shadow-md cursor-pointer"
-                          onClick={() =>
-                            router.push(`/admin/tasks/${item._id}`)
-                          }
-                        >
-                          <div className="flex flex-row gap-4">
-                            <span className="h-20 rounded-full w-1 bg-primary" />
-                            <div className="flex flex-col [&_span]:leading-7 font-ubuntu text-base text-[#565656]">
-                              <div>
-                                <span className="font-semibold text-sm flex flex-row gap-2 items-center">
-                                  <Avatar
-                                    sx={{}}
-                                    {...stringAvatar('ThikedaarDotCom')}
-                                  />
-                                  {item.issueMember?.name}
-                                </span>
-                                <span className="text-lg font-bold">
-                                  {item.title}
-                                </span>
-                              </div>
-                              {item.issueMember?.name === 'ThikedaarDotCom' ? (
-                                <span className="font-semibold text-sm">
-                                  Admin
-                                </span>
-                              ) : (
-                                <div className="flex flex-row gap-4 items-center">
-                                  <span className="font-semibold text-sm flex flex-row gap-2 items-center">
-                                    <FaUserCircle className="text-primary" />
-                                    <p className="font-semibold text-sm">
-                                      {item.assignedBy?.name ===
-                                      'ThikedaarDotCom'
-                                        ? 'Admin'
-                                        : item.assignedBy?.name}
-                                    </p>
-                                  </span>
-                                  <span className="font-semibold text-sm flex flex-row gap-2 items-center">
-                                    <SlCalender className="text-primary" />
-                                    <p>
-                                      {new Date(item.dueDate).toLocaleString(
-                                        'en-US',
-                                        {
-                                          dateStyle: 'medium',
-                                          timeStyle: 'short',
-                                        }
-                                      )}
-                                    </p>
-                                  </span>
-                                  <span className="font-semibold text-sm flex flex-row gap-1 items-center">
-                                    {item.status === 'Complete' && (
-                                      <FaCircleCheck className="text-primary" />
-                                    )}
-                                    {item.status === 'Pending' && (
-                                      <FaCircle className="text-primary" />
-                                    )}
-                                    {item.status === 'In Progress' && (
-                                      <AiOutlineLoading3Quarters className="text-primary" />
-                                    )}
-                                    {item.status === 'In Progress' && (
-                                      <FaRegCircle className="text-primary" />
-                                    )}
-                                    {item.status === 'Overdue' && (
-                                      <FaExclamationCircle className="text-primary" />
-                                    )}
-                                    <p>{item.status}</p>
-                                  </span>
-                                  <span className="font-semibold text-sm flex flex-row gap-1 items-center">
-                                    <IoIosPricetag className="text-primary" />
-                                    <p>{item.category}</p>
-                                  </span>
-                                  <span className="font-semibold text-sm flex flex-row gap-1 items-center">
-                                    <IoIosFlag className="text-primary" />
-                                    <p>{item.priority}</p>
-                                  </span>
-                                  <span className="font-semibold text-sm flex flex-row gap-1 items-center">
-                                    <FiRepeat className="text-primary" />
-                                    <p>{item.repeat?.repeatType}</p>
-                                  </span>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                </div>
-                {data?.filter(item => item.status === activeTab)?.length >=
-                  10 && (
-                  <div className="flex flex-row gap-2 items-center w-full justify-center mb-4">
-                    <button
-                      onClick={() =>
-                        setCurrentPage(prev => Math.max(prev - 1, 1))
-                      }
-                      className="flex flex-row gap-2 items-center bg-secondary text-primary px-3 py-2 rounded-3xl"
-                      disabled={currentPage === 1}
-                    >
-                      <MdSkipPrevious />
-                      Last Page
-                    </button>
-                    <span className="text-secondary font-semibold">
-                      Page {currentPage}
-                    </span>
-                    <button
-                      onClick={() => {
-                        setCurrentPage(prev => prev + 1);
-                        if (!isPreviousData && data.hasMore) {
-                        }
-                      }}
-                      className="flex flex-row gap-2 items-center bg-secondary text-primary px-3 py-2 rounded-3xl"
-                      disabled={isPreviousData || !data?.hasMore}
-                    >
-                      Next Page
-                      <MdSkipNext />
-                    </button>
-                  </div>
-                )}{' '}
-              </TabsContent>
-              <TabsContent value="Daily Report" className="w-full">
-                <div className="flex flex-col gap-4 w-full justify-center items-center my-4">
-                  {isFetched &&
-                    data.length > 0 &&
-                    data
-                      .filter(item => item.status === activeTab)
-                      .map((item, index) => (
-                        <div
-                          key={index}
-                          className="bg-white w-full rounded-2xl p-8 flex flex-row justify-between shadow-md cursor-pointer"
-                          onClick={() =>
-                            router.push(`/admin/tasks/${item._id}`)
-                          }
-                        >
-                          <div className="flex flex-row gap-4">
-                            <span className="h-20 rounded-full w-1 bg-primary" />
-                            <div className="flex flex-col [&_span]:leading-7 font-ubuntu text-base text-[#565656]">
-                              <div>
-                                <span className="font-semibold text-sm flex flex-row gap-2 items-center">
-                                  <Avatar
-                                    sx={{}}
-                                    {...stringAvatar('ThikedaarDotCom')}
-                                  />
-                                  {item.issueMember?.name}
-                                </span>
-                                <span className="text-lg font-bold">
-                                  {item.title}
-                                </span>
-                              </div>
-                              {item.issueMember?.name === 'ThikedaarDotCom' ? (
-                                <span className="font-semibold text-sm">
-                                  Admin
-                                </span>
-                              ) : (
-                                <div className="flex flex-row gap-4 items-center">
-                                  <span className="font-semibold text-sm flex flex-row gap-2 items-center">
-                                    <FaUserCircle className="text-primary" />
-                                    <p className="font-semibold text-sm">
-                                      {item.assignedBy?.name ===
-                                      'ThikedaarDotCom'
-                                        ? 'Admin'
-                                        : item.assignedBy?.name}
-                                    </p>
-                                  </span>
-                                  <span className="font-semibold text-sm flex flex-row gap-2 items-center">
-                                    <SlCalender className="text-primary" />
-                                    <p>
-                                      {new Date(item.dueDate).toLocaleString(
-                                        'en-US',
-                                        {
-                                          dateStyle: 'medium',
-                                          timeStyle: 'short',
-                                        }
-                                      )}
-                                    </p>
-                                  </span>
-                                  <span className="font-semibold text-sm flex flex-row gap-1 items-center">
-                                    {item.status === 'Complete' && (
-                                      <FaCircleCheck className="text-primary" />
-                                    )}
-                                    {item.status === 'Pending' && (
-                                      <FaCircle className="text-primary" />
-                                    )}
-                                    {item.status === 'In Progress' && (
-                                      <AiOutlineLoading3Quarters className="text-primary" />
-                                    )}
-                                    {item.status === 'In Progress' && (
-                                      <FaRegCircle className="text-primary" />
-                                    )}
-                                    {item.status === 'Overdue' && (
-                                      <FaExclamationCircle className="text-primary" />
-                                    )}
-                                    <p>{item.status}</p>
-                                  </span>
-                                  <span className="font-semibold text-sm flex flex-row gap-1 items-center">
-                                    <IoIosPricetag className="text-primary" />
-                                    <p>{item.category}</p>
-                                  </span>
-                                  <span className="font-semibold text-sm flex flex-row gap-1 items-center">
-                                    <IoIosFlag className="text-primary" />
-                                    <p>{item.priority}</p>
-                                  </span>
-                                  <span className="font-semibold text-sm flex flex-row gap-1 items-center">
-                                    <FiRepeat className="text-primary" />
-                                    <p>{item.repeat?.repeatType}</p>
-                                  </span>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                </div>
-                {data?.filter(item => item.status === activeTab)?.length >=
-                  10 && (
-                  <div className="flex flex-row gap-2 items-center w-full justify-center mb-4">
-                    <button
-                      onClick={() =>
-                        setCurrentPage(prev => Math.max(prev - 1, 1))
-                      }
-                      className="flex flex-row gap-2 items-center bg-secondary text-primary px-3 py-2 rounded-3xl"
-                      disabled={currentPage === 1}
-                    >
-                      <MdSkipPrevious />
-                      Last Page
-                    </button>
-                    <span className="text-secondary font-semibold">
-                      Page {currentPage}
-                    </span>
-                    <button
-                      onClick={() => {
-                        setCurrentPage(prev => prev + 1);
-                        if (!isPreviousData && data.hasMore) {
-                        }
-                      }}
-                      className="flex flex-row gap-2 items-center bg-secondary text-primary px-3 py-2 rounded-3xl"
-                      disabled={isPreviousData || !data?.hasMore}
-                    >
-                      Next Page
-                      <MdSkipNext />
-                    </button>
-                  </div>
-                )}{' '}
-              </TabsContent>
-              <TabsContent value="OverDue Report" className="w-full">
+              <TabsContent value="Complete" className="w-full">
                 <div className="flex flex-col gap-4 w-full justify-center items-center my-4">
                   {isFetched &&
                     data.length > 0 &&
@@ -1016,7 +753,13 @@ const Page = () => {
             </Tabs>
           </div>
         </div>
-      </div> */}
+      </div>
+      <TaskFilterPopup
+        isOpen={openFilter}
+        filterhandler={handleFilterChange}
+        onClose={() => setOpenFilter(false)}
+        hideTo={true}
+      />
     </AsideContainer>
   );
 };

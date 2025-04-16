@@ -1,30 +1,30 @@
-"use client";
-import { useEffect, useRef, useState } from "react";
-import { Cancel, Check, Clear, Flag, Repeat } from "@mui/icons-material";
+'use client';
+import { useEffect, useRef, useState } from 'react';
+import { Cancel, Check, Clear, Flag, Repeat } from '@mui/icons-material';
 // import VoiceRecorder from "./VoiceRecorder";
-import { FaFile, FaMicrophone } from "react-icons/fa6";
-import { MdAttachFile, MdOutlineAccessAlarm } from "react-icons/md";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
-import { toast } from "sonner";
-import axios from "axios";
+import { FaFile, FaMicrophone } from 'react-icons/fa6';
+import { MdAttachFile, MdOutlineAccessAlarm } from 'react-icons/md';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+import { toast } from 'sonner';
+import axios from 'axios';
 import {
   Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-} from "@mui/material";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { StaticTimePicker } from "@mui/x-date-pickers/StaticTimePicker";
-import dayjs from "dayjs";
-import "dayjs/locale/en-gb"; // Import locale if needed
-import { FaPlus, FaTimes } from "react-icons/fa";
-import { AiOutlineCheck } from "react-icons/ai"; // Import check icon
-import { redirect } from "next/navigation";
-import AsideContainer from "../../../../components/AsideContainer";
-import { IoIosArrowBack } from "react-icons/io";
+} from '@mui/material';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { StaticTimePicker } from '@mui/x-date-pickers/StaticTimePicker';
+import dayjs from 'dayjs';
+import 'dayjs/locale/en-gb'; // Import locale if needed
+import { FaPlus, FaTimes } from 'react-icons/fa';
+import { AiOutlineCheck } from 'react-icons/ai'; // Import check icon
+import { redirect } from 'next/navigation';
+import AsideContainer from '../../../../components/AsideContainer';
+import { IoIosArrowBack } from 'react-icons/io';
 
 import {
   Select,
@@ -32,99 +32,99 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../../../../components/ui/select";
-import { useAuthStore } from "../../../../store/useAuthStore";
+} from '../../../../components/ui/select';
+import { useAuthStore } from '../../../../store/useAuthStore';
 
 const styles = {
   container: {
-    width: "430px",
-    padding: "25px 20px",
-    backgroundColor: "#f7f7f7",
-    borderRadius: "8px",
-    boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+    width: '430px',
+    padding: '25px 20px',
+    backgroundColor: '#f7f7f7',
+    borderRadius: '8px',
+    boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
   },
   reminderRow: {
-    display: "flex",
-    alignItems: "center",
-    marginBottom: "10px",
+    display: 'flex',
+    alignItems: 'center',
+    marginBottom: '10px',
   },
   select: {
-    marginRight: "10px",
-    padding: "5px",
-    borderRadius: "4px",
-    border: "1px solid #ccc",
+    marginRight: '10px',
+    padding: '5px',
+    borderRadius: '4px',
+    border: '1px solid #ccc',
   },
   input: {
-    width: "50px",
-    marginRight: "10px",
-    padding: "5px",
-    borderRadius: "4px",
-    border: "1px solid #ccc",
+    width: '50px',
+    marginRight: '10px',
+    padding: '5px',
+    borderRadius: '4px',
+    border: '1px solid #ccc',
   },
   deleteButton: {
     // backgroundColor: "#ff4d4d",
-    border: "none",
-    padding: "5px",
+    border: 'none',
+    padding: '5px',
     // borderRadius: "4px",
-    cursor: "pointer",
-    color: "#ff4d4d",
-    fontSize: "18px",
+    cursor: 'pointer',
+    color: '#ff4d4d',
+    fontSize: '18px',
   },
   addButton: {
-    backgroundColor: "#28a745",
-    border: "none",
-    padding: "6px 10px",
-    borderRadius: "50%",
-    color: "#fff",
-    cursor: "pointer",
+    backgroundColor: '#28a745',
+    border: 'none',
+    padding: '6px 10px',
+    borderRadius: '50%',
+    color: '#fff',
+    cursor: 'pointer',
   },
   saveButton: {
-    backgroundColor: "#28a745",
-    border: "none",
-    padding: "10px",
-    borderRadius: "4px",
-    color: "#fff",
-    cursor: "pointer",
-    width: "100%",
-    marginTop: "20px",
+    backgroundColor: '#28a745',
+    border: 'none',
+    padding: '10px',
+    borderRadius: '4px',
+    color: '#fff',
+    cursor: 'pointer',
+    width: '100%',
+    marginTop: '20px',
   },
 };
 
 const Page = () => {
   const [reminders, setReminders] = useState([
-    { type: "", time: "", unit: "" },
+    { type: '', time: '', unit: '' },
   ]);
   const [categoryList, setCategoryList] = useState([]);
   const [fileSelected, setFileSelected] = useState(false);
   const [reminderOpen, setReminderOpen] = useState(false);
   const [selectedTime, setSelectedTime] = useState(dayjs());
   const [isRecording, setIsRecording] = useState(false);
-  const [audioURL, setAudioURL] = useState("");
+  const [audioURL, setAudioURL] = useState('');
   const mediaRecorderRef = useRef(null);
   const chunksRef = useRef([]);
-  const [fileName, setFileName] = useState("");
+  const [fileName, setFileName] = useState('');
   const [memberList, setMemberList] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
   const [dateOpen, setDateOpen] = useState(false);
   const [timeOpen, setTimeOpen] = useState(false);
   const [time, setTime] = useState(false);
-  const [selectedPriority, setSelectedPriority] = useState("");
+  const [selectedPriority, setSelectedPriority] = useState('');
   const [checked, setChecked] = useState(false);
   const userId = useAuthStore(state => state.userId);
   const userName = useAuthStore(state => state.username);
 
   const [data, setData] = useState({
-    title: "",
-    description: "",
-    member: "",
-    memberName: "",
-    category: "",
-    priority: "",
-    repeatType: "",
-    repeatTime: "",
-    dueDate: "",
-    file: "",
-    audio: "",
+    title: '',
+    description: '',
+    member: '',
+    memberName: '',
+    category: '',
+    priority: '',
+    repeatType: '',
+    repeatTime: '',
+    dueDate: '',
+    file: '',
+    audio: '',
     reminder: [],
   });
 
@@ -155,7 +155,7 @@ const Page = () => {
     if (!checked) {
       setData(prevData => ({
         ...prevData,
-        repeatType: "",
+        repeatType: '',
       }));
       setSelectedDate(null);
     }
@@ -163,21 +163,21 @@ const Page = () => {
 
   const handleFormData = e => {
     const { value, name, files } = e.target;
-    if (name === "repeatType" && value) {
+    if (name === 'repeatType' && value) {
       setData({ ...data, [name]: value });
       setTime(false);
-      if (value === "Monthly") {
+      if (value === 'Monthly') {
         setDateOpen(true);
-      } else if (value === "Daily") {
+      } else if (value === 'Daily') {
         setTimeOpen(true);
       }
-    } else if (name === "file") {
+    } else if (name === 'file') {
       if (files && files[0]) {
         setFileSelected(true);
         setData({ ...data, [name]: files[0] });
         setFileName(files[0].name); // Update fileName state
       }
-    } else if (name === "member") {
+    } else if (name === 'member') {
       setData({ ...data, [name]: value });
     } else {
       setData({ ...data, [name]: value });
@@ -203,7 +203,7 @@ const Page = () => {
   const handleSave = () => {
     setData(prevData => ({
       ...prevData,
-      repeatTime: selectedDate ? selectedDate : selectedTime.format("hh:mm A"),
+      repeatTime: selectedDate ? selectedDate : selectedTime.format('hh:mm A'),
     }));
     setDateOpen(false);
     setTimeOpen(false);
@@ -225,7 +225,7 @@ const Page = () => {
           }
         };
         mediaRecorderRef.current.onstop = () => {
-          const blob = new Blob(chunksRef.current, { type: "audio/wav" });
+          const blob = new Blob(chunksRef.current, { type: 'audio/wav' });
           setData(prevData => ({
             ...prevData,
             audio: blob,
@@ -236,10 +236,10 @@ const Page = () => {
         mediaRecorderRef.current.start();
         setIsRecording(true);
       } catch (err) {
-        console.error("Error accessing media devices.", err);
+        console.error('Error accessing media devices.', err);
       }
     } else {
-      alert("Media Devices not supported");
+      alert('Media Devices not supported');
     }
   };
   const stopRecording = () => {
@@ -249,10 +249,10 @@ const Page = () => {
     }
   };
   const clearRecording = () => {
-    setAudioURL("");
+    setAudioURL('');
     setData(prevData => ({
       ...prevData,
-      audio: "",
+      audio: '',
     }));
   };
 
@@ -263,7 +263,7 @@ const Page = () => {
     if (newValue && newValue.isValid()) {
       setSelectedTime(newValue); // Update state with dayjs object
     } else {
-      console.error("Invalid date value:", newValue);
+      console.error('Invalid date value:', newValue);
     }
   };
 
@@ -271,7 +271,7 @@ const Page = () => {
 
   // Function to handle adding a new reminder
   const addReminder = () => {
-    setReminders([...reminders, { type: "", time: "", unit: "" }]);
+    setReminders([...reminders, { type: '', time: '', unit: '' }]);
   };
 
   // Function to handle removing a reminder
@@ -281,8 +281,8 @@ const Page = () => {
       const newReminders = reminders.filter((_, i) => i !== index);
       setReminders(newReminders);
     } else {
-      toast("Not Allowed", {
-        position: "top-center",
+      toast('Not Allowed', {
+        position: 'top-center',
       });
     }
   };
@@ -292,11 +292,11 @@ const Page = () => {
     const hasNonEmptyValue = reminders?.some(
       obj =>
         obj.type &&
-        obj.type.trim() !== "" &&
+        obj.type.trim() !== '' &&
         obj.time &&
-        obj.time.trim() !== "" &&
+        obj.time.trim() !== '' &&
         obj.unit &&
-        obj.unit.trim() !== ""
+        obj.unit.trim() !== ''
     );
     if (hasNonEmptyValue) {
       setData(prevData => ({
@@ -305,8 +305,8 @@ const Page = () => {
       }));
       setReminderOpen(false);
     } else {
-      toast("Field are mandatory", {
-        position: "top-center",
+      toast('Field are mandatory', {
+        position: 'top-center',
       });
     }
   };
@@ -327,81 +327,81 @@ const Page = () => {
       employeeID: userId,
     };
     if (!data.title) {
-      toast("Task Title is required", {
-        position: "top-right",
+      toast('Task Title is required', {
+        position: 'top-right',
       });
     } else if (!data.description) {
-      toast("Title Description is required", {
-        position: "top-right",
+      toast('Title Description is required', {
+        position: 'top-right',
       });
     } else if (!data.member) {
-      toast("Member is required", {
-        position: "top-right",
+      toast('Member is required', {
+        position: 'top-right',
       });
     } else if (!data.category) {
-      toast("Category is required", {
-        position: "top-right",
+      toast('Category is required', {
+        position: 'top-right',
       });
     } else if (!data.priority) {
-      toast("Priority is required", {
-        position: "top-right",
+      toast('Priority is required', {
+        position: 'top-right',
       });
     } else if (!data.dueDate) {
-      toast("Due Date is required", {
-        position: "top-right",
+      toast('Due Date is required', {
+        position: 'top-right',
       });
     } else {
       let employeeID = userId;
       const formData = new FormData();
-      formData.append("title", data.title);
-      formData.append("description", data.description);
-      formData.append("member", data.member?.split("/")[0]);
-      formData.append("memberName", data.member?.split("/")[1]);
-      formData.append("assignedName", userName);
-      formData.append("assignedID", userId);
-      formData.append("category", data.category);
-      formData.append("priority", data.priority);
-      formData.append("repeatType", data.repeatType);
-      formData.append("repeatTime", data.repeatTime);
-      formData.append("dueDate", data.dueDate);
-      formData.append("file", data.file);
+      formData.append('title', data.title);
+      formData.append('description', data.description);
+      formData.append('member', data.member?.split('/')[0]);
+      formData.append('memberName', data.member?.split('/')[1]);
+      formData.append('assignedName', userName);
+      formData.append('assignedID', userId);
+      formData.append('category', data.category);
+      formData.append('priority', data.priority);
+      formData.append('repeatType', data.repeatType);
+      formData.append('repeatTime', data.repeatTime);
+      formData.append('dueDate', data.dueDate);
+      formData.append('file', data.file);
       if (data.audio) {
-        formData.append("audio", data.audio, "recording.wav");
+        formData.append('audio', data.audio, 'recording.wav');
       } else {
-        formData.append("audio", data.audio);
+        formData.append('audio', data.audio);
       }
-      formData.append("reminder", JSON.stringify(data.reminder));
+      formData.append('reminder', JSON.stringify(data.reminder));
       //   console.log(audioURL)
       axios
         .post(`${process.env.REACT_APP_BASE_PATH}/api/task/add`, formData)
         .then(response => {
           if (response.data.status === 201) {
             setData({
-              title: "",
-              description: "",
-              member: "",
-              memberName: "",
-              category: "",
-              priority: "",
-              repeatType: "",
-              repeatTime: "",
-              dueDate: "",
-              file: "",
-              audio: "",
+              title: '',
+              description: '',
+              member: '',
+              memberName: '',
+              category: '',
+              priority: '',
+              repeatType: '',
+              repeatTime: '',
+              dueDate: '',
+              file: '',
+              audio: '',
               reminder: [],
             });
             clearRecording();
-            setReminders([{ type: "", time: "", unit: "" }]);
-            setFileName("");
-            setSelectedPriority("");
+            setReminders([{ type: '', time: '', unit: '' }]);
+            setFileName('');
+            setSelectedPriority('');
             setChecked(false);
             toast(response.data.message, {
-              position: "top-right",
+              position: 'top-right',
             });
-            redirect("/admin/taskdashboard");
+            redirect('/admin/taskdashboard');
           } else {
             toast(response.data.message, {
-              position: "top-right",
+              position: 'top-right',
             });
           }
         })
@@ -433,6 +433,7 @@ const Page = () => {
                   className="h-12 border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100"
                   value={data.title}
                   type="text"
+                  placeholder="Task Title"
                   name="title"
                   onChange={e => handleFormData(e)}
                 />
@@ -441,6 +442,7 @@ const Page = () => {
                 <label>Description</label>
                 <input
                   value={data.description}
+                  placeholder="Description"
                   type="text"
                   className="h-12 border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100"
                   name="description"
@@ -510,6 +512,7 @@ const Page = () => {
                       priority: value,
                     }));
                   }}
+                  defaultValue="High"
                 >
                   <SelectTrigger className="w-full border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100 h-[54px]">
                     <SelectValue placeholder="Select" />
@@ -532,25 +535,33 @@ const Page = () => {
                       ...prevData,
                       repeatType: value,
                     }));
-                    if (value === "Monthly") {
+                    if (value === 'Monthly') {
                       setDateOpen(true);
-                    } else if (value === "Daily") {
+                    } else if (value === 'Daily') {
                       setTimeOpen(true);
                     }
                   }}
+                  defaultValue="Once"
                 >
                   <SelectTrigger className="w-full border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100 h-[54px]">
                     <SelectValue placeholder="Select" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="Once" selected={checked}>
+                      Once
+                    </SelectItem>
                     <SelectItem value="Daily">Daily</SelectItem>
+                    <SelectItem value="Weekly">Weekly</SelectItem>
                     <SelectItem value="Monthly">Monthly</SelectItem>
+                    <SelectItem value="Yearly">Yearly</SelectItem>
+                    {/* <SelectItem value="Periodically">Periodically</SelectItem>
+                    <SelectItem value="Custom">Custom</SelectItem> */}
                   </SelectContent>
                 </Select>
 
                 {data?.repeatType && time && (
                   <p className="font-semibold">
-                    Repeat {data.repeatType === "Daily" ? "Time" : "Date"}:{" "}
+                    Repeat {data.repeatType === 'Daily' ? 'Time' : 'Date'}:{' '}
                     {selectedDate ? selectedDate.getDate() : data.repeatTime}
                   </p>
                 )}
@@ -571,7 +582,7 @@ const Page = () => {
                   <input
                     type="file"
                     id="fileInput"
-                    style={{ display: "none" }}
+                    style={{ display: 'none' }}
                     name="file"
                     onChange={e => handleFormData(e)}
                   />
@@ -595,7 +606,7 @@ const Page = () => {
                 <button
                   onClick={() => {
                     setReminderOpen(true);
-                    setReminders([{ type: "", time: "", unit: "" }]);
+                    setReminders([{ type: '', time: '', unit: '' }]);
                   }}
                   className="p-2 bg-primary-foreground rounded-full border border-primary [&_svg]:text-primary text-xl"
                 >
@@ -632,11 +643,11 @@ const Page = () => {
                 reminders?.some(
                   obj =>
                     obj.type &&
-                    obj.type.trim() !== "" &&
+                    obj.type.trim() !== '' &&
                     obj.time &&
-                    obj.time.trim() !== "" &&
+                    obj.time.trim() !== '' &&
                     obj.unit &&
-                    obj.unit.trim() !== ""
+                    obj.unit.trim() !== ''
                 ) && (
                   <div className="reminder_block">
                     {reminders?.map((item, idx) => {
@@ -666,13 +677,13 @@ const Page = () => {
         open={dateOpen}
         onClose={handleCancel}
         sx={{
-          "& .MuiDialog-paper": {
-            width: "400px",
-            height: "460px",
-            maxWidth: "100%",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
+          '& .MuiDialog-paper': {
+            width: '400px',
+            height: '460px',
+            maxWidth: '100%',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
           },
         }}
       >
@@ -701,7 +712,7 @@ const Page = () => {
 
       <Dialog open={timeOpen} onClose={handleCancel}>
         <DialogTitle>Select Time</DialogTitle>
-        <DialogContent style={{ width: "500px", height: "260px" }}>
+        <DialogContent style={{ width: '500px', height: '260px' }}>
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <StaticTimePicker
               orientation="landscape"
@@ -725,13 +736,13 @@ const Page = () => {
           <MdOutlineAccessAlarm className="me-2 fs-4" />
           Add Task Reminders
         </DialogTitle>
-        <DialogContent style={{ width: "500px", height: "250px" }}>
+        <DialogContent style={{ width: '500px', height: '250px' }}>
           <div style={styles.container}>
             {reminders?.map((reminder, index) => (
               <div key={index} style={styles.reminderRow}>
                 <select
                   value={reminder.type}
-                  onChange={e => updateReminder(index, "type", e.target.value)}
+                  onChange={e => updateReminder(index, 'type', e.target.value)}
                   style={styles.select}
                 >
                   <option value="">Select</option>
@@ -742,13 +753,13 @@ const Page = () => {
                 <input
                   type="number"
                   value={reminder.time}
-                  onChange={e => updateReminder(index, "time", e.target.value)}
+                  onChange={e => updateReminder(index, 'time', e.target.value)}
                   style={styles.input}
                 />
 
                 <select
                   value={reminder.unit}
-                  onChange={e => updateReminder(index, "unit", e.target.value)}
+                  onChange={e => updateReminder(index, 'unit', e.target.value)}
                   style={styles.select}
                 >
                   <option value="">Select</option>

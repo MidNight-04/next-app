@@ -255,7 +255,7 @@ const ClientProjectView = () => {
     setPointList(filter[0]?.step);
   };
 
-  const handleStepChange = async value => {
+  const handleStepChange = value => {
     const pt = value?.split('$')[1];
     setPoint(parseInt(pt));
     if (step) {
@@ -265,39 +265,8 @@ const ClientProjectView = () => {
       if (filtered) {
         const selectedStep = filtered.find(dt => dt.point === parseInt(pt));
         if (selectedStep) {
-          const member = selectedStep.issueMember;
-          let issue;
-          for (let i = 0; i < member?.length; i++) {
-            switch (member[i]?.toLowerCase()) {
-              case 'admin':
-                issue = '65362fba3ffa1cad30f53bac';
-                break;
-              case 'project admin':
-                issue = projectDetails?.project_admin[0];
-                break;
-              case 'project manager':
-                issue = projectDetails?.project_manager[0];
-                break;
-              case 'sr. engineer':
-                issue = projectDetails?.sr_engineer[0];
-                break;
-              case 'site engineer':
-                issue = projectDetails?.site_engineer[0];
-                break;
-              case 'accountant':
-                issue = projectDetails?.accountant[0];
-                break;
-              case 'operation':
-                issue = projectDetails?.operation[0];
-                break;
-              case 'sales':
-                issue = projectDetails?.sales[0];
-                break;
-              default:
-                break;
-            }
-          }
-          setAssignMember(issue);
+          const member = selectedStep.taskId.issueMember?._id;
+          setAssignMember(member);
         }
       }
     }
@@ -378,12 +347,8 @@ const ClientProjectView = () => {
       formData.append('name', step);
       formData.append('point', parseInt(point));
       formData.append('content', content?.split('$')[0]);
-      // Serialize the entire array as a JSON string
       formData.append('assignedBy', userId);
-      formData.append('assignMember', projectDetails.client);
-      // for (let i = 0; i < assignMember?.length; i++) {
-      //   formData.append("assignMember", JSON.stringify(assignMember[i]));
-      // }
+      formData.append('assignMember', assignMember);
       formData.append('status', status);
       for (let i = 0; i < image?.length; i++) {
         formData.append('image', image[i]);
@@ -2011,8 +1976,11 @@ const ClientProjectView = () => {
               >
                 {pointList?.map((data, id) => {
                   return (
-                    <MenuItem key={id} value={`${data.content}$${data.point}`}>
-                      {data.content}
+                    <MenuItem
+                      key={id}
+                      value={`${data.taskId.title}$${data.point}`}
+                    >
+                      {data.taskId.title}
                     </MenuItem>
                   );
                 })}

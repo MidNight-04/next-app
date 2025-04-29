@@ -73,9 +73,11 @@ const Page = () => {
       break;
   }
 
-  if (userType !== 'ROLE_ADMIN') {
-    setEmployeeId(userId);
-  }
+  useEffect(() => {
+    if (userType !== 'ROLE_ADMIN') {
+      setEmployeeId(userId);
+    }
+  }, []);
 
   // const user = userType !== 'ROLE_ADMIN' ? userId : null;
   const { data, isFetched, isError, isPreviousData, isFetching, refetch } =

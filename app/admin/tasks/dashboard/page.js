@@ -609,7 +609,7 @@ const Page = () => {
                       <div className="w-full overflow-x-auto bg-secondary font-semibold rounded-2xl">
                         <table className="w-full table-auto text-center">
                           <thead>
-                            <tr className="text-primary flex flex-row">
+                            <tr className="text-primary">
                               <th className="p-4">Employee Name</th>
                               <th className="px-4">Total</th>
                               <th>

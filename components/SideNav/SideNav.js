@@ -1,5 +1,5 @@
-"use client";
-import { Calendar, Home, Inbox, Search, Settings } from "lucide-react";
+'use client';
+import { Calendar, Home, Inbox, Search, Settings } from 'lucide-react';
 
 import {
   Sidebar,
@@ -12,17 +12,17 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-} from "../../components/ui/sidebar";
-import Link from "next/link";
-import { useAuthStore } from "../../store/useAuthStore";
-import { getDashboardSidebar } from "../../constant/dashboardSidebarData";
-import { usePathname } from "next/navigation";
-import { cn } from "../../lib/utils";
-import Image from "next/image";
+} from '../../components/ui/sidebar';
+import Link from 'next/link';
+import { useAuthStore } from '../../store/useAuthStore';
+import { getDashboardSidebar } from '../../constant/dashboardSidebarData';
+import { usePathname } from 'next/navigation';
+import { cn } from '../../lib/utils';
+import Image from 'next/image';
 
 const SideNav = () => {
   const userType = useAuthStore(state => state.userType);
-  const content = getDashboardSidebar(userType || "ROLE_CLIENT");
+  const content = getDashboardSidebar(userType || 'ROLE_CLIENT');
   const path = usePathname();
 
   return (
@@ -30,11 +30,11 @@ const SideNav = () => {
       <SidebarContent className="bg-secondary">
         <SidebarGroup className="pr-0 pl-5">
           <SidebarHeader>
-            <Link href={"/admin/home"} className="pt-[14px]">
+            <Link href={'/admin/home'} className="pt-[14px]">
               <img
-                src="/bldox_light.svg"
+                src="/logo_white.png"
                 alt="log"
-                className="h-32 w-52 fill-red-500 text-red-500"
+                className='h-9'
               />
             </Link>
           </SidebarHeader>
@@ -53,8 +53,8 @@ const SideNav = () => {
                       >
                         <Link
                           className={cn(
-                            "text-[#93BFCF] font-normal flex flex-row justify-between",
-                            path.includes(item.path) ? "text-[#EEE9DA] " : ""
+                            'text-[#93BFCF] font-normal flex flex-row justify-between',
+                            path.includes(item.path) ? 'text-[#EEE9DA] ' : ''
                           )}
                           href={item.path}
                         >
@@ -71,7 +71,7 @@ const SideNav = () => {
                   ))}
                 </>
                 {content.length - 1 === index ? (
-                  ""
+                  ''
                 ) : (
                   <hr className="border-[#565656] ml-2 my-4 w-[85%]" />
                 )}

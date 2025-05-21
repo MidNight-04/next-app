@@ -58,6 +58,7 @@ import {
 import { useAuthStore } from '../../../../store/useAuthStore';
 import { IoIosArrowBack } from 'react-icons/io';
 import { useRouter } from 'next/navigation';
+import { LuTimerReset } from "react-icons/lu";
 
 let today = new Date();
 let yyyy = today.getFullYear();
@@ -257,15 +258,15 @@ const ClientProjectView = () => {
 
   const handleStepChange = value => {
     const pt = value?.split('$')[1];
-    setPoint(parseInt(pt));
+    setPoint(pt);
     if (step) {
       const filtered = projectDetails?.project_status?.find(
         obj => obj.name === step
       )?.step;
       if (filtered) {
-        const selectedStep = filtered.find(dt => dt.point === parseInt(pt));
-        if (selectedStep) {
-          const member = selectedStep.taskId.issueMember?._id;
+        const selectedTask = filtered.find(dt => dt.taskId.title === value?.split('$')[0]);
+        if (selectedTask) {
+          const member = selectedTask.taskId.issueMember?._id;
           setAssignMember(member);
         }
       }
@@ -735,7 +736,7 @@ const ClientProjectView = () => {
         activeUser: userId,
         userName: userName,
         uploadData: {
-          manager: projectDetails?.project_manager,
+          // manager: projectDetails?.project_manager,
           engineer: projectDetails?.site_engineer,
           sr_engineer: projectDetails?.sr_engineer,
           contractor: projectDetails?.contractor,
@@ -1286,6 +1287,9 @@ const ClientProjectView = () => {
                                 {itm.taskId.status === 'In Progress' && (
                                   <TbProgress className="mt-1 ml-1 text-secondary text-2xl " />
                                 )}
+                                {itm.taskId.status === 'Overdue' && (
+                                  <LuTimerReset className="mt-[3px] ml-1 text-secondary text-2xl " />
+                                )}
                               </div>
                             </div>
                             <div className="w-[200px] flex items-center -md:w-16">
@@ -1572,7 +1576,7 @@ const ClientProjectView = () => {
                   );
                 })}
               </div>
-              <div className="mb-2">
+              {/* <div className="mb-2">
                 <span className="font-ubuntu font-semibold">
                   Project Manager
                 </span>
@@ -1602,7 +1606,7 @@ const ClientProjectView = () => {
                     </div>
                   );
                 })}
-              </div>
+              </div> */}
               <div className="mb-2">
                 <span className="font-ubuntu font-semibold">
                   Architect/Designer
@@ -1978,7 +1982,7 @@ const ClientProjectView = () => {
                   return (
                     <MenuItem
                       key={id}
-                      value={`${data.taskId.title}$${data.point}`}
+                      value={`${data.taskId.title}$${data.taskId.stepName}`}
                     >
                       {data.taskId.title}
                     </MenuItem>
@@ -2288,9 +2292,9 @@ const ClientProjectView = () => {
                 <MenuItem
                   value={projectDetails?.project_admin[0]}
                 >{`${projectDetails?.project_admin[0]?.name} (Project Admin)`}</MenuItem>
-                <MenuItem
+                {/* <MenuItem
                   value={projectDetails?.project_manager[0]}
-                >{`${projectDetails?.project_manager[0]?.name} (Project Manager)`}</MenuItem>
+                >{`${projectDetails?.project_manager[0]?.name} (Project Manager)`}</MenuItem> */}
                 <MenuItem
                   value={projectDetails?.sr_engineer[0]}
                 >{`${projectDetails?.sr_engineer[0]?.name} (Senior Engineer)`}</MenuItem>

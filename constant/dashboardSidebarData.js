@@ -59,6 +59,13 @@ const adminSidebar = [
     paraClass: 'title',
     menuItem: [
       {
+        path: '/admin/dashboard',
+        iconName: <Dashboard sx={{ height: '1rem', width: '1rem' }} />,
+        feildName: 'Dashboard',
+        linkClassName: 'adminNavLink',
+        subMenuItem: [],
+      },
+      {
         path: '/admin/projects',
         iconName: <GrProjects />,
         feildName: 'Projects',
@@ -517,7 +524,7 @@ const managerSidebar = [
     paraClass: 'title',
     menuItem: [
       {
-        path: '/admin/projects',
+        path: '/admin/projects/myprojects',
         iconName: <GroupIcon />,
         feildName: 'Projects',
         linkClassName: 'adminNavLink',
@@ -600,7 +607,7 @@ const clientSidebar = [
     paraClass: 'title',
     menuItem: [
       {
-        path: '/admin/projects',
+        path: '/admin/projects/myprojects',
         iconName: <GroupIcon />,
         feildName: 'Projects',
         linkClassName: 'adminNavLink',
@@ -713,7 +720,7 @@ const siteEngineerSidebar = [
     paraClass: 'title',
     menuItem: [
       {
-        path: '/admin/projects',
+        path: '/admin/projects/myprojects',
         iconName: <GroupIcon />,
         feildName: 'Projects',
         linkClassName: 'adminNavLink',

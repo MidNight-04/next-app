@@ -63,7 +63,7 @@ const Page = () => {
   useEffect(() => {
     if (isFetched) {
       setProfileData({
-        profileImage: profile?.data.profileImage[0],
+        image: profile?.data.profileImage[0],
         name: profile?.data.name,
         phone: profile?.data.phone,
         email: profile?.data.email,

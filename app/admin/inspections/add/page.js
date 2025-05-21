@@ -84,7 +84,7 @@ const AddProjectCheckList = () => {
             toast(response.data.message, {
               position: "top-right",
             });
-            router.push("/admin/project/checklist");
+            router.push("/admin/inspections");
           }
         })
         .catch(error => {

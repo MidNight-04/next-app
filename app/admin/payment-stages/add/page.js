@@ -106,7 +106,7 @@ const AddPaymentStagesForm = () => {
     // Save the Blob as an Excel file
     saveAs(dataBlob, "paymentstagesample.xlsx");
   };
-  console.log(floorList);
+
   return (
     <AsideContainer>
       {/* <AdminSidebar /> */}

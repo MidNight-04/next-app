@@ -1,8 +1,9 @@
-import { redirect } from "next/navigation";
-import AdminHeader from "../AdminHeader/AdminHeader";
-import SideNav from "../SideNav/SideNav";
-import { SidebarProvider } from "../ui/sidebar";
-import { useAuthStore } from "../../store/useAuthStore";
+'use client';
+import { redirect } from 'next/navigation';
+import AdminHeader from '../AdminHeader/AdminHeader';
+import SideNav from '../SideNav/SideNav';
+import { SidebarProvider } from '../ui/sidebar';
+import { useAuthStore } from '../../store/useAuthStore';
 
 const AsideContainer = ({ children }) => {
   const isAuth = useAuthStore(state => state.isAuth);

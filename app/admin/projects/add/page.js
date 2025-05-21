@@ -23,6 +23,7 @@ const AddProjectForm = () => {
     name: '',
     siteID: '',
     location: '',
+    branch: '',
     client: '',
     plan: '',
     floor: '',
@@ -31,7 +32,7 @@ const AddProjectForm = () => {
     date: '',
     duration: '',
     admin: '',
-    manager: '',
+    // manager: '',
     architect: '',
     sr_engineer: '',
     engineer: '',
@@ -147,6 +148,8 @@ const AddProjectForm = () => {
       toast('Site ID is required');
     } else if (!data.location) {
       toast('Location is required');
+    } else if (!data.branch) {
+      toast('Branch is required');
     } else if (!data.client) {
       toast('Client is required');
     } else if (!data.floor) {
@@ -161,8 +164,8 @@ const AddProjectForm = () => {
       toast('Duration is required');
     } else if (data.admin?.length === 0) {
       toast('Admin is required');
-    } else if (data.manager?.length === 0) {
-      toast('Project Manager is required');
+    // } else if (data.manager?.length === 0) {
+    //   toast('Project Manager is required');
     } else if (data.sr_engineer?.length === 0) {
       toast('Sr. Engineer is required');
     } else if (data.engineer?.length === 0) {
@@ -180,6 +183,7 @@ const AddProjectForm = () => {
         name: data.name,
         siteID: data.siteID,
         location: data.location,
+        branch: data.branch,
         client: data.client,
         plan: data.plan,
         floor: data.floor,
@@ -187,7 +191,7 @@ const AddProjectForm = () => {
         cost: data.cost,
         date: data.date,
         duration: data.duration,
-        manager: data.manager,
+        // manager: data.manager,
         accountant: data.accountant,
         architect: data.architect,
         sr_engineer: data.sr_engineer,
@@ -217,7 +221,7 @@ const AddProjectForm = () => {
               cost: '',
               date: '',
               duration: '',
-              manager: [],
+              // manager: [],
               accountant: [],
               engineer: [],
               sr_engineer: [],
@@ -294,6 +298,25 @@ const AddProjectForm = () => {
                         onChange={e => handleFormData(e)}
                         className="h-[54px] border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100 font-semibold"
                       />
+                    </div>
+                      <div className="flex flex-col gap-2 [&_label]:font-semibold">
+                      <label htmlFor="branch">Branch</label>
+                      <div>
+                        <Select
+                          onValueChange={value =>
+                            setData({ ...data, branch: value })
+                          }
+                        >
+                          <SelectTrigger className="w-full border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100 h-[54px]">
+                            <SelectValue placeholder="Select" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value='Gurgaon'>Gurgaon</SelectItem>
+                            <SelectItem value='Patna'>Patna</SelectItem>
+                            <SelectItem value='Ranchi'>Ranchi</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
                     <div className="flex flex-col gap-2 [&_label]:font-semibold">
                       <label htmlFor="client">Client</label>
@@ -429,7 +452,7 @@ const AddProjectForm = () => {
                         </Select>
                       </div>
                     </div>
-                    <div className="flex flex-col gap-2 [&_label]:font-semibold">
+                    {/* <div className="flex flex-col gap-2 [&_label]:font-semibold">
                       <label htmlFor="role">Project Manager</label>
                       <div>
                         <Select
@@ -454,7 +477,7 @@ const AddProjectForm = () => {
                           </SelectContent>
                         </Select>
                       </div>
-                    </div>
+                    </div> */}
                     <div className="flex flex-col gap-2 [&_label]:font-semibold">
                       <label htmlFor="role">Architect</label>
                       <div>

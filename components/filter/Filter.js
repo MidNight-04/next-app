@@ -10,15 +10,20 @@ const TaskFilterPopup = ({
   isOpen,
   onClose,
   filterhandler,
-  hideTo = false,
-  hideBy = false,
+  showTo = false,
+  showBy = false,
+  category = '',
+  assgndBy = '',
+  assgndTo = '',
+  frqcy = '',
+  prty = '',
 }) => {
   const [activeTab, setActiveTab] = useState('Category');
-  const [selectedCategory, setSelectedCategory] = useState('');
-  const [assignedBy, setAssignedBy] = useState('');
-  const [assignedTo, setAssignedTo] = useState('');
-  const [frequency, setFrequency] = useState('');
-  const [priority, setPriority] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState(category);
+  const [assignedBy, setAssignedBy] = useState(assgndBy);
+  const [assignedTo, setAssignedTo] = useState(assgndTo);
+  const [frequency, setFrequency] = useState(frqcy);
+  const [priority, setPriority] = useState(prty);
   const [searchCategory, setSearchCategory] = useState('');
   const [searchAssignedBy, setSearchAssignedBy] = useState('');
   const [searchAssignedTo, setSearchAssignedTo] = useState('');
@@ -55,7 +60,14 @@ const TaskFilterPopup = ({
     ],
   });
 
-  const frequencyOptions = ['Daily', 'Weekly', 'Monthly'];
+  const frequencyOptions = [
+    { name: 'Once', id: 'norepeat' },
+    { name: 'Hourly', id: 'Hourly' },
+    { name: 'Daily', id: 'Daily' },
+    { name: 'Weekly', id: 'Weekly' },
+    { name: 'Monthly', id: 'Monthly' },
+  ];
+
   const priorityOptions = ['High', 'Medium', 'Low'];
 
   const handleClear = () => {
@@ -78,8 +90,8 @@ const TaskFilterPopup = ({
 
   const filters = [
     'Category',
-    !hideBy ? '' : 'Assigned By',
-    !hideTo ? '' : 'Assigned To',
+    !showBy ? '' : 'Assigned By',
+    !showTo ? '' : 'Assigned To',
     'Frequency',
     'Priority',
   ];
@@ -129,7 +141,7 @@ const TaskFilterPopup = ({
       case 'Assigned By':
         return (
           <>
-            {hideBy && (
+            {showBy && (
               <div className="flex flex-col w-full">
                 <input
                   value={searchAssignedBy}
@@ -168,11 +180,11 @@ const TaskFilterPopup = ({
       case 'Assigned To':
         return (
           <>
-            {hideTo && (
+            {showTo && (
               <div className="flex flex-col w-full">
                 <input
-                  value={searchAssignedBy}
-                  onChange={e => setSearchAssignedBy(e.target.value)}
+                  value={searchAssignedTo}
+                  onChange={e => setSearchAssignedTo(e.target.value)}
                   type="text"
                   placeholder="Search Assigned By"
                   className="p-2 border rounded-md mb-4 w-full"
@@ -181,20 +193,20 @@ const TaskFilterPopup = ({
                   .filter(item =>
                     item.name
                       .toLowerCase()
-                      .includes(searchAssignedBy.toLowerCase())
+                      .includes(searchAssignedTo.toLowerCase())
                   )
                   .map(person => (
                     <div
                       key={person._id}
                       className={`flex items-center p-2 rounded-md cursor-pointer ${
-                        assignedBy === person._id ? 'bg-gray-100' : ''
+                        assignedTo === person._id ? 'bg-gray-100' : ''
                       }`}
-                      onClick={() => setAssignedBy(person._id)}
+                      onClick={() => setAssignedTo(person._id)}
                     >
                       <input
                         type="radio"
-                        checked={assignedBy === person._id}
-                        onChange={() => setAssignedBy(person._id)}
+                        checked={assignedTo === person._id}
+                        onChange={() => setAssignedTo(person._id)}
                         className="mr-2"
                       />
                       <label>{person.name}</label>
@@ -216,23 +228,23 @@ const TaskFilterPopup = ({
             />
             {frequencyOptions
               .filter(item =>
-                item.toLowerCase().includes(searchFrequency.toLowerCase())
+                item.id.toLowerCase().includes(searchFrequency.toLowerCase())
               )
               .map(freq => (
                 <div
-                  key={freq}
+                  key={freq.id}
                   className={`flex items-center p-2 rounded-md cursor-pointer ${
                     frequency === freq ? 'bg-gray-100' : ''
                   }`}
-                  onClick={() => setFrequency(freq)}
+                  onClick={() => setFrequency(freq.id)}
                 >
                   <input
                     type="radio"
-                    checked={frequency === freq}
-                    onChange={() => setFrequency(freq)}
+                    checked={frequency === freq.id}
+                    onChange={() => setFrequency(freq.id)}
                     className="mr-2"
                   />
-                  <label>{freq}</label>
+                  <label>{freq.name}</label>
                 </div>
               ))}
           </>

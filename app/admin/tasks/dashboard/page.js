@@ -43,6 +43,7 @@ const Page = () => {
   const [employeeId, setEmployeeId] = useState('');
   const [categoryId, setCategoryId] = useState('');
   const [frequency, setFrequency] = useState('');
+  const [branch,setBranch] = useState("");
 
   let url;
 
@@ -72,13 +73,13 @@ const Page = () => {
       url = `${process.env.REACT_APP_BASE_PATH}/api/task/customfilters`;
       break;
   }
-
-  useEffect(()=>{ 
-    if (userType !== 'ROLE_ADMIN') {
-    setEmployeeId(userId);
-  }
-  },[])
   
+  useEffect(() => {
+    if (userType !== 'ROLE_ADMIN') {
+      setEmployeeId(userId);
+    }
+  }, []);
+
   // const user = userType !== 'ROLE_ADMIN' ? userId : null;
   const { data, isFetched, isError, isPreviousData, isFetching, refetch } =
     useQuery({
@@ -91,12 +92,18 @@ const Page = () => {
         frequency,
       ],
       queryFn: async () => {
-        const response = await axios.post(url, {
-          page: currentPage,
-          assignedTo: employeeId,
-          category: categoryId,
-          repeat: frequency,
-        });
+        const response = await axios.post(
+          `${process.env.REACT_APP_BASE_PATH}/api/task/customfilters`,
+          // url,
+          {
+            page: currentPage,
+            assignedTo: employeeId,
+            category: categoryId,
+            repeat: frequency,
+            filter: activeFilter,
+            branch: branch,
+          }
+        );
         return response.data;
       },
       keepPreviousData: true,
@@ -108,7 +115,7 @@ const Page = () => {
 
   useEffect(() => {
     refetch();
-  }, [employeeId, categoryId, frequency, refetch]);
+  }, [employeeId, categoryId, frequency, refetch, branch]);
 
   const [{ data: teammembers }, { data: categories }] = useQueries({
     queries: [
@@ -134,8 +141,8 @@ const Page = () => {
   });
 
   const filters = [
-    'Today',
     'Yesterday',
+    'Today',
     'This Week',
     'Last Week',
     'This Month',
@@ -486,7 +493,7 @@ const Page = () => {
                   </SelectItem>
                 ))}
               </SelectContent>
-            </Select>
+              </Select>
             <Select
               onValueChange={value => {
                 setCategoryId(value);
@@ -503,6 +510,21 @@ const Page = () => {
                     {item.name}
                   </SelectItem>
                 ))}
+              </SelectContent>
+            </Select>
+            <Select
+              onValueChange={value => {
+                setBranch(value);
+              }}
+              value={branch}
+            >
+              <SelectTrigger className="w-[180px] bg-white px-2 py-1 rounded-lg border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                <SelectValue placeholder="Branch" />
+              </SelectTrigger>
+              <SelectContent>
+              <SelectItem value="Gurgaon">Gurgaon</SelectItem>
+              <SelectItem value="Ranchi">Ranchi</SelectItem>
+              <SelectItem value="Patna">Patna</SelectItem>
               </SelectContent>
             </Select>
             <Select
@@ -527,6 +549,7 @@ const Page = () => {
                 setEmployeeId('');
                 setCategoryId('');
                 setFrequency('');
+                setBranch('');
               }}
               className="flex items-center"
             >
@@ -586,7 +609,7 @@ const Page = () => {
                       <div className="w-full overflow-x-auto bg-secondary font-semibold rounded-2xl">
                         <table className="w-full table-auto text-center">
                           <thead>
-                            <tr className="text-primary">
+                            <tr className="text-primary flex flex-row">
                               <th className="p-4">Employee Name</th>
                               <th className="px-4">Total</th>
                               <th>
@@ -628,7 +651,9 @@ const Page = () => {
                           <tbody>
                             {isFetched &&
                               groupedByEmployee.length > 0 &&
-                              groupedByEmployee.map((item, index) => {
+                              groupedByEmployee
+                              // .filter(item => item.branch === branch || branch === '')
+                              .map((item, index) => {
                                 const percent =
                                   (item.obj.filter(
                                     task => task.status === 'Complete'
@@ -662,7 +687,6 @@ const Page = () => {
                                       new Date(task.updatedOn) >
                                       new Date(task.dueDate)
                                   ).length;
-
                                 return (
                                   <tr
                                     key={index}

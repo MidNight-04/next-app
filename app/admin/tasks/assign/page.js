@@ -367,9 +367,7 @@ const Page = () => {
       formData.append('file', data.file);
       if (data.audio) {
         formData.append('audio', data.audio, 'recording.wav');
-      } else {
-        formData.append('audio', data.audio);
-      }
+      } 
       formData.append('reminder', JSON.stringify(data.reminder));
       //   console.log(audioURL)
       axios

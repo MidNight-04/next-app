@@ -73,7 +73,7 @@ const Page = () => {
       url = `${process.env.REACT_APP_BASE_PATH}/api/task/customfilters`;
       break;
   }
-
+  
   useEffect(() => {
     if (userType !== 'ROLE_ADMIN') {
       setEmployeeId(userId);

@@ -1,19 +1,21 @@
-"use client";
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { BsBuilding } from "react-icons/bs";
-import { GiDuration } from "react-icons/gi";
-import { RiMoneyRupeeCircleLine } from "react-icons/ri";
-import { PiMapPinSimpleAreaLight } from "react-icons/pi";
-import { MdDeleteOutline } from "react-icons/md";
-import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
-import "react-circular-progressbar/dist/styles.css";
-import AddIcon from "@mui/icons-material/Add";
-import { FiArrowUpRight } from "react-icons/fi";
-import Link from "next/link";
-import { useAuthStore } from "../../../store/useAuthStore";
-import { IoPeopleOutline } from "react-icons/io5";
-import AsideContainer from "../../../components/AsideContainer";
+'use client';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { BsBuilding } from 'react-icons/bs';
+import { GiDuration } from 'react-icons/gi';
+import { RiMoneyRupeeCircleLine } from 'react-icons/ri';
+import { PiMapPinSimpleAreaLight } from 'react-icons/pi';
+import { MdDeleteOutline } from 'react-icons/md';
+import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
+import 'react-circular-progressbar/dist/styles.css';
+import AddIcon from '@mui/icons-material/Add';
+import { FiArrowUpRight } from 'react-icons/fi';
+import Link from 'next/link';
+import { useAuthStore } from '../../../store/useAuthStore';
+import { IoPeopleOutline } from 'react-icons/io5';
+import AsideContainer from '../../../components/AsideContainer';
+import { Modal } from '@mui/material';
+import { useRouter } from 'next/navigation';
 
 const Page = () => {
   const [project, setProject] = useState([]);
@@ -21,22 +23,17 @@ const Page = () => {
   const userType = useAuthStore(state => state.userType);
   // const id = "668e250e039e5714c86ccd57";
   // const id = "65362fba3ffa1cad30f53bac";
-  const [search, setSearch] = useState("");
-  const columns = [
-    { field: "seriel", headerName: "SNo.", width: 100 },
-    { field: "name", headerName: "Name", width: 250 },
-    { field: "location", headerName: "Location", width: 200 },
-    { field: "date", headerName: "Start Date", width: 150 },
-    { field: "duration", headerName: "Duration", width: 150 },
-    { field: "floor", headerName: "floor", width: 150 },
-  ];
+  const [search, setSearch] = useState('');
+  const [siteId, setSiteId] = useState('');
+  const [openDelete, setOpenDelete] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     getAllProjects();
   }, [id, userType]);
 
   const getAllProjects = () => {
-    if (userType === "ROLE_CLIENT") {
+    if (userType === 'ROLE_CLIENT') {
       axios
         .get(`${process.env.REACT_APP_BASE_PATH}/api/project/client/${id}`)
         .then(response => {
@@ -45,7 +42,7 @@ const Page = () => {
         .catch(error => {
           console.log(error);
         });
-    } else if (userType === "ROLE_ADMIN") {
+    } else if (userType === 'ROLE_ADMIN') {
       axios
         .get(`${process.env.REACT_APP_BASE_PATH}/api/project/getall`)
         .then(response => {
@@ -82,8 +79,8 @@ const Page = () => {
 
   const actionColumn = [
     {
-      field: "action",
-      headerName: "Action",
+      field: 'action',
+      headerName: 'Action',
       width: 250,
       renderCell: params => {
         return (
@@ -122,6 +119,17 @@ const Page = () => {
     }
   };
 
+  const deleteProject = async () => {
+    setOpenDelete(false);
+    const response = await axios.delete(
+      `${process.env.REACT_APP_BASE_PATH}/api/project/delete/${siteId}`
+    );
+    if (response.status === 200) {
+      getAllProjects();
+    }
+    console.log('Delete project with siteId:', siteId);
+  }
+
   return (
     <AsideContainer>
       <div className="flex flex-row justify-between pt-[20px] mb-[20px] items-center -lg:pt-2 -lg:mb-2">
@@ -146,7 +154,7 @@ const Page = () => {
               </svg>
             </div>
           </div>
-          {userType === "ROLE_ADMIN" && (
+          {userType === 'ROLE_ADMIN' && (
             <Link href="/admin/projects/add">
               <button className="p-[6px] px-3 bg-transparent border-2 border-secondary rounded-full font-ubuntu hover:bg-secondary [&_p]:hover:text-primary-foreground [&_svg]:hover:text-primary-foreground">
                 <div className="text-secondary flex flex-row items-center">
@@ -161,26 +169,28 @@ const Page = () => {
       <div>
         <div>
           {project?.map((item, index) => {
-            var totalPoint = 0;
-            var completePoint = 0;
+            let totalPoint = 0;
+            let completePoint = 0;
             for (let i = 0; i < item?.project_status?.length; i++) {
               for (let j = 0; j < item.project_status[i]?.step?.length; j++) {
                 totalPoint += 1;
                 if (
                   item.project_status[i]?.step[j]?.taskId?.status ===
-                  "Completed"
+                  'Complete'
                 ) {
                   completePoint += 1;
                 }
               }
             }
-            var percent = ((completePoint * 100) / totalPoint).toFixed(0);
+            const percent = ((completePoint * 100) / totalPoint).toFixed(0);
             return (
               <div key={index} className="bg-white rounded-3xl shadow-md">
-                <Link href={`/admin/projects/${item?.siteID}`}>
+                <div>
                   <div className="p-8 mb-4 -md:p-4">
                     <div className="flex">
-                      <div className="w-full">
+                      <div className="w-full cursor-pointer" onClick={() => {
+                        router.push(`/admin/projects/${item?.siteID}`);
+                      }}>
                         <div className="flex flex-row gap-4 ">
                           <span className="h-[88px] rounded-full w-1 bg-primary -md:h-16" />
                           <div className="[&_span]:flex [&_span]:flex-row [&_span]:gap-3 [&_span]:leading-7 font-ubuntu font-bold text-base -md:[&_span]:gap-1 -md:[&_span]:leading-snug -md:text-sm text-nowrap text-[#565656]">
@@ -214,7 +224,7 @@ const Page = () => {
                             <RiMoneyRupeeCircleLine className="icon" />
                             <p>{item.cost}</p>
                           </span>
-                          {userType !== "ROLE_CLIENT" && (
+                          {userType !== 'ROLE_CLIENT' && (
                             <span className="flex gap-2 justify-center items-center p-2 bg-primary-foreground rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl -md:p-1 -md:text-xs">
                               <IoPeopleOutline />
                               <p>
@@ -224,8 +234,8 @@ const Page = () => {
                                     .flat()
                                     .find(
                                       item =>
-                                        item.taskId.status === "Pending" ||
-                                        item.taskId.status === "In Progress"
+                                        item.taskId.status === 'Pending' ||
+                                        item.taskId.status === 'In Progress'
                                     ).taskId.issueMember.name
                                 }
                               </p>
@@ -241,19 +251,21 @@ const Page = () => {
                             strokeWidth={14}
                             className="font-bold font-ubuntu"
                             styles={buildStyles({
-                              backgroundColor: "#3e98c7",
-                              textColor: "black",
-                              pathColor: "#93BFCF",
-                              trailColor: "#d6d6d6",
+                              backgroundColor: '#3e98c7',
+                              textColor: 'black',
+                              pathColor: '#93BFCF',
+                              trailColor: '#d6d6d6',
                             })}
                           />
                         </div>
                         <div className="flex flex-col justify-between h-full">
-                          <span className="flex justify-center items-center p-2 bg-primary-foreground rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl -md:p-1 -md:text-xs">
+                          <Link href={`/admin/projects/${item?.siteID}`} className="flex justify-center items-center p-2 bg-primary-foreground rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl -md:p-1 -md:text-xs">
                             <FiArrowUpRight />
-                          </span>
-                          {userType === "ROLE_ADMIN" && (
-                            <span className="flex justify-center items-center p-2 bg-primary-foreground rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl -md:p-1 -md:text-xs">
+                          </Link>
+                          {userType === 'ROLE_ADMIN' && (
+                            <span className="flex justify-center items-center p-2 bg-red-100 rounded-full border-[1px] border-red-500 [&_svg]:text-red-500 [&_svg]:text-2xl -md:p-1 -md:text-xs cursor-pointer"
+                            onClick={() => {setOpenDelete(true); setSiteId(item?.siteID)}}
+                            >
                               <MdDeleteOutline />
                             </span>
                           )}
@@ -261,7 +273,7 @@ const Page = () => {
                       </div>
                     </div>
                   </div>
-                </Link>
+                </div>
               </div>
             );
           })}
@@ -270,6 +282,40 @@ const Page = () => {
           <p className="text-center mt-5">No Record Available</p>
         )}
       </div>
+      <Modal
+        open={openDelete}
+        onClose={() => setOpenDelete(false)}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
+           <div className='bg-white w-1/3 p-8 rounded-3xl outline-none -md:w-3/4'>
+            <div>
+                <h3 className=' text-2xl font-semibold font-ubuntu'>
+                  Delete Project
+                </h3>
+                <hr className='my-4' />
+            </div>
+              <p>Are you sure you want to delete this project?</p>
+               <div className='flex flex-row gap-2 justify-end mt-4'>
+                <button
+                className='bg-primary-foreground border border-secondary text-secondary rounded-3xl px-4 py-2 flex flex-row  items-center'
+                onClick={() => setOpenDelete(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                className='bg-secondary text-primary rounded-3xl px-4 py-2 flex flex-row  items-center'
+                onClick={deleteProject}
+                >
+                  Delete
+                </button>
+              </div>
+          </div>
+        </Modal>
     </AsideContainer>
   );
 };

@@ -297,10 +297,10 @@ const Page = () => {
               <Accordion type="single" id="checklist" collapsible>
                 {data
                   ?.filter(dt => dt.checkListStep === itm.checkListStep)
-                  ?.map(item => (
+                  ?.map((item, idc) => (
                     <AccordionItem
-                      value={item.name}
-                      key={item.name}
+                      value={item.name + +idc}
+                      key={item.name + +idc}
                       className="bg-white px-4 py-1 rounded-2xl mb-2"
                     >
                       <AccordionTrigger>
@@ -332,16 +332,16 @@ const Page = () => {
                             </span>
                           </div>
                           <Accordion type="single" id="checks" collapsible>
-                            {item.checkList?.map(itm => (
+                            {item.checkList?.map((itm,index) => (
                               <AccordionItem
-                                className="no-underline border-none"
+                                className="no-underline border-none my-1"
                                 key={itm.heading}
                                 value={itm.heading}
                               >
                                 <AccordionTrigger className="border border-primary rounded-lg px-2 py-3">
                                   <div className="flex flex-row justify-between items-center gap-4 w-full">
                                     <h5 className="text-sm font-semibold">
-                                      {itm.heading}
+                                      {itm.heading} 
                                     </h5>
                                   </div>
                                 </AccordionTrigger>
@@ -573,7 +573,7 @@ const Page = () => {
               className="bg-secondary text-primary rounded-3xl px-4 py-2 flex flex-row  items-center"
               onClick={handleUpdateNewField}
             >
-              Delete
+              Add
             </button>
           </div>
         </div>

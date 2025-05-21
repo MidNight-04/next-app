@@ -29,6 +29,7 @@ import { FaCircle } from 'react-icons/fa6';
 import { AiOutlineLoading3Quarters } from 'react-icons/ai';
 import { FaExclamationCircle } from 'react-icons/fa';
 import { FaUserCircle } from 'react-icons/fa';
+import { MdFilterListOff } from 'react-icons/md';
 
 // import ProgressBar from "../ProgressBar/ProgressBar";
 
@@ -51,62 +52,28 @@ const Page = () => {
     priority: '',
   });
 
-  let url;
-
-  switch (activeFilter) {
-    case 'Today':
-      url = `${process.env.REACT_APP_BASE_PATH}/api/task/gettodaytaskbyid`;
-      break;
-    case 'Yesterday':
-      url = `${process.env.REACT_APP_BASE_PATH}/api/task/getyesterdaytaskbyid`;
-      break;
-    case 'Tomorrow':
-      url = `${process.env.REACT_APP_BASE_PATH}/api/task/gettomorrowtaskbyid`;
-      break;
-    case 'This Week':
-      url = `${process.env.REACT_APP_BASE_PATH}/api/task/getthisweektaskbyid`;
-      break;
-    case 'Next Week':
-      url = `${process.env.REACT_APP_BASE_PATH}/api/task/getnextweektaskbyid`;
-      break;
-    case 'Next Month':
-      url = `${process.env.REACT_APP_BASE_PATH}/api/task/getnextmonthtaskbyid`;
-      break;
-    case 'This Month':
-      url = `${process.env.REACT_APP_BASE_PATH}/api/task/getthismonthtaskbyid`;
-      break;
-    case 'Last Month':
-      url = `${process.env.REACT_APP_BASE_PATH}/api/task/getlastmonthtaskbyid`;
-      break;
-    case 'Custom':
-      url = `${process.env.REACT_APP_BASE_PATH}/api/task/customfilters`;
-      break;
-  }
-
   const user = userType !== 'ROLE_ADMIN' ? userId : null;
-  const { data, isFetched, isError, isPreviousData, isFetching } = useQuery({
-    queryKey: ['tasks', activeFilter, currentPage],
-    queryFn: async () => {
-      const response = await axios.post(url, {
-        page: currentPage,
-        userId: user,
-        ...customFilters,
-      });
-      return response.data;
-    },
-    keepPreviousData: true,
-    placeholderData: keepPreviousData,
-    retry: 1,
-    retryDelay: 5000,
-    staleTime: 10000,
-    isError: error => {
-      if (error) {
-        toast.error('Error fetching tasks');
-        return true;
-      }
-      return false;
-    },
-  });
+  const { data, isFetched, isError, isPreviousData, isFetching, refetch } =
+    useQuery({
+      queryKey: ['tasks', activeFilter, currentPage],
+      queryFn: async () => {
+        const response = await axios.post(
+          `${process.env.REACT_APP_BASE_PATH}/api/task/customfilters`,
+          {
+            page: currentPage,
+            userId,
+            filter: activeFilter,
+            ...customFilters,
+          }
+        );
+        return response.data;
+      },
+      keepPreviousData: true,
+      placeholderData: keepPreviousData,
+      retry: 1,
+      retryDelay: 5000,
+      staleTime: 10000,
+    });
 
   const filters = [
     'Yesterday',
@@ -130,8 +97,11 @@ const Page = () => {
 
   const handleFilterChange = filter => {
     setCustomFilters(filter);
-    setActiveFilter('Custom');
   };
+
+  useEffect(() => {
+    refetch();
+  }, [customFilters, refetch]);
 
   if (isFetching && !isError) {
     return <LoaderSpinner />;
@@ -210,19 +180,56 @@ const Page = () => {
                 {filter}
               </span>
             ))}
-            <span
-              className="flex flex-row items-center gap-2 bg-secondary text-primary px-3 py-2 rounded-3xl cursor-pointer"
-              onClick={() => {
-                setOpenFilter(true);
-              }}
-            >
-              Filter
-              <IoFilterOutline />
-            </span>
+            <div className="flex flex-row gap-3">
+              <button
+                className={cn(
+                  'flex flex-row items-center gap-2 bg-secondary text-primary px-3 py-2 rounded-3xl cursor-pointer'
+                )}
+                onClick={() => {
+                  setOpenFilter(true);
+                }}
+              >
+                Filter
+                <IoFilterOutline />
+              </button>
+              <button
+                className={cn(
+                  'flex flex-row items-center gap-2 bg-secondary text-primary px-3 py-2 rounded-3xl cursor-pointer',
+                  Object.values(customFilters).every(value => value === '') &&
+                    'hidden'
+                )}
+                disabled={Object.values(customFilters).every(
+                  value => value === ''
+                )}
+                onClick={() => {
+                  setCustomFilters({
+                    selectedCategory: '',
+                    assignedBy: '',
+                    assignedTo: '',
+                    frequency: '',
+                    priority: '',
+                  });
+                }}
+              >
+                Clear
+                <MdFilterListOff />
+              </button>
+            </div>
+            {/* <div>
+              {Object.keys(customFilters).map(
+                key =>
+                  customFilters[key] !== '' && (
+                    <span key={key}>
+                      {key}:{customFilters[key]}
+                    </span>
+                  )
+              )}
+            </div> */}
           </div>
           <div>
             <Tabs
               defaultValue="Pending"
+              value={activeTab}
               onValueChange={value => setActiveTab(value)}
               className="flex flex-col w-full justify-center items-center my-4"
             >
@@ -756,9 +763,14 @@ const Page = () => {
       </div>
       <TaskFilterPopup
         isOpen={openFilter}
+        assgndBy={customFilters.assignedBy}
+        assgndTo={customFilters.assignedTo}
+        category={customFilters.selectedCategory}
+        frqcy={customFilters.frequency}
+        prty={customFilters.priority}
         filterhandler={handleFilterChange}
         onClose={() => setOpenFilter(false)}
-        hideBy={true}
+        showBy={true}
       />
     </AsideContainer>
   );

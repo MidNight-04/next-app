@@ -351,9 +351,6 @@ const Page = () => {
                                     "p-4 text-secondary text-sm font-semibold w-full text-center"
                                   )}
                                 >
-                                  {console.log(
-                                    item?.stages?.length - 1 === idx
-                                  )}
                                   {itm.payment}
                                 </td>
                                 <td

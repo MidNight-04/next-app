@@ -24,11 +24,11 @@ const ConstructionStepForm = () => {
     } else if (!points) {
       toast("Points is required");
     } else {
-      // console.log(process,points)
+      // console.log(process,points);
       const formData = new FormData();
       formData.append("name", name);
       formData.append("priority", priority);
-      formData.append("points", points);
+      formData.append("file", points);
       axios
         .post(
           `${process.env.REACT_APP_BASE_PATH}/api/constructionstep/add`,

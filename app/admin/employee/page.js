@@ -125,7 +125,7 @@ const MemberTable = () => {
             name: response.data.data.name,
             employeeID: response.data.data.employeeID,
             role: response.data.data.role,
-            name: response.data.data.email,
+            email: response.data.data.email,
             phone: response.data.data.phone,
             address: response.data.data.address,
           });
@@ -186,8 +186,6 @@ const MemberTable = () => {
     });
   });
 
-  console.log(memberList);
-
   const actionColumn = [
     {
       field: "action",
@@ -216,6 +214,7 @@ const MemberTable = () => {
       },
     },
   ];
+
   return (
     <AsideContainer>
       <div className="datatable">
@@ -333,6 +332,28 @@ const MemberTable = () => {
                   type="text"
                   name="name"
                   value={data.name}
+                  onChange={e => handleFormData(e)}
+                />
+              </div>
+              <div className="w-full flex flex-col gap-2 mb-2 [&_label]:font-semibold">
+                <label htmlFor="employeeID">Employee ID</label>
+                <input
+                  className="h-12 border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100"
+                  id="employeeID"
+                  type="text"
+                  name="employeeID"
+                  value={data.employeeID}
+                  onChange={e => handleFormData(e)}
+                />
+              </div>
+              <div className="w-full flex flex-col gap-2 mb-2 [&_label]:font-semibold">
+                <label htmlFor="email">Email</label>
+                <input
+                  className="h-12 border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100"
+                  id="email"
+                  type="text"
+                  name="email"
+                  value={data.email}
                   onChange={e => handleFormData(e)}
                 />
               </div>

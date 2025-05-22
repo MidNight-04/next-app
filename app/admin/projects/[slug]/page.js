@@ -613,10 +613,6 @@ const ClientProjectView = () => {
     }
   };
 
-  const downloadImage = url => {
-    saveAs(url, 'site_image.jpg');
-  };
-
   const deleteStatusImage = async ({ point, content, name }) => {
     setOpenAccordion('');
     toggleShowImage();
@@ -921,6 +917,8 @@ const ClientProjectView = () => {
   let initialDate = new Date(projectDetails?.date);
   let diff;
 
+  //download is always a pdf file in project documents and change login page add icon and copy right paragraph project task progress is not working
+
   return (
     <AsideContainer>
       {Loading && <LoaderSpinner />}
@@ -994,40 +992,40 @@ const ClientProjectView = () => {
       </div>
       <div className="grid grid-row grid-cols-6 gap-4 -lg:gap-2 -xl:grid-cols-4 -lg:grid-cols-3 -md:grid-cols-2 justify-evenly [&>div]:h-[88px] -lg:[&>div]:p-[10px] -md:[&>div]:h-14 -lg:text-xs ">
         <div
-          className="p-[20px]  w-full rounded-[14px] [&_svg]:text-primary font-ubuntu flex flex-row gap-2 items-center self-center justify-between bg-white cursor-pointer"
+          className="p-5 w-full rounded-[14px] [&_svg]:text-primary font-ubuntu flex flex-row gap-2 items-center self-center justify-between bg-white cursor-pointer"
           onClick={() => documentDialogFunction()}
         >
           <div className="font-semibold">Documents</div>
-          <IoDocumentsOutline className="text-[20px]" />
+          <IoDocumentsOutline className="text-5" />
         </div>
         <div
-          className="p-[20px] w-full rounded-[14px] [&_svg]:text-primary font-ubuntu flex flex-row gap-2 items-center self-center justify-between bg-white cursor-pointer"
+          className="p-5 w-full rounded-[14px] [&_svg]:text-primary font-ubuntu flex flex-row gap-2 items-center self-center justify-between bg-white cursor-pointer"
           onClick={() => setTeamOpen(true)}
         >
           <div className="font-semibold">Team</div>
-          <GoPeople className="text-[20px]" />
+          <GoPeople className="text-5" />
         </div>
-        <div className="p-[20px] w-full rounded-[14px] [&_svg]:text-primary font-ubuntu flex flex-row gap-2 items-center self-center justify-between bg-white">
+        <div className="p-5 w-full rounded-[14px] [&_svg]:text-primary font-ubuntu flex flex-row gap-2 items-center self-center justify-between bg-white">
           <span className="font-semibold">
             Site ID - {projectDetails?.siteID}
           </span>
-          <MdLockOutline className="text-[20px]" />
+          <MdLockOutline className="text-5" />
         </div>
-        <div className="p-[20px] w-full rounded-[14px] [&_svg]:text-primary font-ubuntu flex flex-row gap-2 items-center self-center justify-between bg-white">
+        <div className="p-5 w-full rounded-[14px] [&_svg]:text-primary font-ubuntu flex flex-row gap-2 items-center self-center justify-between bg-white">
           <div>
             <span className="font-semibold">Start Date -</span>
             <span> {startDate}</span>
           </div>
-          <BsCalendar4Event className="text-[20px]" />
+          <BsCalendar4Event className="text-5" />
         </div>
-        <div className="p-[20px] w-full rounded-[14px] [&_svg]:text-primary font-ubuntu flex flex-row gap-2 items-center self-center justify-between bg-white">
+        <div className="p-5 w-full rounded-[14px] [&_svg]:text-primary font-ubuntu flex flex-row gap-2 items-center self-center justify-between bg-white">
           <div>
             <span className="font-semibold">End Date -</span>
             <span> {endDate}</span>
           </div>
-          <BsCalendar4Event className="text-[20px]" />
+          <BsCalendar4Event className="text-5" />
         </div>
-        <div className="px-[20px] py-[14px] flex w-full flex-auto items-center self-center justify-center bg-white rounded-[14px]">
+        <div className="px-5 py-[14px] flex w-full flex-auto items-center self-center justify-center bg-white rounded-[14px]">
           <Select
             onValueChange={value => {
               if (value === showInspection) {
@@ -1070,7 +1068,7 @@ const ClientProjectView = () => {
             </ul>
           </div> */}
         </div>
-        <div className="p-[20px] w-full rounded-[14px] [&_svg]:text-primary font-ubuntu flex flex-row gap-2 items-center self-center justify-between bg-white">
+        <div className="p-5 w-full rounded-[14px] [&_svg]:text-primary font-ubuntu flex flex-row gap-2 items-center self-center justify-between bg-white">
           <span className="font-semibold">Pending Inspection</span>
           <span className="px-[10px] py-[3px] font-semibold rounded-full border-[1px] border-primary bg-primary-foreground text-primary">
             {
@@ -1079,7 +1077,7 @@ const ClientProjectView = () => {
             }
           </span>
         </div>
-        <div className="p-[20px] w-full rounded-[14px] [&_svg]:text-primary font-ubuntu flex flex-row gap-2 items-center self-center justify-between bg-white">
+        <div className="p-5 w-full rounded-[14px] [&_svg]:text-primary font-ubuntu flex flex-row gap-2 items-center self-center justify-between bg-white">
           <span className="font-semibold">Passed Inspection</span>
           <span className="px-[10px] py-[3px] font-semibold rounded-full border-[1px] border-primary bg-primary-foreground text-primary">
             {
@@ -1088,13 +1086,13 @@ const ClientProjectView = () => {
             }
           </span>
         </div>
-        <div className="p-[20px] w-full rounded-[14px] [&_svg]:text-primary font-ubuntu flex flex-row gap-2 items-center self-center justify-between bg-white">
+        <div className="p-5 w-full rounded-[14px] [&_svg]:text-primary font-ubuntu flex flex-row gap-2 items-center self-center justify-between bg-white">
           <span className="font-semibold">Total Tickets</span>
           <span className="px-[10px] py-[3px] font-semibold rounded-full border-[1px] border-primary bg-primary-foreground text-primary">
             {projectDetails?.openTicket?.length}
           </span>
         </div>
-        <div className="p-[20px] w-full rounded-[14px] [&_svg]:text-primary font-ubuntu flex flex-row gap-2 items-center self-center justify-between bg-white">
+        <div className="p-5 w-full rounded-[14px] [&_svg]:text-primary font-ubuntu flex flex-row gap-2 items-center self-center justify-between bg-white">
           <span className="font-semibold">Pending Tickets</span>
           <span className="px-[10px] py-[3px] font-semibold rounded-full border-[1px] border-primary bg-primary-foreground text-primary">
             {
@@ -1106,7 +1104,7 @@ const ClientProjectView = () => {
         </div>
         <div
           onClick={() => setExtensionOpen(prev => !prev)}
-          className="p-[20px] w-full rounded-[14px] [&_svg]:text-primary font-ubuntu flex flex-row gap-2 items-center self-center cursor-pointer justify-between bg-white"
+          className="p-5 w-full rounded-[14px] [&_svg]:text-primary font-ubuntu flex flex-row gap-2 items-center self-center cursor-pointer justify-between bg-white"
         >
           <span className="font-semibold">Force Majeure</span>
           <span className="px-[10px] py-[3px] font-semibold rounded-full border-[1px] border-primary bg-primary-foreground text-primary">
@@ -1129,7 +1127,7 @@ const ClientProjectView = () => {
             var completePoint = 0;
             for (let j = 0; j < item?.step?.length; j++) {
               totalPoint += 1;
-              if (item?.step[j]?.taskId?.status === 'Completed') {
+              if (item?.step[j]?.taskId?.status === 'Complete') {
                 completePoint += 1;
               }
             }
@@ -1162,6 +1160,7 @@ const ClientProjectView = () => {
                               textColor: 'black',
                               pathColor: '#93BFCF',
                               trailColor: '#d6d6d6',
+                              textSize: '1.5rem',
                             })}
                           />
                         </div>
@@ -1875,7 +1874,7 @@ const ClientProjectView = () => {
                       >{`${new Date(item?.updatedAt).getDate()} ${
                         monthNames[new Date(item.updatedAt).getMonth()]
                       }, ${new Date(item.updatedAt).getFullYear()}`}</span>
-                      <a ref={linkRef} style={{ display: 'none' }}></a>
+                      <a ref={linkRef} style={{ display: 'none' }} target='_blank'></a>
                       <span
                         className="bg-green-600 p-2 rounded-full cursor-pointer"
                         onClick={() => {

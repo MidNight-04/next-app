@@ -55,7 +55,7 @@ const AddPaymentStagesForm = () => {
       // console.log(process,points)
       const formData = new FormData();
       formData.append("floor", floor);
-      formData.append("stages", stages);
+      formData.append("file", stages);
       axios
         .post(
           `${process.env.REACT_APP_BASE_PATH}/api/paymentstages/add`,

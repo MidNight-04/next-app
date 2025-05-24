@@ -305,6 +305,11 @@ const Page = () => {
       );
   };
 
+  let rupee = new Intl.NumberFormat('en-IN', {
+  maximumFractionDigits: 0,
+  useGrouping: true
+  });
+
   return (
     <AsideContainer>
       <div className="datatable">
@@ -327,7 +332,7 @@ const Page = () => {
               <span>
                 <FaRupeeSign />
               </span>
-              <span>{projectDetails?.cost}</span>
+              <span>{rupee.format(projectDetails?.cost)}</span>
             </div>
           </div>
           <section>
@@ -376,7 +381,7 @@ const Page = () => {
                           <FaRupeeSign />
                         </span>
                         <span>
-                          {(item.payment * projectDetails.cost) / 100}
+                          {rupee.format((item.payment * projectDetails.cost) / 100)}
                         </span>
                       </span>
                     </div>
@@ -403,7 +408,7 @@ const Page = () => {
                                   <td>
                                     <span>
                                       {/* <FaRupeeSign /> */}
-                                      {detail.amount}
+                                      {rupee.format(detail.amount)}
                                     </span>
                                   </td>
                                   <td>{detail.remarks}</td>
@@ -423,13 +428,13 @@ const Page = () => {
                         <span>
                           <FaRupeeSign />
                         </span>
-                        {(item.payment * projectDetails.cost) / 100 -
+                        {rupee.format((item.payment * projectDetails.cost) / 100 -
                           payDetails[0]?.stages
                             .filter(dt => dt.stage === item.stage)[0]
                             ?.installments.reduce(
                               (acc, item) => acc + parseFloat(item.amount || 0),
                               0
-                            )}
+                        ))}
                       </span>
                     </div>
                     {/* {userType === "ROLE_CLIENT" && (

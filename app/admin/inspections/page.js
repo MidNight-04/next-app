@@ -183,9 +183,7 @@ const Page = () => {
         }
       })
       .catch(error => {
-        toast("Error while delete checklist point", {
-          position: "top-right",
-        });
+        toast("Error while delete checklist point");
         console.log(error);
       });
   };
@@ -198,9 +196,7 @@ const Page = () => {
   const handleUpdateNewField = () => {
     const isAnyHeadingEmpty = checklistItems.some(item => !item.heading.trim());
     if (isAnyHeadingEmpty) {
-      toast("Checklist heading is required", {
-        position: "top-center",
-      });
+      toast("Checklist heading is required");
       return; // Exit early if any heading is empty
     }
     // Check if any checklist item point is empty
@@ -208,9 +204,7 @@ const Page = () => {
       item.points.some(point => !point.point.trim())
     );
     if (isAnyPointEmpty) {
-      toast("Checklist point is required", {
-        position: "top-center",
-      });
+      toast("Checklist point is required");
       return; // Exit early if any point is empty
     } else {
       const data = {
@@ -225,9 +219,7 @@ const Page = () => {
         )
         .then(response => {
           if (response) {
-            toast(response.data.message, {
-              position: "top-right",
-            });
+            toast(response.data.message);
             setAddFieldOpen(false);
             getAllCheckList();
             setChecklistItems([{ heading: "", points: [{ point: "" }] }]);
@@ -241,9 +233,7 @@ const Page = () => {
   };
   const handleSubmitPoint = () => {
     if (!point) {
-      toast("Point is required", {
-        position: "top-right",
-      });
+      toast("Point is required");
     } else {
       const data = {
         id: id,
@@ -258,9 +248,7 @@ const Page = () => {
         )
         .then(response => {
           if (response) {
-            toast(response.data.message, {
-              position: "top-right",
-            });
+            toast(response.data.message);
             setPointAddOpen(false);
             getAllCheckList();
             setPoint("");

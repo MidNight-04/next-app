@@ -1,10 +1,10 @@
-'use client';
-import AsideContainer from '../../../../components/AsideContainer';
-import axios from 'axios';
-import { useRouter } from 'next/navigation';
+'use client'
 import React, { useEffect, useState } from 'react';
-import { toast } from 'sonner';
 import { IoIosArrowBack } from 'react-icons/io';
+import { useRouter } from "next/navigation";
+import AsideContainer from "../../../../components/AsideContainer";
+import axios from 'axios';
+import { toast } from 'sonner';
 import { useAuthStore } from '../../../../store/useAuthStore';
 import {
   Select,
@@ -14,252 +14,22 @@ import {
   SelectValue,
 } from '../../../../components/ui/select';
 
-const AddProjectForm = () => {
+const ContractorTable = () => {
   const router = useRouter();
-  const userName = useAuthStore(state => state.username);
-  const activeUser = useAuthStore(state => state.userId);
-  const [data, setData] = useState({
-    name: '',
-    siteID: '',
-    location: '',
-    branch: '',
-    client: '',
-    plan: '',
-    floor: '',
-    area: '',
-    amount: '',
-    date: '',
-    duration: '',
-    admin: '',
-    // manager: '',
-    architect: '',
-    sr_engineer: '',
-    engineer: '',
-    accountant: '',
-    operation: '',
-    sales: '',
-    contractor: '',
-  });
-  const [floorList, setFloorList] = useState([]);
-  const [memberList, setMemberList] = useState([]);
-  const [contractorList, setContractorList] = useState([]);
-  const [clientList, setClientList] = useState([]);
-  const [clientId, setClientId] = useState('');
-  const [stages, setStages] = useState([]);
 
-  useEffect(() => {
-    axios
-      .get(`${process.env.REACT_APP_BASE_PATH}/api/constructionstep/getall`)
-      .then(response => {
-        setStages(
-          response?.data?.data?.sort((a, b) => a.priority - b.priority)
-        );
-        // console.log(response?.data?.data)
-      })
-      .catch(error => {
-        console.log(error);
-        setStages([]);
-      });
-    axios
-      .get(`${process.env.REACT_APP_BASE_PATH}/api/teammember/getall`)
-      .then(response => {
-        if (response) {
-          // console.log(response.data.data);
-          setMemberList(response.data.data);
-        }
-      })
-      .catch(error => {
-        console.log(error);
-      });
-    axios
-      .get(`${process.env.REACT_APP_BASE_PATH}/api/client/getall`)
-      .then(response => {
-        if (response) {
-          //   console.log(response.data.data);
-          setClientList(response.data.data);
-        }
-      })
-      .catch(error => {
-        console.log(error);
-      });
-    axios
-      .get(`${process.env.REACT_APP_BASE_PATH}/api/contractor/applications`)
-      .then(response => {
-        if (response) {
-          // console.log(response.data.data);
-          setContractorList(
-            response.data.data?.filter(
-              item => item.approvalStatus === 'Approved'
-            )
-          );
-        }
-      })
-      .catch(error => {
-        console.log(error);
-      });
-    axios
-      .get(`${process.env.REACT_APP_BASE_PATH}/api/floor/getall`)
-      .then(response => {
-        if (response) {
-          //   console.log(response.data.data);
-          setFloorList(response.data.data);
-        }
-      })
-      .catch(error => {
-        console.log(error);
-      });
-  }, []);
-
-  // console.log(stages);
-  // console.log(data);
-  const handleFormData = e => {
-    // console.log(e.target.value);
-    const { name, value, type, checked } = e.target;
-
-    if (type === 'checkbox') {
-      const memberName = value.split(',')[0];
-      const memberId = value.split(',')[1];
-      const data = {
-        name: memberName,
-        employeeID: memberId,
-      };
-      // Handle checkbox inputs
-      setData(prevData => ({
-        ...prevData,
-        [name]: checked
-          ? [...prevData[name], data] // Add to array if checked
-          : prevData[name].filter(item => item.employeeID !== memberId), // Remove from array if unchecked
-      }));
-    } else if (name === 'client') {
-      setData({ ...data, [name]: value });
-      const clientId = value.split('-')[1];
-      setClientId(clientId);
-    } else {
-      // Handle other inputs
-      setData({ ...data, [name]: value });
-    }
-  };
-
-  const submitFormData = () => {
-    if (!data.name) {
-      toast('Name is required');
-    } else if (!data.siteID) {
-      toast('Site ID is required');
-    } else if (!data.location) {
-      toast('Location is required');
-    } else if (!data.branch) {
-      toast('Branch is required');
-    } else if (!data.client) {
-      toast('Client is required');
-    } else if (!data.floor) {
-      toast('Floor is required');
-    } else if (!data.area) {
-      toast('Area is required');
-    } else if (!data.cost) {
-      toast('Cost is required');
-    } else if (!data.date) {
-      toast('Start date is required');
-    } else if (!data.duration) {
-      toast('Duration is required');
-    } else if (data.admin?.length === 0) {
-      toast('Admin is required');
-    // } else if (data.manager?.length === 0) {
-    //   toast('Project Manager is required');
-    } else if (data.sr_engineer?.length === 0) {
-      toast('Sr. Engineer is required');
-    } else if (data.engineer?.length === 0) {
-      toast('Site Engineer is required');
-    } else if (data.accountant?.length === 0) {
-      toast('Accountant is required');
-    } else if (data.operation?.length === 0) {
-      toast('Operation is required');
-    } else if (data.sales?.length === 0) {
-      toast('Sales is required');
-    } else if (data.contractor?.length === 0) {
-      toast('Contractor is required');
-    } else {
-      const uploadData = {
-        name: data.name,
-        siteID: data.siteID,
-        location: data.location,
-        branch: data.branch,
-        client: data.client,
-        plan: data.plan,
-        floor: data.floor,
-        area: data.area,
-        cost: data.cost,
-        date: data.date,
-        duration: data.duration,
-        // manager: data.manager,
-        accountant: data.accountant,
-        architect: data.architect,
-        sr_engineer: data.sr_engineer,
-        engineer: data.engineer,
-        contractor: data.contractor,
-        operation: data.operation,
-        admin: data.admin,
-        sales: data.sales,
-        assignedName: userName,
-        assignedID: activeUser,
-      };
-
-      axios
-        .post(`${process.env.REACT_APP_BASE_PATH}/api/project/add`, {
-          uploadData,
-        })
-        .then(response => {
-          if (response.data.status === 201) {
-            setData({
-              name: '',
-              siteID: '',
-              location: '',
-              client: '',
-              plan: '',
-              floor: '',
-              area: '',
-              cost: '',
-              date: '',
-              duration: '',
-              // manager: [],
-              accountant: [],
-              engineer: [],
-              sr_engineer: [],
-              architect: [],
-              contractor: [],
-              operation: [],
-              admin: [],
-              sales: [],
-            });
-            toast(response.data.message);
-            router.push('/admin/projects');
-          } else {
-            toast(response.data.message);
-          }
-        })
-        .catch(error => {
-          console.log(error);
-        });
-    }
-  };
   return (
     <AsideContainer>
-      <div className="mt-5">
-        <div className="flex flex-row gap-2 items-center">
+      <div className="">
+        <div className="flex flex-row justify-between items-center my-4">
           <IoIosArrowBack
             className="text-2xl cursor-pointer transition duration-300 hover:scale-150 ease-in-out"
             onClick={() => router.back()}
           />
           <h1 className="text-2xl font-semibold font-ubuntu -md:mb-2 -md:text-lg">
-            Add Project
+            Add Contractor
           </h1>
         </div>
-        <p
-          className="text-center"
-          style={{ color: 'rgb(255, 119, 0)', wordSpacing: '2px' }}
-        >
-          Create Process and Checklist point before Project creation
-        </p>
-        <div className="bg-white rounded-[15px] p-5 mb-5">
+         <div className="bg-white rounded-[15px] p-5 mb-5">
           <div className="col-lg-12">
             <div>
               <div style={{ marginLeft: '0px' }}>
@@ -675,4 +445,4 @@ const AddProjectForm = () => {
   );
 };
 
-export default AddProjectForm;
+export default ContractorTable;

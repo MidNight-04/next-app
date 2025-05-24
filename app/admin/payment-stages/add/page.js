@@ -44,13 +44,9 @@ const AddPaymentStagesForm = () => {
   const submitFormData = () => {
     // console.log(role)
     if (!floor) {
-      toast("Floor is required", {
-        position: "top-center",
-      });
+      toast("Floor is required");
     } else if (!stages) {
-      toast("Payment stages is required", {
-        position: "top-center",
-      });
+      toast("Payment stages is required");
     } else {
       // console.log(process,points)
       const formData = new FormData();
@@ -65,18 +61,14 @@ const AddPaymentStagesForm = () => {
           }
         )
         .then(resp => {
-          toast(resp.data.message, {
-            position: "top-center",
-          });
+          toast(resp.data.message);
           setFloor("");
           setStages("");
           router.push("/admin/payment-stages");
         })
         .catch(err => {
           //   console.log(err);
-          toast("Error while upload construction points", {
-            position: "top-center",
-          });
+          toast("Error while upload construction points");
         });
     }
   };

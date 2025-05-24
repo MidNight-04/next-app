@@ -19,9 +19,7 @@ const AddRoleForm = () => {
         .then(response => {
           if (response) {
             setRole("");
-            toast(response.data.message, {
-              position: "top-right",
-            });
+            toast(response.data.message);
             router.push("/admin/roles");
           }
         })
@@ -29,9 +27,7 @@ const AddRoleForm = () => {
           console.log(error);
         });
     } else {
-      toast("Role is mandatory", {
-        position: "top-right",
-      });
+      toast("Role is mandatory");
     }
   };
   return (

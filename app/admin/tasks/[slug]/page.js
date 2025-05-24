@@ -61,6 +61,8 @@ const Page = () => {
   const [material, setMaterial] = useState('no');
   const [workers, setWorkers] = useState(0);
   const [newMember, setNewMember] = useState(null);
+  const [openManualClose,setOpenManualClose] = useState(false);
+  const [manualDate, setManualDate] = useState(new Date().toISOString().split('T')[0]);
   const { data, error, isFetched, refetch } = useQuery({
     queryKey: [`gettaskbyid/${slug}`],
     queryFn: async () =>
@@ -278,6 +280,25 @@ const Page = () => {
       .then((res) => {
         refetch();
         toast('Checklist Deleted Successfully.');
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
+  const closelManuallyHandler = async () => {
+    setOpenManualClose(false);
+    const data = await axios
+      .post(
+        `${process.env.REACT_APP_BASE_PATH}/api/task/manuallyclosetask`,
+        {
+          taskId: slug,
+          date:manualDate
+        }
+      )
+      .then((res) => {
+        refetch();
+        toast('Task Manually Closed.');
       })
       .catch((err) => {
         console.log(err);
@@ -532,6 +553,15 @@ const Page = () => {
                   >
                     <CiViewList className='text-xl' />
                     View Checklist
+                  </button>
+                )}
+              {userType==="ROLE_ADMIN" && data.data.status !== 'Complete' && (
+                  <button
+                    className='px-[10px] py-[6px] border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-1 items-center'
+                    onClick={() => setOpenManualClose(true)}
+                  >
+                    <FaCheck className='text-xl' />
+                    Close Manually
                   </button>
                 )}
             </div>
@@ -1277,6 +1307,49 @@ const Page = () => {
                   onClick={() => setOpenViewChecklist(false)}
                 >
                   Close
+                </button>
+              </div>
+            </div>
+          </Modal>
+            <Modal
+            open={openManualClose}
+            onClose={() => setOpenManualClose(false)}
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            <div className='bg-white w-1/4 p-8 rounded-3xl outline-none -md:w-3/4'>
+              <div>
+                <h3 className=' text-2xl font-semibold font-ubuntu'>
+                  Close Task
+                </h3>
+                <hr className='my-4' />
+              </div>
+              <div>
+                <input
+                  type="date"
+                  defaultValue={manualDate}
+                  className='outline-none border border-primary px-3 py-2 rounded-3xl bg-gray-100 '
+                  onChange={(e) => setManualDate(e.target.value)}
+                  id="manual-close-date"
+                  label="Select Date"
+                  required
+                />
+              </div>
+              <div className='flex flex-row gap-2 justify-end mt-4'>
+                <button
+                  className='bg-primary-foreground border border-secondary text-secondary rounded-3xl px-4 py-2 flex flex-row  items-center'
+                  onClick={() => setOpenManualClose(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  className='bg-secondary text-primary rounded-3xl px-4 py-2 flex flex-row  items-center'
+                  onClick={closelManuallyHandler}
+                >
+                  Close Task
                 </button>
               </div>
             </div>

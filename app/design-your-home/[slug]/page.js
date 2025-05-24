@@ -302,9 +302,6 @@ const ViewDesignsPage = () => {
               ) {
                 toast(
                   "Congratulations, your order has been successfully sent. You will be contacted soon!",
-                  {
-                    position: toast.POSITION.TOP_RIGHT,
-                  }
                 );
 
                 const dealerNotification = {
@@ -369,9 +366,6 @@ const ViewDesignsPage = () => {
               ) {
                 toast(
                   resp.data.data.paymentInformation.body.resultInfo.resultMsg,
-                  {
-                    position: toast.POSITION.TOP_RIGHT,
-                  }
                 );
               }
 
@@ -381,9 +375,6 @@ const ViewDesignsPage = () => {
               ) {
                 toast(
                   resp.data.data.paymentInformation.body.resultInfo.resultMsg,
-                  {
-                    position: toast.POSITION.TOP_RIGHT,
-                  }
                 );
               }
 
@@ -393,17 +384,12 @@ const ViewDesignsPage = () => {
               ) {
                 toast(
                   resp.data.data.paymentInformation.body.resultInfo.resultMsg,
-                  {
-                    position: toast.POSITION.TOP_RIGHT,
-                  }
                 );
               }
             })
             .catch(err => {
               console.error(err);
-              toast("Something went wrong. Please try again!", {
-                position: toast.POSITION.TOP_RIGHT,
-              });
+              toast("Something went wrong. Please try again!");
             });
           setTimeout(() => window.location.reload(), 1500);
           console.log(paymentStatus);
@@ -496,13 +482,9 @@ const ViewDesignsPage = () => {
               console.error(err);
             });
           if (wish === true) {
-            toast(`Design added to your wishlist`, {
-              position: "top-right",
-            });
+            toast(`Design added to your wishlist`);
           } else {
-            toast(`Design remove from your wishlist`, {
-              position: "top-right",
-            });
+            toast(`Design remove from your wishlist`);
           }
         })
         .catch(err => {
@@ -516,17 +498,11 @@ const ViewDesignsPage = () => {
 
   const notify = (type, message) => {
     if (type == "success" && message.status == 200) {
-      toast(message.data.message, {
-        position: toast.POSITION.TOP_RIGHT,
-      });
+      toast(message.data.message);
     } else if (message.status == 202) {
-      toast(message.data.message, {
-        position: toast.POSITION.TOP_RIGHT,
-      });
+      toast(message.data.message);
     } else {
-      toast("Something went wrong!", {
-        position: toast.POSITION.TOP_RIGHT,
-      });
+      toast("Something went wrong!");
     }
   };
 
@@ -635,17 +611,12 @@ const ViewDesignsPage = () => {
           if (resp) {
             toast(
               "Your query for design has been successfully sent. You will be contacted soon!",
-              {
-                position: toast.POSITION.TOP_RIGHT,
-              }
             );
           }
         })
         .catch(err => {
           console.error(err);
-          toast("Something went wrong. Please try again!", {
-            position: toast.POSITION.TOP_RIGHT,
-          });
+          toast("Something went wrong. Please try again!");
         });
     } else {
       // localStorage.setItem("last_url", location.pathname);

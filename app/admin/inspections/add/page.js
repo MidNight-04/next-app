@@ -45,18 +45,14 @@ const AddProjectCheckList = () => {
   const submitFormData = () => {
     // Check if name is empty
     if (!name.trim()) {
-      toast("Checklist name is required", {
-        position: "top-center",
-      });
+      toast("Checklist name is required");
       return; // Exit early if name is empty
     }
 
     // Check if any checklist item heading is empty
     const isAnyHeadingEmpty = checklistItems.some(item => !item.heading.trim());
     if (isAnyHeadingEmpty) {
-      toast("Checklist item heading is required", {
-        position: "top-center",
-      });
+      toast("Checklist item heading is required");
       return; // Exit early if any heading is empty
     }
 
@@ -65,9 +61,7 @@ const AddProjectCheckList = () => {
       item.points.some(point => !point.point.trim())
     );
     if (isAnyPointEmpty) {
-      toast("Checklist item point is required", {
-        position: "top-center",
-      });
+      toast("Checklist item point is required");
       return; // Exit early if any point is empty
     } else {
       const data = {

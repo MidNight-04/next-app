@@ -237,7 +237,7 @@ const adminSidebar = [
         subMenuItem: [],
       },
       {
-        path: '/admin/contractor-list',
+        path: '/admin/contractor',
         iconName: <GroupIcon />,
         feildName: 'Contractors List',
         linkClassName: 'adminNavLink',

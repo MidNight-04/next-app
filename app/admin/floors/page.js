@@ -2,20 +2,7 @@
 import { useEffect, useState } from "react";
 import { DataGrid, gridClasses } from "@mui/x-data-grid";
 import axios from "axios";
-import {
-  Chip,
-  Button,
-  Modal,
-  Typography,
-  Box,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
-  TextField,
-  styled,
-} from "@mui/material";
+import { Modal, styled } from "@mui/material";
 import { toast } from "sonner";
 import Link from "next/link";
 import AsideContainer from "../../../components/AsideContainer";
@@ -55,7 +42,6 @@ const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
 const ProjectFloorList = () => {
   const [data, setData] = useState([]);
   const [confirmationOpen, setConfirmationOpen] = useState(false);
-  const [authorizationStatus, setAuthorizationStatus] = useState("");
   const [confirmationDelete, setConfirmationDelete] = useState(false);
   const [userId, setUserId] = useState("");
   const [floor, setFloor] = useState("");
@@ -81,9 +67,10 @@ const ProjectFloorList = () => {
       });
   };
 
-  const deleteFloor = id => {
+  const deleteFloor = () => {
+    handleDelete();
     axios
-      .delete(`${process.env.REACT_APP_BASE_PATH}/api/floor/delete/${id}`)
+      .delete(`${process.env.REACT_APP_BASE_PATH}/api/floor/delete/${userId}`)
       .then(response => {
         if (response) {
           toast("Record deleted successfully");
@@ -127,12 +114,10 @@ const ProjectFloorList = () => {
       .catch(error => {
         console.log(error);
       });
-    // Close the confirmation dialog
     setConfirmationOpen(false);
   };
 
   const handleCancel = () => {
-    // Close the confirmation dialog
     setConfirmationOpen(false);
   };
 
@@ -144,6 +129,7 @@ const ProjectFloorList = () => {
       name: row?.name,
     });
   });
+
   const handleDelete = () => {
     setConfirmationDelete(prev => !prev);
   };
@@ -176,6 +162,7 @@ const ProjectFloorList = () => {
       },
     },
   ];
+
   return (
     <AsideContainer>
       <div className="flex flex-row justify-between items-center">

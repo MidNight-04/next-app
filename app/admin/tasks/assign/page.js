@@ -281,9 +281,7 @@ const Page = () => {
       const newReminders = reminders.filter((_, i) => i !== index);
       setReminders(newReminders);
     } else {
-      toast('Not Allowed', {
-        position: 'top-center',
-      });
+      toast('Not Allowed');
     }
   };
 
@@ -305,9 +303,7 @@ const Page = () => {
       }));
       setReminderOpen(false);
     } else {
-      toast('Field are mandatory', {
-        position: 'top-center',
-      });
+      toast('Field are mandatory');
     }
   };
 
@@ -327,29 +323,17 @@ const Page = () => {
       employeeID: userId,
     };
     if (!data.title) {
-      toast('Task Title is required', {
-        position: 'top-right',
-      });
+      toast('Task Title is required');
     } else if (!data.description) {
-      toast('Title Description is required', {
-        position: 'top-right',
-      });
+      toast('Title Description is required');
     } else if (!data.member) {
-      toast('Member is required', {
-        position: 'top-right',
-      });
+      toast('Member is required');
     } else if (!data.category) {
-      toast('Category is required', {
-        position: 'top-right',
-      });
+      toast('Category is required');
     } else if (!data.priority) {
-      toast('Priority is required', {
-        position: 'top-right',
-      });
+      toast('Priority is required');
     } else if (!data.dueDate) {
-      toast('Due Date is required', {
-        position: 'top-right',
-      });
+      toast('Due Date is required');
     } else {
       let employeeID = userId;
       const formData = new FormData();

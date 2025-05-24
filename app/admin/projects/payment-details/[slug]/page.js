@@ -148,9 +148,7 @@ const Page = () => {
           console.error(err);
         });
     } else {
-      toast("Enter amount for payment", {
-        position: toast.POSITION.TOP_RIGHT,
-      });
+      toast("Enter amount for payment");
     }
   };
 
@@ -223,12 +221,7 @@ const Page = () => {
                 resp.data.data.paymentInformation.body.resultInfo
                   .resultStatus == "TXN_SUCCESS"
               ) {
-                toast(
-                  `Congratulations, Your payment has been successfully done for siteID ${siteID}`,
-                  {
-                    position: toast.POSITION.TOP_RIGHT,
-                  }
-                );
+                toast(`Congratulations, Your payment has been successfully done for siteID ${siteID}`);
 
                 const payNotification = {
                   clientID: activeUser,
@@ -243,9 +236,7 @@ const Page = () => {
                   )
                   .then(resp1 => {
                     // console.log(resp1.data);
-                    toast(resp1?.data?.message, {
-                      position: toast.POSITION.TOP_RIGHT,
-                    });
+                    toast(resp1?.data?.message);
                   })
                   .catch(err => {
                     console.error(err);
@@ -258,9 +249,6 @@ const Page = () => {
               ) {
                 toast(
                   resp.data.data.paymentInformation.body.resultInfo.resultMsg,
-                  {
-                    position: toast.POSITION.TOP_RIGHT,
-                  }
                 );
               }
 
@@ -270,9 +258,6 @@ const Page = () => {
               ) {
                 toast(
                   resp.data.data.paymentInformation.body.resultInfo.resultMsg,
-                  {
-                    position: toast.POSITION.TOP_RIGHT,
-                  }
                 );
               }
 
@@ -282,17 +267,12 @@ const Page = () => {
               ) {
                 toast(
                   resp.data.data.paymentInformation.body.resultInfo.resultMsg,
-                  {
-                    position: toast.POSITION.TOP_RIGHT,
-                  }
                 );
               }
             })
             .catch(err => {
               console.error(err);
-              toast("Something went wrong. Please try again!", {
-                position: toast.POSITION.TOP_RIGHT,
-              });
+              toast("Something went wrong. Please try again!");
             });
           setTimeout(() => window.location.reload(), 2000);
           console.log(paymentStatus);

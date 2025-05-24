@@ -19,9 +19,7 @@ const AddTaskCategoryForm = () => {
 
   const submitFormData = () => {
     if (!data.name) {
-      toast("Name is required", {
-        position: "top-right",
-      });
+      toast("Name is required");
     } else {
       //   console.log(data);
       axios
@@ -31,16 +29,12 @@ const AddTaskCategoryForm = () => {
         .then(response => {
           if (response) {
             if (response.data.status === 204) {
-              toast(response.data.message, {
-                position: "top-right",
-              });
+              toast(response.data.message);
             } else {
               setData({
                 name: "",
               });
-              toast(response.data.message, {
-                position: "top-right",
-              });
+              toast(response.data.message);
               router.back();
             }
           }

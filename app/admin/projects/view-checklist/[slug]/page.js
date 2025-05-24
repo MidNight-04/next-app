@@ -1,13 +1,10 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { DataGrid } from "@mui/x-data-grid";
 import axios from "axios";
 import {
-  Chip,
   Button,
   Modal,
   Typography,
-  Box,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -21,21 +18,10 @@ import {
 import { toast } from "sonner";
 import { FaMinus, FaPlus } from "react-icons/fa6";
 import { TiArrowSortedDown, TiArrowSortedUp, TiMinus } from "react-icons/ti";
-import { IoIosArrowBack, IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
+import { IoIosArrowBack } from "react-icons/io";
 import { useParams, useRouter } from "next/navigation";
 import AsideContainer from "../../../../../components/AsideContainer";
 import { useAuthStore } from "../../../../../store/useAuthStore";
-const style = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: 500,
-  bgcolor: "background.paper",
-  border: "2px solid #000",
-  boxShadow: 25,
-  p: 4,
-};
 
 let today = new Date();
 let yyyy = today.getFullYear();
@@ -225,9 +211,7 @@ const SingleProjectChecklistView = () => {
         }
       })
       .catch(error => {
-        toast("Error while delete checklist point", {
-          position: "top-right",
-        });
+        toast("Error while delete checklist point");
         console.log(error);
       });
   };
@@ -240,9 +224,7 @@ const SingleProjectChecklistView = () => {
   const handleUpdateNewField = () => {
     const isAnyHeadingEmpty = checklistItems.some(item => !item.heading.trim());
     if (isAnyHeadingEmpty) {
-      toast("Inspection heading is required", {
-        position: "top-center",
-      });
+      toast("Inspection heading is required");
       return; // Exit early if any heading is empty
     }
     // Check if any checklist item point is empty
@@ -250,9 +232,7 @@ const SingleProjectChecklistView = () => {
       item.points.some(point => !point.point.trim())
     );
     if (isAnyPointEmpty) {
-      toast("Inspection point is required", {
-        position: "top-center",
-      });
+      toast("Inspection point is required");
       return; // Exit early if any point is empty
     }
     // Check if any checklist item status is empty
@@ -260,9 +240,7 @@ const SingleProjectChecklistView = () => {
       item.points.some(point => !point.status.trim())
     );
     if (isAnyStatusEmpty) {
-      toast("Inspection status is required", {
-        position: "top-center",
-      });
+      toast("Inspection status is required");
       return; // Exit early if any point is empty
     } else {
       const data = {
@@ -283,9 +261,7 @@ const SingleProjectChecklistView = () => {
         )
         .then(response => {
           if (response) {
-            toast(response.data.message, {
-              position: "top-right",
-            });
+            toast(response.data.message);
             setAddFieldOpen(false);
             getAllCheckList();
             setChecklistItems([
@@ -304,13 +280,9 @@ const SingleProjectChecklistView = () => {
   };
   const handleSubmitPoint = () => {
     if (!point) {
-      toast("Point is required", {
-        position: "top-right",
-      });
+      toast("Point is required");
     } else if (!status) {
-      toast("Status is required", {
-        position: "top-right",
-      });
+      toast("Status is required");
     } else {
       const data = {
         id: id,
@@ -332,9 +304,7 @@ const SingleProjectChecklistView = () => {
         )
         .then(response => {
           if (response) {
-            toast(response.data.message, {
-              position: "top-right",
-            });
+            toast(response.data.message);
             setPointAddOpen(false);
             getAllCheckList();
             setPoint("");

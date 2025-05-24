@@ -40,25 +40,15 @@ const AddMemberForm = () => {
 
   const submitFormData = () => {
     if (!data.name) {
-      toast("Name is required", {
-        position: "top-right",
-      });
+      toast("Name is required");
     } else if (!data.employeeID) {
-      toast("Employee ID is required", {
-        position: "top-right",
-      });
+      toast("Employee ID is required");
     } else if (!data.role) {
-      toast("Role is required", {
-        position: "top-right",
-      });
+      toast("Role is required");
     } else if (!data.email) {
-      toast("Email is required", {
-        position: "top-right",
-      });
+      toast("Email is required");
     } else if (!data.phone) {
-      toast("Phone is required", {
-        position: "top-right",
-      });
+      toast("Phone is required");
     } else {
       console.log(data);
       axios

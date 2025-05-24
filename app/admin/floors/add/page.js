@@ -19,19 +19,15 @@ const AddProjectFloorForm = () => {
         .then(response => {
           if (response) {
             setFloor("");
-            toast(response.data.message, {
-              position: "top-right",
-            });
-            redirect("/admin/floors");
+            toast(response.data.message);
+            router.back();
           }
         })
         .catch(error => {
           console.log(error);
         });
     } else {
-      toast("Floor is mandatory", {
-        position: "top-right",
-      });
+      toast("Floor is mandatory");
     }
   };
   return (

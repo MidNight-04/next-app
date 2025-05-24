@@ -327,21 +327,13 @@ const ClientProjectView = () => {
 
   const handleUpdate = () => {
     if (!status) {
-      toast('Work is required', {
-        position: 'top-center',
-      });
+      toast('Work is required');
     } else if (!step) {
-      toast('Query step log is required', {
-        position: 'top-center',
-      });
+      toast('Query step log is required');
     } else if (!content) {
-      toast('Query content is required', {
-        position: 'top-center',
-      });
+      toast('Query content is required');
     } else if (!date) {
-      toast('Date is required', {
-        position: 'top-center',
-      });
+      toast('Date is required');
     } else {
       const formData = new FormData();
       formData.append('id', slug);
@@ -367,14 +359,10 @@ const ClientProjectView = () => {
       axios
         .request(config)
         .then(resp => {
-          toast(resp.data.message, {
-            position: 'top-center',
-          });
+          toast(resp.data.message);
         })
         .catch(err => {
-          toast('Error while raise query by client', {
-            position: 'top-center',
-          });
+          toast('Error while raise query by client');
           console.log(err);
         });
       setConfirmationOpen(false);
@@ -460,9 +448,7 @@ const ClientProjectView = () => {
       })
       .catch(error => {
         console.log(error);
-        toast('Error while showing task update', {
-          position: 'top-right',
-        });
+        toast('Error while showing task update');
       });
   };
 
@@ -525,9 +511,7 @@ const ClientProjectView = () => {
       hasUnCheckedMandatory ||
       (inspectionList?.length > 0 && checkedItems?.length === 0)
     ) {
-      toast(' Checked all mandatory inspection is required', {
-        position: 'top-center',
-      });
+      toast(' Checked all mandatory inspection is required');
     }
     // else if (!chatLog) {
     //   toast("Chat Log is required", {
@@ -685,29 +669,17 @@ const ClientProjectView = () => {
 
   const AddProjectStepSubmit = () => {
     if (!pointName) {
-      toast('Point Name is required', {
-        position: 'top-right',
-      });
+      toast('Point Name is required');
     } else if (!checkList) {
-      toast('CheckList is required', {
-        position: 'top-right',
-      });
+      toast('CheckList is required');
     } else if (checkList === 'yes' && !checkListName) {
-      toast('CheckList Name is required', {
-        position: 'top-right',
-      });
+      toast('CheckList Name is required');
     } else if (!duration && force !== 'yes') {
-      toast('Duration is required', {
-        position: 'top-right',
-      });
+      toast('Duration is required');
     } else if (issueMember?.length === 0) {
-      toast('Issue member is required', {
-        position: 'top-right',
-      });
+      toast('Issue member is required');
     } else if (!prevContent) {
-      toast('Content is required', {
-        position: 'top-right',
-      });
+      toast('Content is required');
     } else {
       const data = {
         id: slug,
@@ -750,9 +722,7 @@ const ClientProjectView = () => {
         )
         .then(response => {
           if (response.data.status == 200) {
-            toast(response.data.message, {
-              position: 'top-right',
-            });
+            toast(response.data.message);
             setStepModal(false);
             getprojectDetail();
             setPointList([]);
@@ -833,9 +803,7 @@ const ClientProjectView = () => {
         }
       })
       .catch(error => {
-        toast('Error while delete project field', {
-          position: 'top-right',
-        });
+        toast('Error while delete project field');
         console.log(error);
       });
   };
@@ -874,9 +842,7 @@ const ClientProjectView = () => {
         }
       })
       .catch(error => {
-        toast('Error while delete project field', {
-          position: 'top-right',
-        });
+        toast('Error while delete project field');
         console.log(error);
       });
   };

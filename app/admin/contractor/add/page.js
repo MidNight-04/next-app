@@ -29,7 +29,7 @@ const ContractorTable = () => {
             Add Contractor
           </h1>
         </div>
-         <div className="bg-white rounded-[15px] p-5 mb-5">
+        {/* <div className="bg-white rounded-[15px] p-5 mb-5">
           <div className="col-lg-12">
             <div>
               <div style={{ marginLeft: '0px' }}>
@@ -190,12 +190,6 @@ const ContractorTable = () => {
                         className="h-[54px] border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100 font-semibold"
                       />
                     </div>
-                    {/* <div className="formInputContainer col-lg-6">
-                      <label htmlFor="role">
-                        Flow Structure
-                      </label>
-                      
-                    </div> */}
                     <div className="flex flex-col gap-2 [&_label]:font-semibold">
                       <label htmlFor="role">Project Admin</label>
                       <div>
@@ -221,32 +215,6 @@ const ContractorTable = () => {
                         </Select>
                       </div>
                     </div>
-                    {/* <div className="flex flex-col gap-2 [&_label]:font-semibold">
-                      <label htmlFor="role">Project Manager</label>
-                      <div>
-                        <Select
-                          onValueChange={value =>
-                            setData({ ...data, manager: value })
-                          }
-                        >
-                          <SelectTrigger className="w-full border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100 h-[54px]">
-                            <SelectValue placeholder="Select" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {memberList
-                              ?.filter(
-                                itm =>
-                                  itm.role?.name.toLowerCase() === 'manager'
-                              )
-                              ?.map((item, index) => (
-                                <SelectItem key={index} value={item._id}>
-                                  {item?.name} ({item.employeeID})
-                                </SelectItem>
-                              ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div> */}
                     <div className="flex flex-col gap-2 [&_label]:font-semibold">
                       <label htmlFor="role">Architect</label>
                       <div>
@@ -439,7 +407,7 @@ const ContractorTable = () => {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
     </AsideContainer>
   );

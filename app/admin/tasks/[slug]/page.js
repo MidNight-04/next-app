@@ -423,7 +423,8 @@ const Page = () => {
             </div>
             <div className='flex flex-row gap-4 mt-4 text-nowrap flex-wrap'>
               {(data.data.issueMember._id === userId ||
-                data.data.assignedBy?._id === userId) &&
+                data.data.assignedBy?._id === userId ) &&
+                userType !== 'ROLE_CLIENT' &&
                 data.data.status !== 'Complete' && (
                   <button
                     className='px-[10px] py-[6px] border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-1 items-center'
@@ -450,7 +451,8 @@ const Page = () => {
                   </button>
                 )}
               {(data.data.issueMember._id === userId ||
-                data.data.assignedBy?._id === userId) &&
+                data.data.assignedBy?._id === userId ) &&
+                userType !== 'ROLE_CLIENT' && 
                 data.data.status !== 'Complete' && (
                   <button
                     className='px-[10px] py-[6px] border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-1 items-center 
@@ -474,7 +476,8 @@ const Page = () => {
             )} */}
               {data.data.assignedBy?._id === userId &&
                 data.data.status !== 'Complete' &&
-                data.data.category !== 'Project' && (
+                data.data.category !== 'Project' && 
+                userType !== 'ROLE_CLIENT' && (
                   <button
                     className='px-[10px] py-[6px] border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-1 items-center'
                     onClick={() => toggleDelete()}
@@ -483,7 +486,7 @@ const Page = () => {
                     Delete
                   </button>
                 )}
-              {(userType === 'ROLE_USER' || userType === 'ROLE_ADMIN') &&
+              {(userType !== 'ROLE_CLIENT' && userType !== 'ROLE_SITE ENGINEER' ) &&
                 data.data.status !== 'Complete' && (
                   <button
                     className='px-[10px] py-[6px] border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-1 items-center'
@@ -510,7 +513,7 @@ const Page = () => {
                     Comment
                   </button>
                 )}
-                              {data.data.assignedBy?._id === userId &&
+              {userType === 'ROLE_ADMIN' &&
                 data.data.status !== 'Complete' && (
                   <button
                     className='px-[10px] py-[6px] border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-1 items-center'
@@ -537,6 +540,7 @@ const Page = () => {
                 )}
               {data.data.issueMember._id !== userId &&
                 data.data.status !== 'Complete' &&
+                userType === 'ROLE_ADMIN' &&
                 data?.data?.checkList && (
                   <button
                     className='px-[10px] py-[6px] border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-1 items-center'

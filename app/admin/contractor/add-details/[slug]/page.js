@@ -5,8 +5,8 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { useRouter } from 'next/navigation';
 import { IoIosArrowBack } from 'react-icons/io';
 import { useQueries } from '@tanstack/react-query';
-import { postEndpoint } from '../../../../helpers/endpoints';
-import AsideContainer from '../../../../components/AsideContainer';
+import { postEndpoint } from '../../../../../helpers/endpoints';
+import AsideContainer from '../../../../../components/AsideContainer';
 import axios from 'axios';
 import * as yup from "yup";
 import { toast } from 'sonner';
@@ -16,7 +16,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../../../../components/ui/select';
+} from '../../../../../components/ui/select';
 
 const contractorSchema = yup.object().shape({
   name: yup.string().required("First name is required"),

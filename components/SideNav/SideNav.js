@@ -1,28 +1,35 @@
 'use client';
-import { Calendar, Home, Inbox, Search, Settings } from 'lucide-react';
 
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-} from '../../components/ui/sidebar';
-import Link from 'next/link';
-import { useAuthStore } from '../../store/useAuthStore';
-import { getDashboardSidebar } from '../../constant/dashboardSidebarData';
-import { usePathname } from 'next/navigation';
-import { cn } from '../../lib/utils';
-import Image from 'next/image';
+  import {
+    Sidebar,
+    SidebarContent,
+    SidebarFooter,
+    SidebarGroup,
+    SidebarGroupContent,
+    SidebarGroupLabel,
+    SidebarHeader,
+    SidebarMenu,
+    SidebarMenuItem,
+    SidebarMenuButton,
+  } from '../../components/ui/sidebar';
+  import Link from 'next/link';
+  import { useAuthStore } from '../../store/useAuthStore';
+  import { getDashboardSidebar } from '../../constant/dashboardSidebarData';
+  import { usePathname } from 'next/navigation';
+  import { cn } from '../../lib/utils';
+  import Image from 'next/image';
+  import { NavUser } from '../../components/nav-user';
+
+ const user = {
+    name: 'Thikedaar',
+    email: 'test@thikedaar.com',
+    avatar: '/avatars/shadcn.jpg',
+  };
 
 const SideNav = () => {
   const userType = useAuthStore(state => state.userType);
-  const content = getDashboardSidebar(userType || 'ROLE_CLIENT');
+  const content = getDashboardSidebar(userType ||'ROLE_CLIENT');
+  // const content = getDashboardSidebar(userType || 'ROLE_CLIENT');
   const path = usePathname();
 
   return (
@@ -80,130 +87,34 @@ const SideNav = () => {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter className='bg-secondary'>
+        <NavUser user={user} />
+      </SidebarFooter>
     </Sidebar>
   );
 };
 
 export default SideNav;
 
-// const { openMenu } = useSelector(store => store.styleReducer);
-// const { userRole } = useSelector(store => store.userReducer);
-// const [activeTab, setActiveTab] = useState("");
-// const sideBarRoute = getDashboardSidebar(userRole);
-// // console.log(userRole)
+// import { AppSidebar } from '../../components/app-sidebar';
+// import { SidebarInset, SidebarProvider } from '../../components/ui/sidebar';
 
-// // activeAdminNavLink
+// export default function Page() {
+//   return (
+//     <SidebarProvider
+//       style={{
+//         '--sidebar-width': 'calc(var(--spacing) * 72)',
+//         '--header-height': 'calc(var(--spacing) * 12)',
+//       }}
+//     >
+//       <AppSidebar variant='inset' />
+//       <SidebarInset>
+//         <div className='flex flex-1 flex-col'>
+//           <div className='@container/main flex flex-1 flex-col gap-2'>
 
-// const setActiveTabFunc = id => {
-//   setActiveTab(id);
-//   // console.log('activeAdminNavLink --->>>>>>>>', id);
-//   setTimeout(() => {
-//     // console.log('activeTab --->>>>>', activeTab);
-//   }, 2000);
-// };
-
-// const dispatch = useDispatch();
-// return (
-//   <div
-//     className={`sidebar menu_open_${openMenu === undefined ? false : openMenu}`}
-//   >
-//     <div className="top mt-3">
-//       <Link href="/" className="adminNavLink">
-//         {openMenu ? null : (
-//           <>
-//             <span className="logo">Thikedaardotcompvtltd</span>
-//             <p
-//               className="text-center"
-//               style={{ fontSize: "14px", color: "#fec20e" }}
-//             >
-//               ({userRole.substring(5).toLowerCase()})
-//             </p>
-//           </>
-//         )}
-//       </Link>
-//       <span className="menu_icon " onClick={() => dispatch(changeOpenMenu())}>
-//         {!openMenu ? <BiSolidLeftArrow className="left" /> : <MenuIcon />}
-//       </span>
-//     </div>
-//     <hr />
-//     {!openMenu ? (
-//       <div className="center">
-//         <ul>
-//           {sideBarRoute?.map((data, index) => (
-//             <div key={index}>
-//               <p className={data.paraClass}>{data.name}</p>
-//               {data.menuItem.map((item, index) => (
-//                 <div
-//                   onClick={() => setActiveTabFunc(item.feildName)}
-//                   className={
-//                     activeTab === item.feildName ? "activeAdminNavLink" : ""
-//                   }
-//                   key={index}
-//                 >
-//                   <li
-//                     onClick={() => setActiveTabFunc(item.feildName)}
-//                     className={
-//                       activeTab === item.feildName ? "activeAdminNavLink" : ""
-//                     }
-//                   >
-//                     <Link href={item.path} className={item.linkClassName}>
-//                       {item.iconName}
-//                       <span>{item.feildName}</span>
-//                     </Link>
-//                   </li>
-//                   {item.subMenuItem.map((subItem, index) => (
-//                     <ul
-//                       onClick={() => setActiveTabFunc(item.feildName)}
-//                       className={
-//                         activeTab === item.feildName ? "activeAdminNavLink" : ""
-//                       }
-//                       key={index}
-//                     >
-//                       <li
-//                         onClick={() => setActiveTabFunc(item.feildName)}
-//                         className={
-//                           activeTab === item.feildName
-//                             ? "activeAdminNavLink"
-//                             : ""
-//                         }
-//                       >
-//                         <NavLink
-//                           to={subItem.path}
-//                           className={subItem.linkClassName}
-//                         >
-//                           {subItem.iconName}
-//                           <span>{subItem.feildName}</span>
-//                         </NavLink>
-//                       </li>
-//                     </ul>
-//                   ))}
-//                 </div>
-//               ))}
-//             </div>
-//           ))}
-//         </ul>
-//       </div>
-//     ) : (
-//       <div className="center">
-//         <ul>
-//           {sideBarRoute.map(data => (
-//             <>
-//               <p className={data.paraClass}>{data.name}</p>
-//               {data.menuItem.map(item => (
-//                 <li key={item.path}>
-//                   <Link href={item.path} className={item.linkClassName}>
-//                     {item.iconName}
-//                   </Link>
-//                 </li>
-//               ))}
-//             </>
-//           ))}
-//         </ul>
-//       </div>
-//     )}
-//     {/* <div className="bottom">
-//       <div className="colorOption"></div>
-//       <div className="colorOption"></div>
-//     </div> */}
-//   </div>
-// );
+//           </div>
+//         </div>
+//       </SidebarInset>
+//     </SidebarProvider>
+//   );
+// }

@@ -34,26 +34,26 @@ import { FaTasks } from 'react-icons/fa';
 // const userRole = localStorage.getItem("role");
 
 const adminSidebar = [
-  {
-    name: 'Main',
-    paraClass: 'title',
-    menuItem: [
-      {
-        path: '/admin/home',
-        iconName: <DashboardIcon />,
-        feildName: 'Dashboard',
-        linkClassName: 'adminNavLink',
-        subMenuItem: [],
-      },
-      {
-        path: '/admin/profile',
-        iconName: <AccountBoxIcon />,
-        feildName: 'Profile',
-        linkClassName: 'adminNavLink',
-        subMenuItem: [],
-      },
-    ],
-  },
+  // {
+  //   name: 'Main',
+  //   paraClass: 'title',
+  //   menuItem: [
+  //     {
+  //       path: '/admin/home',
+  //       iconName: <DashboardIcon />,
+  //       feildName: 'Dashboard',
+  //       linkClassName: 'adminNavLink',
+  //       subMenuItem: [],
+  //     },
+  //     {
+  //       path: '/admin/profile',
+  //       iconName: <AccountBoxIcon />,
+  //       feildName: 'Profile',
+  //       linkClassName: 'adminNavLink',
+  //       subMenuItem: [],
+  //     },
+  //   ],
+  // },
   {
     name: 'Project Management',
     paraClass: 'title',
@@ -306,19 +306,19 @@ const adminSidebar = [
       },
     ],
   },
-  {
-    name: 'Setting',
-    paraClass: 'title',
-    menuItem: [
-      {
-        path: '/admin/notifications',
-        iconName: <NotificationsIcon />,
-        feildName: 'Notifications',
-        linkClassName: 'adminNavLink',
-        subMenuItem: [],
-      },
-    ],
-  },
+  // {
+  //   name: 'Setting',
+  //   paraClass: 'title',
+  //   menuItem: [
+  //     {
+  //       path: '/admin/notifications',
+  //       iconName: <NotificationsIcon />,
+  //       feildName: 'Notifications',
+  //       linkClassName: 'adminNavLink',
+  //       subMenuItem: [],
+  //     },
+  //   ],
+  // },
 ];
 
 const userSidebar = [
@@ -393,19 +393,19 @@ const userSidebar = [
 ];
 
 const architectSidebar = [
-  {
-    name: 'Main',
-    paraClass: 'title',
-    menuItem: [
-      {
-        path: '/architect/profile',
-        iconName: <DashboardIcon />,
-        feildName: 'Profile',
-        linkClassName: 'adminNavLink',
-        subMenuItem: [],
-      },
-    ],
-  },
+  // {
+  //   name: 'Main',
+  //   paraClass: 'title',
+  //   menuItem: [
+  //     {
+  //       path: '/architect/profile',
+  //       iconName: <DashboardIcon />,
+  //       feildName: 'Profile',
+  //       linkClassName: 'adminNavLink',
+  //       subMenuItem: [],
+  //     },
+  //   ],
+  // },
   {
     name: 'Lists',
     paraClass: 'title',
@@ -457,19 +457,19 @@ const architectSidebar = [
 ];
 
 const contractorSidebar = [
-  {
-    name: 'Main',
-    paraClass: 'title',
-    menuItem: [
-      {
-        path: '/contractor/profile',
-        iconName: <DashboardIcon />,
-        feildName: 'Profile',
-        linkClassName: 'adminNavLink',
-        subMenuItem: [],
-      },
-    ],
-  },
+  // {
+  //   name: 'Main',
+  //   paraClass: 'title',
+  //   menuItem: [
+  //     {
+  //       path: '/contractor/profile',
+  //       iconName: <DashboardIcon />,
+  //       feildName: 'Profile',
+  //       linkClassName: 'adminNavLink',
+  //       subMenuItem: [],
+  //     },
+  //   ],
+  // },
   {
     name: 'My application',
     paraClass: 'title',
@@ -505,118 +505,111 @@ const contractorSidebar = [
   },
 ];
 
-const managerSidebar = [
-  {
-    name: 'Main',
-    paraClass: 'title',
-    menuItem: [
-      {
-        path: '/admin/profile',
-        iconName: <DashboardIcon />,
-        feildName: 'Profile',
-        linkClassName: 'adminNavLink',
-        subMenuItem: [],
-      },
-    ],
-  },
-  {
-    name: 'Project Management',
-    paraClass: 'title',
-    menuItem: [
-      {
-        path: '/admin/projects/myprojects',
-        iconName: <GroupIcon />,
-        feildName: 'Projects',
-        linkClassName: 'adminNavLink',
-        subMenuItem: [],
-      },
-      // {
-      //   path: "/material-request/list",
-      //   iconName: <GroupIcon />,
-      //   feildName: "Material Request",
-      //   linkClassName: "adminNavLink",
-      //   subMenuItem: [],
-      // },
-    ],
-  },
-  {
-    name: 'Task Management',
-    paraClass: 'title',
-    menuItem: [
-      {
-        path: '/admin/tasks/dashboard',
-        iconName: <Dashboard />,
-        feildName: 'Dashboard',
-        linkClassName: 'adminNavLink',
-        subMenuItem: [],
-      },
-      {
-        path: '/admin/tasks/assign',
-        iconName: <AddTask />,
-        feildName: 'Assign Task',
-        linkClassName: 'adminNavLink',
-        subMenuItem: [],
-      },
-      // {
-      //   path: "/member/tasklist",
-      //   iconName: <Task  style={{color:"#fec20e"}} />,
-      //   feildName: "All Tasks",
-      //   linkClassName: "adminNavLink",
-      //   subMenuItem: [],
-      // },
-    ],
-  },
-  {
-    name: 'Tickets Management',
-    paraClass: 'title',
-    menuItem: [
-      {
-        path: '/admin/tickets',
-        iconName: <ListAlt />,
-        feildName: 'Tickets',
-        linkClassName: 'adminNavLink',
-        subMenuItem: [],
-      },
-      // {
-      //   path: "/admin/ticket/add",
-      //   iconName: <ListAlt  style={{color:"#fec20e"}} />,
-      //   feildName: "Raise Ticket",
-      //   linkClassName: "adminNavLink",
-      //   subMenuItem: [],
-      // },
-    ],
-  },
-];
+// const managerSidebar = [
+//   {
+//     name: 'Main',
+//     paraClass: 'title',
+//     menuItem: [
+//       {
+//         path: '/admin/profile',
+//         iconName: <DashboardIcon />,
+//         feildName: 'Profile',
+//         linkClassName: 'adminNavLink',
+//         subMenuItem: [],
+//       },
+//     ],
+//   },
+//   {
+//     name: 'Project Management',
+//     paraClass: 'title',
+//     menuItem: [
+//       {
+//         path: '/admin/projects/myprojects',
+//         iconName: <GroupIcon />,
+//         feildName: 'Projects',
+//         linkClassName: 'adminNavLink',
+//         subMenuItem: [],
+//       },
+//       // {
+//       //   path: "/material-request/list",
+//       //   iconName: <GroupIcon />,
+//       //   feildName: "Material Request",
+//       //   linkClassName: "adminNavLink",
+//       //   subMenuItem: [],
+//       // },
+//     ],
+//   },
+//   {
+//     name: 'Task Management',
+//     paraClass: 'title',
+//     menuItem: [
+//       {
+//         path: '/admin/tasks/dashboard',
+//         iconName: <Dashboard />,
+//         feildName: 'Dashboard',
+//         linkClassName: 'adminNavLink',
+//         subMenuItem: [],
+//       },
+//       {
+//         path: '/admin/tasks/assign',
+//         iconName: <AddTask />,
+//         feildName: 'Assign Task',
+//         linkClassName: 'adminNavLink',
+//         subMenuItem: [],
+//       },
+//       // {
+//       //   path: "/member/tasklist",
+//       //   iconName: <Task  style={{color:"#fec20e"}} />,
+//       //   feildName: "All Tasks",
+//       //   linkClassName: "adminNavLink",
+//       //   subMenuItem: [],
+//       // },
+//     ],
+//   },
+//   {
+//     name: 'Tickets Management',
+//     paraClass: 'title',
+//     menuItem: [
+//       {
+//         path: '/admin/tickets',
+//         iconName: <ListAlt />,
+//         feildName: 'Tickets',
+//         linkClassName: 'adminNavLink',
+//         subMenuItem: [],
+//       },
+//       // {
+//       //   path: "/admin/ticket/add",
+//       //   iconName: <ListAlt  style={{color:"#fec20e"}} />,
+//       //   feildName: "Raise Ticket",
+//       //   linkClassName: "adminNavLink",
+//       //   subMenuItem: [],
+//       // },
+//     ],
+//   },
+// ];
 
 const clientSidebar = [
-  {
-    name: 'Main',
-    paraClass: 'title',
-    menuItem: [
-      {
-        path: '/admin/profile',
-        iconName: <DashboardIcon />,
-        feildName: 'Profile',
-        linkClassName: 'adminNavLink',
-        subMenuItem: [],
-      },
-    ],
-  },
+  // {
+  //   name: 'Main',
+  //   paraClass: 'title',
+  //   menuItem: [
+  //     {
+  //       path: '/admin/profile',
+  //       iconName: <DashboardIcon />,
+  //       feildName: 'Profile',
+  //       linkClassName: 'adminNavLink',
+  //       subMenuItem: [],
+  //     },
+  //   ],
+  // },
   {
     name: 'Project Management',
     paraClass: 'title',
     menuItem: [
       {
-        path: '/admin/projects/myprojects',
-        iconName: <GroupIcon />,
+        path: '/admin/projects',
+        iconName: <GrProjects />,
         feildName: 'Projects',
-        linkClassName: 'adminNavLink',
-        subMenuItem: [],
-      },
-      {
-        path: '/admin/documents',
-        iconName: <ListAlt />,
-        feildName: 'Documents',
         linkClassName: 'adminNavLink',
         subMenuItem: [],
       },
@@ -633,31 +626,24 @@ const clientSidebar = [
         linkClassName: 'adminNavLink',
         subMenuItem: [],
       },
-      // {
-      //   path: "/client/ticket/add",
-      //   iconName: <ListAlt  style={{color:"#fec20e"}} />,
-      //   feildName: "Raise Ticket",
-      //   linkClassName: "adminNavLink",
-      //   subMenuItem: [],
-      // },
     ],
   },
 ];
 
 const dealerSidebar = [
-  {
-    name: 'Main',
-    paraClass: 'title',
-    menuItem: [
-      {
-        path: '/dealer/profile',
-        iconName: <DashboardIcon />,
-        feildName: 'Profile',
-        linkClassName: 'adminNavLink',
-        subMenuItem: [],
-      },
-    ],
-  },
+  // {
+  //   name: 'Main',
+  //   paraClass: 'title',
+  //   menuItem: [
+  //     {
+  //       path: '/dealer/profile',
+  //       iconName: <DashboardIcon />,
+  //       feildName: 'Profile',
+  //       linkClassName: 'adminNavLink',
+  //       subMenuItem: [],
+  //     },
+  //   ],
+  // },
   {
     name: 'Lists',
     paraClass: 'title',
@@ -702,26 +688,26 @@ const dealerSidebar = [
 ];
 
 const siteEngineerSidebar = [
-  {
-    name: 'Main',
-    paraClass: 'title',
-    menuItem: [
-      {
-        path: '/admin/profile',
-        iconName: <DashboardIcon />,
-        feildName: 'Profile',
-        linkClassName: 'adminNavLink',
-        subMenuItem: [],
-      },
-    ],
-  },
+  // {
+  //   name: 'Main',
+  //   paraClass: 'title',
+  //   menuItem: [
+  //     {
+  //       path: '/admin/profile',
+  //       iconName: <DashboardIcon />,
+  //       feildName: 'Profile',
+  //       linkClassName: 'adminNavLink',
+  //       subMenuItem: [],
+  //     },
+  //   ],
+  // },
   {
     name: 'Project Management',
     paraClass: 'title',
     menuItem: [
       {
-        path: '/admin/projects/myprojects',
-        iconName: <GroupIcon />,
+        path: '/admin/projects',
+        iconName: <GrProjects />,
         feildName: 'Projects',
         linkClassName: 'adminNavLink',
         subMenuItem: [],
@@ -736,13 +722,69 @@ const siteEngineerSidebar = [
     ],
   },
   {
-    name: 'Task Management',
+    name: 'Tickets Management',
+    paraClass: 'title',
+    menuItem: [
+      {
+        path: '/admin/tickets',
+        iconName: <ListAlt />,
+        feildName: 'Tickets',
+        linkClassName: 'adminNavLink',
+        subMenuItem: [],
+      },
+    ],
+  },
+  {
+    name: 'Tickets Management',
     paraClass: 'title',
     menuItem: [
       {
         path: '/admin/tasks/dashboard',
         iconName: <Dashboard />,
         feildName: 'Dashboard',
+        linkClassName: 'adminNavLink',
+        subMenuItem: [],
+      },
+      {
+        path: '/admin/tasks/mytasks',
+        iconName: <Task />,
+        feildName: 'My Tasks',
+        linkClassName: 'adminNavLink',
+        subMenuItem: [],
+      },
+    ],
+  },
+];
+
+const managerSidebar = [
+  // {
+  //   name: 'Main',
+  //   paraClass: 'title',
+  //   menuItem: [
+  //     {
+  //       path: '/admin/profile',
+  //       iconName: <AccountBoxIcon />,
+  //       feildName: 'Profile',
+  //       linkClassName: 'adminNavLink',
+  //       subMenuItem: [],
+  //     },
+  //   ],
+  // },
+  {
+    name: 'Project Management',
+    paraClass: 'title',
+    menuItem: [
+      {
+        path: '/admin/dashboard',
+        iconName: <Dashboard sx={{ height: '1rem', width: '1rem' }} />,
+        feildName: 'Dashboard',
+        linkClassName: 'adminNavLink',
+        subMenuItem: [],
+      },
+      {
+        path: '/admin/projects',
+        iconName: <GrProjects />,
+        feildName: 'Projects',
         linkClassName: 'adminNavLink',
         subMenuItem: [],
       },
@@ -756,6 +798,40 @@ const siteEngineerSidebar = [
         path: '/admin/tickets',
         iconName: <ListAlt />,
         feildName: 'Tickets',
+        linkClassName: 'adminNavLink',
+        subMenuItem: [],
+      },
+    ],
+  },
+  {
+    name: 'Task Management',
+    paraClass: 'title',
+    menuItem: [
+      {
+        path: '/admin/tasks/dashboard',
+        iconName: <Dashboard />,
+        feildName: 'Dashboard',
+        linkClassName: 'adminNavLink',
+        subMenuItem: [],
+      },
+      {
+        path: '/admin/tasks/mytasks',
+        iconName: <Task />,
+        feildName: 'My Tasks',
+        linkClassName: 'adminNavLink',
+        subMenuItem: [],
+      },
+      {
+        path: '/admin/tasks/delegatedtasks',
+        iconName: <FaTasks className="text-2xl" />,
+        feildName: 'Delegated Tasks',
+        linkClassName: 'adminNavLink',
+        subMenuItem: [],
+      },
+      {
+        path: '/admin/tasks/assign',
+        iconName: <AddTask />,
+        feildName: 'Assign Task',
         linkClassName: 'adminNavLink',
         subMenuItem: [],
       },

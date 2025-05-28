@@ -349,7 +349,7 @@ const Page = () => {
                         {item?.paymentStatus}
                       </span>
                     </div>
-                    {userType === "ROLE_ADMIN" &&
+                    {userType !== "ROLE_CLIENT" && userType !== "ROLE_SITE ENGINEER" &&
                       item.paymentStatus !== "Paid" && (
                         <button
                           onClick={() => {
@@ -387,7 +387,11 @@ const Page = () => {
                     </div>
                   </div>
                   {showPaymentDetails[index] && (
-                    <div className="text-center">
+                  <>
+                    {payDetails[0]?.stages
+                      .filter(dt => dt.stage === item.stage)[0]
+                      ?.installments.length > 0 ? (
+                      <div className="text-center">
                       <table className="w-full">
                         <thead>
                           <tr>
@@ -416,8 +420,14 @@ const Page = () => {
                               );
                             })}
                         </tbody>
-                      </table>
-                    </div>
+                      </table>           
+                    </div> ) : ( 
+                    <p className="text-center p-4">
+                      No payment details available
+                    </p>
+                    )}
+                  </>
+
                   )}
                   <div className="flex flex-row items-center bg-secondary-foreground  p-2 w-full rounded-b-3xl">
                     <div className="flex flex-row items-center gap-2 w-full p-5 justify-between">

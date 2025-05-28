@@ -919,7 +919,7 @@ const ClientProjectView = () => {
           </Link>
           {userType === 'ROLE_ADMIN' && (
             <>
-              <Link href={`/admin/projects/view-checklist/${slug}`}>
+              {/* <Link href={`/admin/projects/view-checklist/${slug}`}>
                 <button
                   // onClick={uploadDocument}
                   className="px-[15px] py-[12px] bg-transparent border-2 border-secondary rounded-full font-ubuntu -md:px-2 -md:py-[6px] hover:bg-secondary [&_div]:hover:text-primary"
@@ -930,7 +930,7 @@ const ClientProjectView = () => {
                     </p>
                   </div>
                 </button>
-              </Link>
+              </Link> */}
 
               <button
                 onClick={uploadDocument}
@@ -1148,8 +1148,9 @@ const ClientProjectView = () => {
                     </div>
                   </AccordionTrigger>
                   <AccordionContent className="py-0">
-                    <div className="bg-[#efefef] h-[7rem] pt-2">
+                    <div className="bg-[#efefef]  pt-2">
                       <div className="flex flex-row justify-end gap-2 mb-2">
+                        { userType !== 'ROLE_CLIENT' && (
                         <span
                           className="border border-primary rounded-full p-2 font-semibold text-primary cursor-pointer"
                           onClick={() =>
@@ -1158,6 +1159,8 @@ const ClientProjectView = () => {
                         >
                           <FaPlus />
                         </span>
+                        )}
+                        { userType === 'ROLE_ADMIN' && (
                         <span
                           className="border border-primary rounded-full p-2 font-semibold text-primary cursor-pointer"
                           onClick={() =>
@@ -1165,7 +1168,7 @@ const ClientProjectView = () => {
                           }
                         >
                           <FaMinus />
-                        </span>
+                        </span>)}
                       </div>
                       <div className=" bg-secondary text-primary h-16 flex flex-row justify-evenly items-center rounded-t-3xl flex-auto text-base font-semibold -md:justify-between">
                         <span className="font-semibold w-24 -sm:hidden" />

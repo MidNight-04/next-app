@@ -16,8 +16,9 @@ import AsideContainer from "../../../components/AsideContainer";
 const Page = () => {
   const router = useRouter();
   const userId = useAuthStore(state => state.userId);
-  const userType = useAuthStore(state => state);
+  const userType = useAuthStore(state => state.userType);
   const hasHydrated = useAuthStore.persist?.hasHydrated();
+
   const {
     data: profileData,
     isLoading,

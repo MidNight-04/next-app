@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { IoIosArrowBack } from "react-icons/io";
 import { toast } from "sonner";
+import { SidebarTrigger } from "../../../../components/ui/sidebar";
+import { Separator } from "../../../../components/ui/separator";
 
 const AddClientForm = () => {
   const router = useRouter();
@@ -56,12 +58,16 @@ const AddClientForm = () => {
   };
   return (
     <AsideContainer>
-      <div className="flex flex-row items-center text-2xl font-bold gap-2 my-4">
+      <div className='flex w-full items-center gap-1 lg:gap-2'>
+        <SidebarTrigger className="-ml-2 hover:bg-primary" />
+        <Separator orientation="vertical" className="data-[orientation=vertical]:h-4 bg-black" />
         <IoIosArrowBack
           onClick={() => router.back()}
           className="cursor-pointer transition duration-300 hover:scale-150 ease-in-out"
         />
-        <h1>Add Client</h1>
+        <h1 className="font-ubuntu font-bold text-[25px] leading-7 py-5 text-nowrap">
+          Add Client
+        </h1>
       </div>
       <div className="bg-white p-6 rounded-3xl shadow-xl">
         <div>

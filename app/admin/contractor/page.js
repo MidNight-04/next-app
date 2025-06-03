@@ -12,6 +12,8 @@ import { RiUserForbidLine } from "react-icons/ri";
 import { CiViewList } from "react-icons/ci";
 import { FaCheck } from "react-icons/fa6";
 import { MdOutlineDelete } from "react-icons/md";
+import { SidebarTrigger } from "../../../components/ui/sidebar";
+import { Separator } from "../../../components/ui/separator";
 
 const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
   [`& .${gridClasses.row}.even`]: {
@@ -222,10 +224,14 @@ const ContractorTable = () => {
             className="text-2xl cursor-pointer transition duration-300 hover:scale-150 ease-in-out"
             onClick={() => router.back()}
           /> */}
-          <h1 className="text-2xl font-semibold font-ubuntu -md:mb-2 -md:text-lg">
+        <div className='flex w-full items-center gap-1 lg:gap-2'>
+          <SidebarTrigger className="-ml-2 hover:bg-primary" />
+          <Separator orientation="vertical" className="data-[orientation=vertical]:h-4 bg-black" />
+          <h1 className="font-ubuntu font-bold text-[25px] leading-7 text-nowrap">
             Contractor List
           </h1>
-          <button className="bg-secondary text-primary rounded-3xl px-3 py-2" onClick={()=>router.push('/admin/contractor/add')}>Add Contractor</button>
+        </div>
+          <button className="bg-secondary text-primary rounded-3xl px-3 py-2 text-nowrap" onClick={()=>router.push('/admin/contractor/add')}>Add Contractor</button>
         </div>
       {/* <div className="datatableTitle">
        Dealer's Application List

@@ -2,7 +2,7 @@
 import { redirect } from 'next/navigation';
 // import AdminHeader from '../AdminHeader/AdminHeader';
 import SideNav from '../SideNav/SideNav';
-import { SidebarProvider,SidebarInset } from '../ui/sidebar';
+import { SidebarProvider } from '../ui/sidebar';
 import { useAuthStore } from '../../store/useAuthStore';
 
 const AsideContainer = ({ children }) => {

@@ -26,10 +26,11 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '../../../components/ui/accordion';
-
 import { cn } from '../../../lib/utils';
 import { Add } from '@mui/icons-material';
 import { useRouter } from 'next/navigation';
+import { SidebarTrigger } from "../../../components/ui/sidebar";
+import { Separator } from "../../../components/ui/separator";
 
 const ConstructionStepTable = () => {
   const [data, setData] = useState([]);
@@ -219,10 +220,14 @@ const ConstructionStepTable = () => {
 
   return (
     <AsideContainer>
-      <div className='flex flex-row justify-between items-center'>
-        <h1 className='text-[25px] font-ubuntu font-bold my-5 -md:text-lg -lg:my-2 -md:my-3'>
-          Process List
-        </h1>
+      <div className='flex flex-row justify-between items-center text-nowrap'>
+        <div className='flex w-full items-center gap-1 lg:gap-2'>
+          <SidebarTrigger className="-ml-2 hover:bg-primary" />
+          <Separator orientation="vertical" className="data-[orientation=vertical]:h-4 bg-black" />
+          <h1 className="font-ubuntu font-bold text-[25px] leading-7 py-5 text-nowrap">
+            Construction Step List
+          </h1>
+        </div>
         <button
           className='bg-secondary text-primary rounded-3xl px-4 pr-5 py-3 flex flex-row gap-1 items-center -md:text-xs -md:px-2 -md:py-[6px] -md:[&_svg]:text-sm'
           onClick={() => router.push('/admin/construction-steps/add')}

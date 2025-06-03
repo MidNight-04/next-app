@@ -10,6 +10,8 @@ import { FiEdit } from "react-icons/fi";
 import { MdOutlineDelete } from "react-icons/md";
 import { useRouter } from "next/navigation";
 import { Add } from "@mui/icons-material";
+import { SidebarTrigger } from "../../../components/ui/sidebar";
+import { Separator } from "../../../components/ui/separator";
 
 const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
   [`& .${gridClasses.row}.even`]: {
@@ -196,19 +198,22 @@ const ClientTable = () => {
   });
   return (
     <AsideContainer>
-      <div>
-        <div className="flex flex-row justify-between items-center">
-          <h1 className="text-[25px] font-ubuntu font-bold my-5 -md:text-lg -lg:my-2">
+      <div className="flex flex-row justify-between items-center my-4">
+        <div className='flex w-full items-center gap-1 lg:gap-2'>
+          <SidebarTrigger className="-ml-2 hover:bg-primary" />
+          <Separator orientation="vertical" className="data-[orientation=vertical]:h-4 bg-black" />
+          <h1 className="font-ubuntu font-bold text-[25px] leading-7 text-nowrap">
             Client List
           </h1>
+        </div>
           <button
-            className="bg-secondary text-primary rounded-3xl px-4 py-3 flex flex-row  items-center"
+            className="bg-secondary text-primary rounded-3xl px-4 py-3 flex flex-row  items-center text-nowrap"
             onClick={() => router.push("/admin/clients/add")}
-          >
+            >
             <Add sx={{ marginRight: "4px" }} />
             <span>Add Client</span>
           </button>
-        </div>
+      </div>
         <StripedDataGrid
           rows={arrayData}
           columns={columns.concat(actionColumn)}
@@ -399,7 +404,6 @@ const ClientTable = () => {
             </div>
           </div>
         </Modal>
-      </div>
     </AsideContainer>
   );
 };

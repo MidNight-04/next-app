@@ -16,6 +16,8 @@ import { IoPeopleOutline } from 'react-icons/io5';
 import AsideContainer from '../../../components/AsideContainer';
 import { Modal } from '@mui/material';
 import { useRouter } from 'next/navigation';
+import { SidebarTrigger } from "../../../components/ui/sidebar";
+import { Separator } from "../../../components/ui/separator";
 
 const Page = () => {
   const [project, setProject] = useState([]);
@@ -139,10 +141,14 @@ let rupee = new Intl.NumberFormat('en-IN', {
 
   return (
     <AsideContainer>
-      <div className="flex flex-row justify-between pt-[20px] mb-[20px] items-center -lg:pt-2 -lg:mb-2">
-        <h1 className="font-ubuntu font-bold text-[25px] leading-7 -lg:leading-relaxed -lg:text-lg">
-          Project List
-        </h1>
+      <div className="flex flex-row justify-between items-center -lg:pt-2 -lg:mb-2">
+        <div className='flex w-full items-center gap-1 lg:gap-2'>
+          <SidebarTrigger className="-ml-2 hover:bg-primary" />
+          <Separator orientation="vertical" className="data-[orientation=vertical]:h-4 bg-black" />
+          <h1 className="font-ubuntu font-bold text-[25px] leading-7 py-5 text-nowrap">
+            Project List
+          </h1>
+        </div>
         <div className="flex flex-row gap-2">
           {/* <div className="flex p-1 pl-4 w-[305px] h-[46px] rounded-full border-[1px] border-[#EFEFEF] bg-white overflow-hidden max-w-md mx-auto text-[#565656] -md:w-56">
             <input
@@ -166,7 +172,7 @@ let rupee = new Intl.NumberFormat('en-IN', {
               <button className="p-[6px] px-3 bg-transparent border-2 border-secondary rounded-full font-ubuntu hover:bg-secondary [&_p]:hover:text-primary-foreground [&_svg]:hover:text-primary-foreground">
                 <div className="text-secondary flex flex-row items-center">
                   <AddIcon />
-                  <p className="text-[13px] font-bold">Add Project</p>
+                  <p className="text-[13px] font-bold text-nowrap">Add Project</p>
                 </div>
               </button>
             </Link>
@@ -200,7 +206,7 @@ let rupee = new Intl.NumberFormat('en-IN', {
                       }}>
                         <div className="flex flex-row gap-4 ">
                           <span className="h-[88px] rounded-full w-1 bg-primary -md:h-16" />
-                          <div className="[&_span]:flex [&_span]:flex-row [&_span]:gap-3 [&_span]:leading-7 font-ubuntu font-bold text-base -md:[&_span]:gap-1 -md:[&_span]:leading-snug -md:text-sm text-nowrap text-[#565656]">
+                          <div className="[&_span]:flex [&_span]:flex-row [&_span]:gap-3 [&_span]:leading-7 font-ubuntu font-bold text-base -md:[&_span]:gap-1 -md:[&_span]:leading-snug -md:text-sm text-nowrap text-[#565656] -md:max-w-64">
                             <span>
                               <p>Project Id :</p>
                               {item.siteID}
@@ -210,7 +216,9 @@ let rupee = new Intl.NumberFormat('en-IN', {
                             </span>
                             <span>
                               <p>Project Location :</p>
+                              <p className='truncate'>
                               {item.project_location}
+                              </p>
                             </span>
                           </div>
                         </div>

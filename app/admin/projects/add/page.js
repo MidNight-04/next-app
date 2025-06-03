@@ -13,6 +13,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../../../../components/ui/select';
+import { SidebarTrigger } from "../../../../components/ui/sidebar";
+import { Separator } from "../../../../components/ui/separator";
 
 const AddProjectForm = () => {
   const router = useRouter();
@@ -243,28 +245,30 @@ const AddProjectForm = () => {
   };
   return (
     <AsideContainer>
-      <div className="mt-5">
-        <div className="flex flex-row gap-2 items-center">
-          <IoIosArrowBack
-            className="text-2xl cursor-pointer transition duration-300 hover:scale-150 ease-in-out"
-            onClick={() => router.back()}
-          />
-          <h1 className="text-2xl font-semibold font-ubuntu -md:mb-2 -md:text-lg">
-            Add Project
-          </h1>
-        </div>
-        <p
+      <div>
+      <div className='flex w-full items-center gap-1 lg:gap-2'>
+        <SidebarTrigger className="-ml-2 hover:bg-primary" />
+        <Separator orientation="vertical" className="data-[orientation=vertical]:h-4 bg-black" />
+        <IoIosArrowBack
+          onClick={() => router.back()}
+          className="cursor-pointer transition duration-300 hover:scale-150 ease-in-out"
+        />
+        <h1 className="font-ubuntu font-bold text-[25px] leading-7 py-5 text-nowrap">
+          Add Project
+        </h1>
+      </div>
+        {/* <p
           className="text-center"
           style={{ color: 'rgb(255, 119, 0)', wordSpacing: '2px' }}
         >
           Create Process and Checklist point before Project creation
-        </p>
+        </p> */}
         <div className="bg-white rounded-[15px] p-5 mb-5">
           <div className="col-lg-12">
             <div>
               <div style={{ marginLeft: '0px' }}>
                 <div>
-                  <div className="grid grid-cols-2 gap-4 gap-x-8">
+                  <div className="grid grid-cols-2 gap-4 gap-x-8 -md:grid-cols-1">
                     <div className="flex flex-col gap-2 [&_label]:font-semibold">
                       <label>Project Name</label>
                       <input

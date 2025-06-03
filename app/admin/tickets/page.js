@@ -9,6 +9,8 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import AsideContainer from "../../../components/AsideContainer";
 import { cn } from "../../../lib/utils";
+import { SidebarTrigger } from "../../../components/ui/sidebar";
+import { Separator } from "../../../components/ui/separator";
 
 const Page = () => {
   const userId = useAuthStore(state => state.userId);
@@ -118,9 +120,13 @@ const Page = () => {
   return (
     <AsideContainer>
       <div className="flex flex-row justify-between items-center my-5">
-        <h1 className="text-[25px] font-ubuntu font-bold -md:text-lg -lg:my-2">
-          Ticket List
-        </h1>
+        <div className='flex w-full items-center gap-1 lg:gap-2'>
+          <SidebarTrigger className="-ml-2 hover:bg-primary" />
+          <Separator orientation="vertical" className="data-[orientation=vertical]:h-4 bg-black" />
+          <h1 className="font-ubuntu font-bold text-[25px] leading-7 text-nowrap">
+            Ticket List
+          </h1>
+        </div>
         <div>
           {userType === "ROLE_USER" && (
             <div className="flex flex-row items-center gap-4">

@@ -17,6 +17,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../../../../components/ui/select';
+import { SidebarTrigger } from "../../../../components/ui/sidebar";
+import { Separator } from "../../../../components/ui/separator";
 
 const contractorSchema = yup.object().shape({
   name: yup.string().required("First name is required"),
@@ -167,7 +169,7 @@ const Page = () => {
               <Select
                 onValueChange={(val) => setValue('city', val)}
               >
-                <SelectTrigger className="h-[54px] bg-gray-100 border px-4 border-primary rounded-[7px]">
+                <SelectTrigger className="h-[54px] bg-gray-100 border px-4 border-primary rounded-[7px]" disabled={!state}>
                   <SelectValue placeholder="Select" />
                 </SelectTrigger>
                 <SelectContent>

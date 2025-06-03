@@ -8,6 +8,8 @@ import { saveAs } from "file-saver";
 import { IoIosArrowBack } from "react-icons/io";
 import { useRouter } from "next/navigation";
 import { FiDownload } from "react-icons/fi";
+import { SidebarTrigger } from "../../../../components/ui/sidebar";
+import { Separator } from "../../../../components/ui/separator";
 
 const ConstructionStepForm = () => {
   const [name, setName] = useState("");
@@ -88,14 +90,18 @@ const ConstructionStepForm = () => {
   return (
     <AsideContainer className="single">
       <div className="flex flex-row justify-between my-4">
-        <div className="flex flex-row items-center text-2xl font-bold gap-2 -md:text-lg">
-          <IoIosArrowBack
-            onClick={() => router.back()}
-            className="cursor-pointer transition duration-300 hover:scale-150 ease-in-out"
-          />
-          <h1>Add Contruction Step</h1>
-        </div>
-        <div className="flex flex-row items-center justify-end -md:text-xs">
+      <div className='flex w-full items-center gap-1 lg:gap-2'>
+        <SidebarTrigger className="-ml-2 hover:bg-primary" />
+        <Separator orientation="vertical" className="data-[orientation=vertical]:h-4 bg-black" />
+        <IoIosArrowBack
+          onClick={() => router.back()}
+          className="cursor-pointer transition duration-300 hover:scale-150 ease-in-out"
+        />
+        <h1 className="font-ubuntu font-bold text-[25px] leading-7 text-nowrap">
+          Add Construction Step
+        </h1>
+      </div>
+        <div className="flex flex-row items-center justify-end -md:text-xs text-nowrap">
           <button
             className="flex flex-row items-center p-2 px-3 font-ubuntu text-sm -md:text-xs font-semibold bg-secondary border-[1px] border-secondary text-primary rounded-full cursor-pointer"
             onClick={handleSampleDownload}

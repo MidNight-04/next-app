@@ -59,6 +59,8 @@ import { useAuthStore } from '../../../../store/useAuthStore';
 import { IoIosArrowBack } from 'react-icons/io';
 import { useRouter } from 'next/navigation';
 import { LuTimerReset } from "react-icons/lu";
+import { SidebarTrigger } from "../../../../components/ui/sidebar";
+import { Separator } from "../../../../components/ui/separator";
 
 let today = new Date();
 let yyyy = today.getFullYear();
@@ -888,16 +890,18 @@ const ClientProjectView = () => {
   return (
     <AsideContainer>
       {Loading && <LoaderSpinner />}
-      <div className="flex flex-row my-4 justify-between -md:flex-col -md:gap-2 -md:pl-0 -md:my-2">
-        <div className="flex flex-row gap-2 items-center">
-          <IoIosArrowBack
-            className="text-2xl cursor-pointer transition duration-300 hover:scale-150 ease-in-out"
-            onClick={() => router.back()}
-          />
-          <h1 className="text-2xl font-semibold font-ubuntu -md:mb-2 -md:text-lg">
-            Project Details
-          </h1>
-        </div>
+      <div className="flex flex-rowjustify-between -md:flex-col -md:gap-2 -md:pl-0 -md:my-2 w-full justify-between items-center">
+      <div className='flex items-center gap-1 lg:gap-2'>
+        <SidebarTrigger className="-ml-2 hover:bg-primary" />
+        <Separator orientation="vertical" className="data-[orientation=vertical]:h-4 bg-black" />
+        <IoIosArrowBack
+          onClick={() => router.back()}
+          className="cursor-pointer transition duration-300 hover:scale-150 ease-in-out"
+        />
+        <h1 className="font-ubuntu font-bold text-[25px] leading-7 py-5 text-nowrap">
+          Project Details
+        </h1>
+      </div>
         <div className="flex flex-row gap-2 flex-wrap">
           <Link href={`/admin/projects/payment-stages/${slug}`}>
             <button className="px-[15px] py-[12px] bg-transparent border-2 border-secondary rounded-full font-ubuntu -md:px-2 -md:py-[6px] hover:bg-secondary [&_div]:hover:text-primary">
@@ -1111,10 +1115,10 @@ const ClientProjectView = () => {
                   className="bg-white rounded-[14px] mb-2"
                 >
                   <AccordionTrigger className="px-4">
-                    <div className="flex flex-row justify-between w-full pr-8">
-                      <div className="flex text-lg font-ubuntu justify-center items-center font-bold">
+                    <div className="flex flex-row justify-between w-full pr-8 -md:pr-2">
+                      <p className="flex text-lg font-ubuntu justify-center items-center font-bold -md:text-sm">
                         {item.name}
-                      </div>
+                      </p>
                       <div className="flex flex-row gap-4 items-center">
                         <div style={{ width: 40, height: 40 }}>
                           <CircularProgressbar
@@ -1172,16 +1176,16 @@ const ClientProjectView = () => {
                       </div>
                       <div className=" bg-secondary text-primary h-16 flex flex-row justify-evenly items-center rounded-t-3xl flex-auto text-base font-semibold -md:justify-between">
                         <span className="font-semibold w-24 -sm:hidden" />
-                        <span className="font-semibold w-[200px] text-center -md:w-16 -md:ml-8 -sm:ml-16">
+                        <span className="font-semibold w-[200px] text-center -md:w-16 -md:ml-8 -sm:ml-12 -md:text-sm">
                           Point
                         </span>
-                        <span className="font-semibold w-[200px] flex ml-6 -md:w-20 text-left">
+                        <span className="font-semibold w-[200px] flex md:ml-6 -md:w-20 text-left -sm:ml-4 -md:text-sm">
                           Member Issue
                         </span>
-                        <span className="font-semibold w-[200px] text-left -md:w-24 -md:mr-16">
+                        <span className="font-semibold w-[200px] text-left -md:w-24 -md:text-sm">
                           Schedule Time
                         </span>
-                        <span className="font-semibold w-[70px] text-center -md:w-24 -md:mr-16">
+                        <span className="font-semibold w-[70px] text-center -md:w-24 -md:text-sm">
                           Action
                         </span>
                       </div>
@@ -1261,29 +1265,29 @@ const ClientProjectView = () => {
                               </div>
                             </div>
                             <div className="w-[200px] flex items-center -md:w-16">
-                              <div className="text-sm font-semibold">
+                              <p className="text-sm font-semibold -md:text-xs">
                                 {itm.taskId.title}
                                 {itm.checkList?.toLowerCase() === 'yes' && (
-                                  <div>inspections</div>
+                                  <>inspections</>
                                 )}
-                              </div>
+                              </p>
                             </div>
                             <div className="w-[200px] flex self-center justify-start -md:w-16">
                               {`${itm.taskId.issueMember?.name}`}
                             </div>
                             <div className="w-[200px] -md:w-28 my-1 flex items-start flex-col">
-                              <div className="text-left">
+                              <div className="text-left text-nowrap">
                                 <div className="flex flex-row mb-2">
-                                  <div className="text-sm font-semibold">
+                                  <p className="text-sm font-semibold -md:text-xs">
                                     ETC :
-                                  </div>
-                                  <div className="text-sm">{finalDate}</div>
+                                  </p>
+                                  <p className="text-sm -md:text-xs">{finalDate}</p>
                                 </div>
                                 <div className="flex flex-row">
-                                  <div className="text-sm font-semibold">
+                                  <p className="text-sm font-semibold -md:text-xs">
                                     DOC :
-                                  </div>
-                                  <div className="text-sm">
+                                  </p>
+                                  <p className="text-sm -md:text-xs">
                                     {itm?.taskId?.updatedOn !== '' &&
                                       itm?.taskId?.status === 'Complete' &&
                                       new Date(itm.taskId.updatedOn)
@@ -1302,17 +1306,17 @@ const ClientProjectView = () => {
                                         itm?.taskId?.status === 'Complete'
                                       ? '(On Time)'
                                       : ''}
-                                  </div>
+                                  </p>
                                 </div>
                               </div>
                             </div>
-                            <div className="flex items-center w-[70px]">
+                            <div className="flex items-center justify-center w-[70px]">
                               <button
-                                className="bg-secondary rounded-3xl text-primary px-3 py-2"
+                                className="bg-secondary rounded-3xl text-primary px-3 py-2 -md:text-xs -md:px-2 -md:py-1"
                                 onClick={() => {
                                   router.push(`/admin/tasks/${itm.taskId._id}`);
                                 }}
-                              >
+                                >
                                 Details
                               </button>
                             </div>

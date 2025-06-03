@@ -34,6 +34,7 @@ import {
   SelectValue,
 } from '../../../../components/ui/select';
 import { useAuthStore } from '../../../../store/useAuthStore';
+import { useRouter } from 'next/navigation';
 
 const styles = {
   container: {
@@ -91,6 +92,7 @@ const styles = {
 };
 
 const Page = () => {
+  const router = useRouter()
   const [reminders, setReminders] = useState([
     { type: '', time: '', unit: '' },
   ]);
@@ -119,8 +121,8 @@ const Page = () => {
     member: '',
     memberName: '',
     category: '',
-    priority: '',
-    repeatType: '',
+    repeatType: 'norepeat',
+    priority: 'High',
     repeatTime: '',
     dueDate: '',
     file: '',
@@ -380,7 +382,7 @@ const Page = () => {
             toast(response.data.message, {
               position: 'top-right',
             });
-            redirect('/admin/taskdashboard');
+            router.back();
           } else {
             toast(response.data.message, {
               position: 'top-right',
@@ -495,6 +497,7 @@ const Page = () => {
                     }));
                   }}
                   defaultValue="High"
+                  value={data.priority}
                 >
                   <SelectTrigger className="w-full border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100 h-[54px]">
                     <SelectValue placeholder="Select" />
@@ -523,13 +526,13 @@ const Page = () => {
                       setTimeOpen(true);
                     }
                   }}
-                  defaultValue="Once"
+                  value={data.repeatType}
                 >
                   <SelectTrigger className="w-full border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100 h-[54px]">
                     <SelectValue placeholder="Select" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Once" selected={checked}>
+                    <SelectItem value="norepeat">
                       Once
                     </SelectItem>
                     <SelectItem value="Daily">Daily</SelectItem>

@@ -34,6 +34,8 @@ import AudioRecorder from '../../../../components/AudioRecorder/AudioRecorder';
 import { Label } from "../../../../components/ui/label"
 import { RadioGroup, RadioGroupItem } from "../../../../components/ui/radio-group"
 import { CiViewList } from "react-icons/ci";
+import { SidebarTrigger } from "../../../../components/ui/sidebar";
+import { Separator } from "../../../../components/ui/separator";
 
 const Page = () => {
   const { slug } = useParams();
@@ -317,34 +319,34 @@ const Page = () => {
         <LoaderSpinner />
       ) : (
         <>
-          <div className='flex flex-row gap-2 items-center my-4'>
+          <div className='flex w-full items-center gap-1 lg:gap-2'>
+            <SidebarTrigger className="-ml-2 hover:bg-primary" />
+            <Separator orientation="vertical" className="data-[orientation=vertical]:h-4 bg-black" />
             <IoIosArrowBack
-              className='text-2xl cursor-pointer transition duration-300 hover:scale-150 ease-in-out'
               onClick={() => router.back()}
+              className="cursor-pointer transition duration-300 hover:scale-150 ease-in-out"
             />
-            <h1 className='text-2xl font-semibold font-ubuntu -md:mb-2 -md:text-lg'>
+            <h1 className="font-ubuntu font-bold text-[25px] leading-7 py-5 text-nowrap">
               {userType === 'ROLE_CLIENT' ? 'Step Details' : 'Task Details'}
             </h1>
           </div>
           <div className='bg-white p-8 rounded-2xl shadow-md'>
-            <div className='flex flex-col gap-4'>
-              <div className='flex flex-row justify-between items-center'>
-                <div>
-                  <span className='flex flex-row gap-2 items-center'>
-                    <p className='font-ubuntu font-semibold text-gray-600'>
-                      Assigned To :
-                    </p>
-                    <Image
-                      src={'/assets/profile-placeholder.png'}
-                      alt='project image'
-                      width={20}
-                      height={20}
-                      className='rounded-full'
-                    />
-                    <p>{data.data.issueMember?.name}</p>
-                  </span>
-                </div>
-                <div className='flex flex-row gap-2 items-center'>
+            <div className='flex flex-col gap-4 -md:gap-2'>
+              <div className='flex flex-row gap-2 justify-between items-center -md:flex-col -md:items-start'>
+                <span className='flex flex-row gap-2 items-center'>
+                  <p className='font-ubuntu font-semibold text-gray-600'>
+                    Assigned To :
+                  </p>
+                  <Image
+                    src={'/assets/profile-placeholder.png'}
+                    alt='project image'
+                    width={20}
+                    height={20}
+                    className='rounded-full'
+                  />
+                  <p>{data.data.issueMember?.name}</p>
+                </span>
+                <span className='flex flex-row gap-2 items-center'>
                   <p className='font-ubuntu font-semibold text-gray-600'>
                     Assigned By :
                   </p>
@@ -362,7 +364,7 @@ const Page = () => {
                       <span>{data.data.assignedBy?.name}</span>
                     )}
                   </>
-                </div>
+                </span>
               </div>
               <div className='flex flex-row gap-2 items-center'>
                 <p className='font-ubuntu font-semibold text-gray-600'>
@@ -421,32 +423,32 @@ const Page = () => {
                 </p>
               </div>
             </div>
-            <div className='flex flex-row gap-4 mt-4 text-nowrap flex-wrap'>
+            <div className='flex flex-row gap-4 mt-4 text-nowrap flex-wrap -md:gap-2'>
               {(data.data.issueMember._id === userId ||
                 data.data.assignedBy?._id === userId ) &&
                 userType !== 'ROLE_CLIENT' &&
                 data.data.status !== 'Complete' && (
                   <button
-                    className='px-[10px] py-[6px] border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-1 items-center'
+                    className='px-[10px] py-[6px] border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-1 items-center -md:px-2 -md:py-1 -md:text-sm'
                     onClick={() => {
                       setType('In Progress');
                       setOpenComment((prev) => !prev);
                     }}
                   >
-                    <RiProgress3Line className='text-xl' />
+                    <RiProgress3Line className='text-xl -md:text-sm' />
                     In Progress
                   </button>
                 )}
               {data.data.status === 'Complete' &&
                 data.data.assignedBy?._id === userId && (
                   <button
-                    className='px-[10px] py-[6px] border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-1 items-center'
+                    className='px-[10px] py-[6px] border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-1 items-center -md:px-2 -md:py-1 -md:text-sm'
                     onClick={() => {
                       setType('Reopened');
                       setOpenComment((prev) => !prev);
                     }}
                   >
-                    <HiOutlineLockOpen className='text-xl' />
+                    <HiOutlineLockOpen className='text-xl -md:text-sm' />
                     Re-open
                   </button>
                 )}
@@ -456,14 +458,14 @@ const Page = () => {
                 data.data.status !== 'Complete' && (
                   <button
                     className='px-[10px] py-[6px] border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-1 items-center 
-                               disabled:bg-gray-500 disabled:border-gray-500 disabled:cursor-not-allowed'
+                               disabled:bg-gray-500 disabled:border-gray-500 disabled:cursor-not-allowed -md:px-2 -md:py-1 -md:text-sm'
                     disabled={data?.data?.checkList ? !isAbled : false}
                     onClick={() => {
                       setType('Complete');
                       setOpenComment((prev) => !prev);
                     }}
                   >
-                    <FaCheck className='text-xl' />
+                    <FaCheck className='text-xl -md:text-sm' />
                     Complete
                   </button>
                 )}
@@ -479,23 +481,23 @@ const Page = () => {
                 data.data.category !== 'Project' && 
                 userType !== 'ROLE_CLIENT' && (
                   <button
-                    className='px-[10px] py-[6px] border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-1 items-center'
+                    className='px-[10px] py-[6px] border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-1 items-center -md:px-2 -md:py-1 -md:text-sm'
                     onClick={() => toggleDelete()}
                   >
-                    <MdDeleteOutline className='text-xl' />
+                    <MdDeleteOutline className='text-xl -md:text-sm' />
                     Delete
                   </button>
                 )}
               {(userType !== 'ROLE_CLIENT' && userType !== 'ROLE_SITE ENGINEER' ) &&
                 data.data.status !== 'Complete' && (
                   <button
-                    className='px-[10px] py-[6px] border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-1 items-center'
+                    className='px-[10px] py-[6px] border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-1 items-center -md:px-2 -md:py-1 -md:text-sm'
                     onClick={() => {
                       getTeammembers();
                       setshowChangeMember(true);
                     }}
                   >
-                    <MdEdit className='text-xl' />
+                    <MdEdit className='text-xl -md:text-sm' />
                     Reassign
                   </button>
                 )}
@@ -503,25 +505,25 @@ const Page = () => {
                 data.data.assignedBy?._id === userId) &&
                 data.data.status !== 'Complete' && (
                   <button
-                    className='px-[10px] py-[6px] border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-2 items-center'
+                    className='px-[10px] py-[6px] border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-2 items-center -md:px-2 -md:py-1 -md:text-sm'
                     onClick={() => {
                       setType('Comment');
                       setOpenComment((prev) => !prev);
                     }}
                   >
-                    <MdOutlineInsertComment className='text-xl' />
+                    <MdOutlineInsertComment className='text-xl -md:text-sm' />
                     Comment
                   </button>
                 )}
               {userType === 'ROLE_ADMIN' &&
                 data.data.status !== 'Complete' && (
                   <button
-                    className='px-[10px] py-[6px] border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-1 items-center'
+                    className='px-[10px] py-[6px] border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-1 items-center -md:px-2 -md:py-1 -md:text-sm'
                     onClick={() => {
                       setAddChecklist((prev) => !prev);
                     }}
                   >
-                    <MdChecklist className='text-xl' />
+                    <MdChecklist className='text-xl -md:text-sm' />
                   {data?.data?.checkList ? 'Change' : 'Add'} Checklist
                   </button>
                 )}
@@ -529,12 +531,12 @@ const Page = () => {
                 data.data.status !== 'Complete' &&
                 data?.data?.checkList && (
                   <button
-                    className='px-[10px] py-[6px] border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-1 items-center'
+                    className='px-[10px] py-[6px] border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-1 items-center -md:px-2 -md:py-1 -md:text-sm'
                     onClick={() => {
                       setShowChecklist((prev) => !prev);
                     }}
                   >
-                    <TbCheckbox className='text-xl' />
+                    <TbCheckbox className='text-xl -md:text-sm' />
                     Update Checklist
                   </button>
                 )}
@@ -543,28 +545,28 @@ const Page = () => {
                 userType === 'ROLE_ADMIN' &&
                 data?.data?.checkList && (
                   <button
-                    className='px-[10px] py-[6px] border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-1 items-center'
+                    className='px-[10px] py-[6px] border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-1 items-center -md:px-2 -md:py-1 -md:text-sm'
                     onClick={() => setOpenDeleteChecklist(true)}
                   >
-                    <MdDeleteOutline className='text-xl' />
+                    <MdDeleteOutline className='text-xl -md:text-sm' />
                     Delete Checklist
                   </button>
                 )}
               {data?.data?.checkList && (
                   <button
-                    className='px-[10px] py-[6px] border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-1 items-center'
+                    className='px-[10px] py-[6px] border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-1 items-center -md:px-2 -md:py-1 -md:text-sm'
                     onClick={() => setOpenViewChecklist(true)}
                   >
-                    <CiViewList className='text-xl' />
+                    <CiViewList className='text-xl -md:text-sm' />
                     View Checklist
                   </button>
                 )}
               {userType==="ROLE_ADMIN" && data.data.status !== 'Complete' && (
                   <button
-                    className='px-[10px] py-[6px] border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-1 items-center'
+                    className='px-[10px] py-[6px] border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-1 items-center -md:px-2 -md:py-1 -md:text-sm'
                     onClick={() => setOpenManualClose(true)}
                   >
-                    <FaCheck className='text-xl' />
+                    <FaCheck className='text-xl -md:text-sm' />
                     Close Manually
                   </button>
                 )}
@@ -1113,7 +1115,7 @@ const Page = () => {
                 </h3>
                 <hr className='my-4' />
               </div>
-              <div>
+              <div className='h-96 overflow-auto'>
                 <h5 className='font-semibold mb-2 text-lg'>
                   {taskChecklist.name}
                 </h5>
@@ -1123,10 +1125,10 @@ const Page = () => {
                     {item.points.map((point) => (
                       <div
                         key={point.name}
-                        className='flex flex-row justify-between items-center'
+                        className='flex flex-row items-center w-full gap-2 border-b border-primary py-2'
                       >
-                          <div className='flex flex-col gap-2 items-center'>
-                              <p>{point.point}</p>
+                          <div className='flex flex-row justify-between items-center w-full '>
+                              <p className='text-wrap'>{point.point}</p>
                               <RadioGroup className="flex items-center space-x-2" 
                                 onValueChange={(value) => {
                                 setTaskChecklist((prev) => {
@@ -1284,8 +1286,8 @@ const Page = () => {
                 </h3>
                 <hr className='my-4' />
               </div>
-             <div>
-                <h5 className='font-semibold mb-2 text-lg'>
+             <div className='overflow-auto h-96'>
+                <h5 className='font-semibold mb-2 text-lg '>
                   {taskChecklist.name}
                 </h5>
                 {taskChecklist?.items?.map((item) => (
@@ -1294,11 +1296,11 @@ const Page = () => {
                     {item.points.map((point) => (
                       <div
                         key={point.name}
-                        className='flex flex-row justify-between items-center'
+                        className='flex flex-row justify-between items-center mb-2'
                       >
-                          <div className='flex flex-row gap-2 items-center'>
-                              <p>{point.point} : </p>
-                              <p>{point.isChecked === null ? 'Not Updated' : !point.isChecked ? 'NA' : point.isChecked ? 'Yes' : '' }</p>
+                          <div className='flex flex-row gap-4 items-center justify-between w-full border-b border-primary py-2'>
+                              <p className='text-wrap max-w-96'>{point.point} </p>
+                              <p className='text-nowrap'>{point.isChecked === null ? 'Not Updated' : !point.isChecked ? 'NA' : point.isChecked ? 'Yes' : '' }</p>
                           </div>
                       </div>
                     ))}

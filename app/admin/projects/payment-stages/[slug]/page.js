@@ -20,6 +20,9 @@ import { useRouter } from "next/navigation";
 import { FiEdit } from "react-icons/fi";
 import { MdAdd, MdOutlineDelete } from "react-icons/md";
 import { toast } from "sonner";
+import { SidebarTrigger } from "../../../../../components/ui/sidebar";
+import { Separator } from "../../../../../components/ui/separator";
+
 
 let today = new Date();
 let yyyy = today.getFullYear();
@@ -258,18 +261,18 @@ const Page = () => {
   };
   return (
     <AsideContainer>
-      <div className="datatable">
-        <div className="flex flex-row justify-between pt-[20px] mb-[20px] items-center">
-          <div className="flex flex-row gap-2 items-center">
-            <IoIosArrowBack
-              className="text-2xl cursor-pointer transition duration-300 hover:scale-150 ease-in-out"
-              onClick={() => router.back()}
-            />
-            <h1 className="text-2xl font-semibold font-ubuntu -md:mb-2 -md:text-lg">
-              Project Payment Stages
-            </h1>
-          </div>
-        </div>
+      <div>
+      <div className='flex w-full items-center gap-1 lg:gap-2'>
+        <SidebarTrigger className="-ml-2 hover:bg-primary" />
+        <Separator orientation="vertical" className="data-[orientation=vertical]:h-4 bg-black" />
+        <IoIosArrowBack
+          onClick={() => router.back()}
+          className="cursor-pointer transition duration-300 hover:scale-150 ease-in-out"
+        />
+        <h1 className="font-ubuntu font-bold text-[25px] leading-7 py-5 text-nowrap">
+          Project Payment Stages
+        </h1>
+      </div>
         <div className="mb-6">
           {data?.map((item, index) => {
             return (

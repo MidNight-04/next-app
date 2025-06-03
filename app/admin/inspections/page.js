@@ -265,7 +265,7 @@ const Page = () => {
       <AsideContainer>
         <div className="flex flex-row justify-between items-center">
           <h1 className="text-[25px] font-ubuntu font-bold my-5 -md:text-lg -lg:my-2 -md:my-3">
-            Process List
+            Inspections List
           </h1>
           <button
             className="bg-secondary text-primary rounded-3xl px-4 pr-5 py-3 flex flex-row gap-1 items-center -md:text-xs -md:px-2 -md:py-[6px] -md:[&_svg]:text-sm"
@@ -278,10 +278,10 @@ const Page = () => {
         <div className="row mt-4">
           {uniqueStep?.map(itm => (
             <div key={itm.checkListStep}>
-              <h3 className="text-secondary font-bold text-xl font-ubuntu mb-4 -md:text-base">
+              {/* <h3 className="text-secondary font-bold text-xl font-ubuntu mb-4 -md:text-base">
                 {itm.checkListStep}
                 {` Checklist`}
-              </h3>
+              </h3> */}
               <Accordion type="single" id="checklist" collapsible>
                 {data
                   ?.filter(dt => dt.checkListStep === itm.checkListStep)

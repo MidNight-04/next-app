@@ -31,6 +31,8 @@ import { FaRegClock } from 'react-icons/fa';
 import { FaClockRotateLeft } from 'react-icons/fa6';
 import { MdFilterListOff } from 'react-icons/md';
 import { motion, AnimatePresence } from 'framer-motion';
+import { SidebarTrigger } from '../../../../components/ui/sidebar';
+import { Separator } from '../../../../components/ui/separator';
 
 const Page = () => {
   const userType = useAuthStore(state => state.userType);
@@ -179,7 +181,8 @@ const Page = () => {
 
   if (isFetched && Array.isArray(data) && data.length > 0) {
     for (const task of data) {
-      const activatedDate = new Date(task.activatedOn);
+      // const activatedDate = new Date(task.updatedOn);
+      const activatedDate = new Date(task.updatedAt);
       const month = activatedDate.toLocaleString('default', {
         month: 'long',
         year: 'numeric',
@@ -392,9 +395,13 @@ const Page = () => {
   return (
     <AsideContainer>
       <div>
-        <h1 className="font-ubuntu font-bold text-[25px] leading-7 p-5 text-nowrap">
-          Task Dashboard
-        </h1>
+        <div className='flex w-full items-center gap-1 lg:gap-2'>
+          <SidebarTrigger className="-ml-2 hover:bg-primary" />
+          <Separator orientation="vertical" className="data-[orientation=vertical]:h-4 bg-black" />
+          <h1 className="font-ubuntu font-bold text-[25px] leading-7 py-5 text-nowrap">
+            Task Dashboard
+          </h1>
+        </div>
         <div>
           <div className="flex flex-row items-center justify-center gap-2 -xl:flex-wrap">
             {filters.map(filter => (

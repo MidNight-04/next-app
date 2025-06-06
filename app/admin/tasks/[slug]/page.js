@@ -168,10 +168,12 @@ const Page = () => {
   };
 
   const approveComment = async (id) => {
-    const data = axios
+    const res = axios
       .post(`${process.env.REACT_APP_BASE_PATH}/api/task/approvetaskcomment`, {
         commentId: id,
         userId,
+        taskId:slug,
+        siteID: data?.data?.category ==="Project" ? data?.data?.siteID : null
       })
       .then((res) => {
         refetch();
@@ -311,8 +313,6 @@ const Page = () => {
     item.points.every((point) => point.isChecked !== null)
   );
 
-  // need to add imgages to each checklist item,disable complete button on if all checklist steps are completed or not and add zone/state in project creation page.
-
   return (
     <AsideContainer>
       {!isFetched ? (
@@ -371,7 +371,7 @@ const Page = () => {
                   Created At :
                 </p>
                 <p>
-                  {`${new Date(data.data.createdAt).toLocaleString('en-US', {
+                  {`${new Date(data.data.updatedOn).toLocaleString('en-US', {
                     dateStyle: 'medium',
                     timeStyle: 'short',
                   })}`}
@@ -412,6 +412,14 @@ const Page = () => {
                 </p>
                 <p className='flex flex-row gap-1 items-center'>
                   {data.data.description}
+                </p>
+              </div>
+              <div className='flex flex-row gap-2 items-center'>
+                <p className='font-ubuntu font-semibold text-gray-600'>
+                  Due Date :
+                </p>
+                <p className='flex flex-row gap-1 items-center'>
+                  {new Date(data.data.dueDate).toDateString()}
                 </p>
               </div>
               <div className='flex flex-row gap-2 items-center'>
@@ -724,6 +732,7 @@ const Page = () => {
                         {(userType === 'ROLE_ADMIN' ||
                           userType === 'ROLE_PROJECT MANAGER') &&
                           item.type !== 'Task Updated' &&
+                          data.data.category === 'Project' &&
                           !item.approved.isApproved && (
                             <div className='flex flex-col items-center justify-between'>
                               <span
@@ -770,7 +779,7 @@ const Page = () => {
                 <hr className='my-3' />
               </div>
               <div>
-                {type === 'In Progress' && (
+                {type === 'In Progress' && data.data.category ==="Project" && (
                   <>
                     <FormControl
                       fullWidth
@@ -1365,4 +1374,4 @@ const Page = () => {
     </AsideContainer>
   );
 };
-export default Page; 
+export default Page;

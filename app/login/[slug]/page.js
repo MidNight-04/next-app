@@ -7,17 +7,18 @@ import { useAuthStore } from "../../../store/useAuthStore";
 import { redirect } from "next/navigation";
 import { PiCopyrightThin } from "react-icons/pi";
 import Image from "next/image";
-import whiteBackground from "../../../public/bg-white.jpg";
+import SigninwithPassword from "../../../components/forms/signinwtihpassword/signinwithpassword";
 
-const Header = dynamic(() => import("../../../components/Header"), {
-  ssr: false,
-});
-const Footer = dynamic(() => import("../../../components/Footer"), {
-  ssr: false,
-});
+// const Header = dynamic(() => import("../../../components/Header"), {
+//   ssr: false,
+// });
+// const Footer = dynamic(() => import("../../../components/Footer"), {
+//   ssr: false,
+// });
 
 const Page = () => {
   const [showOtp, setShowOtp] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const type = useAuthStore(state => state.type);
   const isAuth = useAuthStore(state => state.isAuth);
   const hasHydrated = useAuthStore.persist?.hasHydrated();
@@ -64,7 +65,7 @@ const Page = () => {
               alt="logo"
             />
           </span>
-        <div className="bg-white p-8 lg:w-1/4 -xl:w-2/4 -lg:2/3 md:w-11/12 h-auto rounded-3xl shadow-lg dark:bg-gray-800 dark:text-gray-100">
+        <div className="bg-white p-8 lg:w-1/4 -xl:w-2/4 -lg:1/3 -md:w-11/12 h-auto rounded-3xl shadow-lg dark:bg-gray-800 dark:text-gray-100">
           <div className="flex flex-col w-full flex-auto justify-between h-full gap-4">
             <div className="flex flex-col justify-center items-center gap-2">
               <Image
@@ -73,9 +74,6 @@ const Page = () => {
                 width={300}
                 alt="icon"
               />
-            {/* <h1 className="font-ubuntu text-2xl font-semibold text-center text-primary">
-              Welcome to Bldox
-            </h1> */}
             </div>
             <div className="flex flex-col items-center gap-4">
               <div>
@@ -93,29 +91,13 @@ const Page = () => {
               <p className="text-lg">Sign in to your account</p>
               </div>
             </div>
-            {!showOtp ? <SigninForm showOtp={otpHandler} /> : <OtpForm />}
-            {/* {!showOtp && (
-              <div className="flex justify-center text-sm">
-                Don&#39;t have an account ?
-                <span className="text-primary cursor-pointer ml-1">
-                  Sign up
-                </span>
-              </div>
-            )} */}
+            {!showOtp && !showPassword && <SigninForm showOtp={otpHandler} />}
+            {showOtp && !showPassword && <OtpForm />}
+            { showPassword && <SigninwithPassword/> }
             <div className="flex flex-col gap-4 justify-center items-left text-center">
-              {/* <div>
-                <span className="text-sm text-gray-500">
-                  By signing in, you agree to our
-                </span>
-                <span className="text-primary cursor-pointer ml-1">
-                  Terms of Service
-                </span>
-                <span className="text-sm text-gray-500"> and </span>
-                <br/>
-                <span className="text-primary cursor-pointer ml-1">
-                  Privacy Policy
-                </span>
-              </div> */}
+              <span className="text-sm text-gray-500 hover:text-primary cursor-pointer hover:underline underline-offset-2" onClick={() => setShowPassword(!showPassword)}>
+                {showPassword?'Sign in with OTP':'Sign in with your Email and Password'}
+              </span>
                 <span className="text-gray-500 text-sm">
                   <PiCopyrightThin size={12} className="inline" /> 2025 Bldox | All rights reserved
                 </span>

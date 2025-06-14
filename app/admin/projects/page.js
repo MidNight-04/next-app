@@ -29,7 +29,6 @@ const Page = () => {
   const [siteId, setSiteId] = useState('');
   const [openDelete, setOpenDelete] = useState(false);
   const router = useRouter();
-
   useEffect(() => {
     getAllProjects();
   }, [id, userType]);

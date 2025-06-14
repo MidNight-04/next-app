@@ -105,7 +105,7 @@ const SigninForm = ({ showOtp }) => {
                 className="p-[6px] px-3 bg-secondary rounded-full font-ubuntu text-primary font-semibold"
                 type="submit"
               >
-                <p>Get OTP</p>
+                Get OTP
               </button>
             </div>
           </Form>

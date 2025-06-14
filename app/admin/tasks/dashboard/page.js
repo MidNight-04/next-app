@@ -75,12 +75,12 @@ const Page = () => {
       url = `${process.env.REACT_APP_BASE_PATH}/api/task/customfilters`;
       break;
   }
-  
+
   useEffect(() => {
-    if (userType !== 'ROLE_ADMIN') {
+    if (userType === 'ROLE_SITE ENGINEER') {
       setEmployeeId(userId);
     }
-  }, []);
+  });
 
   // const user = userType !== 'ROLE_ADMIN' ? userId : null;
   const { data, isFetched, isError, isPreviousData, isFetching, refetch } =
@@ -1813,7 +1813,6 @@ const Page = () => {
                               groupedByOverdueByEmployee.length > 0 &&
                               groupedByOverdueByEmployee.map((item, index) => {
                                 const taskObj = item.obj.reduce((acc, task) => {
-                                  console.log(item);
                                   const overdueDate = new Date(task.dueDate);
                                   const overdueAcc = new Date(acc.dueDate);
                                   return overdueDate < overdueAcc ? task : acc;

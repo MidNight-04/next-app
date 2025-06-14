@@ -36,6 +36,7 @@ const OtpForm = () => {
         setLogIn({
           username: data.username,
           token: data?.token,
+          phone: data?.phone,
           isAuth: true,
           userId: data.id,
           email: data.email,

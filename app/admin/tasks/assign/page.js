@@ -25,6 +25,9 @@ import { AiOutlineCheck } from 'react-icons/ai'; // Import check icon
 import { redirect } from 'next/navigation';
 import AsideContainer from '../../../../components/AsideContainer';
 import { IoIosArrowBack } from 'react-icons/io';
+import { useForm, Controller } from 'react-hook-form';
+import * as yup from 'yup';
+import { yupResolver } from '@hookform/resolvers/yup';
 
 import {
   Select,
@@ -91,6 +94,16 @@ const styles = {
   },
 };
 
+const schema = yup.object({
+  title: yup.string().required('Task title is required'),
+  description: yup.string().required('Description is required'),
+  member: yup.string().required('Member is required'),
+  category: yup.string().required('Category is required'),
+  priority: yup.string().oneOf(['Low', 'Medium', 'High'], 'Priority is required'),
+  repeatType: yup.string(),
+  dueDate: yup.date().required('Due Date is required'),
+}).required();
+
 const Page = () => {
   const router = useRouter()
   const [reminders, setReminders] = useState([
@@ -130,27 +143,51 @@ const Page = () => {
     reminder: [],
   });
 
+  const {
+    register,
+    control,
+    handleSubmit,
+    formState: { errors,isSubmitting },
+    watch,
+  } = useForm({
+    resolver: yupResolver(schema),
+    defaultValues: {
+      title: '',
+      description: '',
+      member: '',
+      memberName: '',
+      category: '',
+      repeatType: 'norepeat',
+      priority: 'High',
+      repeatTime: '',
+      dueDate: null,
+      file: '',
+      audio: '',
+      reminder: [],
+    },
+  });
+
   useEffect(() => {
-    axios
-      .get(`${process.env.REACT_APP_BASE_PATH}/api/teammember/getall`)
-      .then(response => {
-        if (response) {
-          //   console.log(response.data.data);
-          setMemberList(response.data.data);
+    const fetchData = async () => {
+      try {
+        const [memberResponse, categoryResponse] = await Promise.all([
+          axios.get(`${process.env.REACT_APP_BASE_PATH}/api/teammember/getall`),
+          axios.get(`${process.env.REACT_APP_BASE_PATH}/api/category/list`)
+        ]);
+        if (memberResponse?.data?.data) {
+          setMemberList(memberResponse.data.data);
         }
-      })
-      .catch(error => {
-        console.log(error);
-      });
-    axios
-      .get(`${process.env.REACT_APP_BASE_PATH}/api/category/list`)
-      .then(response => {
-        setCategoryList(response?.data?.data);
-        // console.log(response?.data?.data)
-      })
-      .catch(error => {
-        console.log(error);
-      });
+        if (categoryResponse?.data?.data) {
+          setCategoryList(categoryResponse.data.data);
+        }
+      } catch (err) {
+        setError(err); 
+        console.log("Error fetching data:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
   }, []);
 
   useEffect(() => {
@@ -177,7 +214,7 @@ const Page = () => {
       if (files && files[0]) {
         setFileSelected(true);
         setData({ ...data, [name]: files[0] });
-        setFileName(files[0].name); // Update fileName state
+        setFileName(files[0].name);
       }
     } else if (name === 'member') {
       setData({ ...data, [name]: value });
@@ -188,7 +225,6 @@ const Page = () => {
 
   const handlePriority = priority => {
     setSelectedPriority(priority);
-    // Update the state with the new priority value
     setData(prevData => ({
       ...prevData,
       priority: priority,
@@ -211,8 +247,6 @@ const Page = () => {
     setTimeOpen(false);
     setTime(true);
   };
-
-  /* ~ ~ ~ Recording ~ ~ ~ */
 
   const startRecording = async () => {
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
@@ -258,27 +292,19 @@ const Page = () => {
     }));
   };
 
-  /* ~ ~ ~ Time picker ~ ~ ~  */
-
   const handleTimeChange = newValue => {
-    // Check if newValue is a valid dayjs object
     if (newValue && newValue.isValid()) {
-      setSelectedTime(newValue); // Update state with dayjs object
+      setSelectedTime(newValue);
     } else {
       console.error('Invalid date value:', newValue);
     }
   };
 
-  /* ~ ~ ~ Reminder ~ ~ ~ */
-
-  // Function to handle adding a new reminder
   const addReminder = () => {
     setReminders([...reminders, { type: '', time: '', unit: '' }]);
   };
 
-  // Function to handle removing a reminder
   const removeReminder = index => {
-    // Ensure that at least one reminder remains
     if (reminders.length > 1) {
       const newReminders = reminders.filter((_, i) => i !== index);
       setReminders(newReminders);
@@ -287,7 +313,6 @@ const Page = () => {
     }
   };
 
-  // Function to handle saving reminders
   const saveReminders = () => {
     const hasNonEmptyValue = reminders?.some(
       obj =>
@@ -309,7 +334,6 @@ const Page = () => {
     }
   };
 
-  // Function to handle updating reminder values
   const updateReminder = (index, field, value) => {
     const newReminders = reminders.map((reminder, i) =>
       i === index ? { ...reminder, [field]: value } : reminder
@@ -317,83 +341,97 @@ const Page = () => {
     setReminders(newReminders);
   };
 
-  /* ~ ~ ~ Submit form ~ ~ ~ */
-
-  const submitFormData = () => {
+  const onSubmit = async (data) => {
+  try {
     data.assignedBy = {
       name: userName,
       employeeID: userId,
     };
-    if (!data.title) {
-      toast('Task Title is required');
-    } else if (!data.description) {
-      toast('Title Description is required');
-    } else if (!data.member) {
-      toast('Member is required');
-    } else if (!data.category) {
-      toast('Category is required');
-    } else if (!data.priority) {
-      toast('Priority is required');
-    } else if (!data.dueDate) {
-      toast('Due Date is required');
-    } else {
-      let employeeID = userId;
-      const formData = new FormData();
-      formData.append('title', data.title);
-      formData.append('description', data.description);
-      formData.append('member', data.member?.split('/')[0]);
-      formData.append('memberName', data.member?.split('/')[1]);
-      formData.append('assignedName', userName);
-      formData.append('assignedID', userId);
-      formData.append('category', data.category);
-      formData.append('priority', data.priority);
-      formData.append('repeatType', data.repeatType);
-      formData.append('repeatTime', data.repeatTime);
-      formData.append('dueDate', data.dueDate);
+
+    const formData = new FormData();
+    formData.append('title', data.title);
+    formData.append('description', data.description);
+    formData.append('member', data.member?.split('/')[0]);
+    formData.append('memberName', data.member?.split('/')[1]);
+    formData.append('assignedName', userName);
+    formData.append('assignedID', userId);
+    formData.append('category', data.category);
+    formData.append('priority', data.priority);
+    formData.append('repeatType', data.repeatType || '');
+    formData.append('repeatTime', data.repeatTime || '');
+    formData.append('dueDate', data.dueDate);
+
+    if (data.file) {
       formData.append('file', data.file);
-      if (data.audio) {
-        formData.append('audio', data.audio, 'recording.wav');
-      } 
-      formData.append('reminder', JSON.stringify(data.reminder));
-      //   console.log(audioURL)
-      axios
-        .post(`${process.env.REACT_APP_BASE_PATH}/api/task/add`, formData)
-        .then(response => {
-          if (response.data.status === 201) {
-            setData({
-              title: '',
-              description: '',
-              member: '',
-              memberName: '',
-              category: '',
-              priority: '',
-              repeatType: '',
-              repeatTime: '',
-              dueDate: '',
-              file: '',
-              audio: '',
-              reminder: [],
-            });
-            clearRecording();
-            setReminders([{ type: '', time: '', unit: '' }]);
-            setFileName('');
-            setSelectedPriority('');
-            setChecked(false);
-            toast(response.data.message, {
-              position: 'top-right',
-            });
-            router.back();
-          } else {
-            toast(response.data.message, {
-              position: 'top-right',
-            });
-          }
-        })
-        .catch(error => {
-          console.log(error);
-        });
     }
+
+    if (data.audio) {
+      formData.append('audio', data.audio, 'recording.wav');
+    }
+
+    formData.append('reminder', JSON.stringify(data.reminder || []));
+
+    const response = await axios.post(
+      `${process.env.REACT_APP_BASE_PATH}/api/task/add`,
+      formData
+    );
+
+    console.log('Response:', response.status);
+
+    if (response.status === 201) {
+      setFileName('');
+      setAudioURL('');
+      clearRecording();
+      setReminders([{ type: '', time: '', unit: '' }]);
+      setSelectedPriority('');
+      setChecked(false);
+      toast(response.data.message);
+      router.back();
+    } else {
+      toast(response.data.message);
+    }
+  } catch (error) {
+    console.error('Submit Error:', error);
+    toast('Something went wrong. Please try again.');
+  }
+};
+
+  const onFileChange = e => {
+    const file = e.target.files[0];
+    if (file) setFileName(file.name);
   };
+
+  const renderInput = (label, name, type = 'text', placeholder = '') => (
+    <div className="flex flex-col gap-2">
+      <label className="font-semibold">{label}</label>
+      <input {...register(name)} type={type} placeholder={placeholder}
+        className="h-[54px] border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100 font-semibold" />
+      {errors[name] && <p className="text-red-500 text-sm">{errors[name]?.message}</p>}
+    </div>
+  );
+
+  const renderSelect = (label, name, options) => (
+    <div className="flex flex-col gap-2">
+      <label className="font-semibold">{label}</label>
+      <Controller
+        control={control}
+        name={name}
+        render={({ field }) => (
+          <Select onValueChange={field.onChange} value={field.value ?? ''}>
+            <SelectTrigger className="w-full border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100 h-[54px]">
+              <SelectValue placeholder="Select" />
+            </SelectTrigger>
+            <SelectContent>
+              {options.map((item, index) => (
+                <SelectItem key={index} value={item.value}>{item.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
+      />
+      {errors[name] && <p className="text-red-500 text-sm">{errors[name]?.message}</p>}
+    </div>
+  );
 
   return (
     <AsideContainer>
@@ -409,252 +447,110 @@ const Page = () => {
           </h1>
         </div>
         <div className="bg-white rounded-[15px] p-5 my-5">
-          <div className="">
-            <div className="grid grid-cols-2 gap-x-4">
-              <div className="flex flex-col gap-2 mb-2 [&_label]:font-semibold">
-                <label>Task Title</label>
-                <input
-                  className="h-12 border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100"
-                  value={data.title}
-                  type="text"
-                  placeholder="Task Title"
-                  name="title"
-                  onChange={e => handleFormData(e)}
-                />
-              </div>
-              <div className="flex flex-col gap-2 mb-2 [&_label]:font-semibold">
-                <label>Description</label>
-                <input
-                  value={data.description}
-                  placeholder="Description"
-                  type="text"
-                  className="h-12 border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100"
-                  name="description"
-                  onChange={e => handleFormData(e)}
-                />
-              </div>
-              <div className="flex flex-col gap-2 mb-2 [&_label]:font-semibold">
-                <label htmlFor="role">Member</label>
-                <Select
-                  onValueChange={value => {
-                    setData(prevData => ({
-                      ...prevData,
-                      member: value,
-                    }));
-                  }}
-                >
-                  <SelectTrigger className="w-full border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100 h-[54px]">
-                    <SelectValue placeholder="Select" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {memberList?.map((item, idx) => {
-                      return (
-                        <SelectItem
-                          key={idx}
-                          value={`${item?._id}/${item?.name}`}
-                        >
-                          {`${item?.name} (${item?.role?.name})`}
-                        </SelectItem>
-                      );
-                    })}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex flex-col gap-2 mb-2 [&_label]:font-semibold">
-                <label>Category</label>
-                <Select
-                  onValueChange={value => {
-                    setData(prevData => ({
-                      ...prevData,
-                      category: value,
-                    }));
-                  }}
-                >
-                  <SelectTrigger className="w-full border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100 h-[54px]">
-                    <SelectValue placeholder="Select" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categoryList?.map((itm, idx) => {
-                      return (
-                        <SelectItem key={idx} value={itm.name}>
-                          {itm.name}
-                        </SelectItem>
-                      );
-                    })}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex flex-col gap-2 mb-2 [&_label]:font-semibold">
-                <label>
-                  {/* <Flag /> */}
-                  Priority
-                </label>
-                <Select
-                  onValueChange={value => {
-                    setData(prevData => ({
-                      ...prevData,
-                      priority: value,
-                    }));
-                  }}
-                  defaultValue="High"
-                  value={data.priority}
-                >
-                  <SelectTrigger className="w-full border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100 h-[54px]">
-                    <SelectValue placeholder="Select" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Low">Low</SelectItem>
-                    <SelectItem value="Medium">Medium</SelectItem>
-                    <SelectItem value="High">High</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex flex-col gap-2 mb-2 [&_label]:font-semibold">
-                <label className="checkbox">
-                  {/* <Repeat /> */}
-                  Repeat
-                </label>
-                <Select
-                  onValueChange={value => {
-                    setData(prevData => ({
-                      ...prevData,
-                      repeatType: value,
-                    }));
-                    if (value === 'Monthly') {
-                      setDateOpen(true);
-                    } else if (value === 'Daily') {
-                      setTimeOpen(true);
-                    }
-                  }}
-                  value={data.repeatType}
-                >
-                  <SelectTrigger className="w-full border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100 h-[54px]">
-                    <SelectValue placeholder="Select" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="norepeat">
-                      Once
-                    </SelectItem>
-                    <SelectItem value="Daily">Daily</SelectItem>
-                    <SelectItem value="Weekly">Weekly</SelectItem>
-                    <SelectItem value="Monthly">Monthly</SelectItem>
-                    <SelectItem value="Yearly">Yearly</SelectItem>
-                    {/* <SelectItem value="Periodically">Periodically</SelectItem>
-                    <SelectItem value="Custom">Custom</SelectItem> */}
-                  </SelectContent>
-                </Select>
+        <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-2 gap-2">
+            {renderInput('Task Title', 'title', 'text', 'Enter task title')}
+            {renderInput('Description', 'description', 'text', 'Enter description')}
 
-                {data?.repeatType && time && (
-                  <p className="font-semibold">
-                    Repeat {data.repeatType === 'Daily' ? 'Time' : 'Date'}:{' '}
-                    {selectedDate ? selectedDate.getDate() : data.repeatTime}
-                  </p>
-                )}
-              </div>
-              <div className="flex flex-col gap-2 mb-2 [&_label]:font-semibold">
-                <label>Due Date</label>
-                <input
-                  value={data.dueDate}
-                  type="date"
-                  name="dueDate"
-                  className="h-12 border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100"
-                  onChange={e => handleFormData(e)}
-                />
-              </div>
-              <div className="flex flex-row justify-center gap-4 items-center mt-6">
-                <div className="flex flex-row items-center">
-                  {/* Hide the default file input */}
-                  <input
-                    type="file"
-                    id="fileInput"
-                    style={{ display: 'none' }}
-                    name="file"
-                    onChange={e => handleFormData(e)}
-                  />
-                  {/* Custom styled label that acts as a file picker */}
-                  <label
-                    htmlFor="fileInput"
-                    name="file"
-                    className="p-2 bg-primary-foreground rounded-full border border-primary [&_svg]:text-primary text-xl cursor-pointer"
-                  >
-                    <MdAttachFile />
-                  </label>
-                </div>
-                <div>
-                  <button
-                    onClick={isRecording ? stopRecording : startRecording}
-                    className="p-2 bg-primary-foreground rounded-full border border-primary [&_svg]:text-primary text-xl"
-                  >
-                    <FaMicrophone />
-                  </button>
-                </div>
-                <button
-                  onClick={() => {
-                    setReminderOpen(true);
-                    setReminders([{ type: '', time: '', unit: '' }]);
-                  }}
-                  className="p-2 bg-primary-foreground rounded-full border border-primary [&_svg]:text-primary text-xl"
-                >
-                  <MdOutlineAccessAlarm />
-                </button>
-              </div>
-            </div>
-            <div>
-              {/* Display the selected file name */}
-              {fileName && (
-                <p>
-                  <span>File: </span>
-                  {fileName}
-                </p>
-              )}
-              {/* Display audio file */}
-              {audioURL && (
-                <div>
-                  <span>Voice-Note</span>
-                  <audio controls src={audioURL} />
-                  {audioURL && (
-                    <>
-                      <span onClick={clearRecording} disabled={!audioURL}>
-                        <Clear />
-                        Clear
-                      </span>
-                    </>
-                  )}
-                </div>
-              )}
-              {/* Display reminder */}
+            {renderSelect(
+              'Member',
+              'member',
+              memberList.map(m => ({
+                value: `${m._id}/${m.name}`,
+                label: `${m.name} (${m.role?.name ?? 'N/A'})`,
+              }))
+            )}
 
-              {reminders?.length > 0 &&
-                reminders?.some(
-                  obj =>
-                    obj.type &&
-                    obj.type.trim() !== '' &&
-                    obj.time &&
-                    obj.time.trim() !== '' &&
-                    obj.unit &&
-                    obj.unit.trim() !== ''
-                ) && (
-                  <div className="reminder_block">
-                    {reminders?.map((item, idx) => {
-                      return (
-                        <>
-                          <span key={idx}>
-                            <MdOutlineAccessAlarm />
-                            {`${item.type} ${item.time} ${item.unit}`}
-                          </span>
-                          <br />
-                        </>
-                      );
-                    })}
-                  </div>
-                )}
+            {renderSelect(
+              'Category',
+              'category',
+              categoryList.map(c => ({ value: c.name, label: c.name }))
+            )}
+
+            {renderSelect('Priority', 'priority', [
+              { value: 'Low', label: 'Low' },
+              { value: 'Medium', label: 'Medium' },
+              { value: 'High', label: 'High' },
+            ])}
+
+            {renderSelect('Repeat', 'repeatType', [
+              { value: 'norepeat', label: 'Once' },
+              { value: 'Daily', label: 'Daily' },
+              { value: 'Weekly', label: 'Weekly' },
+              { value: 'Monthly', label: 'Monthly' },
+              { value: 'Yearly', label: 'Yearly' },
+            ])}
+
+            <div className="flex flex-col gap-2">
+              <label className="font-semibold">Due Date</label>
+              <input
+                type="date"
+                {...register('dueDate')}
+                className="h-[54px] border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100 font-semibold"
+              />
+              {errors.dueDate && (
+                <p className="text-red-500 text-sm">{errors.dueDate.message}</p>
+              )}
             </div>
-            <div className="flex flex-row justify-end" onClick={submitFormData}>
-              <button className="px-4 py-2 border border-secondary bg-secondary text-primary rounded-3xl cursor-pointer mt-4">
-                Submit
+
+            <div className="col-span-2 flex gap-4 mt-4 items-center">
+              <label
+                htmlFor="fileInput"
+                className="p-2 bg-primary-foreground rounded-full border border-primary text-primary text-xl cursor-pointer"
+              >
+                <MdAttachFile />
+              </label>
+              <input
+                type="file"
+                id="fileInput"
+                hidden
+                onChange={onFileChange}
+              />
+
+              <button
+                type="button"
+                onClick={isRecording ? stopRecording : startRecording}
+                className="p-2 bg-primary-foreground rounded-full border border-primary text-primary text-xl"
+              >
+                <FaMicrophone />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setReminderOpen(true)}
+                className="p-2 bg-primary-foreground rounded-full border border-primary text-primary text-xl"
+              >
+                <MdOutlineAccessAlarm />
               </button>
             </div>
-          </div>
+
+            {fileName && <p className="col-span-2">File: {fileName}</p>}
+
+            {audioURL && (
+              <div className="col-span-2">
+                <span>Voice Note</span>
+                <audio controls src={audioURL} />
+                <button
+                  type="button"
+                  onClick={clearRecording}
+                  className="ml-2 text-red-500"
+                >
+                  <Clear /> Clear
+                </button>
+              </div>
+            )}
+
+            <div className="col-span-2 flex justify-end">
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className={`bg-secondary text-primary rounded-3xl px-4 py-3 inline-block font-semibold transition-opacity ${
+                isSubmitting ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+              >
+                {isSubmitting ? "Submitting..." : "Submit"}
+              </button>
+            </div>
+          </form>
         </div>
       </div>
 
@@ -681,7 +577,7 @@ const Page = () => {
             showMonthDropdown={false}
             showYearDropdown={false}
             placeholderText="Select Date"
-            showMonthYearPicker={false} // Disables month/year picker
+            showMonthYearPicker={false}
             todayButton="Today"
           />
         </DialogContent>
@@ -701,7 +597,7 @@ const Page = () => {
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <StaticTimePicker
               orientation="landscape"
-              value={selectedTime} // Pass the selected time
+              value={selectedTime} 
               onChange={handleTimeChange}
             />
           </LocalizationProvider>

@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import { Cancel, Check, Clear, Flag, Repeat } from '@mui/icons-material';
+import { FaStop } from 'react-icons/fa';
 // import VoiceRecorder from "./VoiceRecorder";
 import { FaFile, FaMicrophone } from 'react-icons/fa6';
 import { MdAttachFile, MdOutlineAccessAlarm } from 'react-icons/md';
@@ -94,18 +95,22 @@ const styles = {
   },
 };
 
-const schema = yup.object({
-  title: yup.string().required('Task title is required'),
-  description: yup.string().required('Description is required'),
-  member: yup.string().required('Member is required'),
-  category: yup.string().required('Category is required'),
-  priority: yup.string().oneOf(['Low', 'Medium', 'High'], 'Priority is required'),
-  repeatType: yup.string(),
-  dueDate: yup.date().required('Due Date is required'),
-}).required();
+const schema = yup
+  .object({
+    title: yup.string().required('Task title is required'),
+    description: yup.string().required('Description is required'),
+    member: yup.string().required('Member is required'),
+    category: yup.string().required('Category is required'),
+    priority: yup
+      .string()
+      .oneOf(['Low', 'Medium', 'High'], 'Priority is required'),
+    repeatType: yup.string(),
+    dueDate: yup.date().required('Due Date is required'),
+  })
+  .required();
 
 const Page = () => {
-  const router = useRouter()
+  const router = useRouter();
   const [reminders, setReminders] = useState([
     { type: '', time: '', unit: '' },
   ]);
@@ -115,6 +120,7 @@ const Page = () => {
   const [selectedTime, setSelectedTime] = useState(dayjs());
   const [isRecording, setIsRecording] = useState(false);
   const [audioURL, setAudioURL] = useState('');
+  const [audioBlob, setAudioBlob] = useState(null);
   const mediaRecorderRef = useRef(null);
   const chunksRef = useRef([]);
   const [fileName, setFileName] = useState('');
@@ -127,6 +133,7 @@ const Page = () => {
   const [checked, setChecked] = useState(false);
   const userId = useAuthStore(state => state.userId);
   const userName = useAuthStore(state => state.username);
+  const [loading, setLoading] = useState(false);
 
   const [data, setData] = useState({
     title: '',
@@ -147,7 +154,7 @@ const Page = () => {
     register,
     control,
     handleSubmit,
-    formState: { errors,isSubmitting },
+    formState: { errors, isSubmitting },
     watch,
   } = useForm({
     resolver: yupResolver(schema),
@@ -172,7 +179,7 @@ const Page = () => {
       try {
         const [memberResponse, categoryResponse] = await Promise.all([
           axios.get(`${process.env.REACT_APP_BASE_PATH}/api/teammember/getall`),
-          axios.get(`${process.env.REACT_APP_BASE_PATH}/api/category/list`)
+          axios.get(`${process.env.REACT_APP_BASE_PATH}/api/category/list`),
         ]);
         if (memberResponse?.data?.data) {
           setMemberList(memberResponse.data.data);
@@ -181,8 +188,8 @@ const Page = () => {
           setCategoryList(categoryResponse.data.data);
         }
       } catch (err) {
-        setError(err); 
-        console.log("Error fetching data:", err);
+        setError(err);
+        console.log('Error fetching data:', err);
       } finally {
         setLoading(false);
       }
@@ -262,6 +269,7 @@ const Page = () => {
         };
         mediaRecorderRef.current.onstop = () => {
           const blob = new Blob(chunksRef.current, { type: 'audio/wav' });
+          setAudioBlob(blob);
           setData(prevData => ({
             ...prevData,
             audio: blob,
@@ -284,8 +292,10 @@ const Page = () => {
       setIsRecording(false);
     }
   };
+
   const clearRecording = () => {
     setAudioURL('');
+    setAudioBlob(null);
     setData(prevData => ({
       ...prevData,
       audio: '',
@@ -341,60 +351,60 @@ const Page = () => {
     setReminders(newReminders);
   };
 
-  const onSubmit = async (data) => {
-  try {
-    data.assignedBy = {
-      name: userName,
-      employeeID: userId,
-    };
+  const onSubmit = async data => {
+    try {
+      data.assignedBy = {
+        name: userName,
+        employeeID: userId,
+      };
 
-    const formData = new FormData();
-    formData.append('title', data.title);
-    formData.append('description', data.description);
-    formData.append('member', data.member?.split('/')[0]);
-    formData.append('memberName', data.member?.split('/')[1]);
-    formData.append('assignedName', userName);
-    formData.append('assignedID', userId);
-    formData.append('category', data.category);
-    formData.append('priority', data.priority);
-    formData.append('repeatType', data.repeatType || '');
-    formData.append('repeatTime', data.repeatTime || '');
-    formData.append('dueDate', data.dueDate);
+      const formData = new FormData();
+      formData.append('title', data.title);
+      formData.append('description', data.description);
+      formData.append('member', data.member?.split('/')[0]);
+      formData.append('memberName', data.member?.split('/')[1]);
+      formData.append('assignedName', userName);
+      formData.append('assignedID', userId);
+      formData.append('category', data.category);
+      formData.append('priority', data.priority);
+      formData.append('repeatType', data.repeatType || '');
+      formData.append('repeatTime', data.repeatTime || '');
+      formData.append('dueDate', data.dueDate);
 
-    if (data.file) {
-      formData.append('file', data.file);
+      if (fileName.length > 0) {
+        formData.append('file', fileName);
+      }
+
+      if (audioBlob) {
+        formData.append('audio', audioBlob, 'recording.wav');
+      }
+
+      formData.append('reminder', JSON.stringify(data.reminder || []));
+
+      const response = await axios.post(
+        `${process.env.REACT_APP_BASE_PATH}/api/task/add`,
+        formData
+      );
+
+      console.log('Response:', response.status);
+
+      if (response.status === 201) {
+        setFileName('');
+        setAudioURL('');
+        clearRecording();
+        setReminders([{ type: '', time: '', unit: '' }]);
+        setSelectedPriority('');
+        setChecked(false);
+        toast(response.data.message);
+        router.back();
+      } else {
+        toast(response.data.message);
+      }
+    } catch (error) {
+      console.error('Submit Error:', error);
+      toast('Something went wrong. Please try again.');
     }
-
-    if (data.audio) {
-      formData.append('audio', data.audio, 'recording.wav');
-    }
-
-    formData.append('reminder', JSON.stringify(data.reminder || []));
-
-    const response = await axios.post(
-      `${process.env.REACT_APP_BASE_PATH}/api/task/add`,
-      formData
-    );
-
-    console.log('Response:', response.status);
-
-    if (response.status === 201) {
-      setFileName('');
-      setAudioURL('');
-      clearRecording();
-      setReminders([{ type: '', time: '', unit: '' }]);
-      setSelectedPriority('');
-      setChecked(false);
-      toast(response.data.message);
-      router.back();
-    } else {
-      toast(response.data.message);
-    }
-  } catch (error) {
-    console.error('Submit Error:', error);
-    toast('Something went wrong. Please try again.');
-  }
-};
+  };
 
   const onFileChange = e => {
     const file = e.target.files[0];
@@ -404,9 +414,15 @@ const Page = () => {
   const renderInput = (label, name, type = 'text', placeholder = '') => (
     <div className="flex flex-col gap-2">
       <label className="font-semibold">{label}</label>
-      <input {...register(name)} type={type} placeholder={placeholder}
-        className="h-[54px] border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100 font-semibold" />
-      {errors[name] && <p className="text-red-500 text-sm">{errors[name]?.message}</p>}
+      <input
+        {...register(name)}
+        type={type}
+        placeholder={placeholder}
+        className="h-[54px] border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100 font-semibold"
+      />
+      {errors[name] && (
+        <p className="text-red-500 text-sm">{errors[name]?.message}</p>
+      )}
     </div>
   );
 
@@ -423,13 +439,17 @@ const Page = () => {
             </SelectTrigger>
             <SelectContent>
               {options.map((item, index) => (
-                <SelectItem key={index} value={item.value}>{item.label}</SelectItem>
+                <SelectItem key={index} value={item.value}>
+                  {item.label}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
         )}
       />
-      {errors[name] && <p className="text-red-500 text-sm">{errors[name]?.message}</p>}
+      {errors[name] && (
+        <p className="text-red-500 text-sm">{errors[name]?.message}</p>
+      )}
     </div>
   );
 
@@ -447,17 +467,27 @@ const Page = () => {
           </h1>
         </div>
         <div className="bg-white rounded-[15px] p-5 my-5">
-        <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-2 gap-2">
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="grid grid-cols-2 gap-2"
+          >
             {renderInput('Task Title', 'title', 'text', 'Enter task title')}
-            {renderInput('Description', 'description', 'text', 'Enter description')}
+            {renderInput(
+              'Description',
+              'description',
+              'text',
+              'Enter description'
+            )}
 
             {renderSelect(
               'Member',
               'member',
-              memberList.map(m => ({
-                value: `${m._id}/${m.name}`,
-                label: `${m.name} (${m.role?.name ?? 'N/A'})`,
-              }))
+              memberList
+                .filter(item => item._id !== userId)
+                .map(m => ({
+                  value: `${m._id}/${m.name}`,
+                  label: `${m.name} (${m.role?.name ?? 'N/A'})`,
+                }))
             )}
 
             {renderSelect(
@@ -509,9 +539,11 @@ const Page = () => {
               <button
                 type="button"
                 onClick={isRecording ? stopRecording : startRecording}
-                className="p-2 bg-primary-foreground rounded-full border border-primary text-primary text-xl"
+                className={`p-2 bg-primary-foreground rounded-full border border-primary text-primary text-xl ${
+                  isRecording && 'bg-red-100 text-red-500 border-red-500'
+                }`}
               >
-                <FaMicrophone />
+                {isRecording ? <FaStop /> : <FaMicrophone />}
               </button>
 
               <button
@@ -526,13 +558,12 @@ const Page = () => {
             {fileName && <p className="col-span-2">File: {fileName}</p>}
 
             {audioURL && (
-              <div className="col-span-2">
-                <span>Voice Note</span>
+              <div className="flex items-center">
                 <audio controls src={audioURL} />
                 <button
                   type="button"
                   onClick={clearRecording}
-                  className="ml-2 text-red-500"
+                  className="ml-2 px-2 py-2 bg red-100 border border-red-500 rounded-full text-red-500 hover:text-white hover:bg-red-500"
                 >
                   <Clear /> Clear
                 </button>
@@ -544,10 +575,10 @@ const Page = () => {
                 type="submit"
                 disabled={isSubmitting}
                 className={`bg-secondary text-primary rounded-3xl px-4 py-3 inline-block font-semibold transition-opacity ${
-                isSubmitting ? "opacity-50 cursor-not-allowed" : ""
-              }`}
+                  isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
               >
-                {isSubmitting ? "Submitting..." : "Submit"}
+                {isSubmitting ? 'Submitting...' : 'Submit'}
               </button>
             </div>
           </form>
@@ -597,7 +628,7 @@ const Page = () => {
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <StaticTimePicker
               orientation="landscape"
-              value={selectedTime} 
+              value={selectedTime}
               onChange={handleTimeChange}
             />
           </LocalizationProvider>

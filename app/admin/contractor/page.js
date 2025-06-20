@@ -1,49 +1,48 @@
-'use client'
-import React, { useEffect, useState } from "react";
-import { DataGrid,gridClasses } from "@mui/x-data-grid";
-import { styled } from "@mui/material";
-import axios from "axios";
+'use client';
+import React, { useEffect, useState } from 'react';
+import { DataGrid, gridClasses } from '@mui/x-data-grid';
+import { styled } from '@mui/material';
+import axios from 'axios';
 import { IoIosArrowBack } from 'react-icons/io';
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
-import AsideContainer from "../../../components/AsideContainer";
-import Link from "next/link";
-import { RiUserForbidLine } from "react-icons/ri";
-import { CiViewList } from "react-icons/ci";
-import { FaCheck } from "react-icons/fa6";
-import { MdOutlineDelete } from "react-icons/md";
-import { SidebarTrigger } from "../../../components/ui/sidebar";
-import { Separator } from "../../../components/ui/separator";
+import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
+import AsideContainer from '../../../components/AsideContainer';
+import Link from 'next/link';
+import { RiUserForbidLine } from 'react-icons/ri';
+import { CiViewList } from 'react-icons/ci';
+import { FaCheck } from 'react-icons/fa6';
+import { MdOutlineDelete } from 'react-icons/md';
+import { SidebarTrigger } from '../../../components/ui/sidebar';
+import { Separator } from '../../../components/ui/separator';
 
 const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
   [`& .${gridClasses.row}.even`]: {
-    "backgroundColor": "#f8fbfc",
-    "&:hover": {
-      "backgroundColor": "#93bfcf",
-      "color": "#eee9da",
-      "@media (hover: none)": {
-        backgroundColor: "transparent",
+    backgroundColor: '#f8fbfc',
+    '&:hover': {
+      backgroundColor: '#93bfcf',
+      color: '#eee9da',
+      '@media (hover: none)': {
+        backgroundColor: 'transparent',
       },
     },
-    "&.Mui-selected": {
-      backgroundColor: "#93bfcf",
+    '&.Mui-selected': {
+      backgroundColor: '#93bfcf',
     },
   },
   [`& .${gridClasses.row}.odd`]: {
-    "backgroundColor": "#eee9da",
-    "&:hover": {
-      "backgroundColor": "#93bfcf",
-      "color": "#eee9da",
-      "@media (hover: none)": {
-        backgroundColor: "transparent",
+    backgroundColor: '#eee9da',
+    '&:hover': {
+      backgroundColor: '#93bfcf',
+      color: '#eee9da',
+      '@media (hover: none)': {
+        backgroundColor: 'transparent',
       },
     },
-    "&.Mui-selected": {
-      backgroundColor: "#93bfcf",
+    '&.Mui-selected': {
+      backgroundColor: '#93bfcf',
     },
   },
 }));
-
 
 const ContractorTable = () => {
   const router = useRouter();
@@ -55,30 +54,30 @@ const ContractorTable = () => {
   }, []);
 
   const columns = [
-    { field: "id", headerName: "ID", width: 250 },
+    { field: 'id', headerName: 'ID', width: 250 },
     {
-      field: "name",
-      headerName: "Name",
-      type: "text",
+      field: 'name',
+      headerName: 'Name',
+      type: 'text',
       width: 180,
     },
-    { field: "designation", headerName: "Designation", width: 130 },
+    { field: 'designation', headerName: 'Designation', width: 130 },
     {
-      field: "businessContactNumber",
-      headerName: "Contact Number",
-      description: "This column has a value getter and is not sortable.",
+      field: 'businessContactNumber',
+      headerName: 'Contact Number',
+      description: 'This column has a value getter and is not sortable.',
       sortable: false,
       width: 180,
     },
     {
-      field: "approvalStatus",
-      headerName: "Status",
+      field: 'approvalStatus',
+      headerName: 'Status',
       width: 180,
       renderCell: params => {
         return (
           <div className={`cellWithStatus ${params?.row?.approvalStatus}`}>
-            {params?.row?.approvalStatus == "Approved" ? (
-              "Approved"
+            {params?.row?.approvalStatus == 'Approved' ? (
+              'Approved'
             ) : (
               <div className="statusButton">Pending</div>
             )}
@@ -95,7 +94,7 @@ const ContractorTable = () => {
         setRows(resp?.data?.data);
       })
       .catch(err => {
-        console.error("Error:", err);
+        console.error('Error:', err);
         setError(err);
       });
   };
@@ -112,7 +111,7 @@ const ContractorTable = () => {
         }
       })
       .catch(err => {
-        console.error("Error:", err);
+        console.error('Error:', err);
       });
   };
 
@@ -128,7 +127,7 @@ const ContractorTable = () => {
         }
       })
       .catch(err => {
-        console.error("Error:", err);
+        console.error('Error:', err);
       });
   };
   const activeDealer = id => {
@@ -141,7 +140,7 @@ const ContractorTable = () => {
         }
       })
       .catch(err => {
-        console.error("Error:", err);
+        console.error('Error:', err);
       });
   };
   useEffect(() => {
@@ -165,25 +164,27 @@ const ContractorTable = () => {
 
   const actionColumn = [
     {
-      field: "action",
-      headerName: "Action",
+      field: 'action',
+      headerName: 'Action',
       width: 600,
       renderCell: params => {
         return (
           <div className="flex flex-row gap-2">
             <span
-              onClick={()=>router.push(`/admin/contractor/${params?.row?.id}`)} 
+              onClick={() =>
+                router.push(`/admin/contractor/${params?.row?.id}`)
+              }
               className="p-2 rounded-full border border-primary text-primary bg-primary-foreground cursor-pointer"
-              >
-                <CiViewList/>
+            >
+              <CiViewList />
             </span>
             <button
               onClick={() => deleteContractor(params?.row?.id)}
               className="p-2 rounded-full border border-primary text-primary bg-primary-foreground cursor-pointer"
             >
-              <MdOutlineDelete/>
+              <MdOutlineDelete />
             </button>
-            {params?.row?.userStatus === "active" ? (
+            {params?.row?.userStatus === 'active' ? (
               <span
                 onClick={() => suspendDealer(params?.row?.id)}
                 className="p-2 rounded-full border border-primary text-primary bg-primary-foreground cursor-pointer"
@@ -205,12 +206,12 @@ const ContractorTable = () => {
   ];
 
   const notify = type => {
-    if (type == "success") {
-      toast.success("Approved Successfully ! ", {
+    if (type == 'success') {
+      toast.success('Approved Successfully ! ', {
         position: toast.POSITION.TOP_RIGHT,
       });
     } else {
-      toast.error("Something Went Wrong ! ", {
+      toast.error('Something Went Wrong ! ', {
         position: toast.POSITION.TOP_RIGHT,
       });
     }
@@ -224,95 +225,103 @@ const ContractorTable = () => {
             className="text-2xl cursor-pointer transition duration-300 hover:scale-150 ease-in-out"
             onClick={() => router.back()}
           /> */}
-        <div className='flex w-full items-center gap-1 lg:gap-2'>
-          <SidebarTrigger className="-ml-2 hover:bg-primary" />
-          <Separator orientation="vertical" className="data-[orientation=vertical]:h-4 bg-black" />
-          <h1 className="font-ubuntu font-bold text-[25px] leading-7 text-nowrap">
-            Contractor List
-          </h1>
+          <div className="flex w-full items-center gap-1 lg:gap-2">
+            <SidebarTrigger className="-ml-2 hover:bg-primary" />
+            <Separator
+              orientation="vertical"
+              className="data-[orientation=vertical]:h-4 bg-black"
+            />
+            <h1 className="font-ubuntu font-bold text-[25px] leading-7 text-nowrap">
+              Contractor List
+            </h1>
+          </div>
+          <button
+            className="bg-secondary text-primary rounded-3xl px-3 py-2 text-nowrap"
+            onClick={() => router.push('/admin/contractor/add')}
+          >
+            Add Contractor
+          </button>
         </div>
-          <button className="bg-secondary text-primary rounded-3xl px-3 py-2 text-nowrap" onClick={()=>router.push('/admin/contractor/add')}>Add Contractor</button>
-        </div>
-      {/* <div className="datatableTitle">
+        {/* <div className="datatableTitle">
        Dealer's Application List
        <NavLink to={"/admin/dealer/new"} className="addNewUserNavLink" >
        New Application
        </NavLink>
        </div> */}
-      <StripedDataGrid
-        rows={arrayData}
-        columns={columns.concat(actionColumn)}
-        getRowClassName={params =>
-            params.indexRelativeToCurrentPage % 2 === 0 ? "even" : "odd"
-        }
-        pageSize={9}
-        rowsPerPageOptions={[9]}
-        // checkboxSelection
-        sx={{
-            "fontFamily": "ubuntu",
-            "fontSize": "16px",
-            ".MuiDataGrid-columnSeparator": {
-              display: "none",
+        <StripedDataGrid
+          rows={arrayData}
+          columns={columns.concat(actionColumn)}
+          getRowClassName={params =>
+            params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd'
+          }
+          pageSize={9}
+          rowsPerPageOptions={[9]}
+          // checkboxSelection
+          sx={{
+            fontFamily: 'ubuntu',
+            fontSize: '16px',
+            '.MuiDataGrid-columnSeparator': {
+              display: 'none',
             },
-            "& .MuiDataGrid-columnHeaderTitle": { color: "#93bfcf" },
-            "& .MuiDataGrid-menuOpen": { background: "#0b192c" },
-            "&.MuiDataGrid-root": {
-              borderRadius: "16px",
-              marginBottom: "1rem",
+            '& .MuiDataGrid-columnHeaderTitle': { color: '#93bfcf' },
+            '& .MuiDataGrid-menuOpen': { background: '#0b192c' },
+            '&.MuiDataGrid-root': {
+              borderRadius: '16px',
+              marginBottom: '1rem',
               // color: "#93bfcf",
-              background: "#0b192c",
+              background: '#0b192c',
             },
-            "& .MuiDataGrid-filler": { background: "#0b192c" },
-            "& .MuiDataGrid-columnHeader": {
-              background: "#0b192c",
-              color: "#93bfcf",
+            '& .MuiDataGrid-filler': { background: '#0b192c' },
+            '& .MuiDataGrid-columnHeader': {
+              background: '#0b192c',
+              color: '#93bfcf',
             },
-            "& .MuiDataGrid-columnHeader--sortable": {
-              color: "#93bfcf",
+            '& .MuiDataGrid-columnHeader--sortable': {
+              color: '#93bfcf',
             },
-            "& .MuiDataGrid-withBorderColor": {
-              color: "#93bfcf",
+            '& .MuiDataGrid-withBorderColor': {
+              color: '#93bfcf',
             },
-            "& .MuiDataGrid-menuIcon": {
-              background: "#0b192c",
-              color: "#93bfcf",
+            '& .MuiDataGrid-menuIcon': {
+              background: '#0b192c',
+              color: '#93bfcf',
             },
-            "& .MuiDataGrid-columnHeaders": {
-              background: "#0b192c",
-              color: "#93bfcf",
+            '& .MuiDataGrid-columnHeaders': {
+              background: '#0b192c',
+              color: '#93bfcf',
             },
-            "& .MuiDataGrid-sortIcon": {
-              opacity: "inherit !important",
-              color: "#93bfcf",
+            '& .MuiDataGrid-sortIcon': {
+              opacity: 'inherit !important',
+              color: '#93bfcf',
             },
-            "& .MuiDataGrid-cell:focus-within": {
-              outline: "none !important",
+            '& .MuiDataGrid-cell:focus-within': {
+              outline: 'none !important',
             },
-            "& .MuiDataGrid-columnHeaderTitleContainer": {
-              background: "#0b192c",
-              color: "#93bfcf",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
+            '& .MuiDataGrid-columnHeaderTitleContainer': {
+              background: '#0b192c',
+              color: '#93bfcf',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
             },
-            "& .MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular MuiTablePagination-toolbar":
+            '& .MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular MuiTablePagination-toolbar':
               {
-                display: "none",
+                display: 'none',
               },
-            "& .MuiToolbar-root ": {
-              color: "#93bfcf",
+            '& .MuiToolbar-root ': {
+              color: '#93bfcf',
             },
-            "& .MuiButtonBase-root": {
-              color: "#93bfcf",
+            '& .MuiButtonBase-root': {
+              color: '#93bfcf',
             },
-            "& .MuiDataGrid-overlay": {
-              background: "#eee9da",
-              color: "#0b192c",
+            '& .MuiDataGrid-overlay': {
+              background: '#eee9da',
+              color: '#0b192c',
             },
-            "& .MuiDataGrid-cell": {
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
+            '& .MuiDataGrid-cell': {
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
             },
           }}
         />

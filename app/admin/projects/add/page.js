@@ -30,9 +30,19 @@ const schema = yup.object().shape({
   floor: yup.string().required('Number of floors is required'),
   plan: yup.string().required('Floor plan is required'),
   area: yup.string().required('Area is required'),
-  cost: yup.string().typeError('Cost must be a number').required('Cost is required'),
-  date: yup.date().transform((value, originalValue) => new Date(originalValue)).required('Start date is required'),
-  duration: yup.string().min(1).typeError('Duration must be a number').required('Duration is required'),
+  cost: yup
+    .string()
+    .typeError('Cost must be a number')
+    .required('Cost is required'),
+  date: yup
+    .date()
+    .transform((value, originalValue) => new Date(originalValue))
+    .required('Start date is required'),
+  duration: yup
+    .string()
+    .min(1)
+    .typeError('Duration must be a number')
+    .required('Duration is required'),
   admin: yup.string().required('Admin is required'),
   architect: yup.string().required('Architect is required'),
   sr_engineer: yup.string().required('Sr. Engineer is required'),
@@ -43,8 +53,11 @@ const schema = yup.object().shape({
   contractor: yup.string().required('Contractor is required'),
 });
 
-const toOptions = (arr, labelFn = item => item.name, valueFn = item => item._id) =>
-  arr.map(item => ({ label: labelFn(item), value: valueFn(item) }));
+const toOptions = (
+  arr,
+  labelFn = item => item.name,
+  valueFn = item => item._id
+) => arr.map(item => ({ label: labelFn(item), value: valueFn(item) }));
 
 const AddProjectForm = () => {
   const router = useRouter();
@@ -67,10 +80,25 @@ const AddProjectForm = () => {
   } = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
-      name: '', siteID: '', location: '', branch: '', client: '',
-      floor: '', plan: '', area: '', cost: '', date: '', duration: '',
-      admin: '', architect: '', sr_engineer: '', engineer: '', accountant: '',
-      operation: '', sales: '', contractor: '',
+      name: '',
+      siteID: '',
+      location: '',
+      branch: '',
+      client: '',
+      floor: '',
+      plan: '',
+      area: '',
+      cost: '',
+      date: '',
+      duration: '',
+      admin: '',
+      architect: '',
+      sr_engineer: '',
+      engineer: '',
+      accountant: '',
+      operation: '',
+      sales: '',
+      contractor: '',
     },
   });
 
@@ -78,18 +106,31 @@ const AddProjectForm = () => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const [stagesRes, membersRes, clientsRes, contractorsRes, floorsRes] = await Promise.all([
-          axios.get(`${process.env.REACT_APP_BASE_PATH}/api/constructionstep/getall`),
-          axios.get(`${process.env.REACT_APP_BASE_PATH}/api/teammember/getall`),
-          axios.get(`${process.env.REACT_APP_BASE_PATH}/api/client/getall`),
-          axios.get(`${process.env.REACT_APP_BASE_PATH}/api/contractor/applications`),
-          axios.get(`${process.env.REACT_APP_BASE_PATH}/api/floor/getall`),
-        ]);
+        const [stagesRes, membersRes, clientsRes, contractorsRes, floorsRes] =
+          await Promise.all([
+            axios.get(
+              `${process.env.REACT_APP_BASE_PATH}/api/constructionstep/getall`
+            ),
+            axios.get(
+              `${process.env.REACT_APP_BASE_PATH}/api/teammember/getall`
+            ),
+            axios.get(`${process.env.REACT_APP_BASE_PATH}/api/client/getall`),
+            axios.get(
+              `${process.env.REACT_APP_BASE_PATH}/api/contractor/applications`
+            ),
+            axios.get(`${process.env.REACT_APP_BASE_PATH}/api/floor/getall`),
+          ]);
 
-        setStages(stagesRes?.data?.data?.sort((a, b) => a.priority - b.priority) || []);
+        setStages(
+          stagesRes?.data?.data?.sort((a, b) => a.priority - b.priority) || []
+        );
         setTeamMembers(membersRes?.data?.data || []);
         setClients(clientsRes?.data?.data || []);
-        setContractors(contractorsRes?.data?.data?.filter(c => c.approvalStatus === 'Approved') || []);
+        setContractors(
+          contractorsRes?.data?.data?.filter(
+            c => c.approvalStatus === 'Approved'
+          ) || []
+        );
         setFloorOptions(floorsRes?.data?.data || []);
       } catch (error) {
         console.error('Error fetching form data:', error);
@@ -103,9 +144,15 @@ const AddProjectForm = () => {
   const renderInput = (label, name, type = 'text', placeholder = '') => (
     <div className="flex flex-col gap-2">
       <label className="font-semibold">{label}</label>
-      <input {...register(name)} type={type} placeholder={placeholder}
-        className="h-[54px] border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100 font-semibold" />
-      {errors[name] && <p className="text-red-500 text-sm">{errors[name]?.message}</p>}
+      <input
+        {...register(name)}
+        type={type}
+        placeholder={placeholder}
+        className="h-[54px] border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100 font-semibold"
+      />
+      {errors[name] && (
+        <p className="text-red-500 text-sm">{errors[name]?.message}</p>
+      )}
     </div>
   );
 
@@ -122,17 +169,21 @@ const AddProjectForm = () => {
             </SelectTrigger>
             <SelectContent>
               {options.map((item, index) => (
-                <SelectItem key={index} value={item.value}>{item.label}</SelectItem>
+                <SelectItem key={index} value={item.value}>
+                  {item.label}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
         )}
       />
-      {errors[name] && <p className="text-red-500 text-sm">{errors[name]?.message}</p>}
+      {errors[name] && (
+        <p className="text-red-500 text-sm">{errors[name]?.message}</p>
+      )}
     </div>
   );
 
-  const onSubmit = async (formData) => {
+  const onSubmit = async formData => {
     setIsSubmitting(true);
     try {
       const payload = {
@@ -141,7 +192,10 @@ const AddProjectForm = () => {
         assignedID: activeUser,
       };
 
-      const response = await axios.post(`${process.env.REACT_APP_BASE_PATH}/api/project/add`, { data: payload });
+      const response = await axios.post(
+        `${process.env.REACT_APP_BASE_PATH}/api/project/add`,
+        { data: payload }
+      );
 
       if (response.data.status === 201) {
         toast(response.data.message);
@@ -158,53 +212,163 @@ const AddProjectForm = () => {
   };
 
   return (
-      <AsideContainer>
-    {isLoading ? (
-      <LoaderSpinner />
-    ) : (
-      <div>
-        <div className="flex w-full items-center gap-2">
-          <SidebarTrigger className="-ml-2 hover:bg-primary" />
-          <Separator orientation="vertical" className="h-4 bg-black" />
-          <IoIosArrowBack onClick={() => router.back()} className="cursor-pointer transition hover:scale-150" />
-          <h1 className="font-ubuntu font-bold text-[25px] leading-7 py-5 text-nowrap">Add Project</h1>
-        </div>
+    <AsideContainer>
+      {isLoading ? (
+        <LoaderSpinner />
+      ) : (
+        <div>
+          <div className="flex w-full items-center gap-2">
+            <SidebarTrigger className="-ml-2 hover:bg-primary" />
+            <Separator orientation="vertical" className="h-4 bg-black" />
+            <IoIosArrowBack
+              onClick={() => router.back()}
+              className="cursor-pointer transition hover:scale-150"
+            />
+            <h1 className="font-ubuntu font-bold text-[25px] leading-7 py-5 text-nowrap">
+              Add Project
+            </h1>
+          </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="bg-white rounded-[15px] p-5 mb-5">
-          <div className="grid grid-cols-2 gap-4 gap-x-8 -md:grid-cols-1">
-            {renderInput('Project Name', 'name', 'text', 'Enter Name')}
-            {renderInput('Site ID', 'siteID', 'text', 'Enter Site ID')}
-            {renderInput('Project Location', 'location', 'text', 'Enter project location')}
-            {renderSelect('Branch', 'branch', [
-              { value: 'Gurgaon', label: 'Gurgaon' },
-              { value: 'Patna', label: 'Patna' },
-              { value: 'Ranchi', label: 'Ranchi' },
-            ])}
-            {renderSelect('Client', 'client', toOptions(clients))}
-            {renderSelect('Number of Floor', 'floor', toOptions(floorOptions, f => f.name, f => f.name))}
-            {renderSelect('Select Floor Plan', 'plan', toOptions(stages))}
-            {renderInput('Project Area', 'area', 'text', 'Enter project area')}
-            {renderInput('Project Cost', 'cost', 'number', 'Enter project cost')}
-            {renderInput('Start Date', 'date', 'date')}
-            {renderInput('Duration (In months)', 'duration', 'number', 'Enter Construction duration')}
-            {renderSelect('Project Admin', 'admin', toOptions(teamMembers.filter(m => m.role?.name.toLowerCase() === 'admin'), m => `${m.name} (${m.employeeID})`))}
-            {renderSelect('Architect', 'architect', toOptions(teamMembers.filter(m => m.role?.name.toLowerCase() === 'architect'), m => `${m.name} (${m.employeeID})`))}
-            {renderSelect('Sr. Engineer', 'sr_engineer', toOptions(teamMembers.filter(m => m.role?.name.toLowerCase() === 'sr. engineer'), m => `${m.name} (${m.employeeID})`))}
-            {renderSelect('Site Engineer', 'engineer', toOptions(teamMembers.filter(m => m.role?.name.toLowerCase() === 'site engineer'), m => `${m.name} (${m.employeeID})`))}
-            {renderSelect('Accountant', 'accountant', toOptions(teamMembers.filter(m => m.role?.name.toLowerCase() === 'accountant'), m => `${m.name} (${m.employeeID})`))}
-            {renderSelect('Operation', 'operation', toOptions(teamMembers.filter(m => m.role?.name.toLowerCase() === 'operations'), m => `${m.name} (${m.employeeID})`))}
-            {renderSelect('Sales', 'sales', toOptions(teamMembers.filter(m => m.role?.name.toLowerCase() === 'sales'), m => `${m.name} (${m.employeeID})`))}
-            {renderSelect('Contractor', 'contractor', toOptions(contractors, c => `${c.name} (${c.companyNameShopName})`))}
-          </div>
-          <div className="flex flex-row justify-end">
-            <button type="submit" disabled={isSubmitting} className="px-4 py-2 border border-secondary bg-secondary text-primary rounded-3xl cursor-pointer mt-4">
-              {isSubmitting ? 'Submitting...' : 'Submit'}
-            </button>
-          </div>
-        </form>
-      </div>
-    )}
-  </AsideContainer>
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="bg-white rounded-[15px] p-5 mb-5"
+          >
+            <div className="grid grid-cols-2 gap-4 gap-x-8 -md:grid-cols-1">
+              {renderInput('Project Name', 'name', 'text', 'Enter Name')}
+              {renderInput('Site ID', 'siteID', 'text', 'Enter Site ID')}
+              {renderInput(
+                'Project Location',
+                'location',
+                'text',
+                'Enter project location'
+              )}
+              {renderSelect('Branch', 'branch', [
+                { value: 'Gurgaon', label: 'Gurgaon' },
+                { value: 'Patna', label: 'Patna' },
+                { value: 'Ranchi', label: 'Ranchi' },
+              ])}
+              {renderSelect('Client', 'client', toOptions(clients))}
+              {renderSelect(
+                'Number of Floor',
+                'floor',
+                toOptions(
+                  floorOptions,
+                  f => f.name,
+                  f => f.name
+                )
+              )}
+              {renderSelect('Select Floor Plan', 'plan', toOptions(stages))}
+              {renderInput(
+                'Project Area',
+                'area',
+                'text',
+                'Enter project area'
+              )}
+              {renderInput(
+                'Project Cost',
+                'cost',
+                'number',
+                'Enter project cost'
+              )}
+              {renderInput('Start Date', 'date', 'date')}
+              {renderInput(
+                'Duration (In months)',
+                'duration',
+                'number',
+                'Enter Construction duration'
+              )}
+              {renderSelect(
+                'Project Admin',
+                'admin',
+                toOptions(
+                  teamMembers.filter(
+                    m => m.role?.name.toLowerCase() === 'admin'
+                  ),
+                  m => `${m.name} (${m.employeeID})`
+                )
+              )}
+              {renderSelect(
+                'Architect',
+                'architect',
+                toOptions(
+                  teamMembers.filter(
+                    m => m.role?.name.toLowerCase() === 'architect'
+                  ),
+                  m => `${m.name} (${m.employeeID})`
+                )
+              )}
+              {renderSelect(
+                'Sr. Engineer',
+                'sr_engineer',
+                toOptions(
+                  teamMembers.filter(
+                    m => m.role?.name.toLowerCase() === 'sr. engineer'
+                  ),
+                  m => `${m.name} (${m.employeeID})`
+                )
+              )}
+              {renderSelect(
+                'Site Engineer',
+                'engineer',
+                toOptions(
+                  teamMembers.filter(
+                    m => m.role?.name.toLowerCase() === 'site engineer'
+                  ),
+                  m => `${m.name} (${m.employeeID})`
+                )
+              )}
+              {renderSelect(
+                'Accountant',
+                'accountant',
+                toOptions(
+                  teamMembers.filter(
+                    m => m.role?.name.toLowerCase() === 'accountant'
+                  ),
+                  m => `${m.name} (${m.employeeID})`
+                )
+              )}
+              {renderSelect(
+                'Operation',
+                'operation',
+                toOptions(
+                  teamMembers.filter(
+                    m => m.role?.name.toLowerCase() === 'operations'
+                  ),
+                  m => `${m.name} (${m.employeeID})`
+                )
+              )}
+              {renderSelect(
+                'Sales',
+                'sales',
+                toOptions(
+                  teamMembers.filter(
+                    m => m.role?.name.toLowerCase() === 'sales'
+                  ),
+                  m => `${m.name} (${m.employeeID})`
+                )
+              )}
+              {renderSelect(
+                'Contractor',
+                'contractor',
+                toOptions(
+                  contractors,
+                  c => `${c.name} (${c.companyNameShopName})`
+                )
+              )}
+            </div>
+            <div className="flex flex-row justify-end">
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="px-4 py-2 border border-secondary bg-secondary text-primary rounded-3xl cursor-pointer mt-4"
+              >
+                {isSubmitting ? 'Submitting...' : 'Submit'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+    </AsideContainer>
   );
 };
 

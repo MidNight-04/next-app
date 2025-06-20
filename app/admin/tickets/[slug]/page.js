@@ -24,8 +24,8 @@ import { IoLockClosedOutline } from 'react-icons/io5';
 import Image from 'next/image';
 import { FiDownload } from 'react-icons/fi';
 import { saveAs } from 'file-saver';
-import { SidebarTrigger } from "../../../../components/ui/sidebar";
-import { Separator } from "../../../../components/ui/separator";
+import { SidebarTrigger } from '../../../../components/ui/sidebar';
+import { Separator } from '../../../../components/ui/separator';
 
 let today = new Date();
 let yyyy = today.getFullYear();
@@ -200,17 +200,20 @@ const TicketViewClient = () => {
   return (
     <AsideContainer>
       <div>
-      <div className='flex w-full items-center gap-1 lg:gap-2'>
-        <SidebarTrigger className="-ml-2 hover:bg-primary" />
-        <Separator orientation="vertical" className="data-[orientation=vertical]:h-4 bg-black" />
-        <IoIosArrowBack
-          onClick={() => router.back()}
-          className="cursor-pointer transition duration-300 hover:scale-150 ease-in-out"
-        />
-        <h1 className="font-ubuntu font-bold text-[25px] leading-7 py-5 text-nowrap">
-          Ticket Details
-        </h1>
-      </div>
+        <div className="flex w-full items-center gap-1 lg:gap-2">
+          <SidebarTrigger className="-ml-2 hover:bg-primary" />
+          <Separator
+            orientation="vertical"
+            className="data-[orientation=vertical]:h-4 bg-black"
+          />
+          <IoIosArrowBack
+            onClick={() => router.back()}
+            className="cursor-pointer transition duration-300 hover:scale-150 ease-in-out"
+          />
+          <h1 className="font-ubuntu font-bold text-[25px] leading-7 py-5 text-nowrap">
+            Ticket Details
+          </h1>
+        </div>
         <div className="p-5 rounded-2xl bg-white flex flex-col gap-4 mb-4 ">
           <div className="flex flex-row w-full gap-4">
             <div className="flex flex-col gap-4 w-full">
@@ -487,9 +490,9 @@ const TicketViewClient = () => {
         open={showImage}
         onClose={toggleShowImage}
         sx={{
-          'display': 'flex',
-          'alignItems': 'center',
-          'justifyContent': 'center',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
           '& .MuiBackdrop-root': {
             backgroundColor: 'rgba(0, 0, 0, 0.1)',
           },

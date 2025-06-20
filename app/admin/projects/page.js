@@ -16,8 +16,8 @@ import { IoPeopleOutline } from 'react-icons/io5';
 import AsideContainer from '../../../components/AsideContainer';
 import { Modal } from '@mui/material';
 import { useRouter } from 'next/navigation';
-import { SidebarTrigger } from "../../../components/ui/sidebar";
-import { Separator } from "../../../components/ui/separator";
+import { SidebarTrigger } from '../../../components/ui/sidebar';
+import { Separator } from '../../../components/ui/separator';
 
 const Page = () => {
   const [project, setProject] = useState([]);
@@ -131,19 +131,22 @@ const Page = () => {
     console.log('Delete project with siteId:', siteId);
   };
 
-let rupee = new Intl.NumberFormat('en-IN', {
-  // style: 'currency',
-  // currency: 'INR',
-  maximumFractionDigits: 0,
-  useGrouping: true
-});
+  let rupee = new Intl.NumberFormat('en-IN', {
+    // style: 'currency',
+    // currency: 'INR',
+    maximumFractionDigits: 0,
+    useGrouping: true,
+  });
 
   return (
     <AsideContainer>
       <div className="flex flex-row justify-between items-center -lg:pt-2 -lg:mb-2">
-        <div className='flex w-full items-center gap-1 lg:gap-2'>
+        <div className="flex w-full items-center gap-1 lg:gap-2">
           <SidebarTrigger className="-ml-2 hover:bg-primary" />
-          <Separator orientation="vertical" className="data-[orientation=vertical]:h-4 bg-black" />
+          <Separator
+            orientation="vertical"
+            className="data-[orientation=vertical]:h-4 bg-black"
+          />
           <h1 className="font-ubuntu font-bold text-[25px] leading-7 py-5 text-nowrap">
             Project List
           </h1>
@@ -171,7 +174,9 @@ let rupee = new Intl.NumberFormat('en-IN', {
               <button className="p-[6px] px-3 bg-transparent border-2 border-secondary rounded-full font-ubuntu hover:bg-secondary [&_p]:hover:text-primary-foreground [&_svg]:hover:text-primary-foreground">
                 <div className="text-secondary flex flex-row items-center">
                   <AddIcon />
-                  <p className="text-[13px] font-bold text-nowrap">Add Project</p>
+                  <p className="text-[13px] font-bold text-nowrap">
+                    Add Project
+                  </p>
                 </div>
               </button>
             </Link>
@@ -187,8 +192,7 @@ let rupee = new Intl.NumberFormat('en-IN', {
               for (let j = 0; j < item.project_status[i]?.step?.length; j++) {
                 totalPoint += 1;
                 if (
-                  item.project_status[i]?.step[j]?.taskId?.status ===
-                  'Complete'
+                  item.project_status[i]?.step[j]?.taskId?.status === 'Complete'
                 ) {
                   completePoint += 1;
                 }
@@ -200,9 +204,12 @@ let rupee = new Intl.NumberFormat('en-IN', {
                 <div>
                   <div className="p-8 mb-4 -md:p-4">
                     <div className="flex">
-                      <div className="w-full cursor-pointer" onClick={() => {
-                        router.push(`/admin/projects/${item?.siteID}`);
-                      }}>
+                      <div
+                        className="w-full cursor-pointer"
+                        onClick={() => {
+                          router.push(`/admin/projects/${item?.siteID}`);
+                        }}
+                      >
                         <div className="flex flex-row gap-4 ">
                           <span className="h-[88px] rounded-full w-1 bg-primary -md:h-16" />
                           <div className="[&_span]:flex [&_span]:flex-row [&_span]:gap-3 [&_span]:leading-7 font-ubuntu font-bold text-base -md:[&_span]:gap-1 -md:[&_span]:leading-snug -md:text-sm text-nowrap text-[#565656] -md:max-w-64">
@@ -215,8 +222,8 @@ let rupee = new Intl.NumberFormat('en-IN', {
                             </span>
                             <span>
                               <p>Project Location :</p>
-                              <p className='truncate'>
-                              {item.project_location}
+                              <p className="truncate">
+                                {item.project_location}
                               </p>
                             </span>
                           </div>
@@ -240,21 +247,21 @@ let rupee = new Intl.NumberFormat('en-IN', {
                           </span>
                           {/* {userType !== 'ROLE_CLIENT' && (
                               )} */}
-                            <span className="flex gap-2 justify-center items-center p-2 bg-primary-foreground rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl -md:p-1 -md:text-xs">
-                              <IoPeopleOutline />
-                              <p>
-                                {
-                                  item.project_status
-                                    .map(item => item.step)
-                                    .flat()
-                                    .find(
-                                      item =>
-                                        item.taskId.status === 'Pending' ||
-                                        item.taskId.status === 'In Progress'
-                                    ).taskId.issueMember.name
-                                }
-                              </p>
-                            </span>
+                          <span className="flex gap-2 justify-center items-center p-2 bg-primary-foreground rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl -md:p-1 -md:text-xs">
+                            <IoPeopleOutline />
+                            <p>
+                              {
+                                item.project_status
+                                  .map(item => item.step)
+                                  .flat()
+                                  .find(
+                                    item =>
+                                      item.taskId.status === 'Pending' ||
+                                      item.taskId.status === 'In Progress'
+                                  ).taskId.issueMember.name
+                              }
+                            </p>
+                          </span>
                         </div>
                       </div>
                       <div className="flex flex-row gap-8 items-center -md:gap-2">
@@ -273,12 +280,19 @@ let rupee = new Intl.NumberFormat('en-IN', {
                           />
                         </div>
                         <div className="flex flex-col justify-between h-full">
-                          <Link href={`/admin/projects/${item?.siteID}`} className="flex justify-center items-center p-2 bg-primary-foreground rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl -md:p-1 -md:text-xs">
+                          <Link
+                            href={`/admin/projects/${item?.siteID}`}
+                            className="flex justify-center items-center p-2 bg-primary-foreground rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl -md:p-1 -md:text-xs"
+                          >
                             <FiArrowUpRight />
                           </Link>
                           {userType === 'ROLE_ADMIN' && (
-                            <span className="flex justify-center items-center p-2 bg-red-100 rounded-full border-[1px] border-red-500 [&_svg]:text-red-500 [&_svg]:text-2xl -md:p-1 -md:text-xs cursor-pointer"
-                            onClick={() => {setOpenDelete(true); setSiteId(item?.siteID)}}
+                            <span
+                              className="flex justify-center items-center p-2 bg-red-100 rounded-full border-[1px] border-red-500 [&_svg]:text-red-500 [&_svg]:text-2xl -md:p-1 -md:text-xs cursor-pointer"
+                              onClick={() => {
+                                setOpenDelete(true);
+                                setSiteId(item?.siteID);
+                              }}
                             >
                               <MdDeleteOutline />
                             </span>
@@ -305,31 +319,32 @@ let rupee = new Intl.NumberFormat('en-IN', {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-        }}>
-           <div className='bg-white w-1/3 p-8 rounded-3xl outline-none -md:w-3/4'>
-            <div>
-                <h3 className=' text-2xl font-semibold font-ubuntu'>
-                  Delete Project
-                </h3>
-                <hr className='my-4' />
-            </div>
-              <p>Are you sure you want to delete this project?</p>
-               <div className='flex flex-row gap-2 justify-end mt-4'>
-                <button
-                className='bg-primary-foreground border border-secondary text-secondary rounded-3xl px-4 py-2 flex flex-row  items-center'
-                onClick={() => setOpenDelete(false)}
-                >
-                  Cancel
-                </button>
-                <button
-                className='bg-secondary text-primary rounded-3xl px-4 py-2 flex flex-row  items-center'
-                onClick={deleteProject}
-                >
-                  Delete
-                </button>
-              </div>
+        }}
+      >
+        <div className="bg-white w-1/3 p-8 rounded-3xl outline-none -md:w-3/4">
+          <div>
+            <h3 className=" text-2xl font-semibold font-ubuntu">
+              Delete Project
+            </h3>
+            <hr className="my-4" />
           </div>
-        </Modal>
+          <p>Are you sure you want to delete this project?</p>
+          <div className="flex flex-row gap-2 justify-end mt-4">
+            <button
+              className="bg-primary-foreground border border-secondary text-secondary rounded-3xl px-4 py-2 flex flex-row  items-center"
+              onClick={() => setOpenDelete(false)}
+            >
+              Cancel
+            </button>
+            <button
+              className="bg-secondary text-primary rounded-3xl px-4 py-2 flex flex-row  items-center"
+              onClick={deleteProject}
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      </Modal>
     </AsideContainer>
   );
 };

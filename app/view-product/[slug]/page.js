@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import {
   Box,
   Button,
@@ -13,28 +13,28 @@ import {
   TableHead,
   TableRow,
   TextField,
-} from "@mui/material";
-import StarIcon from "@mui/icons-material/Star";
-import axios from "axios";
-import React, { useEffect, useState } from "react";
-import { toast } from "sonner";
-import dummyImagePdf from "../../../public/assets/dummy-image-pdf.jpg";
-import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
-import FavoriteIcon from "@mui/icons-material/Favorite";
-import ReviewProduct from "../../../components/ReviewProduct/ReviewProduct";
-import { useMutation, useQueries, useQuery } from "@tanstack/react-query";
+} from '@mui/material';
+import StarIcon from '@mui/icons-material/Star';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
+import { toast } from 'sonner';
+import dummyImagePdf from '../../../public/assets/dummy-image-pdf.jpg';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import ReviewProduct from '../../../components/ReviewProduct/ReviewProduct';
+import { useMutation, useQueries, useQuery } from '@tanstack/react-query';
 import {
   postDealerEndpoint,
   postNotificationEndpoint,
   postUserEndpoint,
-} from "../../../helpers/endpoints";
-import { useParams, usePathname } from "next/navigation";
-import Link from "next/link";
-import Header from "../../../components/Header";
-import Image from "next/image";
-import Footer from "../../../components/Footer";
-import { useRouter } from "next/navigation";
-import { useAuthStore } from "../../../store/useAuthStore";
+} from '../../../helpers/endpoints';
+import { useParams, usePathname } from 'next/navigation';
+import Link from 'next/link';
+import Header from '../../../components/Header';
+import Image from 'next/image';
+import Footer from '../../../components/Footer';
+import { useRouter } from 'next/navigation';
+import { useAuthStore } from '../../../store/useAuthStore';
 
 // const labels = {
 //   1: "Very Bad",
@@ -47,18 +47,18 @@ import { useAuthStore } from "../../../store/useAuthStore";
 //   return `${value} Star${value !== 1 ? "s" : ""}, ${labels[value]}`;
 // }
 const month = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
 ];
 
 const Page = () => {
@@ -66,8 +66,8 @@ const Page = () => {
   const path = usePathname();
   const router = useRouter();
   const [rows, setRows] = useState([]);
-  const [selectedAddress, setSelectedAddress] = useState("");
-  const [selectedImage, setSelectedImage] = useState("");
+  const [selectedAddress, setSelectedAddress] = useState('');
+  const [selectedImage, setSelectedImage] = useState('');
   const [quantity, setQuantity] = useState(0);
   const [price, setPrice] = useState(0);
   const [buttonDisabled, setButtonDisabled] = useState(true);
@@ -90,7 +90,7 @@ const Page = () => {
     } else {
       // setUrl(location.pathname);
       // navigate("/login");
-      router.push("/login");
+      router.push('/login');
     }
   };
   const handleOpen = () => {
@@ -98,7 +98,7 @@ const Page = () => {
       setOpen(true);
     } else {
       // setUrl(location.pathname);
-      router.push("/login");
+      router.push('/login');
       // navigate("/login");
     }
   };
@@ -106,7 +106,7 @@ const Page = () => {
   const makeCodPaymentMutaton = useMutation({
     mutationFn: data =>
       postUserEndpoint({
-        endpoint: "make-payment-cod",
+        endpoint: 'make-payment-cod',
         data,
       }),
   });
@@ -120,7 +120,7 @@ const Page = () => {
   const makeVerifyPaymentMutation = useMutation({
     mutationFn: data =>
       postUserEndpoint({
-        endpoint: "verify-payment",
+        endpoint: 'verify-payment',
         data,
       }),
   });
@@ -129,20 +129,20 @@ const Page = () => {
     receiverId: architectId,
     message: `Your product placed successfully for order Id ${orderId}`,
     url: path,
-    userType: "ROLE_DEALER",
+    userType: 'ROLE_DEALER',
   });
   const adminNotification = orderId => ({
-    receiverId: "admin",
+    receiverId: 'admin',
     message: `Product placed successfully for order Id ${orderId}`,
     url: path,
-    userType: "ROLE_ADMIN",
+    userType: 'ROLE_ADMIN',
   });
 
   const userNotification = orderId => ({
     receiverId: userId,
     message: `Your new order placed successfully for order Id ${orderId}`,
     url: path,
-    userType: "ROLE_USER",
+    userType: 'ROLE_USER',
   });
 
   const handleWishChange = async (id, wish) => {
@@ -187,7 +187,7 @@ const Page = () => {
         });
     } else {
       // localStorage.setItem("last_url", location.pathname);
-      navigate("/login");
+      navigate('/login');
     }
   };
 
@@ -201,25 +201,25 @@ const Page = () => {
     architectId
   ) => {
     var config = {
-      root: "",
+      root: '',
       style: {
-        bodyBackgroundColor: "#fafafb",
-        bodyColor: "",
-        themeBackgroundColor: "#0FB8C9",
-        themeColor: "#ffffff",
-        headerBackgroundColor: "#284055",
-        headerColor: "#ffffff",
-        errorColor: "",
-        successColor: "",
+        bodyBackgroundColor: '#fafafb',
+        bodyColor: '',
+        themeBackgroundColor: '#0FB8C9',
+        themeColor: '#ffffff',
+        headerBackgroundColor: '#284055',
+        headerColor: '#ffffff',
+        errorColor: '',
+        successColor: '',
         card: {
-          padding: "",
-          backgroundColor: "",
+          padding: '',
+          backgroundColor: '',
         },
       },
       data: {
         orderId: orderId,
         token: token,
-        tokenType: "TXN_TOKEN",
+        tokenType: 'TXN_TOKEN',
         amount: amount /* update amount */,
       },
       payMode: {
@@ -227,17 +227,17 @@ const Page = () => {
         filter: {
           exclude: [],
         },
-        order: ["CC", "DC", "NB", "UPI", "PPBL", "PPI", "BALANCE"],
+        order: ['CC', 'DC', 'NB', 'UPI', 'PPBL', 'PPI', 'BALANCE'],
       },
-      website: "DEFAULT",
-      flow: "DEFAULT",
+      website: 'DEFAULT',
+      flow: 'DEFAULT',
       merchant: {
         mid: mid,
         redirect: false,
       },
       handler: {
         transactionStatus: function (paymentStatus) {
-          console.log("paymentStatus handler function called");
+          console.log('paymentStatus handler function called');
           const data = {
             architectId: architectId,
             designId: params.productID,
@@ -257,9 +257,9 @@ const Page = () => {
             makeVerifyPaymentMutation.data.data.paymentInformation.body
               .resultInfo.resultStatus
           ) {
-            case "TXN_SUCCESS":
+            case 'TXN_SUCCESS':
               toast(
-                "Congratulations, your order has been successfully confirmed!"
+                'Congratulations, your order has been successfully confirmed!'
               );
               makeNotificationMutaton.mutate({
                 data: dealerNotification(architectId, orderId),
@@ -271,33 +271,33 @@ const Page = () => {
                 data: userNotification(orderId),
               });
               break;
-            case "TXN_FAILURE":
+            case 'TXN_FAILURE':
               toast(
                 makeVerifyPaymentMutation.data.data.paymentInformation.body
                   .resultInfo.resultMsg
               );
               break;
-            case "PENDING":
+            case 'PENDING':
               toast(
                 makeVerifyPaymentMutation.data.data.paymentInformation.body
                   .resultInfo.resultMsg
               );
               break;
-            case "NO_RECORD_FOUND":
+            case 'NO_RECORD_FOUND':
               toast(
                 makeVerifyPaymentMutation.data.data.paymentInformation.body
                   .resultInfo.resultMsg
               );
               break;
             default:
-              toast("Something went wrong. Please try again!");
+              toast('Something went wrong. Please try again!');
               break;
           }
         },
         notifyMerchant: function (eventName, data) {
-          console.log("notifyMerchant handler function called");
-          console.log("eventName => ", eventName);
-          console.log("data => ", data);
+          console.log('notifyMerchant handler function called');
+          console.log('eventName => ', eventName);
+          console.log('data => ', data);
         },
       },
     };
@@ -308,7 +308,7 @@ const Page = () => {
           window.Paytm.CheckoutJS.invoke();
         })
         .catch(function onError(error) {
-          console.log("Error => ", error);
+          console.log('Error => ', error);
         });
     }
   };
@@ -320,7 +320,7 @@ const Page = () => {
     paymentType,
     architectId
   ) => {
-    let orderId = "ORDER" + new Date().getTime();
+    let orderId = 'ORDER' + new Date().getTime();
 
     const data = {
       architectId: architectId,
@@ -335,20 +335,20 @@ const Page = () => {
         body: {
           orderId: orderId,
           txnAmount: amount,
-          paymentMode: "COD",
+          paymentMode: 'COD',
           txnDate: new Date(),
         },
       },
     };
 
-    if (selectedAddress !== "") {
+    if (selectedAddress !== '') {
       makeCodPaymentMutaton.mutate({ data });
 
       if (makeCodPaymentMutaton.isError) {
-        toast("Something went wrong!, Please try again later.");
+        toast('Something went wrong!, Please try again later.');
       }
       if (makeCodPaymentMutaton.isSuccess) {
-        toast("Congratulations, your order has been successfully confirmed!");
+        toast('Congratulations, your order has been successfully confirmed!');
         makeNotificationMutaton.mutate({
           data: dealerNotification(architectId, orderId),
         });
@@ -360,7 +360,7 @@ const Page = () => {
         });
       }
     } else {
-      toast("Please select Address of Delivery");
+      toast('Please select Address of Delivery');
     }
   };
 
@@ -372,9 +372,9 @@ const Page = () => {
     architectId
   ) => {
     // Sandbox Credentials
-    let mid = "WBJIwm08119302462954"; // Merchant ID
-    let orderId = "ORDER" + new Date().getTime();
-    if (selectedAddress !== "") {
+    let mid = 'WBJIwm08119302462954'; // Merchant ID
+    let orderId = 'ORDER' + new Date().getTime();
+    if (selectedAddress !== '') {
       axios
         .post(`${process.env.REACT_APP_BASE_PATH}/api/user/initiate-payment`, {
           orderId,
@@ -385,7 +385,7 @@ const Page = () => {
         })
         .then(resp => {
           // console.log("transaction token", resp.data.data)
-          if (resp.data.data.body.resultInfo.resultStatus == "S") {
+          if (resp.data.data.body.resultInfo.resultStatus == 'S') {
             const transactionToken = resp.data.data.body.txnToken;
             initialize(
               mid,
@@ -402,7 +402,7 @@ const Page = () => {
           console.error(err);
         });
     } else {
-      toast("Please select Address of Delivery");
+      toast('Please select Address of Delivery');
     }
   };
   const [
@@ -420,7 +420,7 @@ const Page = () => {
         queryKey: [`productDetail/${slug}`],
         queryFn: () =>
           postDealerEndpoint({
-            endpoint: "product-detail",
+            endpoint: 'product-detail',
             data: { id: slug },
           }),
       },
@@ -428,7 +428,7 @@ const Page = () => {
         queryKey: [`getRatingByProductId/${slug}`],
         queryFn: () =>
           postUserEndpoint({
-            endpoint: "get-rating-by-product-id",
+            endpoint: 'get-rating-by-product-id',
             data: { productid: slug },
           }),
         staleTime: 1000,
@@ -437,14 +437,14 @@ const Page = () => {
         queryKey: [`filterProducts`],
         queryFn: () =>
           postUserEndpoint({
-            endpoint: "filterProducts",
+            endpoint: 'filterProducts',
           }),
       },
       {
         queryKey: [`dealerDetails`],
         queryFn: () =>
           postDealerEndpoint({
-            endpoint: "detail",
+            endpoint: 'detail',
             data: {
               id: detailsData?.data[0].uploadingUser,
             },
@@ -467,7 +467,7 @@ const Page = () => {
       queryKey: [`getDealerRatingById/${slug}`],
       queryFn: () =>
         postDealerEndpoint({
-          endpoint: "get-dealer-rating-by-id",
+          endpoint: 'get-dealer-rating-by-id',
           data: {
             id: detailsData?.data[0].uploadingUser,
           },
@@ -479,7 +479,7 @@ const Page = () => {
     queryKey: [`getAddress/${slug}`],
     queryFn: () =>
       postUserEndpoint({
-        endpoint: "get-address",
+        endpoint: 'get-address',
         data: {
           uploadingUser: detailsData?.data[0].uploadingUser,
         },
@@ -497,7 +497,7 @@ const Page = () => {
       setReviewOpen(true);
     } else {
       setUrl(path);
-      router.push("/login");
+      router.push('/login');
       // navigate("/login");
     }
   };
@@ -564,8 +564,8 @@ const Page = () => {
                     <Image
                       src={
                         file && file.match(/jpg|jpeg|png|gif|in/)
-                          ? String(file).includes("files") &&
-                            !String(selectedImage).includes("bucket.s3")
+                          ? String(file).includes('files') &&
+                            !String(selectedImage).includes('bucket.s3')
                             ? `${process.env.REACT_APP_BASE_PATH}${file}`
                             : file
                           : dummyImagePdf
@@ -578,7 +578,7 @@ const Page = () => {
                     />
                   </div>
                 ))
-              : ""}
+              : ''}
           </div>
           <div>
             <h5 className="text-xl font-semibold">
@@ -606,15 +606,15 @@ const Page = () => {
                   )}
                   <StarIcon
                     className="mb-1 ml-[2px] text-light"
-                    style={{ fontSize: "14px" }}
+                    style={{ fontSize: '14px' }}
                   />
                 </div>
               ) : (
                 <button className="p-review">
-                  {0}{" "}
+                  {0}{' '}
                   <StarIcon
                     className="mb-1 text-light"
-                    style={{ fontSize: "12px" }}
+                    style={{ fontSize: '12px' }}
                   />
                 </button>
               )}
@@ -622,7 +622,7 @@ const Page = () => {
                 <span>
                   {productRatingData?.data.length > 0
                     ? productRatingData.data.length
-                    : 0}{" "}
+                    : 0}{' '}
                   Ratings & Reviews
                 </span>
               )}
@@ -631,7 +631,7 @@ const Page = () => {
                 <span>
                   <FavoriteIcon
                     fontSize="large"
-                    style={{ cursor: "pointer", color: "#ff4343" }}
+                    style={{ cursor: 'pointer', color: '#ff4343' }}
                     onClick={() =>
                       handleWishChange(detailsData?.data[0]._id, false)
                     }
@@ -641,7 +641,7 @@ const Page = () => {
                 <span>
                   <FavoriteBorderIcon
                     fontSize="large"
-                    style={{ cursor: "pointer", fill: "#c2c2c2" }}
+                    style={{ cursor: 'pointer', fill: '#c2c2c2' }}
                     onClick={() =>
                       handleWishChange(detailsData?.data[0]._id, true)
                     }
@@ -658,19 +658,19 @@ const Page = () => {
               <span>
                 {detailsData?.data[0]?.descriptionOne
                   ? detailsData?.data[0]?.descriptionOne
-                  : ""}
+                  : ''}
               </span>
               <br />
               <span>
                 {detailsData?.data[0]?.descriptionTwo
                   ? detailsData?.data[0]?.descriptionTwo
-                  : ""}
+                  : ''}
               </span>
               <br />
               <span>
                 {detailsData?.data[0]?.descriptionThree
                   ? detailsData?.data[0]?.descriptionThree
-                  : ""}
+                  : ''}
               </span>
             </div>
             <div sx={{ mt: 2, mb: 2 }}>
@@ -682,8 +682,8 @@ const Page = () => {
                   <Button
                     onClick={() => setDealerOpen(true)}
                     sx={{
-                      fontWeight: "600",
-                      fontSize: "12px",
+                      fontWeight: '600',
+                      fontSize: '12px',
                     }}
                   >
                     {detailsData?.data[0]?.uploadingUserName}&nbsp;
@@ -691,8 +691,8 @@ const Page = () => {
                       {reduceRating > 0 && reduceRating}
                       <StarIcon
                         sx={{
-                          fontSize: "12px",
-                          marginLeft: "4px",
+                          fontSize: '12px',
+                          marginLeft: '4px',
                         }}
                       />
                     </div>
@@ -702,9 +702,9 @@ const Page = () => {
                     onClick={productDealerPage}
                     className="mx-2"
                     style={{
-                      fontSize: "12px",
-                      fontWeight: "600",
-                      color: "#2874f0",
+                      fontSize: '12px',
+                      fontWeight: '600',
+                      color: '#2874f0',
                     }}
                   >
                     See other sellers
@@ -715,7 +715,7 @@ const Page = () => {
             <h5 className="font-semibold text-xl mb-2">Product Description</h5>
             <TableContainer
               component={Box}
-              sx={{ border: "1px solid #efefef", borderRadius: "7px" }}
+              sx={{ border: '1px solid #efefef', borderRadius: '7px' }}
             >
               <Table>
                 <TableBody>
@@ -723,13 +723,13 @@ const Page = () => {
                     <TableCell variant="head">Supplier</TableCell>
                     <TableCell>
                       {detailsData?.data[0]?.uploadingUserName} (
-                      {detailsData?.data[0]?.userRating}{" "}
+                      {detailsData?.data[0]?.userRating}{' '}
                       <Link
                         href={`/view-profile/product/${detailsData?.data[0]?.uploadingUser}`}
                         style={{
-                          textDecoration: "none",
-                          color: "black",
-                          fontSize: "12px",
+                          textDecoration: 'none',
+                          color: 'black',
+                          fontSize: '12px',
                         }}
                       >
                         View Details
@@ -737,7 +737,7 @@ const Page = () => {
                       )
                     </TableCell>
                   </TableRow>
-                  <TableRow sx={{ backgroundColor: "#eee9da" }}>
+                  <TableRow sx={{ backgroundColor: '#eee9da' }}>
                     <TableCell variant="head">Category</TableCell>
                     <TableCell>{detailsData?.data[0]?.category}</TableCell>
                   </TableRow>
@@ -747,31 +747,31 @@ const Page = () => {
                       {detailsData?.data[0]?.serviceLocationState}
                       {detailsData?.data[0]?.serviceLocationCity
                         ? `(${detailsData?.data[0].serviceLocationCity})`
-                        : ""}
+                        : ''}
                     </TableCell>
                   </TableRow>
-                  <TableRow sx={{ backgroundColor: "#eee9da" }}>
+                  <TableRow sx={{ backgroundColor: '#eee9da' }}>
                     <TableCell variant="head">Price</TableCell>
                     <TableCell>
                       {/* <FaRupeeSign /> */}
                       {`${detailsData?.data[0]?.price}`}
                       {detailsData?.data[0]?.unit
                         ? `/${detailsData?.data[0]?.unit}`
-                        : ""}
+                        : ''}
                     </TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell variant="head">Minimum Quantity</TableCell>
                     <TableCell>{`${detailsData?.data[0]?.minQuantity} ${detailsData?.data[0]?.unit}`}</TableCell>
                   </TableRow>
-                  <TableRow sx={{ backgroundColor: "#eee9da" }}>
+                  <TableRow sx={{ backgroundColor: '#eee9da' }}>
                     <TableCell variant="head">Maximum Quantity</TableCell>
                     <TableCell>{`${detailsData?.data[0]?.maxQuantity} ${detailsData?.data[0]?.unit}`}</TableCell>
                   </TableRow>
                 </TableBody>
               </Table>
             </TableContainer>
-            <p style={{ color: "red", fontSize: "14px", marginTop: "5px" }}>
+            <p style={{ color: 'red', fontSize: '14px', marginTop: '5px' }}>
               *Quantiy should be in between minimum & maximum quantity.
             </p>
             <div className="flex flex-row mt-2">
@@ -784,13 +784,13 @@ const Page = () => {
                   size="small"
                   min="0"
                   sx={{
-                    "& .MuiFormControl-root": {
-                      outline: "1px solid #efefef",
+                    '& .MuiFormControl-root': {
+                      outline: '1px solid #efefef',
                     },
-                    "& .MuiInputBase-input": { background: "#fafafa" },
-                    "width": "50%",
-                    "& input[type=number]": {
-                      WebkitAppearance: "none",
+                    '& .MuiInputBase-input': { background: '#fafafa' },
+                    width: '50%',
+                    '& input[type=number]': {
+                      WebkitAppearance: 'none',
                       margin: 0,
                     },
                   }}
@@ -816,14 +816,14 @@ const Page = () => {
                   value={price}
                   disabled
                   sx={{
-                    "& .MuiFormControl-root": {
-                      outline: "1px solid #efefef",
+                    '& .MuiFormControl-root': {
+                      outline: '1px solid #efefef',
                     },
-                    "& .MuiInputBase-input": { background: "#fafafa" },
-                    "width": "50%",
-                    "appearance": "textfield",
-                    "& input::-webkit-outer-spin-button": {
-                      WebkitAppearance: "none",
+                    '& .MuiInputBase-input': { background: '#fafafa' },
+                    width: '50%',
+                    appearance: 'textfield',
+                    '& input::-webkit-outer-spin-button': {
+                      WebkitAppearance: 'none',
                       margin: 0,
                     },
                   }}
@@ -832,7 +832,7 @@ const Page = () => {
               <div className="flex flex-row gap-2 items-center">
                 <Button
                   variant="contained"
-                  sx={{ background: "#eab308", margin: "" }}
+                  sx={{ background: '#eab308', margin: '' }}
                   disabled={buttonDisabled}
                   onClick={handleOpen}
                 >
@@ -848,9 +848,9 @@ const Page = () => {
             <Button
               variant="contained"
               sx={{
-                textTransform: "capitalize",
-                background: "#e5e5e5",
-                color: "black",
+                textTransform: 'capitalize',
+                background: '#e5e5e5',
+                color: 'black',
               }}
               onClick={() => {
                 handleReviewOpen(detailsData?.data[0]);
@@ -863,7 +863,7 @@ const Page = () => {
           <div className="grid grid-cols-5 gap-4">
             {!productRatingIsLoading && productRatingData?.data.length > 0 ? (
               productRatingData?.data.slice(0, 6).map((item, index) => (
-                <Card sx={{ padding: "1.5rem 1rem" }} key={index}>
+                <Card sx={{ padding: '1.5rem 1rem' }} key={index}>
                   <div className="mb-2">
                     <div className="p-1 !pb-[2px] text-xs font-semibold text-white bg-green-600 inline-block rounded-sm items-center [&_svg]:text-sm">
                       {item.rating} <StarIcon className="mb-1" />
@@ -871,10 +871,10 @@ const Page = () => {
                     &nbsp;&nbsp;
                     <span className="font-semibold">{item.title}</span>
                   </div>
-                  <p className="card-text mb-4" style={{ fontSize: "14px" }}>
+                  <p className="card-text mb-4" style={{ fontSize: '14px' }}>
                     {item.comments}
                   </p>
-                  <p style={{ fontSize: "13px", color: "#878787" }}>
+                  <p style={{ fontSize: '13px', color: '#878787' }}>
                     <span>{item.username}</span>
                     {`, `}
                     <span>
@@ -901,12 +901,12 @@ const Page = () => {
       >
         <Card
           sx={{
-            background: "white",
-            height: "50%",
-            width: "800px",
-            position: "absolute",
-            top: "20%",
-            left: "30%",
+            background: 'white',
+            height: '50%',
+            width: '800px',
+            position: 'absolute',
+            top: '20%',
+            left: '30%',
           }}
         >
           <div className="p-4">
@@ -945,7 +945,7 @@ const Page = () => {
                       <TableCell>
                         <div>
                           <ul>
-                            <li style={{ listStyle: "none" }}>
+                            <li style={{ listStyle: 'none' }}>
                               <Stack direction="row" spacing={0.3}>
                                 <input
                                   type="radio"
@@ -970,13 +970,13 @@ const Page = () => {
             <br />
             <Button
               variant="contained"
-              style={{ marginRight: "10px" }}
+              style={{ marginRight: '10px' }}
               onClick={() =>
                 makePayment(
                   `${price}`,
-                  "INR",
-                  "Material Purchase",
-                  "Online",
+                  'INR',
+                  'Material Purchase',
+                  'Online',
                   detailsData?.data[0]?.uploadingUser
                 )
               }
@@ -988,9 +988,9 @@ const Page = () => {
               onClick={() =>
                 makePaymentCOD(
                   `${price}`,
-                  "INR",
-                  "Material Purchase",
-                  "COD",
+                  'INR',
+                  'Material Purchase',
+                  'COD',
                   detailsData?.data[0]?.uploadingUser
                 )
               }
@@ -1021,11 +1021,11 @@ const Page = () => {
       >
         <Card
           sx={{
-            height: "50%",
-            width: "40%",
-            position: "absolute",
-            top: "20%",
-            right: "30%",
+            height: '50%',
+            width: '40%',
+            position: 'absolute',
+            top: '20%',
+            right: '30%',
           }}
         >
           <div className="p-4 flex flex-col">
@@ -1085,7 +1085,7 @@ const Page = () => {
           {!productsIsLoading && productsData?.data.length > 0 ? (
             productsData?.data.map(
               (item, index) =>
-                item?.approvalStatus == "Approved" &&
+                item?.approvalStatus == 'Approved' &&
                 item?._id !== slug &&
                 item?.category === detailsData?.data[0]?.category && (
                   <Card
@@ -1099,8 +1099,8 @@ const Page = () => {
                           height={200}
                           width={300}
                           src={
-                            String(item?.productImage[0]).includes("files") &&
-                            !String(item?.productImage[0]).includes("bucket.s3")
+                            String(item?.productImage[0]).includes('files') &&
+                            !String(item?.productImage[0]).includes('bucket.s3')
                               ? `${process.env.REACT_APP_BASE_PATH}${item?.productImage[0]}`
                               : item?.productImage[0]
                           }

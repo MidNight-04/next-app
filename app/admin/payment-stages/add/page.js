@@ -1,31 +1,31 @@
-"use client";
-import { Button } from "@mui/material";
-import axios from "axios";
-import React, { useEffect, useState } from "react";
+'use client';
+import { Button } from '@mui/material';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
 
-import { toast } from "sonner";
-import * as XLSX from "xlsx";
-import { saveAs } from "file-saver";
-import { useRouter } from "next/navigation";
-import AsideContainer from "../../../../components/AsideContainer";
-import { IoIosArrowBack, IoMdAdd } from "react-icons/io";
+import { toast } from 'sonner';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
+import { useRouter } from 'next/navigation';
+import AsideContainer from '../../../../components/AsideContainer';
+import { IoIosArrowBack, IoMdAdd } from 'react-icons/io';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../../../../components/ui/select";
-import { FiDownload } from "react-icons/fi";
+} from '../../../../components/ui/select';
+import { FiDownload } from 'react-icons/fi';
 
 const AddPaymentStagesForm = () => {
   const router = useRouter();
-  const [name, setName] = useState("");
-  const [priority, setPriority] = useState("");
-  const [points, setPoints] = useState("");
+  const [name, setName] = useState('');
+  const [priority, setPriority] = useState('');
+  const [points, setPoints] = useState('');
   const [floorList, setFloorList] = useState([]);
-  const [floor, setFloor] = useState("");
-  const [stages, setStages] = useState("");
+  const [floor, setFloor] = useState('');
+  const [stages, setStages] = useState('');
 
   useEffect(() => {
     axios
@@ -44,59 +44,59 @@ const AddPaymentStagesForm = () => {
   const submitFormData = () => {
     // console.log(role)
     if (!floor) {
-      toast("Floor is required");
+      toast('Floor is required');
     } else if (!stages) {
-      toast("Payment stages is required");
+      toast('Payment stages is required');
     } else {
       // console.log(process,points)
       const formData = new FormData();
-      formData.append("floor", floor);
-      formData.append("file", stages);
+      formData.append('floor', floor);
+      formData.append('file', stages);
       axios
         .post(
           `${process.env.REACT_APP_BASE_PATH}/api/paymentstages/add`,
           formData,
           {
-            headers: { "Content-Type": "multipart/form-data" },
+            headers: { 'Content-Type': 'multipart/form-data' },
           }
         )
         .then(resp => {
           toast(resp.data.message);
-          setFloor("");
-          setStages("");
-          router.push("/admin/payment-stages");
+          setFloor('');
+          setStages('');
+          router.push('/admin/payment-stages');
         })
         .catch(err => {
           //   console.log(err);
-          toast("Error while upload construction points");
+          toast('Error while upload construction points');
         });
     }
   };
 
   const handleSampleDownload = () => {
     // Define headers as an array of arrays (e.g., [['Name', 'Age', 'Occupation']])
-    const headers = [["payment", "stages"]];
+    const headers = [['payment', 'stages']];
 
     // Convert the headers array to a worksheet
     const worksheet = XLSX.utils.aoa_to_sheet(headers);
 
     // Create a new workbook and append the worksheet
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
 
     // Write the workbook to a binary Excel file
     const excelBuffer = XLSX.write(workbook, {
-      bookType: "xlsx",
-      type: "array",
+      bookType: 'xlsx',
+      type: 'array',
     });
 
     // Convert the buffer to a Blob
     const dataBlob = new Blob([excelBuffer], {
-      type: "application/octet-stream",
+      type: 'application/octet-stream',
     });
 
     // Save the Blob as an Excel file
-    saveAs(dataBlob, "paymentstagesample.xlsx");
+    saveAs(dataBlob, 'paymentstagesample.xlsx');
   };
 
   return (
@@ -108,7 +108,7 @@ const AddPaymentStagesForm = () => {
           <div className="newContainer">
             <div
               className="topContainer"
-              style={{ display: "flex", justifyContent: "space-between" }}
+              style={{ display: 'flex', justifyContent: 'space-between' }}
             >
               <div className="flex flex-row items-center justify-between w-full my-3">
                 <div className="flex flex-row gap-2 items-center">

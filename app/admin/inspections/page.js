@@ -1,6 +1,6 @@
-"use client";
-import { useEffect, useState } from "react";
-import axios from "axios";
+'use client';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
 import {
   Button,
   Modal,
@@ -12,44 +12,44 @@ import {
   DialogActions,
   TextField,
   FormControl,
-} from "@mui/material";
-import { toast } from "sonner";
-import { FaMinus, FaPlus } from "react-icons/fa6";
-import AsideContainer from "../../../components/AsideContainer";
-import { useRouter } from "next/navigation";
-import { Add } from "@mui/icons-material";
+} from '@mui/material';
+import { toast } from 'sonner';
+import { FaMinus, FaPlus } from 'react-icons/fa6';
+import AsideContainer from '../../../components/AsideContainer';
+import { useRouter } from 'next/navigation';
+import { Add } from '@mui/icons-material';
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "../../../components/ui/accordion";
-import { MdDeleteOutline } from "react-icons/md";
-import { cn } from "../../../lib/utils";
+} from '../../../components/ui/accordion';
+import { MdDeleteOutline } from 'react-icons/md';
+import { cn } from '../../../lib/utils';
 
 const Page = () => {
-  const [point, setPoint] = useState("");
+  const [point, setPoint] = useState('');
   const [pointAddOpen, setPointAddOpen] = useState(false);
   const [data, setData] = useState([]);
   const [open, setOpen] = useState(false);
-  const [id, setId] = useState("");
+  const [id, setId] = useState('');
   const [showContent, setShowContent] = useState([]);
   const [addFieldOpen, setAddFieldOpen] = useState(false);
-  const [newField, setNewField] = useState("");
-  const [heading, setHeading] = useState("");
+  const [newField, setNewField] = useState('');
+  const [heading, setHeading] = useState('');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [checkName, setCheckName] = useState("");
+  const [checkName, setCheckName] = useState('');
   const [checkNameAdd, setCheckNameAdd] = useState(false);
   const [uniqueStep, setUniqueStep] = useState([]);
   const [checklistItems, setChecklistItems] = useState([
-    { heading: "", points: [{ point: "" }] },
+    { heading: '', points: [{ point: '' }] },
   ]);
   const router = useRouter();
 
   const handleAddChecklistItem = () => {
     setChecklistItems([
       ...checklistItems,
-      { heading: "", points: [{ point: "" }] },
+      { heading: '', points: [{ point: '' }] },
     ]);
   };
 
@@ -62,7 +62,7 @@ const Page = () => {
 
   const handleAddChecklistPoint = idx => {
     const newItems = [...checklistItems];
-    newItems[idx].points.push({ point: "" });
+    newItems[idx].points.push({ point: '' });
     setChecklistItems(newItems);
   };
 
@@ -133,7 +133,7 @@ const Page = () => {
       )
       .then(response => {
         if (response) {
-          toast("Record deleted successfully");
+          toast('Record deleted successfully');
           getAllCheckList();
           setOpen(false);
         }
@@ -153,8 +153,8 @@ const Page = () => {
     setId(itemId);
     setCheckName(name);
     setAddFieldOpen(true);
-    setNewField("");
-    setChecklistItems([{ heading: "", points: [{ point: "" }] }]);
+    setNewField('');
+    setChecklistItems([{ heading: '', points: [{ point: '' }] }]);
   };
   const confirmDeleteField = (itemId, heading, checkName, checkPoint) => {
     setId(itemId);
@@ -183,7 +183,7 @@ const Page = () => {
         }
       })
       .catch(error => {
-        toast("Error while delete checklist point");
+        toast('Error while delete checklist point');
         console.log(error);
       });
   };
@@ -196,7 +196,7 @@ const Page = () => {
   const handleUpdateNewField = () => {
     const isAnyHeadingEmpty = checklistItems.some(item => !item.heading.trim());
     if (isAnyHeadingEmpty) {
-      toast("Checklist heading is required");
+      toast('Checklist heading is required');
       return; // Exit early if any heading is empty
     }
     // Check if any checklist item point is empty
@@ -204,7 +204,7 @@ const Page = () => {
       item.points.some(point => !point.point.trim())
     );
     if (isAnyPointEmpty) {
-      toast("Checklist point is required");
+      toast('Checklist point is required');
       return; // Exit early if any point is empty
     } else {
       const data = {
@@ -222,18 +222,18 @@ const Page = () => {
             toast(response.data.message);
             setAddFieldOpen(false);
             getAllCheckList();
-            setChecklistItems([{ heading: "", points: [{ point: "" }] }]);
+            setChecklistItems([{ heading: '', points: [{ point: '' }] }]);
           }
         })
         .catch(error => {
-          toast("Error while add checklist");
+          toast('Error while add checklist');
           console.log(error);
         });
     }
   };
   const handleSubmitPoint = () => {
     if (!point) {
-      toast("Point is required");
+      toast('Point is required');
     } else {
       const data = {
         id: id,
@@ -251,11 +251,11 @@ const Page = () => {
             toast(response.data.message);
             setPointAddOpen(false);
             getAllCheckList();
-            setPoint("");
+            setPoint('');
           }
         })
         .catch(error => {
-          toast("Error while add checklist");
+          toast('Error while add checklist');
           console.log(error);
         });
     }
@@ -269,7 +269,7 @@ const Page = () => {
           </h1>
           <button
             className="bg-secondary text-primary rounded-3xl px-4 pr-5 py-3 flex flex-row gap-1 items-center -md:text-xs -md:px-2 -md:py-[6px] -md:[&_svg]:text-sm"
-            onClick={() => router.push("/admin/inspections/add")}
+            onClick={() => router.push('/admin/inspections/add')}
           >
             <Add />
             Add CheckList
@@ -320,7 +320,7 @@ const Page = () => {
                             </span>
                           </div>
                           <Accordion type="single" id="checks" collapsible>
-                            {item.checkList?.map((itm,index) => (
+                            {item.checkList?.map((itm, index) => (
                               <AccordionItem
                                 className="no-underline border-none my-1"
                                 key={itm.heading}
@@ -329,7 +329,7 @@ const Page = () => {
                                 <AccordionTrigger className="border border-primary rounded-lg px-2 py-3">
                                   <div className="flex flex-row justify-between items-center gap-4 w-full">
                                     <h5 className="text-sm font-semibold">
-                                      {itm.heading} 
+                                      {itm.heading}
                                     </h5>
                                   </div>
                                 </AccordionTrigger>
@@ -363,13 +363,13 @@ const Page = () => {
                                           <div className="h-full w-6 flex items-center justify-center">
                                             <span
                                               className={cn(
-                                                "w-[2px] bg-secondary pointer-events-none h-12",
+                                                'w-[2px] bg-secondary pointer-events-none h-12',
                                                 idx === 0
-                                                  ? "mt-[100%] h-5"
-                                                  : "",
+                                                  ? 'mt-[100%] h-5'
+                                                  : '',
                                                 idx === itm.points.length - 1
-                                                  ? "mb-[100%] h-5"
-                                                  : ""
+                                                  ? 'mb-[100%] h-5'
+                                                  : ''
                                               )}
                                             />
                                             <span className="w-6 h-6 absolute rounded-full shadow-xl text-center border border-dashed border-primary p-[3px]" />
@@ -419,9 +419,9 @@ const Page = () => {
         open={open}
         onClose={handleClose}
         sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
         }}
       >
         <div className="bg-white w-1/3 p-8 rounded-3xl outline-none -lg:w-3/4">
@@ -454,9 +454,9 @@ const Page = () => {
         open={addFieldOpen}
         onClose={handleFieldCancel}
         sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
         }}
       >
         <div className="bg-white -xl:w-1/2 w-1/3 p-8 rounded-3xl outline-none -md:w-11/12">
@@ -571,9 +571,9 @@ const Page = () => {
         open={deleteDialogOpen}
         onClose={handleClose}
         sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
         }}
       >
         <div className="bg-white w-1/3 p-8 rounded-3xl -md:w-3/4 outline-none">
@@ -606,9 +606,9 @@ const Page = () => {
         open={pointAddOpen}
         onClose={handlePointAddCancel}
         sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
         }}
       >
         <div className="bg-white w-1/3 p-8 rounded-3xl -md:w-3/4 outline-none">

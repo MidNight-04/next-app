@@ -1,7 +1,7 @@
-"use client";
-import React, { useEffect, useState } from "react";
-import { DataGrid } from "@mui/x-data-grid";
-import axios from "axios";
+'use client';
+import React, { useEffect, useState } from 'react';
+import { DataGrid } from '@mui/x-data-grid';
+import axios from 'axios';
 import {
   Chip,
   Button,
@@ -18,25 +18,25 @@ import {
   MenuItem,
   TableContainer,
   Paper,
-} from "@mui/material";
-import { toast } from "sonner";
-import Link from "next/link";
-import AsideContainer from "../../../../components/AsideContainer";
-import { useRouter } from "next/navigation";
+} from '@mui/material';
+import { toast } from 'sonner';
+import Link from 'next/link';
+import AsideContainer from '../../../../components/AsideContainer';
+import { useRouter } from 'next/navigation';
 
 const Page = () => {
   const router = useRouter();
   const [categoryList, setCategoryList] = useState([]);
   const [roleList, setRoleList] = useState([]);
   const [confirmationOpen, setConfirmationOpen] = useState(false);
-  const [userId, setUserId] = useState("");
+  const [userId, setUserId] = useState('');
   const [data, setData] = useState({
-    name: "",
+    name: '',
   });
 
   const columns = [
-    { field: "seriel", headerName: "SNo.", width: 100 },
-    { field: "name", headerName: "Name", width: 400 },
+    { field: 'seriel', headerName: 'SNo.', width: 100 },
+    { field: 'name', headerName: 'Name', width: 400 },
   ];
   useEffect(() => {
     getAllTaskCategory();
@@ -66,7 +66,7 @@ const Page = () => {
       )
       .then(response => {
         if (response) {
-          toast("Record deleted successfully");
+          toast('Record deleted successfully');
           getAllTaskCategory();
         }
       })
@@ -134,8 +134,8 @@ const Page = () => {
 
   const actionColumn = [
     {
-      field: "action",
-      headerName: "Action",
+      field: 'action',
+      headerName: 'Action',
       width: 350,
       renderCell: params => {
         return (
@@ -164,7 +164,7 @@ const Page = () => {
           <h1 className="text-2xl font-semibold font-ubuntu -md:mb-2 -md:text-lg">
             Category List
           </h1>
-          <button onClick={() => router.push("/admin/tasks/category/add")}>
+          <button onClick={() => router.push('/admin/tasks/category/add')}>
             Add Category
           </button>
         </div>
@@ -173,14 +173,14 @@ const Page = () => {
             rows={arrayData}
             columns={columns.concat(actionColumn)}
             pageSize={9}
-            getRowClassName={() => ({ color: "#fff" })}
+            getRowClassName={() => ({ color: '#fff' })}
             rowsPerPageOptions={[9]}
-            localeText={{ noRowsLabel: "No Data Available..." }}
+            localeText={{ noRowsLabel: 'No Data Available...' }}
           />
         </div>
         <Dialog open={confirmationOpen} onClose={handleCancel}>
           <DialogTitle>Update Task Category</DialogTitle>
-          <DialogContent style={{ width: "500px" }}>
+          <DialogContent style={{ width: '500px' }}>
             <DialogContentText>
               <TextField
                 autoFocus

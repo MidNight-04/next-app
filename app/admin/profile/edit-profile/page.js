@@ -1,27 +1,27 @@
-"use client";
-import LoaderSpinner from "../../../../components/loader/LoaderSpinner";
-import { useQuery } from "@tanstack/react-query";
-import { styled, TextField } from "@mui/material";
-import image from "../../../../public/assets/No_image_available.svg.webp";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { useAuthStore } from "../../../../store/useAuthStore";
-import { getClientEndpoint } from "../../../../helpers/endpoints";
-import { useEffect, useState } from "react";
-import axios from "axios";
-import { toast } from "sonner";
-import AsideContainer from "../../../../components/AsideContainer";
-import { FiLoader } from "react-icons/fi"; // will be user a WIP icon
-import { MdSchedule } from "react-icons/md"; //schedule icon
-import { IoIosArrowBack } from "react-icons/io";
+'use client';
+import LoaderSpinner from '../../../../components/loader/LoaderSpinner';
+import { useQuery } from '@tanstack/react-query';
+import { styled, TextField } from '@mui/material';
+import image from '../../../../public/assets/No_image_available.svg.webp';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { useAuthStore } from '../../../../store/useAuthStore';
+import { getClientEndpoint } from '../../../../helpers/endpoints';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
+import { toast } from 'sonner';
+import AsideContainer from '../../../../components/AsideContainer';
+import { FiLoader } from 'react-icons/fi'; // will be user a WIP icon
+import { MdSchedule } from 'react-icons/md'; //schedule icon
+import { IoIosArrowBack } from 'react-icons/io';
 
 const CustomField = styled(TextField)`
   & label.Mui-focused {
-    color: #93BFCF;
+    color: #93bfcf;
   }
   & .MuiOutlinedInput-root {
     &.Mui-focused fieldset {
-      border-color: #93BFCF;
+      border-color: #93bfcf;
     }
   }
 `;
@@ -30,11 +30,11 @@ const Page = () => {
   const router = useRouter();
   const userId = useAuthStore(state => state.userId);
   const [profileData, setProfileData] = useState({
-    profileImage: "",
-    name: "",
-    phone: "",
-    email: "",
-    address: "",
+    profileImage: '',
+    name: '',
+    phone: '',
+    email: '',
+    address: '',
   });
   const { data: profile, isFetched } = useQuery({
     queryKey: [`profileData/${userId}`],
@@ -44,10 +44,10 @@ const Page = () => {
       }),
     initialData: {
       profileImage: image,
-      name: "",
-      phone: "",
-      email: "",
-      address: "",
+      name: '',
+      phone: '',
+      email: '',
+      address: '',
     },
   });
 
@@ -74,13 +74,13 @@ const Page = () => {
 
   const updateForm = () => {
     if (!profileData.name) {
-      toast("Name is required");
+      toast('Name is required');
     } else {
       let config = {
-        method: "post",
+        method: 'post',
         maxBodyLength: Infinity,
         url: `${process.env.REACT_APP_BASE_PATH}/api/client/update-profile/${userId}`,
-        headers: { "Content-Type": "multipart/form-data" },
+        headers: { 'Content-Type': 'multipart/form-data' },
         data: profileData,
       };
       axios

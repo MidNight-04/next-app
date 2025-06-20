@@ -1,14 +1,14 @@
-"use client";
-import axios from "axios";
-import { useRouter, redirect } from "next/navigation";
-import { useState } from "react";
-import { toast } from "sonner";
-import AsideContainer from "../../../../components/AsideContainer";
-import { IoIosArrowBack } from "react-icons/io";
+'use client';
+import axios from 'axios';
+import { useRouter, redirect } from 'next/navigation';
+import { useState } from 'react';
+import { toast } from 'sonner';
+import AsideContainer from '../../../../components/AsideContainer';
+import { IoIosArrowBack } from 'react-icons/io';
 
 const AddRoleForm = () => {
   const router = useRouter();
-  const [role, setRole] = useState("");
+  const [role, setRole] = useState('');
 
   const submitFormData = () => {
     if (role) {
@@ -18,16 +18,16 @@ const AddRoleForm = () => {
         })
         .then(response => {
           if (response) {
-            setRole("");
+            setRole('');
             toast(response.data.message);
-            router.push("/admin/roles");
+            router.push('/admin/roles');
           }
         })
         .catch(error => {
           console.log(error);
         });
     } else {
-      toast("Role is mandatory");
+      toast('Role is mandatory');
     }
   };
   return (

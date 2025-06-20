@@ -1,5 +1,5 @@
-"use client";
-import { useParams, usePathname } from "next/navigation";
+'use client';
+import { useParams, usePathname } from 'next/navigation';
 import {
   Button,
   Card,
@@ -11,38 +11,38 @@ import {
   TableCell,
   TableContainer,
   TableRow,
-} from "@mui/material";
-import axios from "axios";
-import React, { useEffect, useState } from "react";
-import StarIcon from "@mui/icons-material/Star";
-import { toast } from "sonner";
-import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
-import FavoriteIcon from "@mui/icons-material/Favorite";
-import dummyImagePdf from "../../../public/assets/dummy-image-pdf.jpg";
-import dummyImageCad from "../../../public/assets/dummy-image-cad.png";
-import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
-import { AiOutlineExpandAlt } from "react-icons/ai";
-import { FaRetweet } from "react-icons/fa";
-import ReviewProduct from "../../../components/ReviewProduct/ReviewProduct";
-import DownloadDesign from "../../../components/Download Design/DownloadDesign";
-import EditDesign from "../../../components/Edit Design/EditDesign";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { useMutation, useQueries } from "@tanstack/react-query";
-import { postEndpoint, postUserEndpoint } from "../../../helpers/endpoints";
-import Image from "next/image";
-import Header from "../../../components/Header";
-import Footer from "../../../components/Footer";
-import { useAuthStore } from "../../../store/useAuthStore";
+} from '@mui/material';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
+import StarIcon from '@mui/icons-material/Star';
+import { toast } from 'sonner';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import dummyImagePdf from '../../../public/assets/dummy-image-pdf.jpg';
+import dummyImageCad from '../../../public/assets/dummy-image-cad.png';
+import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
+import { AiOutlineExpandAlt } from 'react-icons/ai';
+import { FaRetweet } from 'react-icons/fa';
+import ReviewProduct from '../../../components/ReviewProduct/ReviewProduct';
+import DownloadDesign from '../../../components/Download Design/DownloadDesign';
+import EditDesign from '../../../components/Edit Design/EditDesign';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { useMutation, useQueries } from '@tanstack/react-query';
+import { postEndpoint, postUserEndpoint } from '../../../helpers/endpoints';
+import Image from 'next/image';
+import Header from '../../../components/Header';
+import Footer from '../../../components/Footer';
+import { useAuthStore } from '../../../store/useAuthStore';
 
 const style = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: "50%",
-  bgcolor: "background.paper",
-  border: "2px solid #000",
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: '50%',
+  bgcolor: 'background.paper',
+  border: '2px solid #000',
   boxShadow: 24,
   p: 4,
 };
@@ -59,36 +59,36 @@ const style = {
 // }
 
 const month = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
 ];
 
 const ViewDesignsPage = () => {
   const { slug } = useParams();
   const router = useRouter();
-  const [productId, setProductId] = useState("");
-  const [getRatings, setGetRatings] = useState("");
+  const [productId, setProductId] = useState('');
+  const [getRatings, setGetRatings] = useState('');
   const [reviewOpen, setReviewOpen] = React.useState(false);
   const [architectOpen, setArchitectOpen] = React.useState(false);
   const [designDetails, setDesignDetails] = useState(null);
   const [open, setOpen] = React.useState(false);
-  const [image, setImage] = useState("");
-  const [cadImage, setCadImage] = useState("");
-  const [comment, setComment] = useState("");
+  const [image, setImage] = useState('');
+  const [cadImage, setCadImage] = useState('');
+  const [comment, setComment] = useState('');
   const [paid, setPaid] = useState(false);
   const [openEditDesign, setOpenEditDesign] = useState(false);
   const [featuredData, setFeaturedData] = useState([]);
-  const [selectedImage, setSelectedImage] = useState("");
+  const [selectedImage, setSelectedImage] = useState('');
   const handleClose = () => setOpen(false);
   const handleReviewClose = () => setReviewOpen(false);
   const handleArchitectClose = () => setArchitectOpen(false);
@@ -103,7 +103,7 @@ const ViewDesignsPage = () => {
   const userRole = useAuthStore(state => state.userType);
   const [architectRating, setArchitectRating] = useState(0);
   const [reviewPeople, setReviewPeople] = useState([]);
-  const [architectDetails, setArchitectDetails] = useState("");
+  const [architectDetails, setArchitectDetails] = useState('');
 
   const [
     { data: designData, isLoading: designIsLoading },
@@ -116,7 +116,7 @@ const ViewDesignsPage = () => {
         queryKey: [`${slug}`],
         queryFn: () =>
           postUserEndpoint({
-            endpoint: "get-design-by-id",
+            endpoint: 'get-design-by-id',
             data: {
               id: slug,
             },
@@ -126,24 +126,24 @@ const ViewDesignsPage = () => {
         queryKey: [`design/${slug}`],
         queryFn: () =>
           postUserEndpoint({
-            endpoint: "get-rating-by-product-id",
+            endpoint: 'get-rating-by-product-id',
             data: {
               productid: slug,
             },
           }),
       },
       {
-        queryKey: ["design"],
+        queryKey: ['design'],
         queryFn: () =>
           postUserEndpoint({
-            endpoint: "filterDesign",
+            endpoint: 'filterDesign',
           }),
       },
       {
         queryKey: [`architect/${slug}`],
         queryFn: () =>
           postEndpoint({
-            endpoint: "architect/detail",
+            endpoint: 'architect/detail',
             data: {
               id: designDetails?.uploadingUser,
             },
@@ -154,10 +154,10 @@ const ViewDesignsPage = () => {
   });
 
   const wishlistMutation = useMutation({
-    mutationKey: ["wishlistDesign"],
+    mutationKey: ['wishlistDesign'],
     mutationFn: data =>
       postUserEndpoint({
-        endpoint: "addWishList",
+        endpoint: 'addWishList',
         data,
       }),
     onSuccess: () => {
@@ -172,13 +172,13 @@ const ViewDesignsPage = () => {
   const designArchitecturePage = () => {
     isAuth
       ? router.push(`/view-design-architecture/${slug}`)
-      : router.push("/login");
+      : router.push('/login');
   };
 
   const handleOpen = (image, type) => {
     setImage(image);
     setOpen(true);
-    if (type === "cadImage") {
+    if (type === 'cadImage') {
       setPaid(true);
     } else {
       setPaid(false);
@@ -189,7 +189,7 @@ const ViewDesignsPage = () => {
     if (isAuth) {
       setReviewOpen(true);
     } else {
-      router.push("/login");
+      router.push('/login');
     }
   };
 
@@ -228,7 +228,7 @@ const ViewDesignsPage = () => {
     if (token) {
       setOpenEditDesign(true);
     } else {
-      router.push("/login");
+      router.push('/login');
     }
   };
 
@@ -242,25 +242,25 @@ const ViewDesignsPage = () => {
     architectId
   ) => {
     var config = {
-      root: "",
+      root: '',
       style: {
-        bodyBackgroundColor: "#fafafb",
-        bodyColor: "",
-        themeBackgroundColor: "#0FB8C9",
-        themeColor: "#ffffff",
-        headerBackgroundColor: "#284055",
-        headerColor: "#ffffff",
-        errorColor: "",
-        successColor: "",
+        bodyBackgroundColor: '#fafafb',
+        bodyColor: '',
+        themeBackgroundColor: '#0FB8C9',
+        themeColor: '#ffffff',
+        headerBackgroundColor: '#284055',
+        headerColor: '#ffffff',
+        errorColor: '',
+        successColor: '',
         card: {
-          padding: "",
-          backgroundColor: "",
+          padding: '',
+          backgroundColor: '',
         },
       },
       data: {
         orderId: orderId,
         token: token,
-        tokenType: "TXN_TOKEN",
+        tokenType: 'TXN_TOKEN',
         amount: amount /* update amount */,
       },
       payMode: {
@@ -268,17 +268,17 @@ const ViewDesignsPage = () => {
         filter: {
           exclude: [],
         },
-        order: ["CC", "DC", "NB", "UPI", "PPBL", "PPI", "BALANCE"],
+        order: ['CC', 'DC', 'NB', 'UPI', 'PPBL', 'PPI', 'BALANCE'],
       },
-      website: "DEFAULT",
-      flow: "DEFAULT",
+      website: 'DEFAULT',
+      flow: 'DEFAULT',
       merchant: {
         mid: mid,
         redirect: false,
       },
       handler: {
         transactionStatus: function (paymentStatus) {
-          console.log("paymentStatus handler function called");
+          console.log('paymentStatus handler function called');
           const data = {
             architectId: architectId,
             designId: slug,
@@ -295,33 +295,33 @@ const ViewDesignsPage = () => {
               data
             )
             .then(resp => {
-              console.log("transaction token", resp.data);
+              console.log('transaction token', resp.data);
               if (
                 resp.data.data.paymentInformation.body.resultInfo
-                  .resultStatus == "TXN_SUCCESS"
+                  .resultStatus == 'TXN_SUCCESS'
               ) {
                 toast(
-                  "Congratulations, your order has been successfully sent. You will be contacted soon!",
+                  'Congratulations, your order has been successfully sent. You will be contacted soon!'
                 );
 
                 const dealerNotification = {
                   receiverId: architectId,
                   message: `Payment done Successfully for order ID ${orderId}`,
                   url: path,
-                  userType: "ROLE_DEALER",
+                  userType: 'ROLE_DEALER',
                 };
                 const adminNotification = {
-                  receiverId: "admin",
+                  receiverId: 'admin',
                   message: `Payment done Successfully for order ID ${orderId}`,
                   url: path,
-                  userType: "ROLE_ADMIN",
+                  userType: 'ROLE_ADMIN',
                 };
 
                 const userNotification = {
                   receiverId: userId,
                   message: `Payment done Successfully for order ID ${orderId}`,
                   url: path,
-                  userType: "ROLE_USER",
+                  userType: 'ROLE_USER',
                 };
 
                 axios
@@ -362,42 +362,42 @@ const ViewDesignsPage = () => {
 
               if (
                 resp.data.data.paymentInformation.body.resultInfo
-                  .resultStatus == "TXN_FAILURE"
+                  .resultStatus == 'TXN_FAILURE'
               ) {
                 toast(
-                  resp.data.data.paymentInformation.body.resultInfo.resultMsg,
+                  resp.data.data.paymentInformation.body.resultInfo.resultMsg
                 );
               }
 
               if (
                 resp.data.data.paymentInformation.body.resultInfo
-                  .resultStatus == "PENDING"
+                  .resultStatus == 'PENDING'
               ) {
                 toast(
-                  resp.data.data.paymentInformation.body.resultInfo.resultMsg,
+                  resp.data.data.paymentInformation.body.resultInfo.resultMsg
                 );
               }
 
               if (
                 resp.data.data.paymentInformation.body.resultInfo
-                  .resultStatus == "NO_RECORD_FOUND"
+                  .resultStatus == 'NO_RECORD_FOUND'
               ) {
                 toast(
-                  resp.data.data.paymentInformation.body.resultInfo.resultMsg,
+                  resp.data.data.paymentInformation.body.resultInfo.resultMsg
                 );
               }
             })
             .catch(err => {
               console.error(err);
-              toast("Something went wrong. Please try again!");
+              toast('Something went wrong. Please try again!');
             });
           setTimeout(() => window.location.reload(), 1500);
           console.log(paymentStatus);
         },
         notifyMerchant: function (eventName, data) {
-          console.log("notifyMerchant handler function called");
-          console.log("eventName => ", eventName);
-          console.log("data => ", data);
+          console.log('notifyMerchant handler function called');
+          console.log('eventName => ', eventName);
+          console.log('data => ', data);
         },
       },
     };
@@ -408,7 +408,7 @@ const ViewDesignsPage = () => {
           window.Paytm.CheckoutJS.invoke();
         })
         .catch(function onError(error) {
-          console.log("Error => ", error);
+          console.log('Error => ', error);
         });
     }
   };
@@ -421,8 +421,8 @@ const ViewDesignsPage = () => {
     architectId
   ) => {
     // Sandbox Credentials
-    let mid = "WBJIwm08119302462954"; // Merchant ID
-    let orderId = "Order_" + new Date().getTime();
+    let mid = 'WBJIwm08119302462954'; // Merchant ID
+    let orderId = 'Order_' + new Date().getTime();
     const callbackUrl = path;
     const userId = userId;
     axios
@@ -435,7 +435,7 @@ const ViewDesignsPage = () => {
       })
       .then(resp => {
         // console.log("transaction token", resp.data.data)
-        if (resp.data.data.body.resultInfo.resultStatus == "S") {
+        if (resp.data.data.body.resultInfo.resultStatus == 'S') {
           const transactionToken = resp.data.data.body.txnToken;
           initialize(
             mid,
@@ -489,20 +489,20 @@ const ViewDesignsPage = () => {
         })
         .catch(err => {
           console.error(err);
-          notify("error", err);
+          notify('error', err);
         });
     } else {
-      router.push("/login");
+      router.push('/login');
     }
   };
 
   const notify = (type, message) => {
-    if (type == "success" && message.status == 200) {
+    if (type == 'success' && message.status == 200) {
       toast(message.data.message);
     } else if (message.status == 202) {
       toast(message.data.message);
     } else {
-      toast("Something went wrong!");
+      toast('Something went wrong!');
     }
   };
 
@@ -525,7 +525,7 @@ const ViewDesignsPage = () => {
       .post(`${process.env.REACT_APP_BASE_PATH}/api/user/order-details`, {
         designId: slug,
         userId: userId,
-        contactType: "Image Download",
+        contactType: 'Image Download',
       })
       .then(resp => {
         // console.log("Show image", resp.data)
@@ -571,14 +571,14 @@ const ViewDesignsPage = () => {
         receiverId: architectId,
         message: `New User Contact Query raised for design id ${slug}`,
         url: path,
-        userType: userRole ? userRole : "",
+        userType: userRole ? userRole : '',
       };
 
       const userNotification = {
         receiverId: userId,
         message: `Your Query to contact Architect with design id ${slug} Placed Successfully`,
         url: path,
-        userType: "ROLE_ADMIN",
+        userType: 'ROLE_ADMIN',
       };
 
       axios
@@ -610,23 +610,23 @@ const ViewDesignsPage = () => {
         .then(resp => {
           if (resp) {
             toast(
-              "Your query for design has been successfully sent. You will be contacted soon!",
+              'Your query for design has been successfully sent. You will be contacted soon!'
             );
           }
         })
         .catch(err => {
           console.error(err);
-          toast("Something went wrong. Please try again!");
+          toast('Something went wrong. Please try again!');
         });
     } else {
       // localStorage.setItem("last_url", location.pathname);
-      navigate("/login");
+      navigate('/login');
     }
   };
 
   const editDesignHandler = formData => {
     setComment(formData.comments);
-    makePayment("20", "INR", "Design Modify");
+    makePayment('20', 'INR', 'Design Modify');
   };
 
   return (
@@ -642,8 +642,8 @@ const ViewDesignsPage = () => {
                     src={
                       selectedImage &&
                       selectedImage.match(/jpg|jpeg|png|gif|webp/)
-                        ? String(selectedImage).includes("files") &&
-                          !String(selectedImage).includes("bucket.s3")
+                        ? String(selectedImage).includes('files') &&
+                          !String(selectedImage).includes('bucket.s3')
                           ? `${process.env.REACT_APP_BASE_PATH}${selectedImage}`
                           : selectedImage
                         : dummyImagePdf
@@ -667,8 +667,8 @@ const ViewDesignsPage = () => {
                       width={100}
                       src={
                         file && file.match(/jpg|jpeg|png|gif/)
-                          ? String(file).includes("files") &&
-                            !String(file).includes("bucket.s3")
+                          ? String(file).includes('files') &&
+                            !String(file).includes('bucket.s3')
                             ? `${process.env.REACT_APP_BASE_PATH}${file}`
                             : file
                           : dummyImagePdf
@@ -677,8 +677,8 @@ const ViewDesignsPage = () => {
                       priority
                       className={
                         selectedImage === file
-                          ? "img-fluid side-img mt-3 slide-active"
-                          : "img-fluid side-img mt-3"
+                          ? 'img-fluid side-img mt-3 slide-active'
+                          : 'img-fluid side-img mt-3'
                       }
                     />
                   </div>
@@ -692,8 +692,8 @@ const ViewDesignsPage = () => {
                     onClick={() => setSelectedImage(file)}
                     src={
                       file && file.match(/jpg|jpeg|png|gif/)
-                        ? String(file).includes("files") &&
-                          !String(file).includes("bucket.s3")
+                        ? String(file).includes('files') &&
+                          !String(file).includes('bucket.s3')
                           ? `${process.env.REACT_APP_BASE_PATH}${file}`
                           : file
                         : dummyImagePdf
@@ -711,15 +711,15 @@ const ViewDesignsPage = () => {
                     key={i * 951}
                     src={
                       file && file.match(/jpg|jpeg|png|gif/)
-                        ? String(file).includes("files") &&
-                          !String(file).includes("bucket.s3")
+                        ? String(file).includes('files') &&
+                          !String(file).includes('bucket.s3')
                           ? `${process.env.REACT_APP_BASE_PATH}${file}`
                           : file
                         : dummyImagePdf
                     }
                     alt="Floor Plans"
                     priority
-                    onClick={() => handleOpen(file, "cadImage")}
+                    onClick={() => handleOpen(file, 'cadImage')}
                     className="object-fill blur-[1px]"
                   />
                 ))}
@@ -732,8 +732,8 @@ const ViewDesignsPage = () => {
                 <Button
                   variant="contained"
                   sx={{
-                    background: "#eab308",
-                    color: "black",
+                    background: '#eab308',
+                    color: 'black',
                   }}
                 >
                   Download
@@ -744,15 +744,15 @@ const ViewDesignsPage = () => {
           <div className="w-full">
             <h5 className="text-xl font-semibold">{`${
               designDetails?.plotLength
-            }X${designDetails?.plotWidth}${" "}${designDetails?.title}`}</h5>
+            }X${designDetails?.plotWidth}${' '}${designDetails?.title}`}</h5>
             <div className="flex flex-row gap-4 items-center">
               {getRatings > 0 ? (
                 <div className="flex flex-row gap-2">
                   <span className="bg-green-700 text-xs rounded-sm text-white p-1">
-                    {reduceRating.toFixed(1) / 2}{" "}
+                    {reduceRating.toFixed(1) / 2}{' '}
                     <StarIcon
                       className="mb-1 text-light"
-                      style={{ fontSize: "12px" }}
+                      style={{ fontSize: '12px' }}
                     />
                   </span>
                   <div className="font-semibold text-[#878787]">
@@ -763,10 +763,10 @@ const ViewDesignsPage = () => {
               ) : (
                 <div className="flex flex-row gap-2">
                   <span className="bg-green-700 text-xs rounded-sm text-white p-1">
-                    {0}{" "}
+                    {0}{' '}
                     <StarIcon
                       className="mb-1 text-light"
-                      style={{ fontSize: "12px" }}
+                      style={{ fontSize: '12px' }}
                     />
                   </span>
                   <div className="font-semibold text-[#878787]">
@@ -781,7 +781,7 @@ const ViewDesignsPage = () => {
                     <span>
                       <FavoriteIcon
                         fontSize="large"
-                        style={{ cursor: "pointer", color: "#ff4343" }}
+                        style={{ cursor: 'pointer', color: '#ff4343' }}
                         onClick={() => handleWishChange(false)}
                       />
                     </span>
@@ -789,7 +789,7 @@ const ViewDesignsPage = () => {
                     <span>
                       <FavoriteBorderIcon
                         fontSize="large"
-                        style={{ cursor: "pointer", fill: "#c2c2c2" }}
+                        style={{ cursor: 'pointer', fill: '#c2c2c2' }}
                         onClick={() => handleWishChange(true)}
                       />
                     </span>
@@ -801,11 +801,11 @@ const ViewDesignsPage = () => {
             <div className="product-quality mt-3">
               <div className="font-semibold text-xl">Design Description - </div>
               <div>
-                {designDetails?.description ? designDetails?.description : ""}
+                {designDetails?.description ? designDetails?.description : ''}
               </div>
             </div>
             <div className="flex flex-row gap-16 my-4">
-              <div style={{ fontWeight: "500", color: "#878787" }}>Seller</div>
+              <div style={{ fontWeight: '500', color: '#878787' }}>Seller</div>
               <div className="text-blue-500 font-semibold text-sm mt-[2px]">
                 <div
                   className="flex flex-row gap-2 mb-1 cursor-pointer"
@@ -820,7 +820,7 @@ const ViewDesignsPage = () => {
                     )}
                     <StarIcon
                       className="mb-1 text-light"
-                      style={{ fontSize: "12px" }}
+                      style={{ fontSize: '12px' }}
                     />
                   </div>
                 </div>
@@ -828,7 +828,7 @@ const ViewDesignsPage = () => {
                   variant="text"
                   size="small"
                   onClick={designArchitecturePage}
-                  sx={{ fontWeight: "600" }}
+                  sx={{ fontWeight: '600' }}
                 >
                   See other sellers
                 </Button>
@@ -842,13 +842,13 @@ const ViewDesignsPage = () => {
                     <TableCell variant="head">Supplier</TableCell>
                     <TableCell>
                       {designDetails?.uploadingUserName} (
-                      {designDetails?.userRating}{" "}
+                      {designDetails?.userRating}{' '}
                       <Link
                         href={`/view-profile/design/${designDetails?.uploadingUser}`}
                         style={{
-                          textDecoration: "none",
-                          color: "black",
-                          fontSize: "12px",
+                          textDecoration: 'none',
+                          color: 'black',
+                          fontSize: '12px',
                         }}
                       >
                         View Details
@@ -889,13 +889,13 @@ const ViewDesignsPage = () => {
                   <TableRow>
                     <TableCell variant="head">Vastu</TableCell>
                     <TableCell>
-                      {designDetails?.isVastu == false ? "No" : "Yes"}
+                      {designDetails?.isVastu == false ? 'No' : 'Yes'}
                     </TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell variant="head">Stiltd Parking</TableCell>
                     <TableCell>
-                      {designDetails?.isStiltdParking == false ? "No" : "Yes"}
+                      {designDetails?.isStiltdParking == false ? 'No' : 'Yes'}
                     </TableCell>
                   </TableRow>
                   <TableRow>
@@ -905,7 +905,7 @@ const ViewDesignsPage = () => {
                   <TableRow>
                     <TableCell variant="head">Special Feature</TableCell>
                     <TableCell>
-                      {designDetails?.specialFeature == false ? "No" : "Yes"}
+                      {designDetails?.specialFeature == false ? 'No' : 'Yes'}
                     </TableCell>
                   </TableRow>
                 </TableBody>
@@ -915,13 +915,13 @@ const ViewDesignsPage = () => {
               <Button
                 variant="contained"
                 sx={{
-                  background: "#eab308",
-                  color: "black",
+                  background: '#eab308',
+                  color: 'black',
                 }}
                 onClick={() =>
                   architectContact(
                     designDetails?.uploadingUser,
-                    "Architect Contact"
+                    'Architect Contact'
                   )
                 }
               >
@@ -930,8 +930,8 @@ const ViewDesignsPage = () => {
               <Button
                 variant="contained"
                 sx={{
-                  background: "#eab308",
-                  color: "black",
+                  background: '#eab308',
+                  color: 'black',
                 }}
                 onClick={handleEditDesignOpen}
               >
@@ -947,7 +947,7 @@ const ViewDesignsPage = () => {
               size="small"
               variant="contained"
               sx={{
-                marginY: ".25rem",
+                marginY: '.25rem',
               }}
               onClick={() => handleReviewOpen(designDetails)}
             >
@@ -963,16 +963,16 @@ const ViewDesignsPage = () => {
                     <div className="p-4">
                       <div className="mb-2">
                         <span className="bg-green-700 text-xs rounded-sm text-white p-1">
-                          {item.rating}{" "}
+                          {item.rating}{' '}
                           <StarIcon
                             className="mb-1 text-light"
-                            style={{ fontSize: "12px" }}
+                            style={{ fontSize: '12px' }}
                           />
                         </span>
                         <span className="text-lg ml-2">{item.title}</span>
                       </div>
                       <div className="mb-2">{item.comments}</div>
-                      <p style={{ fontSize: "13px", color: "#878787" }}>
+                      <p style={{ fontSize: '13px', color: '#878787' }}>
                         <span>{item.username}</span>
                         {`, `}
                         <span>
@@ -995,7 +995,7 @@ const ViewDesignsPage = () => {
               designData?.data.map(
                 (item, index) =>
                   item._id !== slug &&
-                  item?.approvalStatus === "Approved" && (
+                  item?.approvalStatus === 'Approved' && (
                     <div className="inline-block" key={item.title}>
                       <Card>
                         <CardActionArea
@@ -1011,10 +1011,10 @@ const ViewDesignsPage = () => {
                             <Image
                               src={
                                 String(item?.twoDImage[index]).includes(
-                                  "files"
+                                  'files'
                                 ) &&
                                 !String(item?.twoDImage[index]).includes(
-                                  "bucket.s3"
+                                  'bucket.s3'
                                 )
                                   ? `${process.env.REACT_APP_BASE_PATH}${item?.twoDImage[index]}`
                                   : item?.twoDImage[index]
@@ -1122,7 +1122,7 @@ const ViewDesignsPage = () => {
                           {architectRating > 0 && architectRating}
                           <StarIcon
                             className="mb-1 text-light"
-                            style={{ fontSize: "12px" }}
+                            style={{ fontSize: '12px' }}
                           />
                         </span>
                       </div>

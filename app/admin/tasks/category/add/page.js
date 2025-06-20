@@ -1,15 +1,15 @@
-"use client";
-import AsideContainer from "../../../../../components/AsideContainer";
-import axios from "axios";
-import { useRouter } from "next/navigation";
-import React, { useState } from "react";
-import { IoIosArrowBack } from "react-icons/io";
-import { toast } from "sonner";
+'use client';
+import AsideContainer from '../../../../../components/AsideContainer';
+import axios from 'axios';
+import { useRouter } from 'next/navigation';
+import React, { useState } from 'react';
+import { IoIosArrowBack } from 'react-icons/io';
+import { toast } from 'sonner';
 
 const AddTaskCategoryForm = () => {
   const router = useRouter();
   const [data, setData] = useState({
-    name: "",
+    name: '',
   });
 
   const handleFormData = e => {
@@ -19,7 +19,7 @@ const AddTaskCategoryForm = () => {
 
   const submitFormData = () => {
     if (!data.name) {
-      toast("Name is required");
+      toast('Name is required');
     } else {
       //   console.log(data);
       axios
@@ -32,7 +32,7 @@ const AddTaskCategoryForm = () => {
               toast(response.data.message);
             } else {
               setData({
-                name: "",
+                name: '',
               });
               toast(response.data.message);
               router.back();

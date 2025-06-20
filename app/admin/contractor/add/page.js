@@ -8,7 +8,7 @@ import { useQueries } from '@tanstack/react-query';
 import { postEndpoint } from '../../../../helpers/endpoints';
 import AsideContainer from '../../../../components/AsideContainer';
 import axios from 'axios';
-import * as yup from "yup";
+import * as yup from 'yup';
 import { toast } from 'sonner';
 import {
   Select,
@@ -17,22 +17,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../../../../components/ui/select';
-import { SidebarTrigger } from "../../../../components/ui/sidebar";
-import { Separator } from "../../../../components/ui/separator";
+import { SidebarTrigger } from '../../../../components/ui/sidebar';
+import { Separator } from '../../../../components/ui/separator';
 
 const contractorSchema = yup.object().shape({
-  name: yup.string().required("First name is required"),
-  username: yup.string().required("Username is required"),
-  email: yup.string().email("Invalid email").required("Email is required"),
-  phone: yup.string().required("Phone is required"),
+  name: yup.string().required('First name is required'),
+  username: yup.string().required('Username is required'),
+  email: yup.string().email('Invalid email').required('Email is required'),
+  phone: yup.string().required('Phone is required'),
   // password: yup.string().min(6, "Password must be at least 6 characters").required("Password is required"),
-  state: yup.string().required("State is required"),
-  city: yup.string().required("City is required"),
-  country: yup.string().required("Country is required"),
+  state: yup.string().required('State is required'),
+  city: yup.string().required('City is required'),
+  country: yup.string().required('Country is required'),
   // pincode: yup.string().required("Pincode is required"),
-  roles: yup.array().of(yup.string()).default(["contractor"]),
+  roles: yup.array().of(yup.string()).default(['contractor']),
 });
-
 
 const Page = () => {
   const router = useRouter();
@@ -53,10 +52,7 @@ const Page = () => {
 
   const state = watch('state');
 
-  const [
-    { data: statesData },
-    { data: citiesData },
-  ] = useQueries({
+  const [{ data: statesData }, { data: citiesData }] = useQueries({
     queries: [
       {
         queryKey: ['getStates'],
@@ -78,9 +74,12 @@ const Page = () => {
     ],
   });
 
-  const onSubmit = async (formData) => {
+  const onSubmit = async formData => {
     try {
-      await axios.post(`${process.env.REACT_APP_BASE_PATH}/api/auth/signup`, formData);
+      await axios.post(
+        `${process.env.REACT_APP_BASE_PATH}/api/auth/signup`,
+        formData
+      );
       toast.success('Contractor added successfully!');
       // router.push('/contractors');
     } catch (err) {
@@ -101,7 +100,10 @@ const Page = () => {
           </h1>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="bg-white rounded-[15px] p-5 mb-5">
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="bg-white rounded-[15px] p-5 mb-5"
+        >
           <div className="grid grid-cols-2 gap-4 gap-x-8">
             {[
               ['Name', 'name'],
@@ -111,7 +113,10 @@ const Page = () => {
               // ['Password', 'password'],
               // ['Pincode', 'pincode'],
             ].map(([label, name]) => (
-              <div key={name} className="flex flex-col gap-2 [&_label]:font-semibold">
+              <div
+                key={name}
+                className="flex flex-col gap-2 [&_label]:font-semibold"
+              >
                 <label>{label}</label>
                 <input
                   {...register(name)}
@@ -120,7 +125,9 @@ const Page = () => {
                   className="h-[54px] border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100 font-semibold"
                 />
                 {errors[name] && (
-                  <span className="text-red-500 text-sm">{errors[name]?.message}</span>
+                  <span className="text-red-500 text-sm">
+                    {errors[name]?.message}
+                  </span>
                 )}
               </div>
             ))}
@@ -129,7 +136,7 @@ const Page = () => {
               <label>Country</label>
               <Select
                 value="India"
-                onValueChange={(val) => setValue('country', val)}
+                onValueChange={val => setValue('country', val)}
               >
                 <SelectTrigger className="h-[54px] bg-gray-100 border px-4 border-primary rounded-[7px]">
                   <SelectValue placeholder="Select" />
@@ -139,15 +146,15 @@ const Page = () => {
                 </SelectContent>
               </Select>
               {errors.country && (
-                <span className="text-red-500 text-sm">{errors.country.message}</span>
+                <span className="text-red-500 text-sm">
+                  {errors.country.message}
+                </span>
               )}
             </div>
 
             <div className="flex flex-col gap-2 [&_label]:font-semibold">
               <label>State</label>
-              <Select
-                onValueChange={(val) => setValue('state', val)}
-              >
+              <Select onValueChange={val => setValue('state', val)}>
                 <SelectTrigger className="h-[54px] bg-gray-100 border px-4 border-primary rounded-[7px]">
                   <SelectValue placeholder="Select" />
                 </SelectTrigger>
@@ -160,16 +167,19 @@ const Page = () => {
                 </SelectContent>
               </Select>
               {errors.state && (
-                <span className="text-red-500 text-sm">{errors.state.message}</span>
+                <span className="text-red-500 text-sm">
+                  {errors.state.message}
+                </span>
               )}
             </div>
 
             <div className="flex flex-col gap-2 [&_label]:font-semibold">
               <label>City</label>
-              <Select
-                onValueChange={(val) => setValue('city', val)}
-              >
-                <SelectTrigger className="h-[54px] bg-gray-100 border px-4 border-primary rounded-[7px]" disabled={!state}>
+              <Select onValueChange={val => setValue('city', val)}>
+                <SelectTrigger
+                  className="h-[54px] bg-gray-100 border px-4 border-primary rounded-[7px]"
+                  disabled={!state}
+                >
                   <SelectValue placeholder="Select" />
                 </SelectTrigger>
                 <SelectContent>
@@ -181,7 +191,9 @@ const Page = () => {
                 </SelectContent>
               </Select>
               {errors.city && (
-                <span className="text-red-500 text-sm">{errors.city.message}</span>
+                <span className="text-red-500 text-sm">
+                  {errors.city.message}
+                </span>
               )}
             </div>
           </div>

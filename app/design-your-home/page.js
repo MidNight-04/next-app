@@ -1,16 +1,16 @@
-"use client";
+'use client';
 // import Header from "../../components/Header";
 // import Footer from "../../components/Footer";
-import { useState } from "react";
-import dynamic from "next/dynamic";
-import { toast } from "sonner";
-import dummyImagePdf from "../../public/assets/dummy-image-pdf.jpg";
-import { FaRetweet } from "react-icons/fa";
-import { AiOutlineExpandAlt } from "react-icons/ai";
-import Image from "next/image";
-import { useQueries } from "@tanstack/react-query";
-import { postEndpoint, postUserEndpoint } from "../../helpers/endpoints";
-import { useRouter } from "next/navigation";
+import { useState } from 'react';
+import dynamic from 'next/dynamic';
+import { toast } from 'sonner';
+import dummyImagePdf from '../../public/assets/dummy-image-pdf.jpg';
+import { FaRetweet } from 'react-icons/fa';
+import { AiOutlineExpandAlt } from 'react-icons/ai';
+import Image from 'next/image';
+import { useQueries } from '@tanstack/react-query';
+import { postEndpoint, postUserEndpoint } from '../../helpers/endpoints';
+import { useRouter } from 'next/navigation';
 import {
   Button,
   Card,
@@ -19,22 +19,22 @@ import {
   InputLabel,
   MenuItem,
   Select,
-} from "@mui/material";
+} from '@mui/material';
 
-const Header = dynamic(() => import("../../components/Header"), { ssr: false });
-const Footer = dynamic(() => import("../../components/Footer"), { ssr: false });
+const Header = dynamic(() => import('../../components/Header'), { ssr: false });
+const Footer = dynamic(() => import('../../components/Footer'), { ssr: false });
 
 const Page = () => {
   const router = useRouter();
-  const [bedroom, setBedroom] = useState("");
-  const [toilet, setToilet] = useState("");
-  const [floor, setFloor] = useState("");
-  const [buildingType, setBuildingType] = useState("");
-  const [purpose, setPurpose] = useState("");
-  const [vastu, setVastu] = useState("");
-  const [stilt, setStilt] = useState("");
-  const [filterState, setFilterState] = useState("");
-  const [filterCity, setFilterCity] = useState("");
+  const [bedroom, setBedroom] = useState('');
+  const [toilet, setToilet] = useState('');
+  const [floor, setFloor] = useState('');
+  const [buildingType, setBuildingType] = useState('');
+  const [purpose, setPurpose] = useState('');
+  const [vastu, setVastu] = useState('');
+  const [stilt, setStilt] = useState('');
+  const [filterState, setFilterState] = useState('');
+  const [filterCity, setFilterCity] = useState('');
   const [searchCities, setSearchCities] = useState([]);
   const [searchStates, setSearchStates] = useState([]);
   const [cities, setCities] = useState([]);
@@ -47,19 +47,19 @@ const Page = () => {
   ] = useQueries({
     queries: [
       {
-        queryKey: ["design"],
+        queryKey: ['design'],
         queryFn: () =>
           postUserEndpoint({
-            endpoint: "filterDesign",
+            endpoint: 'filterDesign',
           }),
       },
       {
-        queryKey: ["getStates"],
+        queryKey: ['getStates'],
         queryFn: () =>
           postEndpoint({
-            endpoint: "auth/getStates",
+            endpoint: 'auth/getStates',
             data: {
-              country: "India",
+              country: 'India',
             },
           }),
       },
@@ -67,7 +67,7 @@ const Page = () => {
         queryKey: [`${filterState}/cities`],
         queryFn: () =>
           postEndpoint({
-            endpoint: "auth/getCities",
+            endpoint: 'auth/getCities',
             data: {
               state_name: filterState,
             },
@@ -81,7 +81,7 @@ const Page = () => {
     let query = e.target.value;
     let updatedList = [...searchStates];
     // Include all the elements which inlcudes the search query
-    if (query === "") {
+    if (query === '') {
       setStates(searchStates);
     } else {
       updatedList = updatedList.filter(item => {
@@ -95,7 +95,7 @@ const Page = () => {
     let query = e.target.value;
     let updatedList = [...searchCities];
     // Include all the elements which inlcudes the search query
-    if (query === "") {
+    if (query === '') {
       setCities(searchCities);
     } else {
       updatedList = updatedList.filter(item => {
@@ -106,15 +106,15 @@ const Page = () => {
   };
 
   const clearFilterData = () => {
-    setFilterState("");
-    setFilterCity("");
-    setBedroom("");
-    setToilet("");
-    setFloor("");
-    setBuildingType("");
-    setPurpose("");
-    setVastu("");
-    setStilt("");
+    setFilterState('');
+    setFilterCity('');
+    setBedroom('');
+    setToilet('');
+    setFloor('');
+    setBuildingType('');
+    setPurpose('');
+    setVastu('');
+    setStilt('');
   };
 
   return (
@@ -128,7 +128,7 @@ const Page = () => {
                 Select Filters
               </div>
               <FormControl
-                sx={{ width: "7.5rem" }}
+                sx={{ width: '7.5rem' }}
                 variant="outlined"
                 size="small"
               >
@@ -149,7 +149,7 @@ const Page = () => {
                 </Select>
               </FormControl>
               <FormControl
-                sx={{ width: "90px" }}
+                sx={{ width: '90px' }}
                 variant="outlined"
                 size="small"
               >
@@ -170,7 +170,7 @@ const Page = () => {
                 </Select>
               </FormControl>
               <FormControl
-                sx={{ width: "80px" }}
+                sx={{ width: '80px' }}
                 variant="outlined"
                 size="small"
               >
@@ -191,7 +191,7 @@ const Page = () => {
                 </Select>
               </FormControl>
               <FormControl
-                sx={{ width: "140px" }}
+                sx={{ width: '140px' }}
                 variant="outlined"
                 size="small"
               >
@@ -215,7 +215,7 @@ const Page = () => {
                 </Select>
               </FormControl>
               <FormControl
-                sx={{ width: "6.5rem" }}
+                sx={{ width: '6.5rem' }}
                 variant="outlined"
                 size="small"
               >
@@ -233,7 +233,7 @@ const Page = () => {
                 </Select>
               </FormControl>
               <FormControl
-                sx={{ width: "84px" }}
+                sx={{ width: '84px' }}
                 variant="outlined"
                 size="small"
               >
@@ -251,7 +251,7 @@ const Page = () => {
                 </Select>
               </FormControl>
               <FormControl
-                sx={{ width: "80px" }}
+                sx={{ width: '80px' }}
                 variant="outlined"
                 size="small"
               >
@@ -269,7 +269,7 @@ const Page = () => {
                 </Select>
               </FormControl>
               <FormControl
-                sx={{ width: "8rem" }}
+                sx={{ width: '8rem' }}
                 variant="outlined"
                 size="small"
               >
@@ -291,8 +291,8 @@ const Page = () => {
               </FormControl>
               <FormControl
                 sx={{
-                  width: "8rem",
-                  marginBottom: !filterState ? "-16px" : "0px",
+                  width: '8rem',
+                  marginBottom: !filterState ? '-16px' : '0px',
                 }}
                 variant="outlined"
                 size="small"
@@ -318,7 +318,7 @@ const Page = () => {
                     Select state first.*
                   </div>
                 ) : (
-                  ""
+                  ''
                 )}
               </FormControl>
               <div className="flex justify-center">
@@ -326,7 +326,7 @@ const Page = () => {
                   variant="contained"
                   type="button"
                   color="error"
-                  sx={{ width: "8rem" }}
+                  sx={{ width: '8rem' }}
                   onClick={clearFilterData}
                 >
                   Clear Filter
@@ -412,10 +412,10 @@ const Page = () => {
                             <Image
                               src={
                                 String(item?.twoDImage[index]).includes(
-                                  "files"
+                                  'files'
                                 ) &&
                                 !String(item?.twoDImage[index]).includes(
-                                  "bucket.s3"
+                                  'bucket.s3'
                                 )
                                   ? `${process.env.REACT_APP_BASE_PATH}${item?.twoDImage[index]}`
                                   : item?.twoDImage[index]

@@ -1,53 +1,53 @@
-"use client";
-import axios from "axios";
-import React, { useState } from "react";
-import { toast } from "sonner";
-import AsideContainer from "../../../../components/AsideContainer";
-import * as XLSX from "xlsx";
-import { saveAs } from "file-saver";
-import { IoIosArrowBack } from "react-icons/io";
-import { useRouter } from "next/navigation";
-import { FiDownload } from "react-icons/fi";
-import { SidebarTrigger } from "../../../../components/ui/sidebar";
-import { Separator } from "../../../../components/ui/separator";
+'use client';
+import axios from 'axios';
+import React, { useState } from 'react';
+import { toast } from 'sonner';
+import AsideContainer from '../../../../components/AsideContainer';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
+import { IoIosArrowBack } from 'react-icons/io';
+import { useRouter } from 'next/navigation';
+import { FiDownload } from 'react-icons/fi';
+import { SidebarTrigger } from '../../../../components/ui/sidebar';
+import { Separator } from '../../../../components/ui/separator';
 
 const ConstructionStepForm = () => {
-  const [name, setName] = useState("");
+  const [name, setName] = useState('');
   const [priority, setPriority] = useState();
-  const [points, setPoints] = useState("");
+  const [points, setPoints] = useState('');
   const router = useRouter();
 
   const submitFormData = () => {
     // console.log(role)
     if (!name) {
-      toast("Name is required");
+      toast('Name is required');
     } else if (!priority) {
-      toast("Priority is required");
+      toast('Priority is required');
     } else if (!points) {
-      toast("Points is required");
+      toast('Points is required');
     } else {
       // console.log(process,points);
       const formData = new FormData();
-      formData.append("name", name);
-      formData.append("priority", priority);
-      formData.append("file", points);
+      formData.append('name', name);
+      formData.append('priority', priority);
+      formData.append('file', points);
       axios
         .post(
           `${process.env.REACT_APP_BASE_PATH}/api/constructionstep/add`,
           formData,
           {
-            headers: { "Content-Type": "multipart/form-data" },
+            headers: { 'Content-Type': 'multipart/form-data' },
           }
         )
         .then(resp => {
           toast(`${response.data.message}`);
-          setName("");
-          setPriority("");
+          setName('');
+          setPriority('');
           // redirect("/admin/constructionstep");
         })
         .catch(err => {
           //   console.log(err);
-          toast("Error while upload construction points");
+          toast('Error while upload construction points');
         });
     }
   };
@@ -56,12 +56,12 @@ const ConstructionStepForm = () => {
     // Define headers as an array of arrays (e.g., [['Name', 'Age', 'Occupation']])
     const headers = [
       [
-        "point",
-        "content",
-        "duration",
-        "issueMember",
-        "checkList",
-        "checkListName",
+        'point',
+        'content',
+        'duration',
+        'issueMember',
+        'checkList',
+        'checkListName',
       ],
     ];
 
@@ -70,37 +70,40 @@ const ConstructionStepForm = () => {
 
     // Create a new workbook and append the worksheet
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
 
     // Write the workbook to a binary Excel file
     const excelBuffer = XLSX.write(workbook, {
-      bookType: "xlsx",
-      type: "array",
+      bookType: 'xlsx',
+      type: 'array',
     });
 
     // Convert the buffer to a Blob
     const dataBlob = new Blob([excelBuffer], {
-      type: "application/octet-stream",
+      type: 'application/octet-stream',
     });
 
     // Save the Blob as an Excel file
-    saveAs(dataBlob, "constructionstepsample.xlsx");
+    saveAs(dataBlob, 'constructionstepsample.xlsx');
   };
 
   return (
     <AsideContainer className="single">
       <div className="flex flex-row justify-between my-4">
-      <div className='flex w-full items-center gap-1 lg:gap-2'>
-        <SidebarTrigger className="-ml-2 hover:bg-primary" />
-        <Separator orientation="vertical" className="data-[orientation=vertical]:h-4 bg-black" />
-        <IoIosArrowBack
-          onClick={() => router.back()}
-          className="cursor-pointer transition duration-300 hover:scale-150 ease-in-out"
-        />
-        <h1 className="font-ubuntu font-bold text-[25px] leading-7 text-nowrap">
-          Add Construction Step
-        </h1>
-      </div>
+        <div className="flex w-full items-center gap-1 lg:gap-2">
+          <SidebarTrigger className="-ml-2 hover:bg-primary" />
+          <Separator
+            orientation="vertical"
+            className="data-[orientation=vertical]:h-4 bg-black"
+          />
+          <IoIosArrowBack
+            onClick={() => router.back()}
+            className="cursor-pointer transition duration-300 hover:scale-150 ease-in-out"
+          />
+          <h1 className="font-ubuntu font-bold text-[25px] leading-7 text-nowrap">
+            Add Construction Step
+          </h1>
+        </div>
         <div className="flex flex-row items-center justify-end -md:text-xs text-nowrap">
           <button
             className="flex flex-row items-center p-2 px-3 font-ubuntu text-sm -md:text-xs font-semibold bg-secondary border-[1px] border-secondary text-primary rounded-full cursor-pointer"

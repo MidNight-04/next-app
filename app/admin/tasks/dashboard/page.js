@@ -45,7 +45,7 @@ const Page = () => {
   const [employeeId, setEmployeeId] = useState('');
   const [categoryId, setCategoryId] = useState('');
   const [frequency, setFrequency] = useState('');
-  const [branch,setBranch] = useState("");
+  const [branch, setBranch] = useState('');
 
   let url;
 
@@ -395,9 +395,12 @@ const Page = () => {
   return (
     <AsideContainer>
       <div>
-        <div className='flex w-full items-center gap-1 lg:gap-2'>
+        <div className="flex w-full items-center gap-1 lg:gap-2">
           <SidebarTrigger className="-ml-2 hover:bg-primary" />
-          <Separator orientation="vertical" className="data-[orientation=vertical]:h-4 bg-black" />
+          <Separator
+            orientation="vertical"
+            className="data-[orientation=vertical]:h-4 bg-black"
+          />
           <h1 className="font-ubuntu font-bold text-[25px] leading-7 py-5 text-nowrap">
             Task Dashboard
           </h1>
@@ -500,7 +503,7 @@ const Page = () => {
                   </SelectItem>
                 ))}
               </SelectContent>
-              </Select>
+            </Select>
             <Select
               onValueChange={value => {
                 setCategoryId(value);
@@ -529,9 +532,9 @@ const Page = () => {
                 <SelectValue placeholder="Branch" />
               </SelectTrigger>
               <SelectContent>
-              <SelectItem value="Gurgaon">Gurgaon</SelectItem>
-              <SelectItem value="Ranchi">Ranchi</SelectItem>
-              <SelectItem value="Patna">Patna</SelectItem>
+                <SelectItem value="Gurgaon">Gurgaon</SelectItem>
+                <SelectItem value="Ranchi">Ranchi</SelectItem>
+                <SelectItem value="Patna">Patna</SelectItem>
               </SelectContent>
             </Select>
             <Select
@@ -659,139 +662,142 @@ const Page = () => {
                             {isFetched &&
                               groupedByEmployee.length > 0 &&
                               groupedByEmployee
-                              // .filter(item => item.branch === branch || branch === '')
-                              .map((item, index) => {
-                                const percent =
-                                  (item.obj.filter(
+                                // .filter(item => item.branch === branch || branch === '')
+                                .map((item, index) => {
+                                  const percent =
+                                    (item.obj.filter(
+                                      task => task.status === 'Complete'
+                                    ).length /
+                                      item.obj.length) *
+                                    100;
+                                  const totalTasks = item.obj.length;
+                                  const overdue = item.obj.filter(
+                                    task => task.status === 'Overdue'
+                                  ).length;
+                                  const pending = item.obj.filter(
+                                    task => task.status === 'Pending'
+                                  ).length;
+                                  const inProgress = item.obj.filter(
+                                    task => task.status === 'In Progress'
+                                  ).length;
+                                  const completed = item.obj.filter(
                                     task => task.status === 'Complete'
-                                  ).length /
-                                    item.obj.length) *
-                                  100;
-                                const totalTasks = item.obj.length;
-                                const overdue = item.obj.filter(
-                                  task => task.status === 'Overdue'
-                                ).length;
-                                const pending = item.obj.filter(
-                                  task => task.status === 'Pending'
-                                ).length;
-                                const inProgress = item.obj.filter(
-                                  task => task.status === 'In Progress'
-                                ).length;
-                                const completed = item.obj.filter(
-                                  task => task.status === 'Complete'
-                                ).length;
-                                const completedInTime = item.obj
-                                  .filter(task => task.status === 'Complete')
-                                  .filter(
-                                    task =>
-                                      new Date(task.updatedOn) <=
-                                      new Date(task.dueDate)
                                   ).length;
-                                const completedDelayed = item.obj
-                                  .filter(task => task.status === 'Complete')
-                                  .filter(
-                                    task =>
-                                      new Date(task.updatedOn) >
-                                      new Date(task.dueDate)
-                                  ).length;
-                                return (
-                                  <tr
-                                    key={index}
-                                    className="bg-white rounded-2xl shadow-md group cursor-pointer hover:bg-gray-100 transition duration-300"
-                                  >
-                                    <td className="p-4 flex items-center justify-start">
-                                      <div className="flex flex-row items-center justify-start gap-16 -lg:gap-2">
-                                        <div className="h-10 w-10">
-                                          <CircularProgressbar
-                                            value={percent}
-                                            text={`${percent.toFixed(0)}%`}
-                                            strokeWidth={8}
-                                            className="h-10 w-10"
-                                            styles={buildStyles({
-                                              backgroundColor: '#3e98c7',
-                                              textColor: 'black',
-                                              pathColor: '#6cf55f',
-                                              trailColor: '#fa7878',
-                                              textSize: '24px',
-                                            })}
-                                          />
+                                  const completedInTime = item.obj
+                                    .filter(task => task.status === 'Complete')
+                                    .filter(
+                                      task =>
+                                        new Date(task.updatedOn) <=
+                                        new Date(task.dueDate)
+                                    ).length;
+                                  const completedDelayed = item.obj
+                                    .filter(task => task.status === 'Complete')
+                                    .filter(
+                                      task =>
+                                        new Date(task.updatedOn) >
+                                        new Date(task.dueDate)
+                                    ).length;
+                                  return (
+                                    <tr
+                                      key={index}
+                                      className="bg-white rounded-2xl shadow-md group cursor-pointer hover:bg-gray-100 transition duration-300"
+                                    >
+                                      <td className="p-4 flex items-center justify-start">
+                                        <div className="flex flex-row items-center justify-start gap-16 -lg:gap-2">
+                                          <div className="h-10 w-10">
+                                            <CircularProgressbar
+                                              value={percent}
+                                              text={`${percent.toFixed(0)}%`}
+                                              strokeWidth={8}
+                                              className="h-10 w-10"
+                                              styles={buildStyles({
+                                                backgroundColor: '#3e98c7',
+                                                textColor: 'black',
+                                                pathColor: '#6cf55f',
+                                                trailColor: '#fa7878',
+                                                textSize: '24px',
+                                              })}
+                                            />
+                                          </div>
+                                          <span>{item.employee}</span>
                                         </div>
-                                        <span>{item.employee}</span>
-                                      </div>
-                                    </td>
-                                    <td>{totalTasks}</td>
-                                    <td>
-                                      <div className="flex flex-col gap-1">
-                                        <span>
-                                          {overdue + pending + inProgress} (
-                                          {(
-                                            ((overdue + pending + inProgress) /
-                                              totalTasks) *
-                                            100
-                                          ).toFixed(0)}
-                                          %)
-                                        </span>
-                                        <div className="hidden group-hover:flex -md:flex flex-row gap-1 mt-2 justify-evenly">
-                                          <span className="text-red-500">
-                                            {overdue} (
+                                      </td>
+                                      <td>{totalTasks}</td>
+                                      <td>
+                                        <div className="flex flex-col gap-1">
+                                          <span>
+                                            {overdue + pending + inProgress} (
                                             {(
-                                              (overdue / totalTasks) *
+                                              ((overdue +
+                                                pending +
+                                                inProgress) /
+                                                totalTasks) *
                                               100
                                             ).toFixed(0)}
                                             %)
                                           </span>
-                                          <span className="text-yellow-500">
-                                            {pending} (
-                                            {(
-                                              (pending / totalTasks) *
-                                              100
-                                            ).toFixed(0)}
-                                            %)
-                                          </span>
-                                          <span className="text-orange-500">
-                                            {inProgress} (
-                                            {(
-                                              (inProgress / totalTasks) *
-                                              100
-                                            ).toFixed(0)}
-                                            %)
-                                          </span>
+                                          <div className="hidden group-hover:flex -md:flex flex-row gap-1 mt-2 justify-evenly">
+                                            <span className="text-red-500">
+                                              {overdue} (
+                                              {(
+                                                (overdue / totalTasks) *
+                                                100
+                                              ).toFixed(0)}
+                                              %)
+                                            </span>
+                                            <span className="text-yellow-500">
+                                              {pending} (
+                                              {(
+                                                (pending / totalTasks) *
+                                                100
+                                              ).toFixed(0)}
+                                              %)
+                                            </span>
+                                            <span className="text-orange-500">
+                                              {inProgress} (
+                                              {(
+                                                (inProgress / totalTasks) *
+                                                100
+                                              ).toFixed(0)}
+                                              %)
+                                            </span>
+                                          </div>
                                         </div>
-                                      </div>
-                                    </td>
-                                    <td>
-                                      <div className="flex flex-col gap-1">
-                                        <span>
-                                          {completed} (
-                                          {(
-                                            (completed / totalTasks) *
-                                            100
-                                          ).toFixed(0)}
-                                          %)
-                                        </span>
-                                        <div className="hidden group-hover:flex -md:flex mt-2 flex-row gap-2 justify-between w-full px-8">
-                                          <span className="text-green-500">
-                                            {completedInTime} (
+                                      </td>
+                                      <td>
+                                        <div className="flex flex-col gap-1">
+                                          <span>
+                                            {completed} (
                                             {(
-                                              (completedInTime / totalTasks) *
+                                              (completed / totalTasks) *
                                               100
                                             ).toFixed(0)}
                                             %)
                                           </span>
-                                          <span className="text-red-500">
-                                            {completedDelayed} (
-                                            {(
-                                              (completedDelayed / totalTasks) *
-                                              100
-                                            ).toFixed(0)}
-                                            %)
-                                          </span>
+                                          <div className="hidden group-hover:flex -md:flex mt-2 flex-row gap-2 justify-between w-full px-8">
+                                            <span className="text-green-500">
+                                              {completedInTime} (
+                                              {(
+                                                (completedInTime / totalTasks) *
+                                                100
+                                              ).toFixed(0)}
+                                              %)
+                                            </span>
+                                            <span className="text-red-500">
+                                              {completedDelayed} (
+                                              {(
+                                                (completedDelayed /
+                                                  totalTasks) *
+                                                100
+                                              ).toFixed(0)}
+                                              %)
+                                            </span>
+                                          </div>
                                         </div>
-                                      </div>
-                                    </td>
-                                  </tr>
-                                );
-                              })}
+                                      </td>
+                                    </tr>
+                                  );
+                                })}
                           </tbody>
                         </table>
                         {groupedByDate?.filter(

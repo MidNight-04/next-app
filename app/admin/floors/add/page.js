@@ -1,14 +1,14 @@
-"use client";
-import axios from "axios";
-import { useRouter, redirect } from "next/navigation";
-import { useState } from "react";
-import { toast } from "sonner";
-import AsideContainer from "../../../../components/AsideContainer";
-import { IoIosArrowBack } from "react-icons/io";
+'use client';
+import axios from 'axios';
+import { useRouter, redirect } from 'next/navigation';
+import { useState } from 'react';
+import { toast } from 'sonner';
+import AsideContainer from '../../../../components/AsideContainer';
+import { IoIosArrowBack } from 'react-icons/io';
 
 const AddProjectFloorForm = () => {
   const router = useRouter();
-  const [floor, setFloor] = useState("");
+  const [floor, setFloor] = useState('');
 
   const submitFormData = () => {
     if (floor) {
@@ -18,7 +18,7 @@ const AddProjectFloorForm = () => {
         })
         .then(response => {
           if (response) {
-            setFloor("");
+            setFloor('');
             toast(response.data.message);
             router.back();
           }
@@ -27,7 +27,7 @@ const AddProjectFloorForm = () => {
           console.log(error);
         });
     } else {
-      toast("Floor is mandatory");
+      toast('Floor is mandatory');
     }
   };
   return (

@@ -1,26 +1,26 @@
-"use client";
-import React, { useEffect, useState } from "react";
-import imageUrl from "../../constant/imageUrl";
-import CurrencyRupeeIcon from "@mui/icons-material/CurrencyRupee";
-import axios from "axios";
-import Link from "next/link";
-import Image from "next/image";
-import { useQueries } from "@tanstack/react-query";
+'use client';
+import React, { useEffect, useState } from 'react';
+import imageUrl from '../../constant/imageUrl';
+import CurrencyRupeeIcon from '@mui/icons-material/CurrencyRupee';
+import axios from 'axios';
+import Link from 'next/link';
+import Image from 'next/image';
+import { useQueries } from '@tanstack/react-query';
 import {
   getCategoryList,
   postEndpoint,
   postDealerEndpoint,
-} from "../../helpers/endpoints";
-import { Button, Card, CardActionArea, styled } from "@mui/material";
-import Radio from "@mui/material/Radio";
-import RadioGroup from "@mui/material/RadioGroup";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import FormControl from "@mui/material/FormControl";
-import FormLabel from "@mui/material/FormLabel";
-import { useRouter } from "next/navigation";
-import dynamic from "next/dynamic";
-const Header = dynamic(() => import("../../components/Header"), { ssr: false });
-const Footer = dynamic(() => import("../../components/Footer"), { ssr: false });
+} from '../../helpers/endpoints';
+import { Button, Card, CardActionArea, styled } from '@mui/material';
+import Radio from '@mui/material/Radio';
+import RadioGroup from '@mui/material/RadioGroup';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import FormControl from '@mui/material/FormControl';
+import FormLabel from '@mui/material/FormLabel';
+import { useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
+const Header = dynamic(() => import('../../components/Header'), { ssr: false });
+const Footer = dynamic(() => import('../../components/Footer'), { ssr: false });
 
 const MyCheckbox = ({ label, value, onChange }) => {
   return (
@@ -45,9 +45,9 @@ const Page = () => {
   // const { userData } = useSelector(store => store.userReducer);
   const userData = {};
   // const [featuredData, setFeaturedData] = useState([]);
-  const [suitableLocation, setCity] = React.useState("");
-  const [suitableCountry, setCountry] = React.useState("");
-  const [suitableState, setState] = React.useState("");
+  const [suitableLocation, setCity] = React.useState('');
+  const [suitableCountry, setCountry] = React.useState('');
+  const [suitableState, setState] = React.useState('');
   const [category, setCategory] = React.useState([]);
   const [searchCities, setSearchCities] = useState([]);
   const [searchStates, setSearchStates] = useState([]);
@@ -58,7 +58,7 @@ const Page = () => {
   const [showMoreCategory, setShowMoreCategory] = React.useState(false);
   const [showMoreCities, setShowMoreCities] = React.useState(false);
   const [showMoreStates, setShowMoreStates] = React.useState(false);
-  const [selectedState, setSelectedState] = useState("");
+  const [selectedState, setSelectedState] = useState('');
   const [selectedCategory, setSelectedCategory] = useState([]);
   const [selectedSupplier, setSelectedSupplier] = useState([]);
   const router = useRouter();
@@ -71,23 +71,23 @@ const Page = () => {
   ] = useQueries({
     queries: [
       {
-        queryKey: ["categories"],
+        queryKey: ['categories'],
         queryFn: getCategoryList,
       },
       {
-        queryKey: ["products"],
+        queryKey: ['products'],
         queryFn: () =>
           postDealerEndpoint({
-            endpoint: "products/all",
+            endpoint: 'products/all',
           }),
       },
       {
-        queryKey: ["states"],
+        queryKey: ['states'],
         queryFn: () =>
           postEndpoint({
-            endpoint: "auth/getStates",
+            endpoint: 'auth/getStates',
             data: {
-              country_name: "India",
+              country_name: 'India',
             },
           }),
         enabled: false,
@@ -96,9 +96,9 @@ const Page = () => {
         queryKey: [`${selectedState}/cities`],
         queryFn: () =>
           postEndpoint({
-            endpoint: "getStates",
+            endpoint: 'getStates',
             data: {
-              state_name: "state",
+              state_name: 'state',
             },
           }),
         enabled: false,
@@ -150,7 +150,7 @@ const Page = () => {
 
   const filterLocationByState = e => {
     let query = e.target.value;
-    if (query === "") {
+    if (query === '') {
       setStates(searchStates);
     } else {
       updatedList = updatedList.filter(item => {
@@ -163,7 +163,7 @@ const Page = () => {
   const filterLocationBySearch = e => {
     let query = e.target.value;
     let updatedList = [...searchCities];
-    if (query === "") {
+    if (query === '') {
       setCities(searchCities);
     } else {
       updatedList = updatedList.filter(item => {
@@ -209,22 +209,22 @@ const Page = () => {
   };
 
   const sortByProductCommission = (a, b) => {
-    const aPrice = a.price || ""; // Handle undefined or null by defaulting to empty string
-    const bPrice = b.price || ""; // Handle undefined or null by defaulting to empty string
+    const aPrice = a.price || ''; // Handle undefined or null by defaulting to empty string
+    const bPrice = b.price || ''; // Handle undefined or null by defaulting to empty string
 
-    if (a.productCommission === "" && b.productCommission !== "") {
+    if (a.productCommission === '' && b.productCommission !== '') {
       return 1; // Place null after non-null values
-    } else if (a.productCommission !== "" && b.productCommission === "") {
+    } else if (a.productCommission !== '' && b.productCommission === '') {
       return -1; // Place null before non-null valuesz
     } else if (a.productCommission !== b.productCommission) {
       return b.productCommission - a.productCommission; // Sort by product commission
     } else {
       // If product commission are the same or both are null, sort by price
-      if (aPrice === "" && bPrice !== "") {
+      if (aPrice === '' && bPrice !== '') {
         return 1; // Place null after non-null values
-      } else if (aPrice !== "" && bPrice === "") {
+      } else if (aPrice !== '' && bPrice === '') {
         return -1; // Place null before non-null values
-      } else if (aPrice !== "" && bPrice !== "") {
+      } else if (aPrice !== '' && bPrice !== '') {
         return aPrice.localeCompare(bPrice); // Sort by price using localeCompare
       } else {
         return 0; // If both prices are null or empty, consider them equal
@@ -246,7 +246,7 @@ const Page = () => {
                 variant="contained"
                 type="button"
                 color="error"
-                sx={{ width: "8rem" }}
+                sx={{ width: '8rem' }}
                 onClick={clearFilterData}
               >
                 Clear Filter
@@ -268,7 +268,7 @@ const Page = () => {
                   .slice(0, 5)
                   .map(
                     dealer =>
-                      dealer?.userStatus === "active" && (
+                      dealer?.userStatus === 'active' && (
                         <MyCheckbox
                           key={dealer.uploadingUser}
                           label={dealer.uploadingUserName}
@@ -287,7 +287,7 @@ const Page = () => {
                   .slice(0, 5)
                   .map(
                     dealer =>
-                      dealer?.userStatus === "active" && (
+                      dealer?.userStatus === 'active' && (
                         <MyCheckbox
                           key={dealer.uploadingUser}
                           label={dealer.uploadingUserName}
@@ -302,7 +302,7 @@ const Page = () => {
                 size="small"
                 onClick={() => setShowMoreDealer(!showMoreDealer)}
               >
-                {showMoreDealer ? "Show less" : "Show more"}
+                {showMoreDealer ? 'Show less' : 'Show more'}
               </Button>
             </div>
             <h6 className="my-2 font-semibold text-center">
@@ -335,7 +335,7 @@ const Page = () => {
                 size="small"
                 onClick={() => setShowMoreCategory(!showMoreCategory)}
               >
-                {showMoreCategory ? "Show less" : "Show more"}
+                {showMoreCategory ? 'Show less' : 'Show more'}
               </Button>
             </div>
             {/* <FormControl margin="dense" size="small">
@@ -473,27 +473,27 @@ const Page = () => {
                 })
                 .map(item => {
                   return (
-                    item.approvalStatus === "Approved" &&
-                    item.userStatus === "active" && (
+                    item.approvalStatus === 'Approved' &&
+                    item.userStatus === 'active' && (
                       <div
                         className="cursor-pointer mb-4 text-black bg-cyan-50 rounded-2xl"
                         key={item._id}
                       >
                         <Card
                           sx={{
-                            display: "flex",
-                            flexDirection: "column",
-                            alignItems: "center",
-                            alignContent: "center",
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            alignContent: 'center',
                           }}
                         >
                           <CardActionArea
                             sx={{
-                              display: "flex",
-                              flexDirection: "column",
-                              alignItems: "center",
-                              alignContent: "center",
-                              background: "#E9EAEC",
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'center',
+                              alignContent: 'center',
+                              background: '#E9EAEC',
                             }}
                             onClick={() =>
                               router.push(`/view-product/${item._id}`)
@@ -506,17 +506,17 @@ const Page = () => {
                               <div className="text-sm font-semibold text-yellow-500">
                                 {item?.category
                                   ? item?.category
-                                  : "Not Available"}
+                                  : 'Not Available'}
                               </div>
                             </div>
                             <div className="flex justify-center">
                               <Image
                                 src={
                                   String(item?.productImage[0]).includes(
-                                    "files"
+                                    'files'
                                   ) &&
                                   !String(item?.productImage[0]).includes(
-                                    "bucket.s3"
+                                    'bucket.s3'
                                   )
                                     ? `${process.env.REACT_APP_BASE_PATH}${item?.productImage[0]}`
                                     : item?.productImage[0]

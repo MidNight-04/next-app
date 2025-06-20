@@ -15,8 +15,6 @@ import {
   Modal,
   Dialog,
   Button,
-  FormControlLabel,
-  Checkbox,
   DialogContentText,
 } from '@mui/material';
 import { toast } from 'sonner';
@@ -27,9 +25,6 @@ import { GoPeople } from 'react-icons/go';
 import { MdLockOutline, MdOutlineEdit } from 'react-icons/md';
 import { BsCalendar4Event } from 'react-icons/bs';
 import { TbProgress } from 'react-icons/tb';
-import { FaCheck } from 'react-icons/fa6';
-import { MdDeleteOutline } from 'react-icons/md';
-import { FiDownload } from 'react-icons/fi';
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 import { TiArrowSortedDown, TiArrowSortedUp } from 'react-icons/ti';
@@ -37,9 +32,8 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import LoaderSpinner from '../../../../components/loader/LoaderSpinner';
 import { cn } from '../../../../lib/utils';
-import { Check, Edit } from '@mui/icons-material';
+import { Check } from '@mui/icons-material';
 import { BsClockHistory } from 'react-icons/bs';
-import { saveAs } from 'file-saver';
 import { RiDeleteBin6Line, RiLockPasswordLine } from 'react-icons/ri';
 import AsideContainer from '../../../../components/AsideContainer';
 import {
@@ -58,9 +52,9 @@ import {
 import { useAuthStore } from '../../../../store/useAuthStore';
 import { IoIosArrowBack } from 'react-icons/io';
 import { useRouter } from 'next/navigation';
-import { LuTimerReset } from "react-icons/lu";
-import { SidebarTrigger } from "../../../../components/ui/sidebar";
-import { Separator } from "../../../../components/ui/separator";
+import { LuTimerReset } from 'react-icons/lu';
+import { SidebarTrigger } from '../../../../components/ui/sidebar';
+import { Separator } from '../../../../components/ui/separator';
 
 let today = new Date();
 let yyyy = today.getFullYear();
@@ -84,6 +78,33 @@ const monthNames = [
   'November',
   'December',
 ];
+
+const ActionButton = ({ children, onClick }) => (
+  <button
+    onClick={onClick}
+    className="px-[15px] py-[12px] bg-transparent border-2 border-secondary rounded-full font-ubuntu -md:px-2 -md:py-[6px] cursor-pointer hover:bg-secondary [&_div]:hover:text-primary"
+  >
+    <div className="text-secondary flex flex-row">
+      <p className="text-[13px] font-semibold leading-none -md:text-xs">
+        {children}
+      </p>
+    </div>
+  </button>
+);
+
+const StatCard = ({ label, value, onClick }) => (
+  <div
+    onClick={onClick}
+    role={onClick ? 'button' : undefined}
+    tabIndex={onClick ? 0 : undefined}
+    className="p-5 w-full rounded-[14px] bg-white font-ubuntu flex justify-between items-center cursor-pointer [&_svg]:text-primary"
+  >
+    <span className="font-semibold">{label}</span>
+    <span className="px-[10px] py-[3px] font-semibold rounded-full border border-primary bg-primary-foreground text-primary">
+      {value}
+    </span>
+  </div>
+);
 
 const ClientProjectView = () => {
   const linkRef = useRef(null);
@@ -176,14 +197,6 @@ const ClientProjectView = () => {
     }
   }, [projectDetails]);
 
-  const toggleContent = index => {
-    setShowContent(prevState => {
-      const newState = [...prevState];
-      newState[index] = !newState[index];
-      return newState;
-    });
-  };
-
   const getprojectDetail = () => {
     axios
       .get(`${process.env.REACT_APP_BASE_PATH}/api/project/databyid/${slug}`)
@@ -219,35 +232,68 @@ const ClientProjectView = () => {
       });
   };
 
+  // useEffect(() => {
+  //   axios
+  //     .get(`${process.env.REACT_APP_BASE_PATH}/api/log/siteid/${slug}`)
+  //     .then(async response => {
+  //       setLogList(response.data.data);
+  //       // Calculate the total file count
+  //       let totalFileCount = 0;
+  //       response.data?.data?.forEach(data => {
+  //         if (data?.file?.length > 0) {
+  //           totalFileCount += data.file.length; // Increment by the number of files in each entry
+  //         }
+  //       });
+  //       // Set the final count once
+  //       setFileCount(totalFileCount);
+  //     })
+  //     .catch(error => {
+  //       console.log(error);
+  //     });
+  // }, [activeTab, refresh]);
+
+  // useEffect(() => {
+  //   getprojectDetail();
+  // }, [slug, refresh]);
+
+  // useEffect(() => {
+  //   if (pointList && pointList.length > 0) {
+  //     const initialValue = `${pointList[0].point}-${pointList[0].content}`;
+  //     setPoint(pointList[0].point);
+  //     setContent(pointList[0].content);
+  //   }
+  // }, [pointList]);
+
   useEffect(() => {
-    axios
-      .get(`${process.env.REACT_APP_BASE_PATH}/api/log/siteid/${slug}`)
-      .then(async response => {
-        setLogList(response.data.data);
-        // Calculate the total file count
-        let totalFileCount = 0;
-        response.data?.data?.forEach(data => {
-          if (data?.file?.length > 0) {
-            totalFileCount += data.file.length; // Increment by the number of files in each entry
-          }
-        });
-        // Set the final count once
-        setFileCount(totalFileCount);
-      })
-      .catch(error => {
-        console.log(error);
-      });
-  }, [activeTab, refresh]);
+    const fetchLogs = async () => {
+      try {
+        const { data } = await axios.get(
+          `${process.env.REACT_APP_BASE_PATH}/api/log/siteid/${slug}`
+        );
+        setLogList(data?.data || []);
+
+        const totalFiles = data?.data?.reduce(
+          (acc, curr) => acc + (curr?.file?.length || 0),
+          0
+        );
+        setFileCount(totalFiles);
+      } catch (error) {
+        console.error('Error fetching logs:', error);
+      }
+    };
+
+    fetchLogs();
+  }, [activeTab, refresh, slug]);
 
   useEffect(() => {
     getprojectDetail();
   }, [slug, refresh]);
 
   useEffect(() => {
-    if (pointList && pointList.length > 0) {
-      const initialValue = `${pointList[0].point}-${pointList[0].content}`;
-      setPoint(pointList[0].point);
-      setContent(pointList[0].content);
+    if (Array.isArray(pointList) && pointList.length > 0) {
+      const { point, content } = pointList[0];
+      setPoint(point);
+      setContent(content);
     }
   }, [pointList]);
 
@@ -266,7 +312,9 @@ const ClientProjectView = () => {
         obj => obj.name === step
       )?.step;
       if (filtered) {
-        const selectedTask = filtered.find(dt => dt.taskId.title === value?.split('$')[0]);
+        const selectedTask = filtered.find(
+          dt => dt.taskId.title === value?.split('$')[0]
+        );
         if (selectedTask) {
           const member = selectedTask.taskId.issueMember?._id;
           setAssignMember(member);
@@ -285,29 +333,6 @@ const ClientProjectView = () => {
     setStatus('');
     setLog('');
     setDate(formatedtoday);
-  };
-
-  const showWorkData = (content, name) => {
-    setDetailsIsLoading(true);
-    // setWorkDetailOpen(true);
-    axios
-      .get(`${process.env.REACT_APP_BASE_PATH}/api/project/databyid/${slug}`)
-      .then(response => {
-        setWorkDetails(
-          response?.data?.data[0]?.project_status
-            ?.filter(item => item.name === name)[0]
-            ?.step?.filter(
-              dt => dt.content === content
-              // dt => dt.point === point && dt.content === content
-            )[0]?.finalStatus
-        );
-      })
-      .then(res => {
-        setDetailsIsLoading(false);
-      })
-      .catch(error => {
-        console.log(error);
-      });
   };
 
   const documentDialogFunction = () => {
@@ -406,73 +431,6 @@ const ClientProjectView = () => {
 
   const handleInspectionDialog = () => {
     setInspectionDialogOpen(false);
-  };
-
-  const updateWorkStatus = (point, content, name, checkName) => {
-    setCheckListName(checkName);
-    setCheckedItems([]);
-    const lists = projectDetails?.inspections?.filter(
-      data =>
-        data.checkListStep === name &&
-        data.name === checkName &&
-        data.checkListNumber === point
-    );
-    setInspectionList(lists);
-    setPoint(point);
-    setContent(content);
-    setName(name);
-    setWorkStatusOpen(true);
-    setImage('');
-    setStatus('');
-    setDate(formatedtoday);
-    axios
-      .get(`${process.env.REACT_APP_BASE_PATH}/api/project/databyid/${slug}`)
-      .then(response => {
-        if (response?.data?.status === 200) {
-          setCurrentStatus(
-            response.data.data[0]?.project_status
-              .filter(item => item.name === name)[0]
-              .step?.filter(
-                dt => dt.point === point && dt.content === content
-              )[0].finalStatus[0].status
-          );
-          setTaskDetails(
-            response?.data?.data[0]?.project_status
-              ?.filter(item => item.name === name)[0]
-              .step?.filter(
-                dt => dt.point === point && dt.content === content
-              )[0]
-              ?.dailyTask?.filter(tdate => tdate.taskDate === formatedtoday)
-          );
-        } else {
-          setTaskDetails([]);
-        }
-      })
-      .catch(error => {
-        console.log(error);
-        toast('Error while showing task update');
-      });
-  };
-
-  const updateImageStatus = ({ point, content, name, url }) => {
-    axios
-      .put(
-        `${process.env.REACT_APP_BASE_PATH}/api/project/updateimagestatusbyid`,
-        {
-          id: slug,
-          name,
-          point,
-          content,
-          userName,
-          userId,
-          url,
-        }
-      )
-      .then(response => {
-        if (response?.data?.status === 200) {
-          toast('Image Approved Successfully.');
-        }
-      });
   };
 
   const workStatusCancel = () => {
@@ -597,33 +555,6 @@ const ClientProjectView = () => {
       // Remove checkbox value from array if unchecked
       setApproveImage(approveImage.filter(val => val !== value));
     }
-  };
-
-  const deleteStatusImage = async ({ point, content, name }) => {
-    setOpenAccordion('');
-    toggleShowImage();
-    setLoading(true);
-    const formData = new FormData();
-    formData.append('_id', projectDetails._id);
-    formData.append('url', showImageUrl);
-    formData.append('name', name);
-    formData.append('point', point);
-    formData.append('content', content);
-    await fetch(
-      `${process.env.REACT_APP_BASE_PATH}/api/project/deletestatusimage`,
-      {
-        method: 'POST',
-        headers: {},
-        body: formData,
-      }
-    ).then(res => {
-      setLoading(false);
-      if (res.ok) {
-        toast('Image deleted successfully.');
-      } else {
-        toast('Something went wrong while deleting the image.');
-      }
-    });
   };
 
   const handleUploadDocument = () => {
@@ -890,197 +821,117 @@ const ClientProjectView = () => {
   return (
     <AsideContainer>
       {Loading && <LoaderSpinner />}
-      <div className="flex flex-rowjustify-between -md:flex-col -md:gap-2 -md:pl-0 -md:my-2 w-full justify-between items-center">
-      <div className='flex items-center gap-1 lg:gap-2'>
-        <SidebarTrigger className="-ml-2 hover:bg-primary" />
-        <Separator orientation="vertical" className="data-[orientation=vertical]:h-4 bg-black" />
-        <IoIosArrowBack
-          onClick={() => router.back()}
-          className="cursor-pointer transition duration-300 hover:scale-150 ease-in-out"
-        />
-        <h1 className="font-ubuntu font-bold text-[25px] leading-7 py-5 text-nowrap">
-          Project Details
-        </h1>
-      </div>
-        <div className="flex flex-row gap-2 flex-wrap">
+      <div className="flex flex-row -md:flex-col -md:pl-0 -md:my-2 w-full justify-between">
+        <div className="flex items-center gap-1 lg:gap-2">
+          <SidebarTrigger className="-ml-2 hover:bg-primary" />
+          <Separator
+            orientation="vertical"
+            className="data-[orientation=vertical]:h-4 bg-black"
+          />
+          <IoIosArrowBack
+            onClick={() => router.back()}
+            className="cursor-pointer transition duration-300 hover:scale-150 ease-in-out"
+          />
+          <h1 className="font-ubuntu font-semibold text-[25px] leading-7 py-5 whitespace-nowrap">
+            Project Details
+          </h1>
+        </div>
+
+        <div className="flex flex-row gap-2 flex-wrap items-center">
           <Link href={`/admin/projects/payment-stages/${slug}`}>
-            <button className="px-[15px] py-[12px] bg-transparent border-2 border-secondary rounded-full font-ubuntu -md:px-2 -md:py-[6px] hover:bg-secondary [&_div]:hover:text-primary">
-              <div className="text-secondary flex flex-row">
-                <p className="text-[13px] font-bold leading-none -md:text-xs">
-                  Payment Stages
-                </p>
-              </div>
-            </button>
+            <ActionButton>Payment Stages</ActionButton>
           </Link>
           <Link href={`/admin/projects/payment-details/${slug}`}>
-            <button className="px-[15px] py-[12px] bg-transparent border-2 border-secondary rounded-full font-ubuntu -md:px-2 -md:py-[6px] hover:bg-secondary [&_div]:hover:text-primary">
-              <div className="text-secondary flex flex-row">
-                <p className="text-[13px] font-bold leading-none -md:text-xs">
-                  Payment Details
-                </p>
-              </div>
-            </button>
+            <ActionButton>Payment Details</ActionButton>
           </Link>
-          {userType === 'ROLE_ADMIN' && (
-            <>
-              {/* <Link href={`/admin/projects/view-checklist/${slug}`}>
-                <button
-                  // onClick={uploadDocument}
-                  className="px-[15px] py-[12px] bg-transparent border-2 border-secondary rounded-full font-ubuntu -md:px-2 -md:py-[6px] hover:bg-secondary [&_div]:hover:text-primary"
-                >
-                  <div className="text-secondary flex flex-row">
-                    <p className="text-[13px] font-bold leading-none -md:text-xs">
-                      Project Inspections
-                    </p>
-                  </div>
-                </button>
-              </Link> */}
 
-              <button
-                onClick={uploadDocument}
-                className="px-[15px] py-[12px] bg-transparent border-2 border-secondary rounded-full font-ubuntu -md:px-2 -md:py-[6px] cursor-pointer hover:bg-secondary [&_div]:hover:text-primary"
-              >
-                <div className="text-secondary flex flex-row">
-                  <p className="text-[13px] font-bold leading-none">
-                    Add Documents
-                  </p>
-                </div>
-              </button>
-            </>
+          {userType === 'ROLE_ADMIN' && (
+            <ActionButton onClick={uploadDocument}>Add Documents</ActionButton>
           )}
-          <button
-            className="px-[15px] py-[12px] bg-transparent border-2 border-secondary rounded-full font-ubuntu -md:px-2 -md:py-[6px] cursor-pointer hover:bg-secondary [&_div]:hover:text-primary"
-            onClick={() => updateStatus()}
-          >
-            <div className="text-secondary flex flex-row">
-              <p className="text-[13px] font-bold leading-none -md:text-xs">
-                Raise Ticket
-              </p>
-            </div>
-          </button>
+
+          <ActionButton onClick={updateStatus}>Raise Ticket</ActionButton>
         </div>
       </div>
-      <div className="grid grid-row grid-cols-6 gap-4 -lg:gap-2 -xl:grid-cols-4 -lg:grid-cols-3 -md:grid-cols-2 justify-evenly [&>div]:h-[88px] -lg:[&>div]:p-[10px] -md:[&>div]:h-14 -lg:text-xs ">
-        <div
-          className="p-5 w-full rounded-[14px] [&_svg]:text-primary font-ubuntu flex flex-row gap-2 items-center self-center justify-between bg-white cursor-pointer"
-          onClick={() => documentDialogFunction()}
-        >
-          <div className="font-semibold">Documents</div>
-          <IoDocumentsOutline className="text-5" />
-        </div>
-        <div
-          className="p-5 w-full rounded-[14px] [&_svg]:text-primary font-ubuntu flex flex-row gap-2 items-center self-center justify-between bg-white cursor-pointer"
+      <div className="grid grid-cols-6 -xl:grid-cols-4 -lg:grid-cols-3 -md:grid-cols-2 gap-4 -lg:gap-2 justify-evenly [&>div]:h-[88px] lg:[&>div]:p-[10px] -md:[&>div]:h-14 -lg:text-xs">
+        <StatCard
+          label="Documents"
+          value={<IoDocumentsOutline className="text-5" />}
+          onClick={documentDialogFunction}
+        />
+        <StatCard
+          label="Team"
+          value={<GoPeople className="text-5" />}
           onClick={() => setTeamOpen(true)}
-        >
-          <div className="font-semibold">Team</div>
-          <GoPeople className="text-5" />
-        </div>
-        <div className="p-5 w-full rounded-[14px] [&_svg]:text-primary font-ubuntu flex flex-row gap-2 items-center self-center justify-between bg-white">
-          <span className="font-semibold">
-            Site ID - {projectDetails?.siteID}
-          </span>
-          <MdLockOutline className="text-5" />
-        </div>
-        <div className="p-5 w-full rounded-[14px] [&_svg]:text-primary font-ubuntu flex flex-row gap-2 items-center self-center justify-between bg-white">
-          <div>
-            <span className="font-semibold">Start Date -</span>
-            <span> {startDate}</span>
-          </div>
-          <BsCalendar4Event className="text-5" />
-        </div>
-        <div className="p-5 w-full rounded-[14px] [&_svg]:text-primary font-ubuntu flex flex-row gap-2 items-center self-center justify-between bg-white">
-          <div>
-            <span className="font-semibold">End Date -</span>
-            <span> {endDate}</span>
-          </div>
-          <BsCalendar4Event className="text-5" />
-        </div>
-        <div className="px-5 py-[14px] flex w-full flex-auto items-center self-center justify-center bg-white rounded-[14px]">
-          <Select
-            onValueChange={value => {
-              if (value === showInspection) {
-                setInspectionDialogOpen(true);
-              } else {
-                handleOpenInspectionDialog();
-              }
-            }}
-          >
+        />
+        <StatCard
+          label={`Site ID - ${projectDetails?.siteID || 'N/A'}`}
+          value={<MdLockOutline className="text-5" />}
+        />
+        <StatCard
+          label={
+            <>
+              <span className="font-semibold">Start Date -</span> {startDate}
+            </>
+          }
+          value={<BsCalendar4Event className="text-5" />}
+        />
+        <StatCard
+          label={
+            <>
+              <span className="font-semibold">End Date -</span> {endDate}
+            </>
+          }
+          value={<BsCalendar4Event className="text-5" />}
+        />
+
+        <div className="px-5 py-[14px] flex w-full flex-auto items-center justify-center bg-white rounded-[14px]">
+          <Select onValueChange={value => handleOpenInspectionDialog(value)}>
             <SelectTrigger className="w-full">
               <SelectValue placeholder="No. of Inspections" />
             </SelectTrigger>
             <SelectContent>
               {projectDetails?.project_status
                 ?.sort((a, b) => a.priority - b.priority)
-                ?.map((item, index) => {
-                  return (
-                    <SelectItem key={item.name} value={item.name}>
-                      {item.name}
-                    </SelectItem>
-                  );
-                })}
+                ?.map(item => (
+                  <SelectItem key={item.name} value={item.name}>
+                    {item.name}
+                  </SelectItem>
+                ))}
             </SelectContent>
           </Select>
-          {/* <div>
-            <p className="font-semibold">No. of Inspections</p>
-            <ul className="dropdown-menu">
-              {projectDetails?.project_status
-                ?.sort((a, b) => a.priority - b.priority)
-                ?.map((item, index) => {
-                  return (
-                    <li
-                      key={index}
-                      onClick={() => handleOpenInspectionDialog(item?.name)}
-                    >
-                      <span className="dropdown-item">{item.name}</span>
-                    </li>
-                  );
-                })}
-            </ul>
-          </div> */}
         </div>
-        <div className="p-5 w-full rounded-[14px] [&_svg]:text-primary font-ubuntu flex flex-row gap-2 items-center self-center justify-between bg-white">
-          <span className="font-semibold">Pending Inspection</span>
-          <span className="px-[10px] py-[3px] font-semibold rounded-full border-[1px] border-primary bg-primary-foreground text-primary">
-            {
-              projectDetails?.inspections?.filter(itm => itm.passed === true)
-                ?.length
-            }
-          </span>
-        </div>
-        <div className="p-5 w-full rounded-[14px] [&_svg]:text-primary font-ubuntu flex flex-row gap-2 items-center self-center justify-between bg-white">
-          <span className="font-semibold">Passed Inspection</span>
-          <span className="px-[10px] py-[3px] font-semibold rounded-full border-[1px] border-primary bg-primary-foreground text-primary">
-            {
-              projectDetails?.inspections?.filter(itm => itm.passed === true)
-                ?.length
-            }
-          </span>
-        </div>
-        <div className="p-5 w-full rounded-[14px] [&_svg]:text-primary font-ubuntu flex flex-row gap-2 items-center self-center justify-between bg-white">
-          <span className="font-semibold">Total Tickets</span>
-          <span className="px-[10px] py-[3px] font-semibold rounded-full border-[1px] border-primary bg-primary-foreground text-primary">
-            {projectDetails?.openTicket?.length}
-          </span>
-        </div>
-        <div className="p-5 w-full rounded-[14px] [&_svg]:text-primary font-ubuntu flex flex-row gap-2 items-center self-center justify-between bg-white">
-          <span className="font-semibold">Pending Tickets</span>
-          <span className="px-[10px] py-[3px] font-semibold rounded-full border-[1px] border-primary bg-primary-foreground text-primary">
-            {
-              projectDetails?.openTicket?.filter(
-                dt => dt.finalStatus !== 'Completed'
-              )?.length
-            }
-          </span>
-        </div>
-        <div
+
+        <StatCard
+          label="Pending Inspection"
+          value={
+            projectDetails?.inspections?.filter(itm => itm.passed === false)
+              ?.length || 0
+          }
+        />
+        <StatCard
+          label="Passed Inspection"
+          value={
+            projectDetails?.inspections?.filter(itm => itm.passed === true)
+              ?.length || 0
+          }
+        />
+        <StatCard
+          label="Total Tickets"
+          value={projectDetails?.openTicket?.length || 0}
+        />
+        <StatCard
+          label="Pending Tickets"
+          value={
+            projectDetails?.openTicket?.filter(
+              t => t.finalStatus !== 'Completed'
+            )?.length || 0
+          }
+        />
+        <StatCard
+          label="Force Majeure"
+          value={projectDetails?.extension ?? 0}
           onClick={() => setExtensionOpen(prev => !prev)}
-          className="p-5 w-full rounded-[14px] [&_svg]:text-primary font-ubuntu flex flex-row gap-2 items-center self-center cursor-pointer justify-between bg-white"
-        >
-          <span className="font-semibold">Force Majeure</span>
-          <span className="px-[10px] py-[3px] font-semibold rounded-full border-[1px] border-primary bg-primary-foreground text-primary">
-            {projectDetails?.extension}
-          </span>
-        </div>
+        />
       </div>
       <section className="inspection-box mt-2">
         <div className="row mx-0">
@@ -1154,38 +1005,39 @@ const ClientProjectView = () => {
                   <AccordionContent className="py-0">
                     <div className="bg-[#efefef]  pt-2">
                       <div className="flex flex-row justify-end gap-2 mb-2">
-                        { userType !== 'ROLE_CLIENT' && (
-                        <span
-                          className="border border-primary rounded-full p-2 font-semibold text-primary cursor-pointer"
-                          onClick={() =>
-                            AddStepOpenModal(item?.step, item?.name)
-                          }
-                        >
-                          <FaPlus />
-                        </span>
+                        {userType !== 'ROLE_CLIENT' && (
+                          <span
+                            className="border border-primary rounded-full p-2 font-semibold text-primary cursor-pointer"
+                            onClick={() =>
+                              AddStepOpenModal(item?.step, item?.name)
+                            }
+                          >
+                            <FaPlus />
+                          </span>
                         )}
-                        { userType === 'ROLE_ADMIN' && (
-                        <span
-                          className="border border-primary rounded-full p-2 font-semibold text-primary cursor-pointer"
-                          onClick={() =>
-                            DeleteStepOpenModal(item?.step, item?.name)
-                          }
-                        >
-                          <FaMinus />
-                        </span>)}
+                        {userType === 'ROLE_ADMIN' && (
+                          <span
+                            className="border border-primary rounded-full p-2 font-semibold text-primary cursor-pointer"
+                            onClick={() =>
+                              DeleteStepOpenModal(item?.step, item?.name)
+                            }
+                          >
+                            <FaMinus />
+                          </span>
+                        )}
                       </div>
-                      <div className=" bg-secondary text-primary h-16 flex flex-row justify-evenly items-center rounded-t-3xl flex-auto text-base font-semibold -md:justify-between">
+                      <div className="bg-secondary text-primary h-16 flex flex-row justify-evenly items-center rounded-t-3xl flex-auto text-base font-semibold -md:justify-between">
                         <span className="font-semibold w-24 -sm:hidden" />
-                        <span className="font-semibold w-[200px] text-center -md:w-16 -md:ml-8 -sm:ml-12 -md:text-sm">
+                        <span className="font-semibold w-[200px] text-center -md:w-16 -md:ml-8 -sm:ml-12 -md:text-xs">
                           Point
                         </span>
-                        <span className="font-semibold w-[200px] flex md:ml-6 -md:w-20 text-left -sm:ml-4 -md:text-sm">
+                        <span className="font-semibold w-[200px] flex md:ml-6 -md:w-20 text-left -sm:ml-4 -md:text-xs">
                           Member Issue
                         </span>
-                        <span className="font-semibold w-[200px] text-left -md:w-24 -md:text-sm">
+                        <span className="font-semibold w-[200px] text-left -md:w-24 -md:text-xs">
                           Schedule Time
                         </span>
-                        <span className="font-semibold w-[70px] text-center -md:w-24 -md:text-sm">
+                        <span className="font-semibold w-[70px] text-center -md:w-24 -md:text-xs">
                           Action
                         </span>
                       </div>
@@ -1219,13 +1071,13 @@ const ClientProjectView = () => {
                         return (
                           <div
                             key={itm.taskId.title + +idx}
-                            className="flex flex-row justify-evenly w-full py-0 outline-none"
+                            className="flex flex-row justify-evenly w-full py-0 outline-none -md:text-xs"
                           >
                             <div className="relative w-[120px] -md:w-8">
                               <div className="h-full w-6 flex items-center justify-center">
-                                <div
+                                <span
                                   className={cn(
-                                    'w-[2px] bg-secondary pointer-events-none h-full',
+                                    'w-[2px] bg-secondary pointer-events-none h-full -md:w-[1px]',
                                     idx === 0 ? 'mt-[100%] h-8' : '',
                                     idx === item.step.length - 1
                                       ? 'mb-[100%] h-8'
@@ -1238,14 +1090,14 @@ const ClientProjectView = () => {
                               </div>
                               <div
                                 className={cn(
-                                  'w-8 h-8 absolute top-1/2 md:right-[92px] -md:right-1 -mt-4 rounded-full bg-green-500 shadow-xl text-center',
+                                  'w-8 h-8 absolute top-1/2 md:right-[92px] -md:right-2 -mt-4 rounded-full bg-green-500 shadow-xl text-center -md:h-6 -md:w-6 -md:[&_svg]:text-base',
                                   itm.taskId.status !== 'Complete'
                                     ? 'bg-primary'
                                     : ''
                                 )}
                               >
                                 {itm.taskId.status === 'Pending' && (
-                                  <BsClockHistory className="mt-1 ml-1 text-secondary text-2xl " />
+                                  <BsClockHistory className="mt-1 ml-1 text-secondary text-2xl" />
                                 )}
                                 {itm.taskId.status === 'Complete' && (
                                   <Check
@@ -1257,15 +1109,15 @@ const ClientProjectView = () => {
                                   />
                                 )}
                                 {itm.taskId.status === 'In Progress' && (
-                                  <TbProgress className="mt-1 ml-1 text-secondary text-2xl " />
+                                  <TbProgress className="mt-1 ml-1 text-secondary text-2xl" />
                                 )}
                                 {itm.taskId.status === 'Overdue' && (
-                                  <LuTimerReset className="mt-[3px] ml-1 text-secondary text-2xl " />
+                                  <LuTimerReset className="mt-[3px] ml-1 text-secondary text-2xl" />
                                 )}
                               </div>
                             </div>
                             <div className="w-[200px] flex items-center -md:w-16">
-                              <p className="text-sm font-semibold -md:text-xs">
+                              <p className="text-sm font-medium -md:text-xs">
                                 {itm.taskId.title}
                                 {itm.checkList?.toLowerCase() === 'yes' && (
                                   <>inspections</>
@@ -1275,19 +1127,21 @@ const ClientProjectView = () => {
                             <div className="w-[200px] flex self-center justify-start -md:w-16">
                               {`${itm.taskId.issueMember?.name}`}
                             </div>
-                            <div className="w-[200px] -md:w-28 my-1 flex items-start flex-col">
+                            <div className="w-[200px] -md:w-20 my-1 flex items-start flex-col">
                               <div className="text-left text-nowrap">
                                 <div className="flex flex-row mb-2">
-                                  <p className="text-sm font-semibold -md:text-xs">
+                                  <p className="text-sm font-medium -md:text-xs">
                                     ETC :
                                   </p>
-                                  <p className="text-sm -md:text-xs">{finalDate}</p>
+                                  <p className="text-sm -md:text-xs">
+                                    {finalDate}
+                                  </p>
                                 </div>
                                 <div className="flex flex-row">
-                                  <p className="text-sm font-semibold -md:text-xs">
+                                  <p className="text-sm font-medium -md:text-xs">
                                     DOC :
                                   </p>
-                                  <p className="text-sm -md:text-xs">
+                                  <p className="text-sm -md:hidden">
                                     {itm?.taskId?.updatedOn !== '' &&
                                       itm?.taskId?.status === 'Complete' &&
                                       new Date(itm.taskId.updatedOn)
@@ -1316,7 +1170,7 @@ const ClientProjectView = () => {
                                 onClick={() => {
                                   router.push(`/admin/tasks/${itm.taskId._id}`);
                                 }}
-                                >
+                              >
                                 Details
                               </button>
                             </div>
@@ -1847,7 +1701,11 @@ const ClientProjectView = () => {
                       >{`${new Date(item?.updatedAt).getDate()} ${
                         monthNames[new Date(item.updatedAt).getMonth()]
                       }, ${new Date(item.updatedAt).getFullYear()}`}</span>
-                      <a ref={linkRef} style={{ display: 'none' }} target='_blank'></a>
+                      <a
+                        ref={linkRef}
+                        style={{ display: 'none' }}
+                        target="_blank"
+                      ></a>
                       <span
                         className="bg-green-600 p-2 rounded-full cursor-pointer"
                         onClick={() => {

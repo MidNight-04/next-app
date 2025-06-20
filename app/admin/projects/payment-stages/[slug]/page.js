@@ -1,6 +1,6 @@
-"use client";
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+'use client';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import {
   Button,
   Typography,
@@ -10,27 +10,26 @@ import {
   DialogContentText,
   DialogActions,
   TextField,
-} from "@mui/material";
-import { useAuthStore } from "../../../../../store/useAuthStore";
-import { useParams } from "next/navigation";
-import AsideContainer from "../../../../../components/AsideContainer";
-import { cn } from "../../../../../lib/utils";
-import { IoIosArrowBack } from "react-icons/io";
-import { useRouter } from "next/navigation";
-import { FiEdit } from "react-icons/fi";
-import { MdAdd, MdOutlineDelete } from "react-icons/md";
-import { toast } from "sonner";
-import { SidebarTrigger } from "../../../../../components/ui/sidebar";
-import { Separator } from "../../../../../components/ui/separator";
-
+} from '@mui/material';
+import { useAuthStore } from '../../../../../store/useAuthStore';
+import { useParams } from 'next/navigation';
+import AsideContainer from '../../../../../components/AsideContainer';
+import { cn } from '../../../../../lib/utils';
+import { IoIosArrowBack } from 'react-icons/io';
+import { useRouter } from 'next/navigation';
+import { FiEdit } from 'react-icons/fi';
+import { MdAdd, MdOutlineDelete } from 'react-icons/md';
+import { toast } from 'sonner';
+import { SidebarTrigger } from '../../../../../components/ui/sidebar';
+import { Separator } from '../../../../../components/ui/separator';
 
 let today = new Date();
 let yyyy = today.getFullYear();
 let mm = today.getMonth() + 1;
 let dd = today.getDate();
-if (dd < 10) dd = "0" + dd;
-if (mm < 10) mm = "0" + mm;
-let formatedtoday = yyyy + "-" + mm + "-" + dd;
+if (dd < 10) dd = '0' + dd;
+if (mm < 10) mm = '0' + mm;
+let formatedtoday = yyyy + '-' + mm + '-' + dd;
 
 const Page = () => {
   const userRole = useAuthStore(state => state.userType);
@@ -41,14 +40,14 @@ const Page = () => {
   const [data, setData] = useState([]);
   const [updateOpen, setUpdateOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [Id, setId] = useState("");
-  const [payment, setPayment] = useState("");
-  const [stage, setStage] = useState("");
-  const [prevPayment, setPrevPayment] = useState("");
-  const [prevStage, setPrevStage] = useState("");
+  const [Id, setId] = useState('');
+  const [payment, setPayment] = useState('');
+  const [stage, setStage] = useState('');
+  const [prevPayment, setPrevPayment] = useState('');
+  const [prevStage, setPrevStage] = useState('');
   const [showContent, setShowContent] = useState([]);
-  const [status, setStatus] = useState("");
-  const [name, setName] = useState("");
+  const [status, setStatus] = useState('');
+  const [name, setName] = useState('');
   useEffect(() => {
     // Initialize showContent state based on the number of project steps
     if (data?.stages) {
@@ -70,7 +69,7 @@ const Page = () => {
   }, []);
 
   const getAllPaymentStage = () => {
-    if (userRole?.substring(5).toLowerCase() === "client") {
+    if (userRole?.substring(5).toLowerCase() === 'client') {
       axios
         .post(
           `${process.env.REACT_APP_BASE_PATH}/api/project/paymentstages/forclient`,
@@ -120,8 +119,8 @@ const Page = () => {
         if (response) {
           toast(`${response.data.message}`);
           getAllPaymentStage();
-          setPayment("");
-          setStage("");
+          setPayment('');
+          setStage('');
         }
       })
       .catch(error => {
@@ -132,9 +131,9 @@ const Page = () => {
 
   const handleConfirmUpdate = () => {
     if (!payment) {
-      toast("Payment % is required");
+      toast('Payment % is required');
     } else if (!stage) {
-      toast("Payment Stage is required");
+      toast('Payment Stage is required');
     } else {
       const data = {
         id: Id,
@@ -147,7 +146,7 @@ const Page = () => {
         userName: userName,
         activeUser: activeUser,
       };
-      if (status === "edit") {
+      if (status === 'edit') {
         axios
           .get(
             `${process.env.REACT_APP_BASE_PATH}/api/project/paymentstages/bysiteid/${slug}`
@@ -163,7 +162,7 @@ const Page = () => {
             });
             if (percent > 100) {
               setUpdateOpen(false);
-              toast("Event has been created.");
+              toast('Event has been created.');
             } else {
               axios
                 .put(
@@ -174,8 +173,8 @@ const Page = () => {
                   if (response) {
                     getAllPaymentStage();
                     toast(`${response.data.message}`);
-                    setPrevPayment("");
-                    setPrevStage("");
+                    setPrevPayment('');
+                    setPrevStage('');
                     // Close the confirmation dialog
                     setUpdateOpen(false);
                   }
@@ -188,7 +187,7 @@ const Page = () => {
           .catch(error => {
             console.log(error);
           });
-      } else if (status === "add") {
+      } else if (status === 'add') {
         axios
           .put(
             `${process.env.REACT_APP_BASE_PATH}/api/project/paymentstages/addnewstage`,
@@ -215,16 +214,16 @@ const Page = () => {
     setStage(stge);
     setPrevPayment(pay);
     setPrevStage(stge);
-    setStatus("edit");
+    setStatus('edit');
     setUpdateOpen(true);
     setId(id);
   };
   const handleAddOpen = (id, name) => {
     setId(id);
-    setPayment("");
-    setStage("");
+    setPayment('');
+    setStage('');
     setName(name);
-    setStatus("add");
+    setStatus('add');
     axios
       .get(
         `${process.env.REACT_APP_BASE_PATH}/api/project/paymentstages/bysiteid/${slug}`
@@ -237,7 +236,7 @@ const Page = () => {
         });
         if (percent === 100) {
           setUpdateOpen(false);
-          toast("Overall payment percent exceed 100%");
+          toast('Overall payment percent exceed 100%');
         } else {
           setUpdateOpen(true);
         }
@@ -262,17 +261,20 @@ const Page = () => {
   return (
     <AsideContainer>
       <div>
-      <div className='flex w-full items-center gap-1 lg:gap-2'>
-        <SidebarTrigger className="-ml-2 hover:bg-primary" />
-        <Separator orientation="vertical" className="data-[orientation=vertical]:h-4 bg-black" />
-        <IoIosArrowBack
-          onClick={() => router.back()}
-          className="cursor-pointer transition duration-300 hover:scale-150 ease-in-out"
-        />
-        <h1 className="font-ubuntu font-bold text-[25px] leading-7 py-5 text-nowrap">
-          Project Payment Stages
-        </h1>
-      </div>
+        <div className="flex w-full items-center gap-1 lg:gap-2">
+          <SidebarTrigger className="-ml-2 hover:bg-primary" />
+          <Separator
+            orientation="vertical"
+            className="data-[orientation=vertical]:h-4 bg-black"
+          />
+          <IoIosArrowBack
+            onClick={() => router.back()}
+            className="cursor-pointer transition duration-300 hover:scale-150 ease-in-out"
+          />
+          <h1 className="font-ubuntu font-bold text-[25px] leading-7 py-5 text-nowrap">
+            Project Payment Stages
+          </h1>
+        </div>
         <div className="mb-6">
           {data?.map((item, index) => {
             return (
@@ -280,12 +282,12 @@ const Page = () => {
                 <div>
                   <div>
                     <div className="bg-white rounded-3xl p-5 text-secondary font-semibold text-lg text-center">
-                      {item?.floor === "0" ? `Ground ` : `${item.floor} `}
+                      {item?.floor === '0' ? `Ground ` : `${item.floor} `}
                       Floor
                     </div>
                   </div>
                   <>
-                    {userRole === "ROLE_ADMIN" && (
+                    {userRole === 'ROLE_ADMIN' && (
                       <div className="flex flex-row items-center justify-end">
                         <span
                           className="p-2 bg-primary-foreground border border-primary rounded-full cursor-pointer mt-2 [&_svg]:text-primary"
@@ -304,25 +306,25 @@ const Page = () => {
                             </th>
                             <th
                               className={cn(
-                                "p-5",
-                                userRole !== "ROLE_ADMIN" && "rounded-tr-3xl"
+                                'p-5',
+                                userRole !== 'ROLE_ADMIN' && 'rounded-tr-3xl'
                               )}
                               scope="col"
                             >
                               Stages
                             </th>
-                            {userRole === "ROLE_ADMIN" ? (
+                            {userRole === 'ROLE_ADMIN' ? (
                               <th
                                 scope="col"
                                 className={cn(
-                                  "p-5",
-                                  userRole === "ROLE_ADMIN" && "rounded-tr-3xl"
+                                  'p-5',
+                                  userRole === 'ROLE_ADMIN' && 'rounded-tr-3xl'
                                 )}
                               >
                                 Action
                               </th>
                             ) : (
-                              ""
+                              ''
                             )}
                           </tr>
                         </thead>
@@ -334,31 +336,31 @@ const Page = () => {
                                 key={idx}
                                 className={cn(
                                   idx % 2
-                                    ? "bg-secondary-foreground"
-                                    : "bg-primary-foreground"
+                                    ? 'bg-secondary-foreground'
+                                    : 'bg-primary-foreground'
                                 )}
                               >
                                 <td
                                   className={cn(
-                                    "p-4 text-secondary text-sm font-semibold",
+                                    'p-4 text-secondary text-sm font-semibold',
                                     item?.stages?.length - 1 === idx
-                                      ? "rounded-bl-3xl"
-                                      : ""
+                                      ? 'rounded-bl-3xl'
+                                      : ''
                                   )}
                                 >
                                   {itm.payment}
                                 </td>
                                 <td
                                   className={cn(
-                                    "p-4 text-secondary text-sm font-semibold",
+                                    'p-4 text-secondary text-sm font-semibold',
                                     item?.stages?.length - 1 === idx
-                                      ? "rounded-br-3xl"
-                                      : ""
+                                      ? 'rounded-br-3xl'
+                                      : ''
                                   )}
                                 >
                                   {itm.stage}
                                 </td>
-                                {userRole === "ROLE_ADMIN" ? (
+                                {userRole === 'ROLE_ADMIN' ? (
                                   <td className="flex flex-row gap-2 items-center justify-center h-[52px]">
                                     <span
                                       className="p-2 rounded-full border border-primary text-primary bg-primary-foreground cursor-pointer"
@@ -403,7 +405,7 @@ const Page = () => {
                                   //     </span>
                                   //   </Button>
                                   // </td>
-                                  ""
+                                  ''
                                 )}
                               </tr>
                             );
@@ -420,9 +422,9 @@ const Page = () => {
         </div>
         <Dialog open={updateOpen} onClose={handleUpdateCancel}>
           <DialogTitle>
-            {status === "edit" ? "Update" : "Add"} Payment Stages
+            {status === 'edit' ? 'Update' : 'Add'} Payment Stages
           </DialogTitle>
-          <DialogContent style={{ width: "500px" }}>
+          <DialogContent style={{ width: '500px' }}>
             <DialogContentText>
               <Typography>Payment %</Typography>
               <TextField
@@ -453,7 +455,7 @@ const Page = () => {
               Cancel
             </Button>
             <Button onClick={handleConfirmUpdate} color="primary">
-              {status === "edit" ? "Update" : "Add"}
+              {status === 'edit' ? 'Update' : 'Add'}
             </Button>
           </DialogActions>
         </Dialog>

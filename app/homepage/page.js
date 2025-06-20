@@ -1,24 +1,24 @@
-"use client";
-import CurrencyRupeeIcon from "@mui/icons-material/CurrencyRupee";
-import EastIcon from "@mui/icons-material/East";
-import dummyImagePdf from "../../public/assets/dummy-image-pdf.jpg";
-import { AiOutlineExpandAlt } from "react-icons/ai";
-import { FaRetweet } from "react-icons/fa";
-import { useQueries } from "@tanstack/react-query";
+'use client';
+import CurrencyRupeeIcon from '@mui/icons-material/CurrencyRupee';
+import EastIcon from '@mui/icons-material/East';
+import dummyImagePdf from '../../public/assets/dummy-image-pdf.jpg';
+import { AiOutlineExpandAlt } from 'react-icons/ai';
+import { FaRetweet } from 'react-icons/fa';
+import { useQueries } from '@tanstack/react-query';
 import {
   getCategoryList,
   postDealerEndpoint,
   postUserEndpoint,
-} from "../../helpers/endpoints";
-import Image from "next/image";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { Card, CardActionArea } from "@mui/material";
-import dynamic from "next/dynamic";
-import Slider from "../../components/Slider";
-import { MdArrowOutward } from "react-icons/md";
-const Header = dynamic(() => import("../../components/Header"), { ssr: false });
-const Footer = dynamic(() => import("../../components/Footer"), { ssr: false });
+} from '../../helpers/endpoints';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { Card, CardActionArea } from '@mui/material';
+import dynamic from 'next/dynamic';
+import Slider from '../../components/Slider';
+import { MdArrowOutward } from 'react-icons/md';
+const Header = dynamic(() => import('../../components/Header'), { ssr: false });
+const Footer = dynamic(() => import('../../components/Footer'), { ssr: false });
 
 const Page = () => {
   const router = useRouter();
@@ -29,42 +29,42 @@ const Page = () => {
   ] = useQueries({
     queries: [
       {
-        queryKey: ["categories"],
+        queryKey: ['categories'],
         queryFn: getCategoryList,
       },
       {
-        queryKey: ["products"],
+        queryKey: ['products'],
         queryFn: () =>
           postDealerEndpoint({
-            endpoint: "products/all",
+            endpoint: 'products/all',
           }),
       },
       {
-        queryKey: ["designs"],
+        queryKey: ['designs'],
         queryFn: () =>
           postUserEndpoint({
-            endpoint: "filterDesign",
+            endpoint: 'filterDesign',
           }),
       },
     ],
   });
 
   const sortByProductCommission = (a, b) => {
-    const aPrice = a.price || "";
-    const bPrice = b.price || "";
+    const aPrice = a.price || '';
+    const bPrice = b.price || '';
 
-    if (a.productCommission === "" && b.productCommission !== "") {
+    if (a.productCommission === '' && b.productCommission !== '') {
       return 1;
-    } else if (a.productCommission !== "" && b.productCommission === "") {
+    } else if (a.productCommission !== '' && b.productCommission === '') {
       return -1;
     } else if (a.productCommission !== b.productCommission) {
       return b.productCommission - a.productCommission;
     } else {
-      if (aPrice === "" && bPrice !== "") {
+      if (aPrice === '' && bPrice !== '') {
         return 1;
-      } else if (aPrice !== "" && bPrice === "") {
+      } else if (aPrice !== '' && bPrice === '') {
         return -1;
-      } else if (aPrice !== "" && bPrice !== "") {
+      } else if (aPrice !== '' && bPrice !== '') {
         return aPrice.localeCompare(bPrice);
       } else {
         return 0;
@@ -152,15 +152,15 @@ const Page = () => {
                 ?.slice(0, 10)
                 .map(
                   (item, index) =>
-                    item.approvalStatus === "Approved" &&
-                    item.userStatus === "active" && (
+                    item.approvalStatus === 'Approved' &&
+                    item.userStatus === 'active' && (
                       <div
                         className="cursor-pointer my-5 text-black bg-white rounded-lg border border-gray-200 hover:shadow-lg hover:scale-105 transition duration-300"
                         key={index}
                       >
                         <span className="text-secondary mb-2 text-end gap-1 items-center bg-primary -mt-5 rounded-md font-ubuntu text-sm p-2 float-end mr-2">
-                          Product Category:{" "}
-                          {item?.category ? item?.category : "Not Available"}
+                          Product Category:{' '}
+                          {item?.category ? item?.category : 'Not Available'}
                         </span>
                         <div
                           className="p-6"
@@ -182,7 +182,7 @@ const Page = () => {
                             {item?.name}
                             <div className="text-primary">
                               Price:
-                              <CurrencyRupeeIcon sx={{ fontSize: "14px" }} />
+                              <CurrencyRupeeIcon sx={{ fontSize: '14px' }} />
                               {item.price}
                             </div>
                           </div>
@@ -213,8 +213,8 @@ const Page = () => {
           {!featuredDesignIsLoading &&
             featuredDesign?.data.slice(0, 10).map(
               (item, index) =>
-                item.approvalStatus === "Approved" &&
-                item.userStatus === "active" && (
+                item.approvalStatus === 'Approved' &&
+                item.userStatus === 'active' && (
                   <div
                     className="cursor-pointer text-black bg-white rounded-lg border border-gray-200 hover:shadow-lg hover:scale-105 transition duration-300"
                     key={index}
@@ -257,7 +257,7 @@ const Page = () => {
                         <div className="flex flex-row justify-between -md:text-sm text-primary font-semibold md:px-2 py-1 border border-gray-200 rounded-md -md:px-1  ">
                           <div className="flex flex-row gap-1 items-center ">
                             <AiOutlineExpandAlt className="text-xl -md:text-sm" />
-                            Area:{" "}
+                            Area:{' '}
                             {parseInt(item.plotLength) *
                               parseInt(item.plotWidth)}
                             sqft

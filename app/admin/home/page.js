@@ -1,13 +1,13 @@
-"use client";
-import React, { useState, useEffect } from "react";
-import TableContainer from "@mui/material/TableContainer";
-import Paper from "@mui/material/Paper";
-import InfoIcon from "@mui/icons-material/Info";
-import axios from "axios";
-import { Box, Chip, Modal, Typography } from "@mui/material";
-import { DataGrid } from "@mui/x-data-grid";
-import Link from "next/link";
-import AsideContainer from "../../../components/AsideContainer";
+'use client';
+import React, { useState, useEffect } from 'react';
+import TableContainer from '@mui/material/TableContainer';
+import Paper from '@mui/material/Paper';
+import InfoIcon from '@mui/icons-material/Info';
+import axios from 'axios';
+import { Box, Chip, Modal, Typography } from '@mui/material';
+import { DataGrid } from '@mui/x-data-grid';
+import Link from 'next/link';
+import AsideContainer from '../../../components/AsideContainer';
 
 const style = {
   // position: "absolute",
@@ -15,8 +15,8 @@ const style = {
   // left: "50%",
   // transform: "translate(-50%, -50%)",
   // width: 400,
-  bgcolor: "background.paper",
-  border: "2px solid #000",
+  bgcolor: 'background.paper',
+  border: '2px solid #000',
   boxShadow: 24,
   p: 4,
 };
@@ -26,10 +26,10 @@ const UserOrders = () => {
   const [rows, setRows] = useState([]);
   const [address, setAddress] = useState(null);
   // const activeUser = localStorage.getItem("activeUser");
-  const activeUser = "ROLE_CLIENT";
+  const activeUser = 'ROLE_CLIENT';
   const [open, setOpen] = React.useState(false);
-  const userRole = "admin";
-  const type = "admin";
+  const userRole = 'admin';
+  const type = 'admin';
 
   // const { userRole } = useSelector(store => store.userReducer);
   const handleClose = () => setOpen(false);
@@ -43,14 +43,14 @@ const UserOrders = () => {
         setOpen(true);
       })
       .catch(err => {
-        console.error("Error:", err);
+        console.error('Error:', err);
         setError(err);
       });
   };
 
   // MY-DESIGN api Call here
   useEffect(() => {
-    if (type === "architect" || type === "dealer") {
+    if (type === 'architect' || type === 'dealer') {
       axios
         .post(`${process.env.REACT_APP_BASE_PATH}/api/user/order-details`, {
           architectId: activeUser,
@@ -60,10 +60,10 @@ const UserOrders = () => {
           setRows(resp?.data?.data);
         })
         .catch(err => {
-          console.error("Error:", err);
+          console.error('Error:', err);
           setError(err);
         });
-    } else if (type === "order-list" || type === "admin") {
+    } else if (type === 'order-list' || type === 'admin') {
       axios
         .post(`${process.env.REACT_APP_BASE_PATH}/api/user/order-details`)
         .then(resp => {
@@ -71,10 +71,10 @@ const UserOrders = () => {
           setRows(resp?.data?.data);
         })
         .catch(err => {
-          console.error("Error:", err);
+          console.error('Error:', err);
           setError(err);
         });
-    } else if (type == "user") {
+    } else if (type == 'user') {
       axios
         .post(`${process.env.REACT_APP_BASE_PATH}/api/user/order-details`, {
           userId: activeUser,
@@ -84,24 +84,24 @@ const UserOrders = () => {
           setRows(resp?.data?.data);
         })
         .catch(err => {
-          console.error("Error:", err);
+          console.error('Error:', err);
           setError(err);
         });
     }
   }, [type]);
 
   const columns = [
-    { field: "id", headerName: "ID", width: 130 },
-    { field: "product_name", headerName: "Product Name", width: 130 },
-    { field: "vendor_name", headerName: "Vendor Name", width: 130 },
-    { field: "order_id", headerName: "Order ID", width: 130 },
-    { field: "order_type", headerName: "Order Type", width: 130 },
-    { field: "amount", headerName: "Amount", width: 130 },
-    { field: "payment_mode", headerName: "Payment Mode", width: 130 },
-    { field: "payment_status", headerName: "Payment Status", width: 130 },
+    { field: 'id', headerName: 'ID', width: 130 },
+    { field: 'product_name', headerName: 'Product Name', width: 130 },
+    { field: 'vendor_name', headerName: 'Vendor Name', width: 130 },
+    { field: 'order_id', headerName: 'Order ID', width: 130 },
+    { field: 'order_type', headerName: 'Order Type', width: 130 },
+    { field: 'amount', headerName: 'Amount', width: 130 },
+    { field: 'payment_mode', headerName: 'Payment Mode', width: 130 },
+    { field: 'payment_status', headerName: 'Payment Status', width: 130 },
     {
-      field: "status",
-      headerName: "Status",
+      field: 'status',
+      headerName: 'Status',
       width: 150,
       renderCell: params => {
         return (
@@ -112,8 +112,8 @@ const UserOrders = () => {
       },
     },
     {
-      field: "address",
-      headerName: "Address",
+      field: 'address',
+      headerName: 'Address',
       width: 130,
       renderCell: params => {
         return (
@@ -125,7 +125,7 @@ const UserOrders = () => {
         );
       },
     },
-    { field: "otp", headerName: "OTP", width: 130 },
+    { field: 'otp', headerName: 'OTP', width: 130 },
   ];
 
   const arrayData = [];
@@ -154,13 +154,13 @@ const UserOrders = () => {
 
   const actionColumn = [
     {
-      field: "action",
-      headerName: "Action",
+      field: 'action',
+      headerName: 'Action',
       width: 200,
       renderCell: params => {
         return (
           <div className="cellAction">
-            {params?.row?.contact_type == "Material Purchase" ? (
+            {params?.row?.contact_type == 'Material Purchase' ? (
               <Link
                 href={`/${userRole.substring(5).toLowerCase()}/view-product/${
                   params?.row?.product_detail
@@ -187,9 +187,9 @@ const UserOrders = () => {
             >
               <Chip label="Payment" color="secondary" size="small" />
             </Link>
-            {params?.row?.approvalStatus == "Pending" && type == "user" ? (
-              ""
-            ) : type == "user" ? (
+            {params?.row?.approvalStatus == 'Pending' && type == 'user' ? (
+              ''
+            ) : type == 'user' ? (
               <Link
                 href={`/${userRole
                   .substring(5)

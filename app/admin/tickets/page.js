@@ -1,25 +1,25 @@
-"use client";
-import { useEffect, useState } from "react";
-import axios from "axios";
-import NoImage from "../../../public/assets/no-image-available.png";
-import { RiShareForwardFill } from "react-icons/ri";
-import { useAuthStore } from "../../../store/useAuthStore";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import Image from "next/image";
-import AsideContainer from "../../../components/AsideContainer";
-import { cn } from "../../../lib/utils";
-import { SidebarTrigger } from "../../../components/ui/sidebar";
-import { Separator } from "../../../components/ui/separator";
+'use client';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
+import NoImage from '../../../public/assets/no-image-available.png';
+import { RiShareForwardFill } from 'react-icons/ri';
+import { useAuthStore } from '../../../store/useAuthStore';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+import AsideContainer from '../../../components/AsideContainer';
+import { cn } from '../../../lib/utils';
+import { SidebarTrigger } from '../../../components/ui/sidebar';
+import { Separator } from '../../../components/ui/separator';
 
 const Page = () => {
   const userId = useAuthStore(state => state.userId);
   const userType = useAuthStore(state => state.userType);
   const hasHydrated = useAuthStore.persist?.hasHydrated();
-  const [activeFilter, setActiveFilter] = useState("All Ticket");
+  const [activeFilter, setActiveFilter] = useState('All Ticket');
   const [ticketList, setTicketList] = useState([]);
   const router = useRouter();
-  const [status, setStatus] = useState("");
+  const [status, setStatus] = useState('');
   const [filteredTickets, setFilteredTickets] = useState(null);
   const [projectList, setProjectList] = useState([]);
   const [memberList, setMemberList] = useState([]);
@@ -33,12 +33,12 @@ const Page = () => {
   useEffect(() => {
     const fetchTickets = async () => {
       try {
-        if (userType === "ROLE_USER" || userType === "ROLE_ADMIN") {
+        if (userType === 'ROLE_USER' || userType === 'ROLE_ADMIN') {
           const response = await axios.get(
             `${process.env.REACT_APP_BASE_PATH}/api/tickets/getalltickets`
           );
           setTicketList(response.data.data);
-        } else if (userType === "ROLE_CLIENT") {
+        } else if (userType === 'ROLE_CLIENT') {
           const response = await axios.get(
             `${process.env.REACT_APP_BASE_PATH}/api/tickets/gettickets/${userId}`
           );
@@ -62,25 +62,25 @@ const Page = () => {
     let filteredData;
 
     switch (filter) {
-      case "All Ticket":
+      case 'All Ticket':
         filteredData = ticketList;
         break;
-      case "Project Ticket":
+      case 'Project Ticket':
         filteredData = ticketList.filter(
           ticket => ticket.siteID === filterData
         );
         break;
-      case "Employee Ticket":
+      case 'Employee Ticket':
         filteredData = ticketList.filter(ticket =>
           ticket.assignMember?.some(obj => obj.employeeID === filterData)
         );
         break;
-      case "Client Ticket":
+      case 'Client Ticket':
         filteredData = ticketList.filter(
           ticket => ticket.client?.id === filterData
         );
         break;
-      case "Overdue Ticket":
+      case 'Overdue Ticket':
         filteredData = ticketList.filter(ticket => {
           const dateStr = ticket.date;
           const finalDateStr = ticket.finalDate;
@@ -91,9 +91,9 @@ const Page = () => {
           return finalDate > newDate;
         });
         break;
-      case "Pending Ticket":
+      case 'Pending Ticket':
         filteredData = ticketList?.filter(
-          ticket => ticket.finalStatus === "Pending"
+          ticket => ticket.finalStatus === 'Pending'
         );
         break;
       default:
@@ -120,24 +120,27 @@ const Page = () => {
   return (
     <AsideContainer>
       <div className="flex flex-row justify-between items-center my-5">
-        <div className='flex w-full items-center gap-1 lg:gap-2'>
+        <div className="flex w-full items-center gap-1 lg:gap-2">
           <SidebarTrigger className="-ml-2 hover:bg-primary" />
-          <Separator orientation="vertical" className="data-[orientation=vertical]:h-4 bg-black" />
+          <Separator
+            orientation="vertical"
+            className="data-[orientation=vertical]:h-4 bg-black"
+          />
           <h1 className="font-ubuntu font-bold text-[25px] leading-7 text-nowrap">
             Ticket List
           </h1>
         </div>
         <div>
-          {userType === "ROLE_USER" && (
+          {userType === 'ROLE_USER' && (
             <div className="flex flex-row items-center gap-4">
               <div>
                 <button
-                  onClick={() => handleButtonClick("All Ticket")}
+                  onClick={() => handleButtonClick('All Ticket')}
                   className={cn(
-                    "flex flex-row gap-2 py-2 px-4 text-nowrap bg-primary-foreground text-primary rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl cursor-pointer ",
-                    activeFilter === "All Ticket"
-                      ? "text-green-800 bg-green-200 border-green-800"
-                      : ""
+                    'flex flex-row gap-2 py-2 px-4 text-nowrap bg-primary-foreground text-primary rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl cursor-pointer ',
+                    activeFilter === 'All Ticket'
+                      ? 'text-green-800 bg-green-200 border-green-800'
+                      : ''
                   )}
                 >
                   All Tickets
@@ -146,12 +149,12 @@ const Page = () => {
               <div>
                 <button
                   className={cn(
-                    "flex flex-row gap-2 py-2 px-4 text-nowrap bg-primary-foreground text-primary rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl cursor-pointer",
-                    activeFilter === "Overdue Ticket"
-                      ? "text-green-800 bg-green-200 border-green-800"
-                      : ""
+                    'flex flex-row gap-2 py-2 px-4 text-nowrap bg-primary-foreground text-primary rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl cursor-pointer',
+                    activeFilter === 'Overdue Ticket'
+                      ? 'text-green-800 bg-green-200 border-green-800'
+                      : ''
                   )}
-                  onClick={() => handleButtonClick("Overdue Ticket")}
+                  onClick={() => handleButtonClick('Overdue Ticket')}
                 >
                   Overdue Tickets
                 </button>
@@ -159,27 +162,27 @@ const Page = () => {
               <div>
                 <button
                   className={cn(
-                    "flex flex-row gap-2 py-2 px-4 text-nowrap bg-primary-foreground text-primary rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl cursor-pointer",
-                    activeFilter === "Pending Ticket"
-                      ? "text-green-800 bg-green-200 border-green-800"
-                      : ""
+                    'flex flex-row gap-2 py-2 px-4 text-nowrap bg-primary-foreground text-primary rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl cursor-pointer',
+                    activeFilter === 'Pending Ticket'
+                      ? 'text-green-800 bg-green-200 border-green-800'
+                      : ''
                   )}
-                  onClick={() => handleButtonClick("Pending Ticket")}
+                  onClick={() => handleButtonClick('Pending Ticket')}
                 >
                   Pending Tickets
                 </button>
               </div>
-              {userType === "ROLE_ADMIN" && (
+              {userType === 'ROLE_ADMIN' && (
                 <>
                   <div>
                     <button
                       className={cn(
-                        "flex flex-row gap-2 py-2 px-4 text-nowrap bg-primary-foreground text-primary rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl cursor-pointer",
-                        activeFilter === "project"
-                          ? "text-green-800 bg-green-200 border-green-800"
-                          : ""
+                        'flex flex-row gap-2 py-2 px-4 text-nowrap bg-primary-foreground text-primary rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl cursor-pointer',
+                        activeFilter === 'project'
+                          ? 'text-green-800 bg-green-200 border-green-800'
+                          : ''
                       )}
-                      onClick={() => toggleDropdown("project")}
+                      onClick={() => toggleDropdown('project')}
                     >
                       Project Tickets
                     </button>
@@ -189,7 +192,7 @@ const Page = () => {
                           <li
                             key={item.siteID}
                             onClick={() =>
-                              handleItemClick("Project Tickets", item.siteID)
+                              handleItemClick('Project Tickets', item.siteID)
                             }
                             className="dropdown-item"
                           >
@@ -202,12 +205,12 @@ const Page = () => {
                   <div className="dropdown">
                     <button
                       className={cn(
-                        "flex flex-row gap-2 py-2 px-4 text-nowrap bg-primary-foreground text-primary rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl cursor-pointer",
-                        activeFilter === "employee"
-                          ? "text-green-800 bg-green-200 border-green-800"
-                          : ""
+                        'flex flex-row gap-2 py-2 px-4 text-nowrap bg-primary-foreground text-primary rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl cursor-pointer',
+                        activeFilter === 'employee'
+                          ? 'text-green-800 bg-green-200 border-green-800'
+                          : ''
                       )}
-                      onClick={() => toggleDropdown("employee")}
+                      onClick={() => toggleDropdown('employee')}
                     >
                       Employee Tickets
                     </button>
@@ -218,7 +221,7 @@ const Page = () => {
                             key={item.employeeID}
                             onClick={() =>
                               handleItemClick(
-                                "Employee Tickets",
+                                'Employee Tickets',
                                 item.employeeID
                               )
                             }
@@ -233,12 +236,12 @@ const Page = () => {
                   <div className="dropdown">
                     <button
                       className={cn(
-                        "flex flex-row gap-2 py-2 px-4 text-nowrap bg-primary-foreground text-primary rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl cursor-pointer",
-                        activeFilter === "employee"
-                          ? "text-green-800 bg-green-200 border-green-800"
-                          : ""
+                        'flex flex-row gap-2 py-2 px-4 text-nowrap bg-primary-foreground text-primary rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl cursor-pointer',
+                        activeFilter === 'employee'
+                          ? 'text-green-800 bg-green-200 border-green-800'
+                          : ''
                       )}
-                      onClick={() => toggleDropdown("client")}
+                      onClick={() => toggleDropdown('client')}
                     >
                       Client Tickets
                     </button>
@@ -248,7 +251,7 @@ const Page = () => {
                           <li
                             key={item._id}
                             onClick={() =>
-                              handleItemClick("Client Tickets", item._id)
+                              handleItemClick('Client Tickets', item._id)
                             }
                             className="dropdown-item"
                           >

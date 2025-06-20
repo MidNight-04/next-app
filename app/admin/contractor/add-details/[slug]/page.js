@@ -8,7 +8,7 @@ import { useQueries } from '@tanstack/react-query';
 import { postEndpoint } from '../../../../../helpers/endpoints';
 import AsideContainer from '../../../../../components/AsideContainer';
 import axios from 'axios';
-import * as yup from "yup";
+import * as yup from 'yup';
 import { toast } from 'sonner';
 import {
   Select,
@@ -18,43 +18,42 @@ import {
   SelectValue,
 } from '../../../../../components/ui/select';
 
-const SUPPORTED_FORMATS = ["image/jpeg", "image/png"]
+const SUPPORTED_FORMATS = ['image/jpeg', 'image/png'];
 
 const contractorSchema = yup.object().shape({
-  name: yup.string().required("First name is required"),
-  designation: yup.string().required("Designation is required"),
-  companyName: yup.string().required("Company Name is required"),
-  Address: yup.string().required("Address is required"),
-  upiId: yup.string().required("UPI ID is required"),
-  phone:yup.number().min(8).required('Business Contact Number is required'),
-  radius: yup.number().required("Delivery radius is required"),
-  merchantType: yup.string().required("Merchant Type is required"),
+  name: yup.string().required('First name is required'),
+  designation: yup.string().required('Designation is required'),
+  companyName: yup.string().required('Company Name is required'),
+  Address: yup.string().required('Address is required'),
+  upiId: yup.string().required('UPI ID is required'),
+  phone: yup.number().min(8).required('Business Contact Number is required'),
+  radius: yup.number().required('Delivery radius is required'),
+  merchantType: yup.string().required('Merchant Type is required'),
   gst: yup
-  .mixed()
-  .required("Gst is required")
-  .test("fileType", "Unsupported file format", (value) => {
-    return value && value[0] && SUPPORTED_FORMATS.includes(value[0].type)
-  }),
+    .mixed()
+    .required('Gst is required')
+    .test('fileType', 'Unsupported file format', value => {
+      return value && value[0] && SUPPORTED_FORMATS.includes(value[0].type);
+    }),
   bankDetails: yup
-  .mixed()
-  .required("Bank Details is required")
-  .test("fileType", "Unsupported file format", (value) => {
-    return value && value[0] && SUPPORTED_FORMATS.includes(value[0].type)
-  }),
+    .mixed()
+    .required('Bank Details is required')
+    .test('fileType', 'Unsupported file format', value => {
+      return value && value[0] && SUPPORTED_FORMATS.includes(value[0].type);
+    }),
   pan: yup
-  .mixed()
-  .required("Pan is required")
-  .test("fileType", "Unsupported file format", (value) => {
-    return value && value[0] && SUPPORTED_FORMATS.includes(value[0].type)
-  }),
+    .mixed()
+    .required('Pan is required')
+    .test('fileType', 'Unsupported file format', value => {
+      return value && value[0] && SUPPORTED_FORMATS.includes(value[0].type);
+    }),
   Aadhar: yup
-  .mixed()
-  .required("Aadhar is required")
-  .test("fileType", "Unsupported file format", (value) => {
-    return value && value[0] && SUPPORTED_FORMATS.includes(value[0].type)
-  })
+    .mixed()
+    .required('Aadhar is required')
+    .test('fileType', 'Unsupported file format', value => {
+      return value && value[0] && SUPPORTED_FORMATS.includes(value[0].type);
+    }),
 });
-
 
 const Page = () => {
   const router = useRouter();
@@ -73,9 +72,12 @@ const Page = () => {
     },
   });
 
-  const onSubmit = async (formData) => {
+  const onSubmit = async formData => {
     try {
-      await axios.post(`${process.env.REACT_APP_BASE_PATH}/api/auth/signup`, formData);
+      await axios.post(
+        `${process.env.REACT_APP_BASE_PATH}/api/auth/signup`,
+        formData
+      );
       toast.success('Contractor added successfully!');
       // router.push('/contractors');
     } catch (err) {
@@ -96,7 +98,10 @@ const Page = () => {
           </h1>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="bg-white rounded-[15px] p-5 mb-5">
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="bg-white rounded-[15px] p-5 mb-5"
+        >
           <div className="grid grid-cols-2 gap-4 gap-x-8">
             {[
               ['Name', 'name'],
@@ -106,7 +111,10 @@ const Page = () => {
               ['UPI ID', 'upiId'],
               ['Business Contact Number', 'phone'],
             ].map(([label, name]) => (
-              <div key={name} className="flex flex-col gap-2 [&_label]:font-semibold">
+              <div
+                key={name}
+                className="flex flex-col gap-2 [&_label]:font-semibold"
+              >
                 <label>{label}</label>
                 <input
                   {...register(name)}
@@ -115,7 +123,9 @@ const Page = () => {
                   className="h-[54px] border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100 font-semibold"
                 />
                 {errors[name] && (
-                  <span className="text-red-500 text-sm">{errors[name]?.message}</span>
+                  <span className="text-red-500 text-sm">
+                    {errors[name]?.message}
+                  </span>
                 )}
               </div>
             ))}
@@ -126,19 +136,19 @@ const Page = () => {
           </div>
 
           <div>
-            <input type="file" accept="image/*" {...register("gst")} />
+            <input type="file" accept="image/*" {...register('gst')} />
             {errors.gst && <p>{errors.gst.message}</p>}
           </div>
           <div>
-            <input type="file" accept="image/*" {...register("bankDetails")} />
+            <input type="file" accept="image/*" {...register('bankDetails')} />
             {errors.bankDetails && <p>{errors.bankDetails.message}</p>}
           </div>
           <div>
-            <input type="file" accept="image/*" {...register("pan")} />
+            <input type="file" accept="image/*" {...register('pan')} />
             {errors.pan && <p>{errors.pan.message}</p>}
           </div>
           <div>
-            <input type="file" accept="image/*" {...register("Aadhar")} />
+            <input type="file" accept="image/*" {...register('Aadhar')} />
             {errors.Aadhar && <p>{errors.Aadhar.message}</p>}
           </div>
 

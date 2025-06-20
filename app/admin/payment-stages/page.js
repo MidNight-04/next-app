@@ -1,7 +1,7 @@
-"use client";
-import { useEffect, useState } from "react";
-import { DataGrid } from "@mui/x-data-grid";
-import axios from "axios";
+'use client';
+import { useEffect, useState } from 'react';
+import { DataGrid } from '@mui/x-data-grid';
+import axios from 'axios';
 import {
   Chip,
   Button,
@@ -17,36 +17,36 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
-} from "@mui/material";
-import { toast } from "sonner";
-import { FaMinus, FaPlus } from "react-icons/fa6";
-import { TiArrowSortedDown, TiArrowSortedUp } from "react-icons/ti";
-import Link from "next/link";
-import { ExpandMore } from "@mui/icons-material";
-import AsideContainer from "../../../components/AsideContainer";
-import { RiBuilding4Line } from "react-icons/ri";
-import { FiEdit } from "react-icons/fi";
-import { MdDeleteOutline } from "react-icons/md";
-import { IoMdAdd } from "react-icons/io";
+} from '@mui/material';
+import { toast } from 'sonner';
+import { FaMinus, FaPlus } from 'react-icons/fa6';
+import { TiArrowSortedDown, TiArrowSortedUp } from 'react-icons/ti';
+import Link from 'next/link';
+import { ExpandMore } from '@mui/icons-material';
+import AsideContainer from '../../../components/AsideContainer';
+import { RiBuilding4Line } from 'react-icons/ri';
+import { FiEdit } from 'react-icons/fi';
+import { MdDeleteOutline } from 'react-icons/md';
+import { IoMdAdd } from 'react-icons/io';
 
 import {
   Accordion as Saccordian,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "../../../components/ui/accordion";
-import { cn } from "../../../lib/utils";
-import { useAuthStore } from "../../../store/useAuthStore";
-import { useRouter } from "next/navigation";
+} from '../../../components/ui/accordion';
+import { cn } from '../../../lib/utils';
+import { useAuthStore } from '../../../store/useAuthStore';
+import { useRouter } from 'next/navigation';
 
 const style = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
   width: 500,
-  bgcolor: "background.paper",
-  border: "2px solid #000",
+  bgcolor: 'background.paper',
+  border: '2px solid #000',
   boxShadow: 25,
   p: 4,
 };
@@ -55,16 +55,16 @@ const Page = () => {
   const [data, setData] = useState([]);
   const [updateOpen, setUpdateOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [Id, setId] = useState("");
-  const [payment, setPayment] = useState("");
-  const [stage, setStage] = useState("");
-  const [prevPayment, setPrevPayment] = useState("");
-  const [prevStage, setPrevStage] = useState("");
+  const [Id, setId] = useState('');
+  const [payment, setPayment] = useState('');
+  const [stage, setStage] = useState('');
+  const [prevPayment, setPrevPayment] = useState('');
+  const [prevStage, setPrevStage] = useState('');
   const [showContent, setShowContent] = useState([]);
-  const [status, setStatus] = useState("");
-  const [deleteStatus, setDeleteStatus] = useState("");
-  const [name, setName] = useState("");
-  const [index, setIndex] = useState("");
+  const [status, setStatus] = useState('');
+  const [deleteStatus, setDeleteStatus] = useState('');
+  const [name, setName] = useState('');
+  const [index, setIndex] = useState('');
   const userType = useAuthStore(state => state.userType);
   // const userType = "ROLE_ADMIN";
   const router = useRouter();
@@ -102,7 +102,7 @@ const Page = () => {
   };
 
   const handleDeletePoint = () => {
-    if (deleteStatus === "point") {
+    if (deleteStatus === 'point') {
       const data = {
         id: Id,
         payment: payment,
@@ -117,14 +117,14 @@ const Page = () => {
           if (response) {
             toast(response.data.message);
             getAllPaymentStage();
-            setPayment("");
-            setStage("");
+            setPayment('');
+            setStage('');
           }
         })
         .catch(error => {
           console.log(error);
         });
-    } else if (deleteStatus === "stage") {
+    } else if (deleteStatus === 'stage') {
       axios
         .delete(
           `${process.env.REACT_APP_BASE_PATH}/api/paymentstages/delete/${Id}`
@@ -148,11 +148,11 @@ const Page = () => {
       0
     );
     if (!payment) {
-      toast("Payment % is required");
+      toast('Payment % is required');
     } else if (!stage) {
-      toast("Payment Stage is required");
+      toast('Payment Stage is required');
     } else if (total + +payment - prevPayment > 100) {
-      toast("Payment % cannot exceed 100.");
+      toast('Payment % cannot exceed 100.');
     } else {
       const data = {
         id: Id,
@@ -161,7 +161,7 @@ const Page = () => {
         prevPayment: prevPayment,
         prevStage: prevStage,
       };
-      if (status === "edit") {
+      if (status === 'edit') {
         axios
           .put(
             `${process.env.REACT_APP_BASE_PATH}/api/paymentstages/stageupdatebyid`,
@@ -171,8 +171,8 @@ const Page = () => {
             if (response) {
               getAllPaymentStage();
               toast(response.data.message);
-              setPrevPayment("");
-              setPrevStage("");
+              setPrevPayment('');
+              setPrevStage('');
               // Close the confirmation dialog
               setUpdateOpen(false);
             }
@@ -180,7 +180,7 @@ const Page = () => {
           .catch(error => {
             console.log(error);
           });
-      } else if (status === "add") {
+      } else if (status === 'add') {
         axios
           .put(
             `${process.env.REACT_APP_BASE_PATH}/api/paymentstages/addnewstage`,
@@ -206,29 +206,29 @@ const Page = () => {
     setStage(stge);
     setPrevPayment(pay);
     setPrevStage(stge);
-    setStatus("edit");
+    setStatus('edit');
     setUpdateOpen(true);
     setId(id);
     setIndex(index);
   };
   const handleAddOpen = (id, name, index) => {
     setId(id);
-    setPayment("");
-    setStage("");
+    setPayment('');
+    setStage('');
     setName(name);
-    setStatus("add");
+    setStatus('add');
     setUpdateOpen(true);
     setIndex(index);
   };
   const handleConfirmDelete = (id, delPayment, deleteStage) => {
-    setDeleteStatus("point");
+    setDeleteStatus('point');
     setId(id);
     setDeleteOpen(true);
     setPayment(delPayment);
     setStage(deleteStage);
   };
   const confirmDelete = id => {
-    setDeleteStatus("stage");
+    setDeleteStatus('stage');
     setId(id);
     setDeleteOpen(true);
   };
@@ -245,11 +245,11 @@ const Page = () => {
       <>
         <div className="flex flex-row justify-between items-center p-4">
           <h1 className="text-xl font-semibold">Payment Stages</h1>
-          {userType === "ROLE_ADMIN" && (
+          {userType === 'ROLE_ADMIN' && (
             <div className="mb-3 flex flex-row items-center justify-end">
               <button
                 className="flex flex-row items-center p-2 pr-4 font-semibold bg-secondary border-[1px] border-secondary text-primary rounded-full cursor-pointer"
-                onClick={() => router.push("/admin/payment-stages/add")}
+                onClick={() => router.push('/admin/payment-stages/add')}
               >
                 <IoMdAdd className="text-2xl mr-1" />
                 Add Payment Stages
@@ -273,11 +273,11 @@ const Page = () => {
                           <RiBuilding4Line />
                         </div>
                         <div className="text-lg font-bold text-secondary">
-                          {item?.floor === "G" ? `Ground ` : `${item.floor} `}
+                          {item?.floor === 'G' ? `Ground ` : `${item.floor} `}
                           Floor
                         </div>
                       </div>
-                      {userType === "ROLE_ADMIN" && (
+                      {userType === 'ROLE_ADMIN' && (
                         <div
                           className="flex flex-row items-center p-2 text-xl bg-primary-foreground border-[1px] border-primary text-primary rounded-full"
                           onClick={() => confirmDelete(item?._id)}
@@ -289,7 +289,7 @@ const Page = () => {
                   </AccordionTrigger>
                   <AccordionContent className="py-0">
                     <div className="bg-[#efefef] pt-4">
-                      {userType === "ROLE_ADMIN" && (
+                      {userType === 'ROLE_ADMIN' && (
                         <div className="mb-3 flex flex-row items-center justify-end">
                           <button
                             className="flex flex-row items-center p-2 pr-3 font-semibold bg-primary-foreground border-[1px] border-secondary text-secondary rounded-full cursor-pointer"
@@ -312,7 +312,7 @@ const Page = () => {
                             <th className="w-full text-center" scope="col">
                               Stages
                             </th>
-                            {userType === "ROLE_ADMIN" && (
+                            {userType === 'ROLE_ADMIN' && (
                               <th className="w-full text-center" scope="col">
                                 Action
                               </th>
@@ -325,36 +325,36 @@ const Page = () => {
                               <tr
                                 key={itm.stage}
                                 className={cn(
-                                  "flex flex-row justify-evenly h-14",
+                                  'flex flex-row justify-evenly h-14',
                                   idx % 2
-                                    ? "bg-secondary-foreground"
-                                    : "bg-primary-foreground",
+                                    ? 'bg-secondary-foreground'
+                                    : 'bg-primary-foreground',
                                   item?.stages?.length - 1 === idx
-                                    ? "rounded-b-3xl"
-                                    : ""
+                                    ? 'rounded-b-3xl'
+                                    : ''
                                 )}
                               >
                                 <td
                                   className={cn(
-                                    "p-4 text-secondary text-sm font-semibold w-full text-center"
+                                    'p-4 text-secondary text-sm font-semibold w-full text-center'
                                   )}
                                 >
                                   {itm.payment}
                                 </td>
                                 <td
                                   className={cn(
-                                    "p-4 text-secondary text-sm font-semibold w-full text-center"
+                                    'p-4 text-secondary text-sm font-semibold w-full text-center'
                                   )}
                                 >
                                   {itm.stage}
                                 </td>
-                                {userType === "ROLE_ADMIN" && (
+                                {userType === 'ROLE_ADMIN' && (
                                   <td
                                     className={cn(
-                                      "p-4 text-secondary text-sm font-semibold text-center w-full flex flex-row gap-4 justify-center items-center",
+                                      'p-4 text-secondary text-sm font-semibold text-center w-full flex flex-row gap-4 justify-center items-center',
                                       item?.stages?.length - 1 === idx
-                                        ? "rounded-br-3xl"
-                                        : ""
+                                        ? 'rounded-br-3xl'
+                                        : ''
                                     )}
                                   >
                                     <div
@@ -400,15 +400,15 @@ const Page = () => {
           open={updateOpen}
           onClose={handleUpdateCancel}
           sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
           }}
         >
           <div className="p-10 rounded-3xl shadow-xl bg-white w-1/3 -lg:w-2/4 -md:w-3/4 ">
             <div>
               <h3 className="text-2xl font-ubuntu text-secondary">
-                {status === "edit" ? "Update" : "Add"} Payment Stages
+                {status === 'edit' ? 'Update' : 'Add'} Payment Stages
               </h3>
               <hr className=" my-4" />
             </div>
@@ -447,7 +447,7 @@ const Page = () => {
                 onClick={handleConfirmUpdate}
                 className="p-2  font-semibold bg-secondary text-center border-[1px] border-secondary text-primary rounded-full cursor-pointer w-[84px]"
               >
-                {status === "edit" ? "Update" : "Add"}
+                {status === 'edit' ? 'Update' : 'Add'}
               </button>
             </div>
           </div>
@@ -459,7 +459,7 @@ const Page = () => {
           onClose={handleCloseDelete}
           aria-labelledby="responsive-dialog-title"
         >
-          <DialogContent sx={{ width: "30rem" }}>
+          <DialogContent sx={{ width: '30rem' }}>
             <h3 className="text-lg font-semibold text-secondary">
               Are you sure want to delete ?
             </h3>

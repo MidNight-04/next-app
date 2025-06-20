@@ -1,40 +1,40 @@
-"use client";
-import { useEffect, useState } from "react";
-import { DataGrid, gridClasses } from "@mui/x-data-grid";
-import axios from "axios";
-import { Modal, Select, MenuItem, styled } from "@mui/material";
-import { toast } from "sonner";
-import AsideContainer from "../../../components/AsideContainer";
-import { Add } from "@mui/icons-material";
-import { useRouter } from "next/navigation";
-import { FiEdit } from "react-icons/fi";
-import { MdOutlineDelete } from "react-icons/md";
+'use client';
+import { useEffect, useState } from 'react';
+import { DataGrid, gridClasses } from '@mui/x-data-grid';
+import axios from 'axios';
+import { Modal, Select, MenuItem, styled } from '@mui/material';
+import { toast } from 'sonner';
+import AsideContainer from '../../../components/AsideContainer';
+import { Add } from '@mui/icons-material';
+import { useRouter } from 'next/navigation';
+import { FiEdit } from 'react-icons/fi';
+import { MdOutlineDelete } from 'react-icons/md';
 
 const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
   [`& .${gridClasses.row}.even`]: {
-    "backgroundColor": "#f8fbfc",
-    "&:hover": {
-      "backgroundColor": "#93bfcf",
-      "color": "#eee9da",
-      "@media (hover: none)": {
-        backgroundColor: "transparent",
+    backgroundColor: '#f8fbfc',
+    '&:hover': {
+      backgroundColor: '#93bfcf',
+      color: '#eee9da',
+      '@media (hover: none)': {
+        backgroundColor: 'transparent',
       },
     },
-    "&.Mui-selected": {
-      backgroundColor: "#93bfcf",
+    '&.Mui-selected': {
+      backgroundColor: '#93bfcf',
     },
   },
   [`& .${gridClasses.row}.odd`]: {
-    "backgroundColor": "#eee9da",
-    "&:hover": {
-      "backgroundColor": "#93bfcf",
-      "color": "#eee9da",
-      "@media (hover: none)": {
-        backgroundColor: "transparent",
+    backgroundColor: '#eee9da',
+    '&:hover': {
+      backgroundColor: '#93bfcf',
+      color: '#eee9da',
+      '@media (hover: none)': {
+        backgroundColor: 'transparent',
       },
     },
-    "&.Mui-selected": {
-      backgroundColor: "#93bfcf",
+    '&.Mui-selected': {
+      backgroundColor: '#93bfcf',
     },
   },
 }));
@@ -45,24 +45,24 @@ const MemberTable = () => {
   const [roleList, setRoleList] = useState([]);
   const [confirmationOpen, setConfirmationOpen] = useState(false);
   const [confirmationDelete, setConfirmationDelete] = useState(false);
-  const [userId, setUserId] = useState("");
+  const [userId, setUserId] = useState('');
   const [data, setData] = useState({
-    name: "",
-    employeeID: "",
-    role: "",
-    email: "",
-    phone: "",
-    address: "",
+    name: '',
+    employeeID: '',
+    role: '',
+    email: '',
+    phone: '',
+    address: '',
   });
 
   const columns = [
-    { field: "seriel", headerName: "SNo.", width: 80 },
-    { field: "name", headerName: "Name", width: 200 },
-    { field: "employeeID", headerName: "Employee ID", width: 100 },
-    { field: "role", headerName: "Role", width: 200 },
-    { field: "email", headerName: "Email", width: 280 },
-    { field: "phone", headerName: "Phone", width: 140 },
-    { field: "address", headerName: "Address", width: 360 },
+    { field: 'seriel', headerName: 'SNo.', width: 80 },
+    { field: 'name', headerName: 'Name', width: 200 },
+    { field: 'employeeID', headerName: 'Employee ID', width: 100 },
+    { field: 'role', headerName: 'Role', width: 200 },
+    { field: 'email', headerName: 'Email', width: 280 },
+    { field: 'phone', headerName: 'Phone', width: 140 },
+    { field: 'address', headerName: 'Address', width: 360 },
   ];
   useEffect(() => {
     getAllMember();
@@ -104,7 +104,7 @@ const MemberTable = () => {
       )
       .then(response => {
         if (response) {
-          toast("Record deleted successfully");
+          toast('Record deleted successfully');
           getAllMember();
         }
       })
@@ -188,8 +188,8 @@ const MemberTable = () => {
 
   const actionColumn = [
     {
-      field: "action",
-      headerName: "Action",
+      field: 'action',
+      headerName: 'Action',
       width: 200,
       renderCell: params => {
         return (
@@ -224,7 +224,7 @@ const MemberTable = () => {
           </h1>
           <button
             className="bg-secondary text-primary rounded-3xl px-4 py-3 flex flex-row gap-1 items-center"
-            onClick={() => router.push("/admin/employee/add")}
+            onClick={() => router.push('/admin/employee/add')}
           >
             <Add />
             <span>Add Team Member</span>
@@ -235,75 +235,75 @@ const MemberTable = () => {
           columns={columns.concat(actionColumn)}
           pageSize={9}
           rowsPerPageOptions={[9]}
-          localeText={{ noRowsLabel: "No Data Available..." }}
+          localeText={{ noRowsLabel: 'No Data Available...' }}
           getRowClassName={params =>
-            params.indexRelativeToCurrentPage % 2 === 0 ? "even" : "odd"
+            params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd'
           }
           sx={{
-            "fontFamily": "ubuntu",
-            "fontSize": "16px",
-            ".MuiDataGrid-columnSeparator": {
-              display: "none",
+            fontFamily: 'ubuntu',
+            fontSize: '16px',
+            '.MuiDataGrid-columnSeparator': {
+              display: 'none',
             },
-            "& .MuiDataGrid-columnHeaderTitle": { color: "#93bfcf" },
-            "& .MuiDataGrid-menuOpen": { background: "#0b192c" },
-            "&.MuiDataGrid-root": {
-              borderRadius: "16px",
-              marginBottom: "1rem",
+            '& .MuiDataGrid-columnHeaderTitle': { color: '#93bfcf' },
+            '& .MuiDataGrid-menuOpen': { background: '#0b192c' },
+            '&.MuiDataGrid-root': {
+              borderRadius: '16px',
+              marginBottom: '1rem',
               // color: "#93bfcf",
-              background: "#0b192c",
+              background: '#0b192c',
             },
-            "& .MuiDataGrid-filler": { background: "#0b192c" },
-            "& .MuiDataGrid-columnHeader": {
-              background: "#0b192c",
-              color: "#93bfcf",
+            '& .MuiDataGrid-filler': { background: '#0b192c' },
+            '& .MuiDataGrid-columnHeader': {
+              background: '#0b192c',
+              color: '#93bfcf',
             },
-            "& .MuiDataGrid-columnHeader--sortable": {
-              color: "#93bfcf",
+            '& .MuiDataGrid-columnHeader--sortable': {
+              color: '#93bfcf',
             },
-            "& .MuiDataGrid-withBorderColor": {
-              color: "#93bfcf",
+            '& .MuiDataGrid-withBorderColor': {
+              color: '#93bfcf',
             },
-            "& .MuiDataGrid-menuIcon": {
-              background: "#0b192c",
-              color: "#93bfcf",
+            '& .MuiDataGrid-menuIcon': {
+              background: '#0b192c',
+              color: '#93bfcf',
             },
-            "& .MuiDataGrid-columnHeaders": {
-              background: "#0b192c",
-              color: "#93bfcf",
+            '& .MuiDataGrid-columnHeaders': {
+              background: '#0b192c',
+              color: '#93bfcf',
             },
-            "& .MuiDataGrid-sortIcon": {
-              opacity: "inherit !important",
-              color: "#93bfcf",
+            '& .MuiDataGrid-sortIcon': {
+              opacity: 'inherit !important',
+              color: '#93bfcf',
             },
-            "& .MuiDataGrid-cell:focus-within": {
-              outline: "none !important",
+            '& .MuiDataGrid-cell:focus-within': {
+              outline: 'none !important',
             },
-            "& .MuiDataGrid-columnHeaderTitleContainer": {
-              background: "#0b192c",
-              color: "#93bfcf",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
+            '& .MuiDataGrid-columnHeaderTitleContainer': {
+              background: '#0b192c',
+              color: '#93bfcf',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
             },
-            "& .MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular MuiTablePagination-toolbar":
+            '& .MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular MuiTablePagination-toolbar':
               {
-                display: "none",
+                display: 'none',
               },
-            "& .MuiToolbar-root ": {
-              color: "#93bfcf",
+            '& .MuiToolbar-root ': {
+              color: '#93bfcf',
             },
-            "& .MuiButtonBase-root": {
-              color: "#93bfcf",
+            '& .MuiButtonBase-root': {
+              color: '#93bfcf',
             },
-            "& .MuiDataGrid-overlay": {
-              background: "#eee9da",
-              color: "#0b192c",
+            '& .MuiDataGrid-overlay': {
+              background: '#eee9da',
+              color: '#0b192c',
             },
-            "& .MuiDataGrid-cell": {
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
+            '& .MuiDataGrid-cell': {
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
             },
           }}
         />
@@ -311,9 +311,9 @@ const MemberTable = () => {
           open={confirmationOpen}
           onClose={handleCancel}
           sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
           }}
         >
           <div className="bg-white w-1/3 p-8 rounded-3xl outline-none">
@@ -365,31 +365,31 @@ const MemberTable = () => {
                   onChange={e => handleFormData(e)}
                   fullWidth
                   sx={{
-                    "borderRadius": "7px",
-                    "background": "#f3f4f6",
-                    "outline": "none",
-                    "& :hover": {
-                      outline: "none",
+                    borderRadius: '7px',
+                    background: '#f3f4f6',
+                    outline: 'none',
+                    '& :hover': {
+                      outline: 'none',
                     },
-                    "& .MuiInputBase-root": {
-                      "outline": "none",
-                      "background": "#cfcfcf",
-                      "& :hover": {
-                        outline: "none",
+                    '& .MuiInputBase-root': {
+                      outline: 'none',
+                      background: '#cfcfcf',
+                      '& :hover': {
+                        outline: 'none',
                       },
                     },
-                    "color": "#4b5563",
-                    ".MuiOutlinedInput-notchedOutline": {
-                      border: "1px solid #93bfcf",
+                    color: '#4b5563',
+                    '.MuiOutlinedInput-notchedOutline': {
+                      border: '1px solid #93bfcf',
                     },
-                    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                      border: "1px solid #93bfcf",
+                    '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                      border: '1px solid #93bfcf',
                     },
-                    "&:hover .MuiOutlinedInput-notchedOutline": {
-                      border: "1px solid #93bfcf",
+                    '&:hover .MuiOutlinedInput-notchedOutline': {
+                      border: '1px solid #93bfcf',
                     },
-                    ".MuiSvgIcon-root ": {
-                      fill: "#93bfcf !important",
+                    '.MuiSvgIcon-root ': {
+                      fill: '#93bfcf !important',
                     },
                   }}
                 >
@@ -447,9 +447,9 @@ const MemberTable = () => {
           open={confirmationDelete}
           onClose={handleDelete}
           sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
           }}
         >
           <div className="bg-white w-1/3 p-8 rounded-3xl outline-none -md:w-3/4">

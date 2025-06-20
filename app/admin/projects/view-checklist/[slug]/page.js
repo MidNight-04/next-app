@@ -1,6 +1,6 @@
-"use client";
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+'use client';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import {
   Button,
   Modal,
@@ -14,22 +14,22 @@ import {
   FormControl,
   MenuItem,
   Select,
-} from "@mui/material";
-import { toast } from "sonner";
-import { FaMinus, FaPlus } from "react-icons/fa6";
-import { TiArrowSortedDown, TiArrowSortedUp, TiMinus } from "react-icons/ti";
-import { IoIosArrowBack } from "react-icons/io";
-import { useParams, useRouter } from "next/navigation";
-import AsideContainer from "../../../../../components/AsideContainer";
-import { useAuthStore } from "../../../../../store/useAuthStore";
+} from '@mui/material';
+import { toast } from 'sonner';
+import { FaMinus, FaPlus } from 'react-icons/fa6';
+import { TiArrowSortedDown, TiArrowSortedUp, TiMinus } from 'react-icons/ti';
+import { IoIosArrowBack } from 'react-icons/io';
+import { useParams, useRouter } from 'next/navigation';
+import AsideContainer from '../../../../../components/AsideContainer';
+import { useAuthStore } from '../../../../../store/useAuthStore';
 
 let today = new Date();
 let yyyy = today.getFullYear();
 let mm = today.getMonth() + 1;
 let dd = today.getDate();
-if (dd < 10) dd = "0" + dd;
-if (mm < 10) mm = "0" + mm;
-let formatedtoday = yyyy + "-" + mm + "-" + dd;
+if (dd < 10) dd = '0' + dd;
+if (mm < 10) mm = '0' + mm;
+let formatedtoday = yyyy + '-' + mm + '-' + dd;
 
 const SingleProjectChecklistView = () => {
   const { slug } = useParams();
@@ -37,30 +37,30 @@ const SingleProjectChecklistView = () => {
   const isAuth = useAuthStore(state => state.isAuth);
   const activeUser = useAuthStore(state => state.userId);
   const userName = useAuthStore(state => state.username);
-  const [point, setPoint] = useState("");
-  const [status, setStatus] = useState("");
+  const [point, setPoint] = useState('');
+  const [status, setStatus] = useState('');
   const [pointAddOpen, setPointAddOpen] = useState(false);
   const [data, setData] = useState([]);
   const [open, setOpen] = useState(false);
-  const [id, setId] = useState("");
+  const [id, setId] = useState('');
   const [showContent, setShowContent] = useState([]);
   const [addFieldOpen, setAddFieldOpen] = useState(false);
-  const [newField, setNewField] = useState("");
-  const [heading, setHeading] = useState("");
+  const [newField, setNewField] = useState('');
+  const [heading, setHeading] = useState('');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [checkName, setCheckName] = useState("");
+  const [checkName, setCheckName] = useState('');
   const [checkNameAdd, setCheckNameAdd] = useState(false);
   const [uniqueStep, setUniqueStep] = useState([]);
-  const [step, setStep] = useState("");
+  const [step, setStep] = useState('');
   const [number, setNumber] = useState(0);
   const [checklistItems, setChecklistItems] = useState([
-    { heading: "", points: [{ point: "", check: false, status: "" }] },
+    { heading: '', points: [{ point: '', check: false, status: '' }] },
   ]);
 
   const handleAddChecklistItem = () => {
     setChecklistItems([
       ...checklistItems,
-      { heading: "", points: [{ point: "", check: false, status: "" }] },
+      { heading: '', points: [{ point: '', check: false, status: '' }] },
     ]);
   };
 
@@ -73,7 +73,7 @@ const SingleProjectChecklistView = () => {
 
   const handleAddChecklistPoint = idx => {
     const newItems = [...checklistItems];
-    newItems[idx].points.push({ point: "", check: false, status: "" });
+    newItems[idx].points.push({ point: '', check: false, status: '' });
     setChecklistItems(newItems);
   };
 
@@ -147,7 +147,7 @@ const SingleProjectChecklistView = () => {
       )
       .then(response => {
         if (response) {
-          toast("Record deleted successfully");
+          toast('Record deleted successfully');
           getAllCheckList();
           setOpen(false);
         }
@@ -171,9 +171,9 @@ const SingleProjectChecklistView = () => {
     setCheckName(name);
     setNumber(number);
     setAddFieldOpen(true);
-    setNewField("");
+    setNewField('');
     setChecklistItems([
-      { heading: "", points: [{ point: "", check: false, status: "" }] },
+      { heading: '', points: [{ point: '', check: false, status: '' }] },
     ]);
   };
   const confirmDeleteField = (step, heading, name, number, point) => {
@@ -211,7 +211,7 @@ const SingleProjectChecklistView = () => {
         }
       })
       .catch(error => {
-        toast("Error while delete checklist point");
+        toast('Error while delete checklist point');
         console.log(error);
       });
   };
@@ -224,7 +224,7 @@ const SingleProjectChecklistView = () => {
   const handleUpdateNewField = () => {
     const isAnyHeadingEmpty = checklistItems.some(item => !item.heading.trim());
     if (isAnyHeadingEmpty) {
-      toast("Inspection heading is required");
+      toast('Inspection heading is required');
       return; // Exit early if any heading is empty
     }
     // Check if any checklist item point is empty
@@ -232,7 +232,7 @@ const SingleProjectChecklistView = () => {
       item.points.some(point => !point.point.trim())
     );
     if (isAnyPointEmpty) {
-      toast("Inspection point is required");
+      toast('Inspection point is required');
       return; // Exit early if any point is empty
     }
     // Check if any checklist item status is empty
@@ -240,7 +240,7 @@ const SingleProjectChecklistView = () => {
       item.points.some(point => !point.status.trim())
     );
     if (isAnyStatusEmpty) {
-      toast("Inspection status is required");
+      toast('Inspection status is required');
       return; // Exit early if any point is empty
     } else {
       const data = {
@@ -266,23 +266,23 @@ const SingleProjectChecklistView = () => {
             getAllCheckList();
             setChecklistItems([
               {
-                heading: "",
-                points: [{ point: "", check: false, status: "" }],
+                heading: '',
+                points: [{ point: '', check: false, status: '' }],
               },
             ]);
           }
         })
         .catch(error => {
-          toast("Error while add Inspection");
+          toast('Error while add Inspection');
           console.log(error);
         });
     }
   };
   const handleSubmitPoint = () => {
     if (!point) {
-      toast("Point is required");
+      toast('Point is required');
     } else if (!status) {
-      toast("Status is required");
+      toast('Status is required');
     } else {
       const data = {
         id: id,
@@ -307,12 +307,12 @@ const SingleProjectChecklistView = () => {
             toast(response.data.message);
             setPointAddOpen(false);
             getAllCheckList();
-            setPoint("");
-            setStatus("");
+            setPoint('');
+            setStatus('');
           }
         })
         .catch(error => {
-          toast("Error while add Inspection");
+          toast('Error while add Inspection');
           console.log(error);
         });
     }
@@ -380,12 +380,12 @@ const SingleProjectChecklistView = () => {
                           </div>
                           {showContent[index] && (
                             <>
-                              {" "}
+                              {' '}
                               <span
                                 className="float-end text-light fw-bold mb-2"
                                 style={{
-                                  backgroundColor: "#fec20e",
-                                  padding: "0px 4px",
+                                  backgroundColor: '#fec20e',
+                                  padding: '0px 4px',
                                 }}
                               >
                                 <FaPlus
@@ -428,18 +428,18 @@ const SingleProjectChecklistView = () => {
                                           <li
                                             key={pointIdx}
                                             className="v-progress-item inprogress"
-                                            style={{ marginBottom: "20px" }}
+                                            style={{ marginBottom: '20px' }}
                                           >
-                                            <span style={{ display: "flex" }}>
-                                              <p style={{ marginTop: "1px" }}>
+                                            <span style={{ display: 'flex' }}>
+                                              <p style={{ marginTop: '1px' }}>
                                                 {dt?.point}
                                                 {dt?.status?.toLowerCase() ===
-                                                "mandatory" ? (
+                                                'mandatory' ? (
                                                   <span className="text-danger">
                                                     *
                                                   </span>
                                                 ) : (
-                                                  ""
+                                                  ''
                                                 )}
                                               </p>
                                               <TiMinus
@@ -503,7 +503,7 @@ const SingleProjectChecklistView = () => {
       {/* Add new work field Dialog */}
       <Dialog open={addFieldOpen} onClose={handleFieldCancel}>
         <DialogTitle>Add Inspection Point</DialogTitle>
-        <DialogContent style={{ width: "600px" }}>
+        <DialogContent style={{ width: '600px' }}>
           {checklistItems.map((item, index) => (
             <FormControl
               fullWidth
@@ -638,7 +638,7 @@ const SingleProjectChecklistView = () => {
       {/* dialog for add point */}
       <Dialog open={pointAddOpen} onClose={handlePointAddCancel}>
         <DialogTitle>Add New Point</DialogTitle>
-        <DialogContent style={{ width: "600px" }}>
+        <DialogContent style={{ width: '600px' }}>
           <DialogContentText>
             <span>
               Point <span className="text-danger">*</span>

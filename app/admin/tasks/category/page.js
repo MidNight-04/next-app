@@ -1,162 +1,228 @@
 'use client';
-import React, { useEffect, useState } from 'react';
-import { DataGrid } from '@mui/x-data-grid';
-import axios from 'axios';
+import React, { useState } from 'react';
+import { DataGrid, gridClasses } from '@mui/x-data-grid';
+import api from '../../../../lib/api';
 import {
-  Chip,
   Button,
-  Modal,
-  Typography,
-  Box,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogContentText,
   DialogActions,
   TextField,
-  Select,
-  MenuItem,
-  TableContainer,
-  Paper,
+  styled,
 } from '@mui/material';
 import { toast } from 'sonner';
-import Link from 'next/link';
 import AsideContainer from '../../../../components/AsideContainer';
 import { useRouter } from 'next/navigation';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { FiEdit } from 'react-icons/fi';
+import { MdOutlineDelete } from 'react-icons/md';
+
+const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
+  [`& .${gridClasses.row}.even`]: {
+    backgroundColor: '#f8fbfc',
+    '&:hover': {
+      backgroundColor: '#93bfcf',
+      color: '#eee9da',
+      '@media (hover: none)': {
+        backgroundColor: 'transparent',
+      },
+    },
+    '&.Mui-selected': {
+      backgroundColor: '#93bfcf',
+    },
+  },
+  [`& .${gridClasses.row}.odd`]: {
+    backgroundColor: '#eee9da',
+    '&:hover': {
+      backgroundColor: '#93bfcf',
+      color: '#eee9da',
+      '@media (hover: none)': {
+        backgroundColor: 'transparent',
+      },
+    },
+    '&.Mui-selected': {
+      backgroundColor: '#93bfcf',
+    },
+  },
+}));
+
+const tableStyles = {
+  fontFamily: 'ubuntu',
+  fontSize: '16px',
+  '.MuiDataGrid-columnSeparator': {
+    display: 'none',
+  },
+  '& .MuiDataGrid-columnHeaderTitle': { color: '#93bfcf' },
+  '& .MuiDataGrid-menuOpen': { background: '#0b192c' },
+  '&.MuiDataGrid-root': {
+    borderRadius: '16px',
+    marginBottom: '1rem',
+    // color: "#93bfcf",
+    background: '#0b192c',
+  },
+  '& .MuiDataGrid-filler': { background: '#0b192c' },
+  '& .MuiDataGrid-columnHeader': {
+    background: '#0b192c',
+    color: '#93bfcf',
+  },
+  '& .MuiDataGrid-columnHeader--sortable': {
+    color: '#93bfcf',
+  },
+  '& .MuiDataGrid-withBorderColor': {
+    color: '#93bfcf',
+  },
+  '& .MuiDataGrid-menuIcon': {
+    background: '#0b192c',
+    color: '#93bfcf',
+  },
+  '& .MuiDataGrid-columnHeaders': {
+    background: '#0b192c',
+    color: '#93bfcf',
+  },
+  '& .MuiDataGrid-sortIcon': {
+    opacity: 'inherit !important',
+    color: '#93bfcf',
+  },
+  '& .MuiDataGrid-cell:focus-within': {
+    outline: 'none !important',
+  },
+  '& .MuiDataGrid-columnHeaderTitleContainer': {
+    background: '#0b192c',
+    color: '#93bfcf',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  '& .MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular MuiTablePagination-toolbar':
+    {
+      display: 'none',
+    },
+  '& .MuiToolbar-root ': {
+    color: '#93bfcf',
+  },
+  '& .MuiButtonBase-root': {
+    color: '#93bfcf',
+  },
+  '& .MuiDataGrid-overlay': {
+    background: '#eee9da',
+    color: '#0b192c',
+  },
+  '& .MuiDataGrid-cell': {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+};
+
+const fetchCategories = async () => {
+  const { data } = await api.get('/category/list');
+  return data.data;
+};
+
+const updateCategory = async ({ id, name }) => {
+  const { data } = await api.put('/task-category/updatebyid', { id, name });
+  return data;
+};
+
+const deleteCategoryById = async id => {
+  const { data } = await api.delete(`/task-category/delete/${id}`);
+  return data;
+};
+
+const fetchCategoryById = async id => {
+  const { data } = await api.get(`/task-category/databyid/${id}`);
+  return data.data;
+};
 
 const Page = () => {
   const router = useRouter();
-  const [categoryList, setCategoryList] = useState([]);
-  const [roleList, setRoleList] = useState([]);
+  const queryClient = useQueryClient();
+  const [editData, setEditData] = useState({ name: '' });
+  const [editId, setEditId] = useState(null);
   const [confirmationOpen, setConfirmationOpen] = useState(false);
-  const [userId, setUserId] = useState('');
-  const [data, setData] = useState({
-    name: '',
+  const [confirmationDelete, setConfirmationDelete] = useState(false);
+  const [roleId, setRoleId] = useState(null);
+
+  const { data: categoryList = [], isPending } = useQuery({
+    queryKey: ['categories'],
+    queryFn: fetchCategories,
   });
+
+  const updateMutation = useMutation({
+    mutationFn: updateCategory,
+    onSuccess: data => {
+      toast.success(data?.message || 'Category updated');
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      setConfirmationOpen(false);
+    },
+    onError: () => toast.error('Update failed'),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: deleteCategoryById,
+    onSuccess: () => {
+      toast.success('Category deleted');
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+    },
+    onError: () => toast.error('Delete failed'),
+  });
+
+  const handleEditOpen = async id => {
+    try {
+      const category = await fetchCategoryById(id);
+      setEditData({ name: category.name });
+      setEditId(id);
+      setConfirmationOpen(true);
+    } catch {
+      toast.error('Failed to fetch category');
+    }
+  };
+
+  const handleUpdate = () => {
+    updateMutation.mutate({ id: editId, name: editData.name });
+  };
+
+  const handleDelete = id => {
+    deleteMutation.mutate(id);
+  };
+
+  const rows = categoryList.map((item, index) => ({
+    id: item._id,
+    seriel: index + 1,
+    name: item.name,
+  }));
 
   const columns = [
     { field: 'seriel', headerName: 'SNo.', width: 100 },
     { field: 'name', headerName: 'Name', width: 400 },
-  ];
-  useEffect(() => {
-    getAllTaskCategory();
-  }, []);
-
-  const getAllTaskCategory = () => {
-    axios
-      .get(`${process.env.REACT_APP_BASE_PATH}/api/category/list`)
-      .then(response => {
-        setCategoryList(response?.data?.data);
-        // console.log(response?.data?.data)
-      })
-      .catch(error => {
-        console.log(error);
-      });
-  };
-
-  const handleFormData = e => {
-    const { name, value } = e.target;
-    setData({ ...data, [name]: value });
-  };
-
-  const deleteCategory = id => {
-    axios
-      .delete(
-        `${process.env.REACT_APP_BASE_PATH}/api/task-category/delete/${id}`
-      )
-      .then(response => {
-        if (response) {
-          toast('Record deleted successfully');
-          getAllTaskCategory();
-        }
-      })
-      .catch(error => {
-        console.log(error);
-      });
-  };
-
-  const updateFunction = id => {
-    setUserId(id);
-    setConfirmationOpen(true);
-    axios
-      .get(
-        `${process.env.REACT_APP_BASE_PATH}/api/task-category/databyid/${id}`
-      )
-      .then(response => {
-        if (response) {
-          //   console.log(response.data.data)
-          setData({
-            name: response.data.data.name,
-          });
-        }
-      })
-      .catch(error => {
-        console.log(error);
-      });
-  };
-  const handleConfirm = () => {
-    // Perform action based on authorizationStatus
-    const dataUpdate = {
-      id: userId,
-      name: data.name,
-    };
-    axios
-      .put(
-        `${process.env.REACT_APP_BASE_PATH}/api/task-category/updatebyid`,
-        dataUpdate
-      )
-      .then(response => {
-        if (response) {
-          toast(`${response.data.message}`);
-          getAllTaskCategory();
-        }
-      })
-      .catch(error => {
-        console.log(error);
-      });
-    // Close the confirmation dialog
-    setConfirmationOpen(false);
-  };
-
-  const handleCancel = () => {
-    // Close the confirmation dialog
-    setConfirmationOpen(false);
-  };
-
-  const arrayData = [];
-  categoryList?.map((row, index) => {
-    return arrayData.push({
-      id: row?._id,
-      seriel: index + 1,
-      name: row?.name,
-    });
-  });
-
-  const actionColumn = [
     {
       field: 'action',
       headerName: 'Action',
       width: 350,
-      renderCell: params => {
-        return (
-          <div className="cellAction">
-            <div
-              className="viewButton"
-              onClick={() => updateFunction(params?.row?.id)}
-            >
-              Update
-            </div>
-            <div
-              className="deleteButton"
-              onClick={() => deleteCategory(params.row.id)}
-            >
-              Delete
-            </div>
+      renderCell: params => (
+        <div className="flex flex-row gap-2 items-center">
+          <div
+            className="p-2 rounded-full border border-primary text-primary bg-primary-foreground cursor-pointer"
+            onClick={() => handleEditOpen(params.row.id)}
+          >
+            <FiEdit className="text-xl" />
           </div>
-        );
-      },
+          <div
+            className="p-2 rounded-full border border-primary text-primary bg-primary-foreground cursor-pointer"
+            onClick={() => {
+              setRoleId(params.row.id);
+              setConfirmationDelete(true);
+            }}
+          >
+            <MdOutlineDelete className="text-xl" />
+          </div>
+        </div>
+      ),
     },
   ];
+
   return (
     <AsideContainer>
       <div className="datatable">
@@ -164,42 +230,47 @@ const Page = () => {
           <h1 className="text-2xl font-semibold font-ubuntu -md:mb-2 -md:text-lg">
             Category List
           </h1>
-          <button onClick={() => router.push('/admin/tasks/category/add')}>
+          <button className='text-primary bg-secondary py-2 px-3 rounded-full' onClick={() => router.push('/admin/tasks/category/add')}>
             Add Category
           </button>
         </div>
         <div className="bg-white">
-          <DataGrid
-            rows={arrayData}
-            columns={columns.concat(actionColumn)}
+          <StripedDataGrid
+            rows={rows}
+            columns={columns}
             pageSize={9}
-            getRowClassName={() => ({ color: '#fff' })}
             rowsPerPageOptions={[9]}
+            loading={isPending}
             localeText={{ noRowsLabel: 'No Data Available...' }}
+            getRowClassName={params =>
+              params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd'
+            }
+            sx={tableStyles}
           />
         </div>
-        <Dialog open={confirmationOpen} onClose={handleCancel}>
+
+        <Dialog
+          open={confirmationOpen}
+          onClose={() => setConfirmationOpen(false)}
+        >
           <DialogTitle>Update Task Category</DialogTitle>
-          <DialogContent style={{ width: '500px' }}>
+          <DialogContent style={{ width: 500 }}>
             <DialogContentText>
               <TextField
                 autoFocus
-                margin="dense"
-                id="role"
-                type="text"
                 fullWidth
+                margin="dense"
                 name="name"
-                value={data.name}
-                onChange={e => handleFormData(e)}
+                label="Category Name"
+                value={editData.name}
+                onChange={e => setEditData({ name: e.target.value })}
               />
             </DialogContentText>
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleCancel} color="primary">
-              Cancel
-            </Button>
-            <Button onClick={handleConfirm} color="primary">
-              Update
+            <Button onClick={() => setConfirmationOpen(false)}>Cancel</Button>
+            <Button onClick={handleUpdate} disabled={updateMutation.isPending}>
+              {updateMutation.isPending ? 'Updating...' : 'Update'}
             </Button>
           </DialogActions>
         </Dialog>
@@ -207,4 +278,5 @@ const Page = () => {
     </AsideContainer>
   );
 };
+
 export default Page;

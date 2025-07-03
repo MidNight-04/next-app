@@ -1,5 +1,5 @@
 'use client';
-import axios from 'axios';
+import api from '../../../../lib/api';
 import AsideContainer from '../../../../components/AsideContainer';
 import React, { useState } from 'react';
 import { FaMinus, FaPlus } from 'react-icons/fa6';
@@ -68,9 +68,9 @@ const AddProjectCheckList = () => {
         name: name,
         checkList: checklistItems,
       };
-      axios
+      api
         .post(
-          `${process.env.REACT_APP_BASE_PATH}/api/project/checklist/add`,
+          `/project/checklist/add`,
           data
         )
         .then(response => {

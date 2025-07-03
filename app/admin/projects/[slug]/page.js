@@ -1,5 +1,5 @@
 'use client';
-import axios from 'axios';
+import api from '../../../../lib/api';
 import React, { useEffect, useRef, useState } from 'react';
 import {
   DialogActions,
@@ -180,6 +180,7 @@ const ClientProjectView = () => {
   const [issue, setIssue] = useState(null);
   const [newMember, setNewMember] = useState(null);
   const [teammembersByRole, setTeammembersByRole] = useState([]);
+  const { token } = useAuthStore.getState();
 
   const toggleShowImage = () => {
     setShowImage(prev => !prev);
@@ -198,96 +199,40 @@ const ClientProjectView = () => {
   }, [projectDetails]);
 
   const getprojectDetail = () => {
-    axios
-      .get(`${process.env.REACT_APP_BASE_PATH}/api/project/databyid/${slug}`)
+    api
+      .get(`/project/databyid/${slug}`)
       .then(response => {
-        setProjectDetails(response?.data?.data[0]);
-        setTotalInspection(response?.data?.data[0]?.inspections?.length);
+        const data = response?.data?.data?.[0];
+        if (!data) return;
 
-        const durationInMonths = parseInt(response?.data?.data[0]?.duration);
-        const initialDate = new Date(response?.data?.data[0]?.date);
-        const newDate1 = new Date(initialDate.setMonth(initialDate.getMonth()));
-        const newDate = new Date(
-          initialDate.setMonth(initialDate.getMonth() + durationInMonths)
-        );
+        setProjectDetails(data);
+        setTotalInspection(data?.inspections?.length || 0);
 
-        // Format the date as dd/mm/yyyy
-        const day = String(newDate.getDate()).padStart(2, '0');
-        const month = String(newDate.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
-        const year = newDate.getFullYear();
+        const durationInMonths = parseInt(data?.duration || '0', 10);
+        const initialDate = new Date(data?.date);
 
-        //
-        // Format the date as dd/mm/yyyy
-        const day1 = String(newDate1.getDate()).padStart(2, '0');
-        const month1 = String(newDate1.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
-        const year1 = newDate1.getFullYear();
+        const start = new Date(initialDate);
+        const end = new Date(initialDate);
+        end.setMonth(end.getMonth() + durationInMonths);
 
-        const formattedDate1 = `${day1}/${month1}/${year1}`;
-        const formattedDate = `${day}/${month}/${year}`;
-        setStartDate(formattedDate1);
-        setEndDate(formattedDate);
+        const formatDate = date => {
+          const day = String(date.getDate()).padStart(2, '0');
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const year = date.getFullYear();
+          return `${day}/${month}/${year}`;
+        };
+
+        setStartDate(formatDate(start));
+        setEndDate(formatDate(end));
       })
       .catch(error => {
-        console.log(error);
+        console.error('Error fetching project detail:', error);
       });
   };
 
-  // useEffect(() => {
-  //   axios
-  //     .get(`${process.env.REACT_APP_BASE_PATH}/api/log/siteid/${slug}`)
-  //     .then(async response => {
-  //       setLogList(response.data.data);
-  //       // Calculate the total file count
-  //       let totalFileCount = 0;
-  //       response.data?.data?.forEach(data => {
-  //         if (data?.file?.length > 0) {
-  //           totalFileCount += data.file.length; // Increment by the number of files in each entry
-  //         }
-  //       });
-  //       // Set the final count once
-  //       setFileCount(totalFileCount);
-  //     })
-  //     .catch(error => {
-  //       console.log(error);
-  //     });
-  // }, [activeTab, refresh]);
-
-  // useEffect(() => {
-  //   getprojectDetail();
-  // }, [slug, refresh]);
-
-  // useEffect(() => {
-  //   if (pointList && pointList.length > 0) {
-  //     const initialValue = `${pointList[0].point}-${pointList[0].content}`;
-  //     setPoint(pointList[0].point);
-  //     setContent(pointList[0].content);
-  //   }
-  // }, [pointList]);
-
-  useEffect(() => {
-    const fetchLogs = async () => {
-      try {
-        const { data } = await axios.get(
-          `${process.env.REACT_APP_BASE_PATH}/api/log/siteid/${slug}`
-        );
-        setLogList(data?.data || []);
-
-        const totalFiles = data?.data?.reduce(
-          (acc, curr) => acc + (curr?.file?.length || 0),
-          0
-        );
-        setFileCount(totalFiles);
-      } catch (error) {
-        console.error('Error fetching logs:', error);
-      }
-    };
-
-    fetchLogs();
-  }, [activeTab, refresh, slug]);
-
   useEffect(() => {
     getprojectDetail();
-  }, [slug, refresh]);
+  }, [slug, token]);
 
   useEffect(() => {
     if (Array.isArray(pointList) && pointList.length > 0) {
@@ -337,10 +282,8 @@ const ClientProjectView = () => {
 
   const documentDialogFunction = () => {
     setDocumentOpen(true);
-    axios
-      .get(
-        `${process.env.REACT_APP_BASE_PATH}/api/client/project-document/bysiteid/${slug}`
-      )
+    api
+      .get(`/client/project-document/bysiteid/${slug}`)
       .then(response => {
         setDocumentList(response?.data?.data);
       })
@@ -353,47 +296,45 @@ const ClientProjectView = () => {
   };
 
   const handleUpdate = () => {
-    if (!status) {
-      toast('Work is required');
-    } else if (!step) {
-      toast('Query step log is required');
-    } else if (!content) {
-      toast('Query content is required');
-    } else if (!date) {
-      toast('Date is required');
-    } else {
-      const formData = new FormData();
-      formData.append('id', slug);
-      formData.append('name', step);
-      formData.append('point', parseInt(point));
-      formData.append('content', content?.split('$')[0]);
-      formData.append('assignedBy', userId);
-      formData.append('assignMember', assignMember);
-      formData.append('status', status);
-      for (let i = 0; i < image?.length; i++) {
-        formData.append('image', image[i]);
-      }
-      formData.append('log', log);
-      formData.append('date', date);
+    if (!status) return toast('Work is required');
+    if (!step) return toast('Query step log is required');
+    if (!content) return toast('Query content is required');
+    if (!date) return toast('Date is required');
 
-      let config = {
-        method: 'put',
-        maxBodyLength: Infinity,
-        url: `${process.env.REACT_APP_BASE_PATH}/api/project/client-query`,
-        headers: { 'Content-Type': 'multipart/form-data' },
-        data: formData,
-      };
-      axios
-        .request(config)
-        .then(resp => {
-          toast(resp.data.message);
-        })
-        .catch(err => {
-          toast('Error while raise query by client');
-          console.log(err);
-        });
-      setConfirmationOpen(false);
+    const formData = new FormData();
+    formData.append('id', slug);
+    formData.append('name', step);
+    formData.append('point', String(parseInt(point)));
+    formData.append('content', content.split('$')[0] || '');
+    formData.append('assignedBy', userId);
+    formData.append('assignMember', assignMember);
+    formData.append('status', status);
+    formData.append('log', log);
+    formData.append('date', date);
+
+    if (Array.isArray(image)) {
+      image.forEach(img => formData.append('image', img));
     }
+
+    const config = {
+      method: 'put',
+      maxBodyLength: Infinity,
+      url: `/project/client-query`,
+      headers: { 'Content-Type': 'multipart/form-data' },
+      data: formData,
+    };
+
+    api
+      .request(config)
+      .then(resp => {
+        toast(resp.data.message);
+      })
+      .catch(err => {
+        toast('Error while raising query by client');
+        console.error(err);
+      });
+
+    setConfirmationOpen(false);
   };
 
   const handleCancel = () => {
@@ -444,106 +385,89 @@ const ClientProjectView = () => {
     setOpenAccordion('');
     setWorkStatusOpen(false);
     setLoading(true);
-    // Extract all mandatory points from the checklist
+
     const mandatoryPoints = inspectionList[0]?.checkList?.flatMap(
-      checklistItem =>
-        checklistItem.points?.filter(
+      item =>
+        item.points?.filter(
           point => point.status?.toLowerCase() === 'mandatory'
-        )
+        ) || []
     );
 
-    // Check if any mandatory point is not checked
     const hasUnCheckedMandatory = mandatoryPoints?.some(mandatoryPoint => {
       const checkedPoint = checkedItems?.find(
         point => point.point === mandatoryPoint.point
       );
-      return !checkedPoint || !checkedPoint.checked;
+      return !checkedPoint?.checked;
     });
 
     if (!status) {
       toast('Status is required');
       setLoading(false);
-      // } else if (approveImage?.length === 0) {
-      //   toast("Approval Image is required", {
-      //     position: "top-center",
-      //   });
-    } else if (
+      return;
+    }
+
+    if (
       hasUnCheckedMandatory ||
       (inspectionList?.length > 0 && checkedItems?.length === 0)
     ) {
-      toast(' Checked all mandatory inspection is required');
+      toast('Checked all mandatory inspection is required');
+      setLoading(false);
+      return;
     }
-    // else if (!chatLog) {
-    //   toast("Chat Log is required", {
-    //     position: "top-center",
-    //   });
-    // }
-    else {
-      const formData = new FormData();
-      formData.append('id', slug);
-      formData.append('name', name);
-      formData.append('point', point);
-      formData.append('content', content);
-      formData.append('status', status);
-      for (let i = 0; i < approveImage?.length; i++) {
-        formData.append('image', approveImage[i]);
-      }
-      formData.append('date', date);
-      formData.append('checkListName', checkListName);
-      // formData.append("chatLog", chatLog);
-      formData.append('userName', userName);
-      formData.append('userId', userId);
-      if (currentStatus === 'Completed') {
-        setWorkStatusOpen(false);
-        setLoading(false);
-        toast('You have already completed this point.');
-      } else {
-        axios
-          .put(
-            `${process.env.REACT_APP_BASE_PATH}/api/project/updatestatusbyid`,
-            formData
-          )
-          .then(response => {
-            setApproveImage([]);
-            if (response) {
-              axios
-                .get(
-                  `${process.env.REACT_APP_BASE_PATH}/api/project/databyid/${slug}`
-                )
-                .then(response => {
-                  setProjectDetails(response?.data?.data[0]);
-                  setRefresh(prev => !prev);
-                })
-                .catch(error => {
-                  toast('Error while update project status');
-                });
-              setLoading(false);
-              setName('');
-              setPoint('');
-              setContent('');
-              setStatus('');
-              setCheckListName('');
-              setInspectionList([]);
-              setCheckedItems([]);
-              toast(`${response.data.message}`);
-            }
-          })
-          .catch(error => {
-            setLoading(false);
-            setName('');
-            setPoint('');
-            setContent('');
-            setStatus('');
-            setCheckListName('');
-            setInspectionList([]);
-            setCheckedItems([]);
-            setApproveImage([]);
-            setWorkStatusOpen(false);
-            console.log(error);
-            toast('Error while update project status');
-          });
-      }
+
+    if (currentStatus === 'Completed') {
+      toast('You have already completed this point.');
+      setLoading(false);
+      return;
     }
+
+    const formData = new FormData();
+    formData.append('id', slug);
+    formData.append('name', name);
+    formData.append('point', point);
+    formData.append('content', content);
+    formData.append('status', status);
+    formData.append('date', date);
+    formData.append('checkListName', checkListName);
+    formData.append('userName', userName);
+    formData.append('userId', userId);
+    // formData.append('chatLog', chatLog);
+
+    if (Array.isArray(approveImage)) {
+      approveImage.forEach(image => formData.append('image', image));
+    }
+
+    api
+      .put(`/project/updatestatusbyid`, formData)
+      .then(response => {
+        toast(`${response.data.message}`);
+        clearWorkStatusState();
+
+        // Fetch updated project details
+        return api.get(`/project/databyid/${slug}`);
+      })
+      .then(response => {
+        setProjectDetails(response?.data?.data[0]);
+        setRefresh(prev => !prev);
+      })
+      .catch(error => {
+        console.error(error);
+        toast('Error while updating project status');
+        clearWorkStatusState();
+      });
+  };
+
+  const clearWorkStatusState = () => {
+    setLoading(false);
+    setApproveImage([]);
+    setName('');
+    setPoint('');
+    setContent('');
+    setStatus('');
+    setCheckListName('');
+    setInspectionList([]);
+    setCheckedItems([]);
+    setWorkStatusOpen(false);
   };
 
   const handleWorkStatusChange = e => {
@@ -558,36 +482,46 @@ const ClientProjectView = () => {
   };
 
   const handleUploadDocument = () => {
+    if (!documentName || !document?.length) {
+      toast('Document name and files are required');
+      return;
+    }
+
     const formData = new FormData();
     formData.append('name', documentName);
-    formData.append('client', projectDetails?.client);
+    formData.append('client', projectDetails?.client || '');
     formData.append('siteID', slug);
     formData.append('user', userId);
     formData.append('userName', userName);
     formData.append('date', formatedtoday);
-    for (let i = 0; i < document?.length; i++) {
-      formData.append('document', document[i]);
+
+    if (Array.isArray(document)) {
+      document.forEach(file => formData.append('document', file));
     }
-    let config = {
+
+    const config = {
       method: 'post',
       maxBodyLength: Infinity,
-      url: `${process.env.REACT_APP_BASE_PATH}/api/admin/project-document/add`,
+      url: `admin/project-document/add`,
       headers: { 'Content-Type': 'multipart/form-data' },
       data: formData,
     };
-    axios
+
+    api
       .request(config)
       .then(resp => {
         setDocumentName('');
         setDocument('');
-        toast(resp?.data?.message);
-        setRefresh(!refresh);
+        setRefresh(prev => !prev);
+        toast(resp?.data?.message || 'Document uploaded successfully');
       })
       .catch(err => {
+        console.error(err);
         toast('Error while uploading document.');
-        console.log(err);
+      })
+      .finally(() => {
+        setDocumentDialogOpen(false);
       });
-    setDocumentDialogOpen(false);
   };
 
   const handleDocumentClose = () => {
@@ -601,95 +535,74 @@ const ClientProjectView = () => {
   };
 
   const AddProjectStepSubmit = () => {
-    if (!pointName) {
-      toast('Point Name is required');
-    } else if (!checkList) {
-      toast('CheckList is required');
-    } else if (checkList === 'yes' && !checkListName) {
-      toast('CheckList Name is required');
-    } else if (!duration && force !== 'yes') {
-      toast('Duration is required');
-    } else if (issueMember?.length === 0) {
-      toast('Issue member is required');
-    } else if (!prevContent) {
-      toast('Content is required');
-    } else {
-      const data = {
-        id: slug,
-        stepName: stepName,
-        pointName: pointName,
-        checkList: checkList,
-        checkListName: checkListName,
-        forceMajeure: {
-          isForceMajeure: force === 'yes' ? true : false,
-          startDate: startForceDate,
-          endDate: endForceDate,
-        },
-        duration:
-          force === 'yes'
-            ? new Date(endForceDate).getDate() -
-              new Date(startForceDate).getDate() +
-              1
-            : duration,
-        issueMember: issueMember,
-        prevContent: prevContent?.split('$')[0],
-        prevPoint: prevPoint,
-        activeUser: userId,
-        userName: userName,
-        uploadData: {
-          // manager: projectDetails?.project_manager,
-          engineer: projectDetails?.site_engineer,
-          sr_engineer: projectDetails?.sr_engineer,
-          contractor: projectDetails?.contractor,
-          operation: projectDetails?.operation,
-          sales: projectDetails?.sales,
-          admin: projectDetails?.project_admin,
-          accountant: projectDetails?.accountant,
-        },
-        date: formatedtoday,
-      };
-      axios
-        .put(
-          `${process.env.REACT_APP_BASE_PATH}/api/project/createnewpoint`,
-          data
-        )
-        .then(response => {
-          if (response.data.status == 200) {
-            toast(response.data.message);
-            setStepModal(false);
-            getprojectDetail();
-            setPointList([]);
-            setRefresh(!refresh);
-          }
-        })
-        .catch(error => {
-          toast('Error while add new point');
-          console.log(error);
-        });
-    }
+    if (!pointName) return toast('Point Name is required');
+    if (!checkList) return toast('CheckList is required');
+    if (checkList === 'yes' && !checkListName)
+      return toast('CheckList Name is required');
+    if (!duration && force !== 'yes') return toast('Duration is required');
+    if (!issueMember?.length) return toast('Issue member is required');
+    if (!prevContent) return toast('Content is required');
+
+    const isForce = force === 'yes';
+
+    const data = {
+      id: slug,
+      stepName,
+      pointName,
+      checkList,
+      checkListName,
+      forceMajeure: {
+        isForceMajeure: isForce,
+        startDate: startForceDate,
+        endDate: endForceDate,
+      },
+      duration: isForce
+        ? (new Date(endForceDate) - new Date(startForceDate)) /
+            (1000 * 60 * 60 * 24) +
+          1
+        : duration,
+      issueMember,
+      prevContent: prevContent.split('$')[0] || '',
+      prevPoint,
+      activeUser: userId,
+      userName,
+      uploadData: {
+        engineer: projectDetails?.site_engineer,
+        sr_engineer: projectDetails?.sr_engineer,
+        contractor: projectDetails?.contractor,
+        operation: projectDetails?.operation,
+        sales: projectDetails?.sales,
+        admin: projectDetails?.project_admin,
+        accountant: projectDetails?.accountant,
+      },
+      date: formatedtoday,
+    };
+
+    api
+      .put(`/project/createnewpoint`, data)
+      .then(response => {
+        if (response.data.status === 200) {
+          toast(response.data.message);
+          setStepModal(false);
+          getprojectDetail();
+          setPointList([]);
+          setRefresh(prev => !prev);
+        } else {
+          toast('Unexpected response from server');
+        }
+      })
+      .catch(error => {
+        console.error(error);
+        toast('Error while adding new point');
+      });
   };
 
   const AddStepOpenModal = (step, name) => {
     setStepModal(true);
     setStepName(name);
     setPointList(step);
-    setIssueMember([]);
-    setPrevContent('');
-    axios
-      .get(`${process.env.REACT_APP_BASE_PATH}/api/teammember/getall`)
-      .then(response => {
-        if (response) {
-          // setAllMemberList(response.data.data);
-          const uniqueRoles = response.data.data.filter(
-            (user, index, self) =>
-              index === self.findIndex(u => u.role === user.role)
-          );
-          setMemberList(uniqueRoles);
-        }
-      })
-      .catch(error => {
-        console.log(error);
-      });
+
+    // Reset relevant form fields and state
     setPointName('');
     setCheckList('');
     setCheckListName('');
@@ -697,6 +610,23 @@ const ClientProjectView = () => {
     setContent('');
     setStatus('');
     setPoint('');
+    setIssueMember([]);
+    setPrevContent('');
+
+    // Fetch unique roles from team member list
+    api
+      .get(`teammember/getall`)
+      .then(response => {
+        const data = response?.data?.data || [];
+        const uniqueRoles = data.filter(
+          (user, index, self) =>
+            index === self.findIndex(u => u.role === user.role)
+        );
+        setMemberList(uniqueRoles);
+      })
+      .catch(error => {
+        console.error('Error fetching team members:', error);
+      });
   };
 
   const DeleteStepOpenModal = (step, name) => {
@@ -717,27 +647,30 @@ const ClientProjectView = () => {
       id: slug,
       name: stepName,
       point: parseInt(point),
-      content: content?.split('$')[0],
+      content: content?.split('$')[0] || '',
       duration: stepDuration,
-      checkList: checkList,
-      checkListName: checkListName,
+      checkList,
+      checkListName,
       activeUser: userId,
-      userName: userName,
+      userName,
       date: formatedtoday,
     };
-    axios
-      .put(`${process.env.REACT_APP_BASE_PATH}/api/project/deletepoint`, data)
+
+    api
+      .put(`/project/deletepoint`, data)
       .then(response => {
-        if (response.data.status === 200) {
-          toast(`${response.data.message}`);
+        if (response?.data?.status === 200) {
+          toast(response.data.message);
           setStepModalDelete(false);
           getprojectDetail();
-          setRefresh(!refresh);
+          setRefresh(prev => !prev);
+        } else {
+          toast('Unexpected server response while deleting step');
         }
       })
       .catch(error => {
-        toast('Error while delete project field');
-        console.log(error);
+        console.error('Delete step error:', error);
+        toast('Error while deleting project step');
       });
   };
 
@@ -759,64 +692,71 @@ const ClientProjectView = () => {
   const DeleteProjectStep = () => {
     const data = {
       id: slug,
-      name: name,
+      name,
       project_step: stepArray,
-      // date: formatedtoday,
-      userName: userName,
+      userName,
       activeUser: userId,
     };
-    axios
-      .put(`${process.env.REACT_APP_BASE_PATH}/api/project/deletestep`, data)
+
+    api
+      .put(`/project/deletestep`, data)
       .then(response => {
-        if (response.data.status === 200) {
-          toast(`${response.data.message}`);
+        if (response?.data?.status === 200) {
+          toast(response.data.message);
           setDeleteStepOpen(false);
           getprojectDetail();
+        } else {
+          toast('Failed to delete step: unexpected server response');
         }
       })
       .catch(error => {
-        toast('Error while delete project field');
-        console.log(error);
+        console.error('Delete step error:', error);
+        toast('Error while deleting project step');
       });
   };
 
-  const getTeammembersByRole = async id => {
+  const getTeammembersByRole = async roleId => {
     try {
-      const response = await axios.post(
-        `${process.env.REACT_APP_BASE_PATH}/api/teammember/getTeammemberByRole`,
-        {
-          role: id,
-        }
-      );
-      setTeammembersByRole(response.data.data);
+      const response = await api.post(`/teammember/getTeammemberByRole`, {
+        role: roleId,
+      });
+
+      if (response?.data?.data) {
+        setTeammembersByRole(response.data.data);
+      } else {
+        toast('No team members found for this role');
+      }
     } catch (error) {
-      console.error(error);
+      console.error('Error fetching team members by role:', error);
+      toast('Failed to fetch team members');
     }
   };
 
   const changeIssueMember = async () => {
     const data = {
-      userId: userId,
+      userId,
       siteId: slug,
-      issue: issue.role.name,
+      issue: issue?.role?.name,
       newMember,
     };
+
     try {
-      const response = await axios.post(
-        `${process.env.REACT_APP_BASE_PATH}/api/project/changeissuemember`,
-        data
-      );
-      // setIssue(response.data.data);
-      getprojectDetail();
+      const response = await api.post(`/project/changeissuemember`, data);
+
+      if (response?.data?.status === 200) {
+        toast(response.data.message || 'Issue member updated successfully');
+        getprojectDetail();
+      } else {
+        toast('Failed to update issue member');
+      }
     } catch (error) {
-      console.error(error);
+      console.error('Error changing issue member:', error);
+      toast('Error occurred while changing issue member');
     }
   };
 
   let initialDate = new Date(projectDetails?.date);
   let diff;
-
-  //download is always a pdf file in project documents and change login page add icon and copy right paragraph project task progress is not working
 
   return (
     <AsideContainer>
@@ -1125,7 +1065,7 @@ const ClientProjectView = () => {
                               </p>
                             </div>
                             <div className="w-[200px] flex self-center justify-start -md:w-16">
-                              {`${itm.taskId.issueMember?.name}`}
+                              {`${itm.taskId.issueMember?.firstname} ${itm.taskId.issueMember?.lastname} `}
                             </div>
                             <div className="w-[200px] -md:w-20 my-1 flex items-start flex-col">
                               <div className="text-left text-nowrap">
@@ -1184,20 +1124,6 @@ const ClientProjectView = () => {
             );
           })}
       </div>
-
-      {/* <Modal
-        open={showImage}
-        onClose={toggleShowImage}
-        sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}
-      >
-        <div className="bg-white rounded-3xl w-2/4 h-4/5">
-          <img
-            src={showImageUrl}
-            alt="site-image"
-            className="w-20 h-full rounded-xl transition-all duration-300 rounded-lg"
-          />
-        </div>
-      </Modal> */}
 
       <Dialog open={workStatusOpen} onClose={workStatusCancel}>
         <DialogTitle>Update Project Work By Admin</DialogTitle>

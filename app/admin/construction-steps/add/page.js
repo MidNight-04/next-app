@@ -1,5 +1,5 @@
 'use client';
-import axios from 'axios';
+import api from '../../../../lib/api';
 import React, { useState } from 'react';
 import { toast } from 'sonner';
 import AsideContainer from '../../../../components/AsideContainer';
@@ -31,9 +31,9 @@ const ConstructionStepForm = () => {
       formData.append('name', name);
       formData.append('priority', priority);
       formData.append('file', points);
-      axios
+      api
         .post(
-          `${process.env.REACT_APP_BASE_PATH}/api/constructionstep/add`,
+          `/constructionstep/add`,
           formData,
           {
             headers: { 'Content-Type': 'multipart/form-data' },

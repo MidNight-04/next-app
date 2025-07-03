@@ -25,6 +25,6 @@
     "**/*.ts",
     "**/*.tsx",
     "app/admin/dashboard/page.js"
-  ],
+, "app/api/auth/session/route.js", "lib/authOptions.js", "helpers/getQueryClient.js"  ],
   "exclude": ["node_modules"]
 }

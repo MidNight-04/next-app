@@ -16,7 +16,7 @@ import {
   SortableContext,
   rectSortingStrategy,
 } from "@dnd-kit/sortable";
-import axios from "axios";
+import api from "../../lib/api";
 import SortableItem from "./SortableItem";
 
 const SortableList: FC = () => {
@@ -50,8 +50,8 @@ const SortableList: FC = () => {
   useEffect(() => {
     const fetchItems = async () => {
       try {
-        const response = await axios.get(
-          `${process.env.REACT_APP_BASE_PATH}/api/constructionstep/getSteps`
+        const response = await api.get(
+          `/constructionstep/getSteps`
         );
         const data = response.data.data.sort((a, b) => a.priority - b.priority);
         setItems(data);
@@ -69,8 +69,8 @@ const SortableList: FC = () => {
     }));
 
     try {
-      const response = await axios.post(
-        `${process.env.REACT_APP_BASE_PATH}/api/constructionstep/arrangeSteps`,
+      const response = await api.post(
+        `/constructionstep/arrangeSteps`,
         { steps: data }
       );
     } catch (error) {

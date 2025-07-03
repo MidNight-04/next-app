@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../../../../../lib/api';
 import {
   Button,
   Modal,
@@ -116,8 +116,8 @@ const SingleProjectChecklistView = () => {
   };
 
   const getAllCheckList = () => {
-    axios
-      .get(`${process.env.REACT_APP_BASE_PATH}/api/project/databyid/${slug}`)
+    api
+      .get(`/project/databyid/${slug}`)
       .then(response => {
         setData(response?.data?.data[0]?.inspections);
         var uniqueData = filterUniqueNames(
@@ -141,9 +141,9 @@ const SingleProjectChecklistView = () => {
     setDeleteDialogOpen(false);
   };
   const handleDelete = () => {
-    axios
+    api
       .delete(
-        `${process.env.REACT_APP_BASE_PATH}/api/project/checklist/delete/${id}`
+        `/project/checklist/delete/${id}`
       )
       .then(response => {
         if (response) {
@@ -198,9 +198,9 @@ const SingleProjectChecklistView = () => {
       userName: userName,
       activeUser: activeUser,
     };
-    axios
+    api
       .put(
-        `${process.env.REACT_APP_BASE_PATH}/api/singleproject/checklist/deletepoint`,
+        `/singleproject/checklist/deletepoint`,
         data
       )
       .then(response => {
@@ -254,9 +254,9 @@ const SingleProjectChecklistView = () => {
         userName: userName,
         activeUser: activeUser,
       };
-      axios
+      api
         .put(
-          `${process.env.REACT_APP_BASE_PATH}/api/singleproject/checklist/addpoint`,
+          `/singleproject/checklist/addpoint`,
           data
         )
         .then(response => {
@@ -297,9 +297,9 @@ const SingleProjectChecklistView = () => {
         userName: userName,
         activeUser: activeUser,
       };
-      axios
+      api
         .put(
-          `${process.env.REACT_APP_BASE_PATH}/api/singleproject/checklist/addextrapoint`,
+          `/singleproject/checklist/addextrapoint`,
           data
         )
         .then(response => {

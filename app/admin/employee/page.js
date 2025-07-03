@@ -1,7 +1,7 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { DataGrid, gridClasses } from '@mui/x-data-grid';
-import axios from 'axios';
+import api from '../../../lib/api';
 import { Modal, Select, MenuItem, styled } from '@mui/material';
 import { toast } from 'sonner';
 import AsideContainer from '../../../components/AsideContainer';
@@ -9,6 +9,7 @@ import { Add } from '@mui/icons-material';
 import { useRouter } from 'next/navigation';
 import { FiEdit } from 'react-icons/fi';
 import { MdOutlineDelete } from 'react-icons/md';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
   [`& .${gridClasses.row}.even`]: {
@@ -39,21 +40,152 @@ const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
   },
 }));
 
+const tableStyles = {
+  fontFamily: 'ubuntu',
+  fontSize: '16px',
+  '.MuiDataGrid-columnSeparator': {
+    display: 'none',
+  },
+  '& .MuiDataGrid-columnHeaderTitle': { color: '#93bfcf' },
+  '& .MuiDataGrid-menuOpen': { background: '#0b192c' },
+  '&.MuiDataGrid-root': {
+    borderRadius: '16px',
+    marginBottom: '1rem',
+    // color: "#93bfcf",
+    background: '#0b192c',
+  },
+  '& .MuiDataGrid-filler': { background: '#0b192c' },
+  '& .MuiDataGrid-columnHeader': {
+    background: '#0b192c',
+    color: '#93bfcf',
+  },
+  '& .MuiDataGrid-columnHeader--sortable': {
+    color: '#93bfcf',
+  },
+  '& .MuiDataGrid-withBorderColor': {
+    color: '#93bfcf',
+  },
+  '& .MuiDataGrid-menuIcon': {
+    background: '#0b192c',
+    color: '#93bfcf',
+  },
+  '& .MuiDataGrid-columnHeaders': {
+    background: '#0b192c',
+    color: '#93bfcf',
+  },
+  '& .MuiDataGrid-sortIcon': {
+    opacity: 'inherit !important',
+    color: '#93bfcf',
+  },
+  '& .MuiDataGrid-cell:focus-within': {
+    outline: 'none !important',
+  },
+  '& .MuiDataGrid-columnHeaderTitleContainer': {
+    background: '#0b192c',
+    color: '#93bfcf',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  '& .MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular MuiTablePagination-toolbar':
+    {
+      display: 'none',
+    },
+  '& .MuiToolbar-root ': {
+    color: '#93bfcf',
+  },
+  '& .MuiButtonBase-root': {
+    color: '#93bfcf',
+  },
+  '& .MuiDataGrid-overlay': {
+    background: '#eee9da',
+    color: '#0b192c',
+  },
+  '& .MuiDataGrid-cell': {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+};
+
+const initialState = {
+  name: '',
+  employeeID: '',
+  role: '',
+  email: '',
+  phone: '',
+  address: '',
+};
+
 const MemberTable = () => {
   const router = useRouter();
-  const [memberList, setMemberList] = useState([]);
-  const [roleList, setRoleList] = useState([]);
+  const queryClient = useQueryClient();
   const [confirmationOpen, setConfirmationOpen] = useState(false);
   const [confirmationDelete, setConfirmationDelete] = useState(false);
   const [userId, setUserId] = useState('');
-  const [data, setData] = useState({
-    name: '',
-    employeeID: '',
-    role: '',
-    email: '',
-    phone: '',
-    address: '',
+  const [data, setData] = useState(initialState);
+
+  const { data: memberList, isLoading } = useQuery({
+    queryKey: ['members'],
+    queryFn: () => api.get('/teammember/getall').then(res => res.data.data),
   });
+
+  const { data: roleList } = useQuery({
+    queryKey: ['roles'],
+    queryFn: () => api.get('/role/getall').then(res => res.data.data),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: () => api.delete(`/teammember/delete/${userId}`),
+    onSuccess: () => {
+      toast('Record deleted successfully');
+      queryClient.invalidateQueries({ queryKey: ['members'] });
+      setConfirmationDelete(false);
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: newData => api.put('/teammember/updatebyid', newData),
+    onSuccess: res => {
+      toast(res.data.message);
+      queryClient.invalidateQueries({ queryKey: ['members'] });
+      setConfirmationOpen(false);
+      setData(initialState);
+      setUserId('');
+    },
+  });
+
+  const updateFunction = id => {
+    setUserId(id);
+    setConfirmationOpen(true);
+    api.get(`/teammember/databyid/${id}`).then(res => {
+      const item = res.data.data;
+      setData({
+        name: item.name,
+        employeeID: item.employeeID,
+        role: item.role,
+        email: item.email,
+        phone: item.phone,
+        address: item.address,
+      });
+    });
+  };
+
+  const handleConfirm = () => {
+    updateMutation.mutate({ ...data, id: userId });
+  };
+
+  const handleCancel = () => {
+    setConfirmationOpen(false);
+  };
+  const handleDelete = () => {
+    setConfirmationDelete(prev => !prev);
+  };
+
+  const deleteMember = () => {
+    setConfirmationDelete(prev => !prev);
+    deleteMutation.mutate(userId);
+  };
 
   const columns = [
     { field: 'seriel', headerName: 'SNo.', width: 80 },
@@ -63,157 +195,44 @@ const MemberTable = () => {
     { field: 'email', headerName: 'Email', width: 280 },
     { field: 'phone', headerName: 'Phone', width: 140 },
     { field: 'address', headerName: 'Address', width: 360 },
-  ];
-  useEffect(() => {
-    getAllMember();
-    axios
-      .get(`${process.env.REACT_APP_BASE_PATH}/api/projectrole/getall`)
-      .then(response => {
-        if (response) {
-          // console.log(response.data.data);
-          setRoleList(response.data.data);
-        }
-      })
-      .catch(error => {
-        console.log(error);
-      });
-  }, []);
-
-  const getAllMember = () => {
-    axios
-      .get(`${process.env.REACT_APP_BASE_PATH}/api/teammember/getall`)
-      .then(response => {
-        setMemberList(response?.data?.data);
-        // console.log(response?.data?.data)
-      })
-      .catch(error => {
-        console.log(error);
-      });
-  };
-
-  const handleFormData = e => {
-    const { name, value } = e.target;
-    setData({ ...data, [name]: value });
-  };
-
-  const deleteMember = () => {
-    setConfirmationDelete(prev => !prev);
-    axios
-      .delete(
-        `${process.env.REACT_APP_BASE_PATH}/api/teammember/delete/${userId}`
-      )
-      .then(response => {
-        if (response) {
-          toast('Record deleted successfully');
-          getAllMember();
-        }
-      })
-      .catch(error => {
-        console.log(error);
-      });
-  };
-
-  const updateFunction = id => {
-    setUserId(id);
-    setConfirmationOpen(true);
-    axios
-      .get(`${process.env.REACT_APP_BASE_PATH}/api/teammember/databyid/${id}`)
-      .then(response => {
-        if (response) {
-          //   console.log(response.data.data)
-          setData({
-            name: response.data.data.name,
-            employeeID: response.data.data.employeeID,
-            role: response.data.data.role,
-            email: response.data.data.email,
-            phone: response.data.data.phone,
-            address: response.data.data.address,
-          });
-        }
-      })
-      .catch(error => {
-        console.log(error);
-      });
-  };
-  const handleConfirm = () => {
-    // Perform action based on authorizationStatus
-    const dataUpdate = {
-      id: userId,
-      name: data.name,
-      employeeID: data.employeeID,
-      role: data.role,
-      email: data.email,
-      phone: data.phone,
-      address: data.address,
-    };
-    axios
-      .put(
-        `${process.env.REACT_APP_BASE_PATH}/api/teammember/updatebyid`,
-        dataUpdate
-      )
-      .then(response => {
-        if (response) {
-          getAllMember();
-          toast(`${response.data.message}`);
-        }
-      })
-      .catch(error => {
-        console.log(error);
-      });
-    // Close the confirmation dialog
-    setConfirmationOpen(false);
-  };
-
-  const handleCancel = () => {
-    // Close the confirmation dialog
-    setConfirmationOpen(false);
-  };
-  const handleDelete = () => {
-    setConfirmationDelete(prev => !prev);
-  };
-
-  const arrayData = [];
-  memberList?.map((row, index) => {
-    return arrayData.push({
-      id: row?._id,
-      seriel: index + 1,
-      name: row?.name,
-      employeeID: row?.employeeID,
-      email: row?.email,
-      role: row?.role?.name,
-      phone: row?.phone,
-      address: row?.address,
-    });
-  });
-
-  const actionColumn = [
     {
       field: 'action',
       headerName: 'Action',
       width: 200,
-      renderCell: params => {
-        return (
-          <div className="flex flex-row gap-2 items-center">
-            <div
-              className="p-2 rounded-full border border-primary text-primary bg-primary-foreground cursor-pointer"
-              onClick={() => updateFunction(params?.row?.id)}
-            >
-              <FiEdit className="text-xl" />
-            </div>
-            <div
-              className="p-2 rounded-full border border-primary text-primary bg-primary-foreground cursor-pointer"
-              onClick={() => {
-                setUserId(params.row.id);
-                handleDelete();
-              }}
-            >
-              <MdOutlineDelete className="text-xl" />
-            </div>
+      renderCell: params => (
+        <div className="flex flex-row gap-2 items-center">
+          <div
+            className="p-2 rounded-full border border-primary text-primary bg-primary-foreground cursor-pointer"
+            // onClick={() => updateFunction(params.row.id)}
+            onClick={() => router.push(`/admin/employee/${params.row.id}`)}
+          >
+            <FiEdit className="text-xl" />
           </div>
-        );
-      },
+          <div
+            className="p-2 rounded-full border border-primary text-primary bg-primary-foreground cursor-pointer"
+            onClick={() => {
+              setUserId(params.row.id);
+              setConfirmationDelete(true);
+            }}
+          >
+            <MdOutlineDelete className="text-xl" />
+          </div>
+        </div>
+      ),
     },
   ];
+
+  const rows =
+    memberList?.map((row, index) => ({
+      id: row._id,
+      seriel: index + 1,
+      name: row?.firstname + ' ' + row?.lastname,
+      employeeID: row.employeeID,
+      email: row.email,
+      role: row.roles?.name,
+      phone: row.phone,
+      address: row?.city + ' ' + row?.state,
+    })) || [];
 
   return (
     <AsideContainer>
@@ -231,81 +250,16 @@ const MemberTable = () => {
           </button>
         </div>
         <StripedDataGrid
-          rows={arrayData}
-          columns={columns.concat(actionColumn)}
+          rows={rows}
+          columns={columns}
           pageSize={9}
           rowsPerPageOptions={[9]}
+          loading={isLoading}
           localeText={{ noRowsLabel: 'No Data Available...' }}
           getRowClassName={params =>
             params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd'
           }
-          sx={{
-            fontFamily: 'ubuntu',
-            fontSize: '16px',
-            '.MuiDataGrid-columnSeparator': {
-              display: 'none',
-            },
-            '& .MuiDataGrid-columnHeaderTitle': { color: '#93bfcf' },
-            '& .MuiDataGrid-menuOpen': { background: '#0b192c' },
-            '&.MuiDataGrid-root': {
-              borderRadius: '16px',
-              marginBottom: '1rem',
-              // color: "#93bfcf",
-              background: '#0b192c',
-            },
-            '& .MuiDataGrid-filler': { background: '#0b192c' },
-            '& .MuiDataGrid-columnHeader': {
-              background: '#0b192c',
-              color: '#93bfcf',
-            },
-            '& .MuiDataGrid-columnHeader--sortable': {
-              color: '#93bfcf',
-            },
-            '& .MuiDataGrid-withBorderColor': {
-              color: '#93bfcf',
-            },
-            '& .MuiDataGrid-menuIcon': {
-              background: '#0b192c',
-              color: '#93bfcf',
-            },
-            '& .MuiDataGrid-columnHeaders': {
-              background: '#0b192c',
-              color: '#93bfcf',
-            },
-            '& .MuiDataGrid-sortIcon': {
-              opacity: 'inherit !important',
-              color: '#93bfcf',
-            },
-            '& .MuiDataGrid-cell:focus-within': {
-              outline: 'none !important',
-            },
-            '& .MuiDataGrid-columnHeaderTitleContainer': {
-              background: '#0b192c',
-              color: '#93bfcf',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            },
-            '& .MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular MuiTablePagination-toolbar':
-              {
-                display: 'none',
-              },
-            '& .MuiToolbar-root ': {
-              color: '#93bfcf',
-            },
-            '& .MuiButtonBase-root': {
-              color: '#93bfcf',
-            },
-            '& .MuiDataGrid-overlay': {
-              background: '#eee9da',
-              color: '#0b192c',
-            },
-            '& .MuiDataGrid-cell': {
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            },
-          }}
+          sx={tableStyles}
         />
         <Modal
           open={confirmationOpen}

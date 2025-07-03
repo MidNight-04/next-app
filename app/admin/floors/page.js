@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { DataGrid, gridClasses } from '@mui/x-data-grid';
-import axios from 'axios';
+import api from '../../../lib/api';
 import { Modal, styled } from '@mui/material';
 import { toast } from 'sonner';
 import Link from 'next/link';
@@ -56,8 +56,8 @@ const ProjectFloorList = () => {
   }, []);
 
   const getAllFloor = () => {
-    axios
-      .get(`${process.env.REACT_APP_BASE_PATH}/api/floor/getall`)
+    api
+      .get(`/floor/getall`)
       .then(response => {
         setData(response?.data?.data);
         // console.log(response?.data?.data)
@@ -69,8 +69,8 @@ const ProjectFloorList = () => {
 
   const deleteFloor = () => {
     handleDelete();
-    axios
-      .delete(`${process.env.REACT_APP_BASE_PATH}/api/floor/delete/${userId}`)
+    api
+      .delete(`/floor/delete/${userId}`)
       .then(response => {
         if (response) {
           toast('Record deleted successfully');
@@ -85,8 +85,8 @@ const ProjectFloorList = () => {
   const updateFunction = id => {
     setUserId(id);
     setConfirmationOpen(true);
-    axios
-      .get(`${process.env.REACT_APP_BASE_PATH}/api/floor/databyid/${id}`)
+    api
+      .get(`/floor/databyid/${id}`)
       .then(response => {
         if (response) {
           //   console.log(response.data.data)
@@ -103,8 +103,8 @@ const ProjectFloorList = () => {
       id: userId,
       floor: floor,
     };
-    axios
-      .put(`${process.env.REACT_APP_BASE_PATH}/api/floor/updatebyid`, data)
+    api
+      .put(`floor/updatebyid`, data)
       .then(response => {
         if (response) {
           getAllFloor();

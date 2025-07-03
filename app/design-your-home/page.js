@@ -417,7 +417,7 @@ const Page = () => {
                                 !String(item?.twoDImage[index]).includes(
                                   'bucket.s3'
                                 )
-                                  ? `${process.env.REACT_APP_BASE_PATH}${item?.twoDImage[index]}`
+                                  ? `${process.env.BACKEND_BASE_URL}${item?.twoDImage[index]}`
                                   : item?.twoDImage[index]
                               }
                               height={200}

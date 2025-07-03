@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../../../lib/api';
 import NoImage from '../../../public/assets/no-image-available.png';
 import { RiShareForwardFill } from 'react-icons/ri';
 import { useAuthStore } from '../../../store/useAuthStore';
@@ -34,19 +34,19 @@ const Page = () => {
     const fetchTickets = async () => {
       try {
         if (userType === 'ROLE_USER' || userType === 'ROLE_ADMIN') {
-          const response = await axios.get(
-            `${process.env.REACT_APP_BASE_PATH}/api/tickets/getalltickets`
+          const response = await api.get(
+            `/tickets/getalltickets`
           );
           setTicketList(response.data.data);
         } else if (userType === 'ROLE_CLIENT') {
-          const response = await axios.get(
-            `${process.env.REACT_APP_BASE_PATH}/api/tickets/gettickets/${userId}`
+          const response = await api.get(
+            `/tickets/gettickets/${userId}`
           );
 
           setTicketList(response.data.data);
         } else {
-          const response = await axios.get(
-            `${process.env.REACT_APP_BASE_PATH}/api/tickets/getmembertickets/${userId}`
+          const response = await api.get(
+            `/tickets/getmembertickets/${userId}`
           );
           setTicketList(response.data.data);
         }

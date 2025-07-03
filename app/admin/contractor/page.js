@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { DataGrid, gridClasses } from '@mui/x-data-grid';
 import { styled } from '@mui/material';
-import axios from 'axios';
+import api from '../../../lib/api';
 import { IoIosArrowBack } from 'react-icons/io';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
@@ -88,8 +88,8 @@ const ContractorTable = () => {
   ];
 
   const getContractors = props => {
-    axios
-      .get(`${process.env.REACT_APP_BASE_PATH}/api/contractor/applications`)
+    api
+      .get(`/contractor/applications`)
       .then(resp => {
         setRows(resp?.data?.data);
       })
@@ -99,11 +99,9 @@ const ContractorTable = () => {
       });
   };
   const deleteContractor = id => {
-    // const REACT_APP_BASE_PATH= "http://localhost:8080"
-    axios
-      .delete(
-        `${process.env.REACT_APP_BASE_PATH}/api/contractor/deleteById/${id}`
-      )
+    // const BACKEND_BASE_URL= "http://localhost:8080"
+    api
+      .delete(`/contractor/deleteById/${id}`)
       .then(resp => {
         if (resp) {
           toast(resp.data.message);
@@ -116,10 +114,8 @@ const ContractorTable = () => {
   };
 
   const suspendDealer = id => {
-    axios
-      .put(
-        `${process.env.REACT_APP_BASE_PATH}/api/contractor/suspendById/${id}`
-      )
+    api
+      .put(`/contractor/suspendById/${id}`)
       .then(resp => {
         if (resp) {
           toast(resp.data.message);
@@ -131,8 +127,8 @@ const ContractorTable = () => {
       });
   };
   const activeDealer = id => {
-    axios
-      .put(`${process.env.REACT_APP_BASE_PATH}/api/contractor/activeById/${id}`)
+    api
+      .put(`/contractor/activeById/${id}`)
       .then(resp => {
         if (resp) {
           toast(resp.data.message);

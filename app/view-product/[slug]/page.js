@@ -15,7 +15,7 @@ import {
   TextField,
 } from '@mui/material';
 import StarIcon from '@mui/icons-material/Star';
-import axios from 'axios';
+import api from '../../../lib/api';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import dummyImagePdf from '../../../public/assets/dummy-image-pdf.jpg';
@@ -153,15 +153,15 @@ const Page = () => {
         userId: userId,
       };
       // console.log(data)
-      axios
+      api
         .post(
-          `${process.env.REACT_APP_BASE_PATH}/api/user/addProductWishList`,
+          `/user/addProductWishList`,
           data
         )
         .then(resp => {
-          axios
+          api
             .post(
-              `${process.env.REACT_APP_BASE_PATH}/api/dealer/product-detail`,
+              `/dealer/product-detail`,
               {
                 id: id,
               }
@@ -375,8 +375,8 @@ const Page = () => {
     let mid = 'WBJIwm08119302462954'; // Merchant ID
     let orderId = 'ORDER' + new Date().getTime();
     if (selectedAddress !== '') {
-      axios
-        .post(`${process.env.REACT_APP_BASE_PATH}/api/user/initiate-payment`, {
+      api
+        .post(`/user/initiate-payment`, {
           orderId,
           amount,
           path,
@@ -511,8 +511,8 @@ const Page = () => {
   //   const data = {
   //     id: id,
   //   };
-  //   axios
-  //     .post(`${process.env.REACT_APP_BASE_PATH}/delete-product-rating`, data)
+  //   api
+  //     .post(`${process.env.BACKEND_BASE_URL}/delete-product-rating`, data)
   //     .then((resp) => {
   //       if (resp.data.data) {
   //         toast("Your review has been deleted successfully", {
@@ -566,7 +566,7 @@ const Page = () => {
                         file && file.match(/jpg|jpeg|png|gif|in/)
                           ? String(file).includes('files') &&
                             !String(selectedImage).includes('bucket.s3')
-                            ? `${process.env.REACT_APP_BASE_PATH}${file}`
+                            ? `${process.env.BACKEND_BASE_URL}${file}`
                             : file
                           : dummyImagePdf
                       }
@@ -1101,7 +1101,7 @@ const Page = () => {
                           src={
                             String(item?.productImage[0]).includes('files') &&
                             !String(item?.productImage[0]).includes('bucket.s3')
-                              ? `${process.env.REACT_APP_BASE_PATH}${item?.productImage[0]}`
+                              ? `${process.env.BACKEND_BASE_URL}${item?.productImage[0]}`
                               : item?.productImage[0]
                           }
                           className="object-contain w-full h-[10rem]"

@@ -38,8 +38,8 @@ const SortableItem = ({ id, item }) => {
     setPoint(point);
     setAddFieldOpen(true);
     setNewField("");
-    axios
-      .get(`${process.env.REACT_APP_BASE_PATH}/api/teammember/getall`)
+    api
+      .get(`/teammember/getall`)
       .then(response => {
         if (response) {
           const uniqueRoles = response.data.data.filter(

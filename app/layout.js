@@ -1,10 +1,11 @@
-import { Geist, Geist_Mono, Imprima, Ubuntu } from "next/font/google";
-import "./globals.css";
+import { Geist, Geist_Mono, Imprima, Ubuntu } from 'next/font/google';
+import './globals.css';
 
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import QueryProvider from "../helpers/QueryProvider";
-import { ThemeProvider } from "../components/theme-provider";
-import { Toaster } from "../components/ui/sonner";
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import QueryProvider from '../helpers/QueryProvider';
+import { ThemeProvider } from '../components/theme-provider';
+import { Toaster } from '../components/ui/sonner';
+import { AuthProvider } from '../context/authContext';
 
 // const geistSans = Geist({
 //   variable: "--font-geist-sans",
@@ -17,19 +18,19 @@ import { Toaster } from "../components/ui/sonner";
 // });
 
 const custom = Imprima({
-  variable: "--font-custom",
-  weight: "400",
-  subsets: ["latin"],
+  variable: '--font-custom',
+  weight: '400',
+  subsets: ['latin'],
 });
 const ubuntu = Ubuntu({
-  variable: "--font-ubuntu",
-  weight: "400",
-  subsets: ["latin"],
+  variable: '--font-ubuntu',
+  weight: '400',
+  subsets: ['latin'],
 });
 
 export const metadata = {
-  title: "Bldox : Track Your Construction Project",
-  description: "Track Your Construction Project On The Go",
+  title: 'Bldox : Track Your Construction Project',
+  description: 'Track Your Construction Project On The Go',
 };
 
 export default function RootLayout({ children }) {
@@ -39,11 +40,13 @@ export default function RootLayout({ children }) {
         className={`${custom.variable} ${ubuntu.variable} antialiased`}
         // className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <QueryProvider>
-          <ReactQueryDevtools initialIsOpen={false} />
-          <Toaster />
-          {children}
-        </QueryProvider>
+        <AuthProvider>
+          <QueryProvider>
+            <ReactQueryDevtools initialIsOpen={false} />
+            <Toaster />
+            {children}
+          </QueryProvider>
+        </AuthProvider>
       </body>
     </html>
   );

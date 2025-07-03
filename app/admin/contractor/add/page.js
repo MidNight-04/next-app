@@ -7,7 +7,7 @@ import { IoIosArrowBack } from 'react-icons/io';
 import { useQueries } from '@tanstack/react-query';
 import { postEndpoint } from '../../../../helpers/endpoints';
 import AsideContainer from '../../../../components/AsideContainer';
-import axios from 'axios';
+import api from '../../../../lib/api';
 import * as yup from 'yup';
 import { toast } from 'sonner';
 import {
@@ -76,10 +76,7 @@ const Page = () => {
 
   const onSubmit = async formData => {
     try {
-      await axios.post(
-        `${process.env.REACT_APP_BASE_PATH}/api/auth/signup`,
-        formData
-      );
+      await api.post(`/auth/signup`, formData);
       toast.success('Contractor added successfully!');
       // router.push('/contractors');
     } catch (err) {

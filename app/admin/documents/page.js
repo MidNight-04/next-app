@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import { DataGrid, gridClasses } from '@mui/x-data-grid';
-import axios from 'axios';
+import api from '../../../lib/api';
 import {
   Chip,
   Button,
@@ -104,9 +104,9 @@ const Page = () => {
   }, [id]);
 
   const getAllDocument = () => {
-    axios
+    api
       .get(
-        `${process.env.REACT_APP_BASE_PATH}/api/client/project-document/byclient/${id}`
+        `/client/project-document/byclient/${id}`
       )
       .then(response => {
         setDocument(response?.data?.data);
@@ -120,9 +120,9 @@ const Page = () => {
     // alert(documentId)
     setDocumentID(documentId);
     setDocumentStatusOpen(true);
-    axios
+    api
       .get(
-        `${process.env.REACT_APP_BASE_PATH}/api/client/project-document/byid/${documentId}`
+        `/client/project-document/byid/${documentId}`
       )
       .then(response => {
         setStatus(response?.data?.data[0]?.status);
@@ -155,9 +155,9 @@ const Page = () => {
         id: documentID,
         status: status,
       };
-      axios
+      api
         .put(
-          `${process.env.REACT_APP_BASE_PATH}/api/client/project-document/update-statusbyclient`,
+          `/client/project-document/update-statusbyclient`,
           data
         )
         .then(response => {

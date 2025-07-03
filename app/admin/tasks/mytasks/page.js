@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { MdSkipNext, MdSkipPrevious } from 'react-icons/md';
-import axios from 'axios';
+import api from '../../../../lib/api';
 import Avatar from '@mui/material/Avatar';
 import { toast } from 'sonner';
 import AsideContainer from '../../../../components/AsideContainer';
@@ -57,8 +57,8 @@ const Page = () => {
     useQuery({
       queryKey: ['tasks', activeFilter, currentPage],
       queryFn: async () => {
-        const response = await axios.post(
-          `${process.env.REACT_APP_BASE_PATH}/api/task/customfilters`,
+        const response = await api.post(
+          `/task/customfilters`,
           {
             page: currentPage,
             userId,
@@ -88,8 +88,8 @@ const Page = () => {
 
   const searchTask = e => {
     const searchValue = e.target.value.toLowerCase();
-    const data = axios.post(
-      `${process.env.REACT_APP_BASE_PATH}/api/task/search/${searchValue}`
+    const data = api.post(
+      `/task/search/${searchValue}`
     );
     setTasks(data);
     console.log(searchValue);

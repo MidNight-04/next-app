@@ -1,34 +1,35 @@
 'use client';
 
-  import {
-    Sidebar,
-    SidebarContent,
-    SidebarFooter,
-    SidebarGroup,
-    SidebarGroupContent,
-    SidebarGroupLabel,
-    SidebarHeader,
-    SidebarMenu,
-    SidebarMenuItem,
-    SidebarMenuButton,
-  } from '../../components/ui/sidebar';
-  import Link from 'next/link';
-  import { useAuthStore } from '../../store/useAuthStore';
-  import { getDashboardSidebar } from '../../constant/dashboardSidebarData';
-  import { usePathname } from 'next/navigation';
-  import { cn } from '../../lib/utils';
-  import Image from 'next/image';
-  import { NavUser } from '../../components/nav-user';
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+} from '../../components/ui/sidebar';
+import Link from 'next/link';
+import { useAuthStore } from '../../store/useAuthStore';
+import { getDashboardSidebar } from '../../constant/dashboardSidebarData';
+import { usePathname } from 'next/navigation';
+import { cn } from '../../lib/utils';
+import Image from 'next/image';
+import { NavUser } from '../../components/nav-user';
 
- const user = {
-    name: 'Thikedaar',
-    email: 'test@thikedaar.com',
-    avatar: '/avatars/shadcn.jpg',
-  };
+const user = {
+  name: 'Thikedaar',
+  email: 'test@thikedaar.com',
+  avatar: '/avatars/shadcn.jpg',
+};
 
 const SideNav = () => {
   const userType = useAuthStore(state => state.userType);
-  const content = getDashboardSidebar(userType ||'ROLE_CLIENT');
+  const state = useAuthStore(state => state);
+  const content = getDashboardSidebar(userType || 'ROLE_CLIENT');
   // const content = getDashboardSidebar(userType || 'ROLE_CLIENT');
   const path = usePathname();
 
@@ -38,11 +39,7 @@ const SideNav = () => {
         <SidebarGroup className="pr-0 pl-5">
           <SidebarHeader>
             <Link href={'/admin/home'} className="pt-[14px]">
-              <img
-                src="/logo_white.png"
-                alt="log"
-                className='h-9'
-              />
+              <img src="/logo_white.png" alt="log" className="h-9" />
             </Link>
           </SidebarHeader>
           <SidebarGroupContent>
@@ -87,7 +84,7 @@ const SideNav = () => {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className='bg-secondary'>
+      <SidebarFooter className="bg-secondary">
         <NavUser user={user} />
       </SidebarFooter>
     </Sidebar>

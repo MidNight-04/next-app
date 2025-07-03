@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../../../../../lib/api';
 import {
   Button,
   Typography,
@@ -70,9 +70,9 @@ const Page = () => {
 
   const getAllPaymentStage = () => {
     if (userRole?.substring(5).toLowerCase() === 'client') {
-      axios
+      api
         .post(
-          `${process.env.REACT_APP_BASE_PATH}/api/project/paymentstages/forclient`,
+          `/project/paymentstages/forclient`,
           {
             siteID: slug,
             clientID: activeUser,
@@ -86,9 +86,9 @@ const Page = () => {
           console.log(error);
         });
     } else {
-      axios
+      api
         .get(
-          `${process.env.REACT_APP_BASE_PATH}/api/project/paymentstages/bysiteid/${slug}`
+          `/project/paymentstages/bysiteid/${slug}`
         )
         .then(response => {
           setData(response?.data?.data);
@@ -110,9 +110,9 @@ const Page = () => {
       userName: userName,
       activeUser: activeUser,
     };
-    axios
+    api
       .put(
-        `${process.env.REACT_APP_BASE_PATH}/api/project/paymentstages/deletestage`,
+        `/project/paymentstages/deletestage`,
         data
       )
       .then(response => {
@@ -147,9 +147,9 @@ const Page = () => {
         activeUser: activeUser,
       };
       if (status === 'edit') {
-        axios
+        api
           .get(
-            `${process.env.REACT_APP_BASE_PATH}/api/project/paymentstages/bysiteid/${slug}`
+            `/project/paymentstages/bysiteid/${slug}`
           )
           .then(async response => {
             // console.log(response?.data?.data[0].stages);
@@ -164,9 +164,9 @@ const Page = () => {
               setUpdateOpen(false);
               toast('Event has been created.');
             } else {
-              axios
+              api
                 .put(
-                  `${process.env.REACT_APP_BASE_PATH}/api/project/paymentstages/stageupdatebyid`,
+                  `/project/paymentstages/stageupdatebyid`,
                   data
                 )
                 .then(response => {
@@ -188,9 +188,9 @@ const Page = () => {
             console.log(error);
           });
       } else if (status === 'add') {
-        axios
+        api
           .put(
-            `${process.env.REACT_APP_BASE_PATH}/api/project/paymentstages/addnewstage`,
+            `/project/paymentstages/addnewstage`,
             data
           )
           .then(response => {
@@ -224,9 +224,9 @@ const Page = () => {
     setStage('');
     setName(name);
     setStatus('add');
-    axios
+    api
       .get(
-        `${process.env.REACT_APP_BASE_PATH}/api/project/paymentstages/bysiteid/${slug}`
+        `/project/paymentstages/bysiteid/${slug}`
       )
       .then(async response => {
         // console.log(response?.data?.data[0].stages);

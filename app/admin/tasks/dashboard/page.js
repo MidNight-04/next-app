@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { MdSkipNext, MdSkipPrevious } from 'react-icons/md';
-import axios from 'axios';
+import api from '../../../../lib/api';
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 import AsideContainer from '../../../../components/AsideContainer';
@@ -37,7 +37,7 @@ import { Separator } from '../../../../components/ui/separator';
 const Page = () => {
   const userType = useAuthStore(state => state.userType);
   const userId = useAuthStore(state => state.userId);
-  const [activeFilter, setActiveFilter] = useState('Today');
+  const [activeFilter, setActiveFilter] = useState('This Month');
   const [activeTab, setActiveTab] = useState('Employee Wise');
   const [currentPage, setCurrentPage] = useState(1);
   const [tasks, setTasks] = useState([]);
@@ -51,28 +51,28 @@ const Page = () => {
 
   switch (activeFilter) {
     case 'Today':
-      url = `${process.env.REACT_APP_BASE_PATH}/api/task/gettodaytaskbyid`;
+      url = `/task/gettodaytaskbyid`;
       break;
     case 'Yesterday':
-      url = `${process.env.REACT_APP_BASE_PATH}/api/task/getyesterdaytaskbyid`;
+      url = `/task/getyesterdaytaskbyid`;
       break;
     case 'This Week':
-      url = `${process.env.REACT_APP_BASE_PATH}/api/task/getthisweektaskbyid`;
+      url = `/task/getthisweektaskbyid`;
       break;
     case 'Last Week':
-      url = `${process.env.REACT_APP_BASE_PATH}/api/task/getlastweektaskbyid`;
+      url = `/task/getlastweektaskbyid`;
       break;
     case 'This Month':
-      url = `${process.env.REACT_APP_BASE_PATH}/api/task/getthismonthtaskbyid`;
+      url = `/task/getthismonthtaskbyid`;
       break;
     case 'Last Month':
-      url = `${process.env.REACT_APP_BASE_PATH}/api/task/getlastmonthtaskbyid`;
+      url = `/task/getlastmonthtaskbyid`;
       break;
     case 'This Year':
-      url = `${process.env.REACT_APP_BASE_PATH}/api/task/getthisyeartaskbyid`;
+      url = `/task/getthisyeartaskbyid`;
       break;
     case 'Custom':
-      url = `${process.env.REACT_APP_BASE_PATH}/api/task/customfilters`;
+      url = `/task/customfilters`;
       break;
   }
 
@@ -94,8 +94,8 @@ const Page = () => {
         frequency,
       ],
       queryFn: async () => {
-        const response = await axios.post(
-          `${process.env.REACT_APP_BASE_PATH}/api/task/customfilters`,
+        const response = await api.post(
+          `/task/customfilters`,
           // url,
           {
             page: currentPage,
@@ -124,8 +124,8 @@ const Page = () => {
       {
         queryKey: ['teammembers'],
         queryFn: async () => {
-          const response = await axios.get(
-            `${process.env.REACT_APP_BASE_PATH}/api/teammember/getall`
+          const response = await api.get(
+            `/teammember/getall`
           );
           return response.data.data;
         },
@@ -133,8 +133,8 @@ const Page = () => {
       {
         queryKey: ['categories'],
         queryFn: async () => {
-          const response = await axios.get(
-            `${process.env.REACT_APP_BASE_PATH}/api/category/list`
+          const response = await api.get(
+            `/category/list`
           );
           return response.data.data;
         },
@@ -155,8 +155,8 @@ const Page = () => {
 
   const searchTask = e => {
     const searchValue = e.target.value.toLowerCase();
-    const data = axios.post(
-      `${process.env.REACT_APP_BASE_PATH}/api/task/search/${searchValue}`
+    const data = api.post(
+      `/task/search/${searchValue}`
     );
     setTasks(data);
   };

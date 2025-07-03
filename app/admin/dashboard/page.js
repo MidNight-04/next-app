@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { MdSkipNext, MdSkipPrevious } from 'react-icons/md';
-import axios from 'axios';
+import api from '../../../lib/api';
 import 'react-circular-progressbar/dist/styles.css';
 import AsideContainer from '../../../components/AsideContainer';
 import { cn } from '../../../lib/utils';
@@ -51,8 +51,8 @@ const Page = () => {
         siteId,
       ],
       queryFn: async () => {
-        const response = await axios.post(
-          `${process.env.REACT_APP_BASE_PATH}/api/task/customdashboardfilters`,
+        const response = await api.post(
+          `/task/customdashboardfilters`,
           {
             page: currentPage,
             assignedTo: employeeId,
@@ -85,8 +85,8 @@ const Page = () => {
       {
         queryKey: ['teammembers'],
         queryFn: async () => {
-          const response = await axios.get(
-            `${process.env.REACT_APP_BASE_PATH}/api/teammember/getall`
+          const response = await api.get(
+            `/teammember/getall`
           );
           return response.data.data;
         },
@@ -94,8 +94,8 @@ const Page = () => {
       {
         queryKey: ['siteIds'],
         queryFn: async () => {
-          const response = await axios.get(
-            `${process.env.REACT_APP_BASE_PATH}/api/project/getallsiteids`
+          const response = await api.get(
+            `/project/getallsiteids`
           );
           return response.data.data;
         },
@@ -103,8 +103,8 @@ const Page = () => {
       {
         queryKey: ['clients'],
         queryFn: async () => {
-          const response = await axios.get(
-            `${process.env.REACT_APP_BASE_PATH}/api/client/getall`
+          const response = await api.get(
+            `/client/getall`
           );
           return response.data.data;
         },
@@ -125,8 +125,8 @@ const Page = () => {
 
   const searchTask = e => {
     const searchValue = e.target.value.toLowerCase();
-    const data = axios.post(
-      `${process.env.REACT_APP_BASE_PATH}/api/task/search/${searchValue}`
+    const data = api.post(
+      `/task/search/${searchValue}`
     );
     setTasks(data);
   };

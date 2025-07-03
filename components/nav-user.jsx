@@ -26,20 +26,21 @@ import {
 } from './ui/sidebar';
 import { useAuthStore } from '../store/useAuthStore';
 import { useRouter } from 'next/navigation';
+import { signOut } from 'next-auth/react';
 
 export function NavUser({ user }) {
   const { isMobile } = useSidebar();
   const router = useRouter();
-    const username = useAuthStore(state => state.username);
-    const email = useAuthStore(state => state.email);
-    const setLogout = useAuthStore(state => state.setLogout);
+  const username = useAuthStore(state => state.username);
+  const email = useAuthStore(state => state.email);
+  const setLogout = useAuthStore(state => state.setLogout);
 
-    const handleLogout = () =>{
-      setLogout();
-      router.push("/")
-    }
+  const handleLogout = async () => {
+    setLogout();
+    await signOut({ redirect: true, callbackUrl: '/login' });
+  };
 
-    function stringToColor(string) {
+  function stringToColor(string) {
     let hash = 0;
     let i;
 
@@ -56,8 +57,8 @@ export function NavUser({ user }) {
     return color;
   }
 
-    function stringAvatar() { 
-    const name = username || 'user' 
+  function stringAvatar() {
+    const name = username || 'user';
     const splitName = name.split(' ');
     const initials = splitName
       .map(n => n[0])
@@ -83,43 +84,49 @@ export function NavUser({ user }) {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
-              size='lg'
-              className='data-[state=open]:bg-secondary data-[state=open]:text-sidebar-accent-foreground hover:bg-secondary hover:text-sidebar-accent-foreground'
+              size="lg"
+              className="data-[state=open]:bg-secondary data-[state=open]:text-sidebar-accent-foreground hover:bg-secondary hover:text-sidebar-accent-foreground"
             >
-              <Avatar className='h-8 w-8 rounded-lg'>
-                <AvatarImage
-                  src={user.avatar}
-                  alt={user.name}
-                />
-                <AvatarFallback className='rounded-lg text-white' style={{backgroundColor: stringAvatar()?.sx?.bgcolor}}>{stringAvatar()?.children}</AvatarFallback>
+              <Avatar className="h-8 w-8 rounded-lg">
+                <AvatarImage src={user.avatar} alt={user.name} />
+                <AvatarFallback
+                  className="rounded-lg text-white"
+                  style={{ backgroundColor: stringAvatar()?.sx?.bgcolor }}
+                >
+                  {stringAvatar()?.children}
+                </AvatarFallback>
               </Avatar>
-              <div className='grid flex-1 text-left text-sm leading-tight'>
-                <span className='truncate text-primary font-medium'>{username}</span>
-                <span className=' text-primary-foreground truncate text-xs'>
+              <div className="grid flex-1 text-left text-sm leading-tight">
+                <span className="truncate text-primary font-medium">
+                  {username}
+                </span>
+                <span className=" text-primary-foreground truncate text-xs">
                   {email}
                 </span>
               </div>
-              <IconDotsVertical className='ml-auto size-4 text-primary' />
+              <IconDotsVertical className="ml-auto size-4 text-primary" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className='w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg bg-secondary text-primary'
+            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg bg-secondary text-primary"
             side={isMobile ? 'bottom' : 'right'}
-            align='end'
+            align="end"
             sideOffset={4}
           >
-            <DropdownMenuLabel className='p-0 font-normal'>
-              <div className='flex items-center gap-2 px-1 py-1.5 text-left text-sm'>
-                <Avatar className='h-8 w-8 rounded-lg'>
-                  <AvatarImage
-                    src={user.avatar}
-                    alt={user.name}
-                  />
-                  <AvatarFallback className='rounded-lg' style={{backgroundColor: stringAvatar()?.sx?.bgcolor}}>{stringAvatar()?.children}</AvatarFallback>
+            <DropdownMenuLabel className="p-0 font-normal">
+              <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+                <Avatar className="h-8 w-8 rounded-lg">
+                  <AvatarImage src={user.avatar} alt={user.name} />
+                  <AvatarFallback
+                    className="rounded-lg"
+                    style={{ backgroundColor: stringAvatar()?.sx?.bgcolor }}
+                  >
+                    {stringAvatar()?.children}
+                  </AvatarFallback>
                 </Avatar>
-                <div className='grid flex-1 text-left text-sm leading-tight'>
-                  <span className='truncate font-medium'>{username}</span>
-                  <span className='text-muted-foreground truncate text-xs'>
+                <div className="grid flex-1 text-left text-sm leading-tight">
+                  <span className="truncate font-medium">{username}</span>
+                  <span className="text-muted-foreground truncate text-xs">
                     {email}
                   </span>
                 </div>
@@ -127,7 +134,7 @@ export function NavUser({ user }) {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem onClick={()=>router.push('/admin/profile')}>
+              <DropdownMenuItem onClick={() => router.push('/admin/profile')}>
                 <IconUserCircle />
                 Account
               </DropdownMenuItem>

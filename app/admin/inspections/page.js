@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../../../lib/api';
 import {
   Button,
   Modal,
@@ -105,8 +105,8 @@ const Page = () => {
   };
 
   const getAllCheckList = () => {
-    axios
-      .get(`${process.env.REACT_APP_BASE_PATH}/api/project/checklist/all`)
+    api
+      .get(`/project/checklist/all`)
       .then(response => {
         setData(response?.data?.data);
         var uniqueData = filterUniqueNames(response?.data?.data);
@@ -127,9 +127,9 @@ const Page = () => {
     setDeleteDialogOpen(false);
   };
   const handleDelete = () => {
-    axios
+    api
       .delete(
-        `${process.env.REACT_APP_BASE_PATH}/api/project/checklist/delete/${id}`
+        `/project/checklist/delete/${id}`
       )
       .then(response => {
         if (response) {
@@ -170,9 +170,9 @@ const Page = () => {
       name: checkName,
       point: newField,
     };
-    axios
+    api
       .put(
-        `${process.env.REACT_APP_BASE_PATH}/api/project/checklist/deletepoint`,
+        `/project/checklist/deletepoint`,
         data
       )
       .then(response => {
@@ -212,9 +212,9 @@ const Page = () => {
         name: checkName,
         checkList: checklistItems,
       };
-      axios
+      api
         .put(
-          `${process.env.REACT_APP_BASE_PATH}/api/project/checklist/addpoint`,
+          `/project/checklist/addpoint`,
           data
         )
         .then(response => {
@@ -241,9 +241,9 @@ const Page = () => {
         heading: heading,
         point: point,
       };
-      axios
+      api
         .put(
-          `${process.env.REACT_APP_BASE_PATH}/api/project/checklist/addextrapoint`,
+          `/project/checklist/addextrapoint`,
           data
         )
         .then(response => {

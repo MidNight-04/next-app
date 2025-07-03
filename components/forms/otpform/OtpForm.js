@@ -1,142 +1,159 @@
-"use client";
-import * as Yup from "yup";
-import { Formik, Form, Field } from "formik";
-import { Button } from "@mui/material";
-import { useAuthStore } from "../../../store/useAuthStore";
-import { useMutation } from "@tanstack/react-query";
-import { postEndpoint } from "../../../helpers/endpoints";
-import { useParams, useRouter } from "next/navigation";
-import LoaderSpinner from "../../../components/loader/LoaderSpinner";
-import { useState } from "react";
-import { toast } from "sonner";
+'use client';
 
-const otpSchema = Yup.object({
-  username: Yup.string(),
-  otp: Yup.number()
-    .required("OTP is required.")
-    .min(6, "Please enter a valid 6 digit OTP."),
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as Yup from 'yup';
+import { useState, useEffect } from 'react';
+import { useAuthStore } from '../../../store/useAuthStore';
+import { signIn, getSession } from 'next-auth/react';
+import { useParams, useRouter } from 'next/navigation';
+import { useMutation } from '@tanstack/react-query';
+import { toast } from 'sonner';
+import api from '../../../lib/api';
+import LoaderSpinner from '../../../components/loader/LoaderSpinner';
+
+const schema = Yup.object().shape({
+  otp: Yup.string()
+    .required('OTP is required.')
+    .length(6, 'Enter a valid 6-digit OTP.'),
 });
-const style = { color: "red", fontSize: ".75rem", paddingLeft: ".25rem" };
 
 const OtpForm = () => {
-  const [showLoader, setShowLoader] = useState(false);
   const { slug } = useParams();
+  const router = useRouter();
+  const [showLoader, setShowLoader] = useState(false);
+  const [timer, setTimer] = useState(0);
+
   const username = useAuthStore(state => state.username);
   const setLogIn = useAuthStore(state => state.setLogIn);
-  const router = useRouter();
-  const otpMutation = useMutation({
-    mutationFn: data =>
-      postEndpoint({
-        endpoint: `${slug}/signin`,
-        data,
-      }),
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: yupResolver(schema),
+    defaultValues: { otp: '' },
+  });
+
+  const resendOtpMutation = useMutation({
+    mutationKey: ['resend-otp', slug],
+    mutationFn: async () => {
+      const response = await api.post(`/${slug}/signin-otp`, { username });
+      return response.data;
+    },
     onSuccess: data => {
-      if (data.message === "You have been logged in") {
-        toast("You have logged in successfully!");
-        setLogIn({
-          username: data.username,
-          token: data?.token,
-          phone: data?.phone,
-          isAuth: true,
-          userId: data.id,
-          email: data.email,
-          userType: data.roles,
-          token: data.token,
-        });
-        setShowLoader(false);
-        setTimeout(() => {
-          if (data.roles[0] === "ROLE_USER") {
-            router.back();
-          } else {
-            router.push("/admin/projects");
-          }
-        }, 1000);
+      setShowLoader(false);
+      setTimer(60);
+      if (data.status === 200) {
+        toast.success('OTP resent successfully.');
+      } else {
+        toast.error('Failed to resend OTP.');
       }
     },
     onError: () => {
       setShowLoader(false);
-      toast("Please enter a valid OTP.");
+      toast.error('Error resending OTP.');
     },
-    // onSettled: () => {
-    //   setShowLoader(false);
-    //   router.back();
-    // },
   });
 
-  const loginMutation = useMutation({
-    mutationKey: ["login", slug],
-    mutationFn: () =>
-      postEndpoint({
-        endpoint: `${slug}/signin-otp`,
-        data: { username },
-      }),
-    onSuccess: data => {
-      if (data.status === 200) {
-        setShowLoader(false);
-        toast("OTP sent to you registered mobile number.");
-      }
-    },
-    onError: data => {
-      if (data.status !== 200) {
-        setShowLoader(false);
-        toast("Something went Wrong please try again later.");
-      }
-    },
-  });
+  const onSubmit = async ({ otp }) => {
+    setShowLoader(true);
+
+    const result = await signIn('credentials', {
+      redirect: false,
+      username,
+      otp,
+    });
+
+    if (result?.error) {
+      toast.error('Invalid OTP or login failed.');
+      setShowLoader(false);
+      return;
+    }
+
+    const session = await getSession();
+
+    if (session?.user?.accessToken) {
+      const user = session.user;
+
+      setLogIn({
+        token: user.accessToken,
+        tokenSetAt: Date.now(),
+        userId: user.id,
+        email: user.email ?? null,
+        phone: user.phone ?? null,
+        userType: user.userType ?? null,
+        employeeId: user.employeeId ?? null,
+        username: user.username ?? null,
+      });
+
+      toast.success('Login successful!');
+      router.refresh();
+      router.push('/admin/projects');
+    } else {
+      toast.error('Login succeeded, but session is invalid.');
+    }
+
+    setShowLoader(false);
+  };
+
+  // Countdown for resend OTP
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimer(t => (t > 0 ? t - 1 : 0));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <>
       {showLoader && <LoaderSpinner />}
-      <Formik
-        initialValues={{
-          username,
-          otp: "",
-        }}
-        validationSchema={otpSchema}
-        onSubmit={data => {
-          setShowLoader(true);
-          otpMutation.mutate({ ...data });
-        }}
-      >
-        {({ errors, touched }) => (
-          <Form>
-            <div className="">
-              <div className="flex flex-col gap-2">
-                <label className="font-semibold" htmlFor="otp">
-                  OTP
-                </label>
-                <Field
-                  className="p-2 border bg-[#f3f4f6] border-primary outline-none rounded-[7px]"
-                  id="otp"
-                  name="otp"
-                  placeholder="Enter OTP"
-                />
-                {errors.otp && touched.otp ? (
-                  <div style={style}>{errors.otp}</div>
-                ) : null}
-              </div>
+
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+        <input type="hidden" value={username} readOnly />
+
+        <div>
+          <label className="font-semibold" htmlFor="otp">
+            OTP
+          </label>
+          <input
+            id="otp"
+            {...register('otp')}
+            placeholder="Enter OTP"
+            className="p-2 border bg-[#f3f4f6] border-primary outline-none rounded-[7px] w-full"
+          />
+          {errors.otp && (
+            <div className="text-red-600 text-sm mt-1">
+              {errors.otp.message}
             </div>
-            <div className="flex justify-end mt-4">
-              <button
-                className="p-[6px] px-4 bg-secondary rounded-full font-ubuntu text-primary font-semibold"
-                type="submit"
-              >
-                Login
-              </button>
-            </div>
-          </Form>
-        )}
-      </Formik>
-      <div className="text-center">
-        Didn&apos;t received OTP ?{"  "}
+          )}
+        </div>
+        <div className="flex items-center justify-end">
+          <button
+            type="submit"
+            className="p-[6px] px-4 bg-secondary rounded-full font-ubuntu text-primary font-semibold"
+            disabled={showLoader}
+          >
+            Login
+          </button>
+        </div>
+      </form>
+
+      <div className="text-center mt-4">
+        Didn&apos;t receive OTP?{' '}
         <span
-          className="text-primary hover:underline cursor-pointer"
+          className={`text-primary hover:underline cursor-pointer ${
+            resendOtpMutation.isLoading || timer > 0
+              ? 'opacity-50 pointer-events-none'
+              : ''
+          }`}
           onClick={() => {
             setShowLoader(true);
-            loginMutation.mutate();
+            resendOtpMutation.mutate();
           }}
         >
-          Resend
+          {timer > 0 ? `Resend in ${timer}s` : 'Resend'}
         </span>
       </div>
     </>

@@ -1,90 +1,89 @@
 'use client';
-import AsideContainer from '../../../../../components/AsideContainer';
-import axios from 'axios';
+import React from 'react';
+import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
-import React, { useState } from 'react';
 import { IoIosArrowBack } from 'react-icons/io';
 import { toast } from 'sonner';
+import { useMutation } from '@tanstack/react-query';
+import * as yup from 'yup';
+import { yupResolver } from '@hookform/resolvers/yup';
+import api from '../../../../../lib/api';
+import AsideContainer from '../../../../../components/AsideContainer';
+
+const schema = yup.object().shape({
+  name: yup.string().trim().required('Name is required'),
+});
 
 const AddTaskCategoryForm = () => {
   const router = useRouter();
-  const [data, setData] = useState({
-    name: '',
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    reset,
+  } = useForm({
+    resolver: yupResolver(schema),
   });
 
-  const handleFormData = e => {
-    const { name, value } = e.target;
-    setData({ ...data, [name]: value });
+  const { mutate, isPending } = useMutation({
+    mutationFn: formData =>
+      api.post(`/category/add`, { data: formData }).then(res => res.data),
+    onSuccess: res => {
+      if (res.status === 204) {
+        toast(res.message || 'No content');
+      } else {
+        toast.success(res.message || 'Category added successfully');
+        reset();
+        router.back();
+      }
+    },
+    onError: err => {
+      console.error(err);
+      toast.error('Failed to add category');
+    },
+  });
+
+  const onSubmit = formData => {
+    mutate(formData);
   };
 
-  const submitFormData = () => {
-    if (!data.name) {
-      toast('Name is required');
-    } else {
-      //   console.log(data);
-      axios
-        .post(`${process.env.REACT_APP_BASE_PATH}/api/category/add`, {
-          data,
-        })
-        .then(response => {
-          if (response) {
-            if (response.data.status === 204) {
-              toast(response.data.message);
-            } else {
-              setData({
-                name: '',
-              });
-              toast(response.data.message);
-              router.back();
-            }
-          }
-        })
-        .catch(error => {
-          console.log(error);
-        });
-    }
-  };
   return (
     <AsideContainer>
-      {/* <AdminSidebar /> */}
-      <div className="singleContainer">
-        {/* <AdminNavbar /> */}
-        <div className="adminNewUser">
-          <div className="newContainer">
-            <div className="flex flex-row gap-2 items-center my-4">
-              <IoIosArrowBack
-                className="text-2xl cursor-pointer transition duration-300 hover:scale-150 ease-in-out"
-                onClick={() => router.back()}
-              />
-              <h1 className="text-2xl font-semibold font-ubuntu -md:mb-2 -md:text-lg">
-                Add Category
-              </h1>
-            </div>
-            <div className="bottomContainer">
-              <div className="bottomRightContainer">
-                <div className="form">
-                  <div className="formInputContainer">
-                    <label>
-                      Name<span className="text-danger">*</span>
-                    </label>
-                    <input
-                      value={data.name}
-                      type="text"
-                      placeholder="Enter Category"
-                      name="name"
-                      onChange={e => handleFormData(e)}
-                    />
-                  </div>
-                </div>
-                <div className="createUserSubmitBTN" onClick={submitFormData}>
-                  Submit
-                </div>
-              </div>
-            </div>
+      <div className="flex flex-row items-center text-2xl font-bold gap-2 my-4">
+        <IoIosArrowBack
+          onClick={() => router.back()}
+          className="cursor-pointer transition duration-300 hover:scale-150 ease-in-out"
+        />
+        <h1>Add Category</h1>
+      </div>
+      <div className="bg-white rounded-3xl p-6 shadow-xl [&_label]:font-semibold">
+        <form className="flex flex-col gap-2" onSubmit={handleSubmit(onSubmit)}>
+          <label htmlFor="name">Name</label>
+          <div className="flex flex-row w-full gap-4">
+            <input
+              type="text"
+              id="name"
+              name="name"
+              placeholder="Enter Category"
+              {...register('name')}
+              className="h-12 border border-primary px-4 text-gray-600 outline-none rounded-[7px] bg-gray-100 w-full"
+            />
+
+            <button
+              type="submit"
+              className="bg-secondary text-primary font-semibold rounded-3xl px-4 py-3 flex items-center disabled:opacity-60"
+            >
+              {isPending || isSubmitting ? 'Submitting...' : 'Submit'}
+            </button>
           </div>
-        </div>
+          {errors.name && (
+            <p className="text-red-500 text-sm mt-1">{errors.name.message}*</p>
+          )}
+        </form>
       </div>
     </AsideContainer>
   );
 };
+
 export default AddTaskCategoryForm;

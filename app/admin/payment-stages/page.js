@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
-import axios from 'axios';
+import api from '../../../lib/api';
 import {
   Chip,
   Button,
@@ -90,8 +90,8 @@ const Page = () => {
   }, []);
 
   const getAllPaymentStage = () => {
-    axios
-      .get(`${process.env.REACT_APP_BASE_PATH}/api/paymentstages/getall`)
+    api
+      .get(`/paymentstages/getall`)
       .then(response => {
         setData(response?.data?.data);
         // console.log(response?.data?.data);
@@ -108,9 +108,9 @@ const Page = () => {
         payment: payment,
         stage: stage,
       };
-      axios
+      api
         .put(
-          `${process.env.REACT_APP_BASE_PATH}/api/paymentstages/deletestage`,
+          `/paymentstages/deletestage`,
           data
         )
         .then(response => {
@@ -125,9 +125,9 @@ const Page = () => {
           console.log(error);
         });
     } else if (deleteStatus === 'stage') {
-      axios
+      api
         .delete(
-          `${process.env.REACT_APP_BASE_PATH}/api/paymentstages/delete/${Id}`
+          `/paymentstages/delete/${Id}`
         )
         .then(response => {
           if (response) {
@@ -162,9 +162,9 @@ const Page = () => {
         prevStage: prevStage,
       };
       if (status === 'edit') {
-        axios
+        api
           .put(
-            `${process.env.REACT_APP_BASE_PATH}/api/paymentstages/stageupdatebyid`,
+            `/paymentstages/stageupdatebyid`,
             data
           )
           .then(response => {
@@ -181,9 +181,9 @@ const Page = () => {
             console.log(error);
           });
       } else if (status === 'add') {
-        axios
+        api
           .put(
-            `${process.env.REACT_APP_BASE_PATH}/api/paymentstages/addnewstage`,
+            `/paymentstages/addnewstage`,
             data
           )
           .then(response => {

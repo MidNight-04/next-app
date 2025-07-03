@@ -1,7 +1,7 @@
 'use client'
 import React, { useState, useEffect } from "react";
 // import "../../public/assets/scss/adminNewForms.scss";
-import axios from "axios";
+import api from "../../lib/api";
 import FormData from "form-data";
 import { toast } from "sonner";
 // import { userouter.push, useParams, useLocation } from "react-router-dom";
@@ -137,8 +137,8 @@ const AdminNewForm = ({
     if (!ratingComment || !ratingValue) {
       toast("Description/Rating cannot be empty");
     } else {
-      axios
-        .get(`${process.env.REACT_APP_BASE_PATH}/api/user/single-profile/${id}`)
+      api
+        .get(`/user/single-profile/${id}`)
         .then(resp => {
           // console.log(resp)
           const data = {
@@ -150,9 +150,9 @@ const AdminNewForm = ({
             date: new Date(),
             username: resp?.data?.data?.username,
           };
-          axios
+          api
             .post(
-              `${process.env.REACT_APP_BASE_PATH}/api/user/post-product-rating`,
+              `/user/post-product-rating`,
               data
             )
             .then(resp => {
@@ -178,8 +178,8 @@ const AdminNewForm = ({
   // UseEffect for country, state and city
   useEffect(() => {
     if (suitableCountry) {
-      axios
-        .post(`${process.env.REACT_APP_BASE_PATH}/api/auth/getStates`, {
+      api
+        .post(`/auth/getStates`, {
           country_name: suitableCountry,
         })
         .then(resp => {
@@ -192,8 +192,8 @@ const AdminNewForm = ({
     }
 
     if (suitableState) {
-      axios
-        .post(`${process.env.REACT_APP_BASE_PATH}/api/auth/getCities`, {
+      api
+        .post(`/auth/getCities`, {
           state_name: suitableState,
         })
         .then(resp => {
@@ -204,8 +204,8 @@ const AdminNewForm = ({
           console.error(err);
         });
     }
-    axios
-      .get(`${process.env.REACT_APP_BASE_PATH}/api/admin/category/list`)
+    api
+      .get(`/admin/category/list`)
       .then(resp => {
         // console.log(resp.data.data)
         setCategories(resp.data.data);
@@ -220,8 +220,8 @@ const AdminNewForm = ({
     setSelectedImage(false);
     setProductFiles([]);
     if (type === "dealer") {
-      axios
-        .post(`${process.env.REACT_APP_BASE_PATH}/api/dealer/products/all`, {
+      api
+        .post(`/dealer/products/all`, {
           approvalStatus: "Approved",
         })
         .then(resp => {
@@ -233,8 +233,8 @@ const AdminNewForm = ({
         });
     }
 
-    axios
-      .post(`${process.env.REACT_APP_BASE_PATH}/api/user/get-next-status`, {
+    api
+      .post(`/user/get-next-status`, {
         type: "order",
       })
       .then(resp => {
@@ -245,8 +245,8 @@ const AdminNewForm = ({
       });
 
     if (orderId) {
-      axios
-        .post(`${process.env.REACT_APP_BASE_PATH}/api/user/order-details`, {
+      api
+        .post(`/user/order-details`, {
           _id: orderId,
         })
         .then(resp => {
@@ -261,7 +261,7 @@ const AdminNewForm = ({
   useEffect(() => {
     console.log(Pid, status);
     if (Pid && status === "approval") {
-      axios
+      api
         .post(getUrl, { id: Pid })
         .then(response => {
           const responseData = response?.data?.data;
@@ -342,7 +342,7 @@ const AdminNewForm = ({
         })
         .catch(error => console.log(error));
     } else if (Pid) {
-      axios
+      api
         .post(getUrl, { id: Pid })
         .then(response => {
           // console.log("response2", response);
@@ -423,7 +423,7 @@ const AdminNewForm = ({
         })
         .catch(error => console.log(error));
     } else {
-      axios
+      api
         .post(getUrl, { id })
         .then(response => {
           // console.log("response3", response);
@@ -514,8 +514,8 @@ const AdminNewForm = ({
       e.target.name === "state"
     ) {
       setState(e.target.value);
-      axios
-        .post(`${process.env.REACT_APP_BASE_PATH}/api/auth/getCities`, {
+      api
+        .post(`auth/getCities`, {
           state_name: e.target.value,
         })
         .then(resp => {
@@ -530,8 +530,8 @@ const AdminNewForm = ({
       if (name === "productImage") {
         handleFileEvent(e, "productImage");
       }
-      if (name === "profileImage") {
-        handleFileEvent(e, "profileImage");
+      if (name === "image") {
+        handleFileEvent(e, "image");
       }
       if (name === "twoDImage") {
         handleFileEvent(e, "twoDImage");
@@ -566,9 +566,9 @@ const AdminNewForm = ({
     }
     if (name === "category") {
       setFormData({ ...formData, [name]: value });
-      axios
+      api
         .get(
-          `${process.env.REACT_APP_BASE_PATH}/api/admin/category/list/categoryName?name=${value}`,
+          `/admin/category/list/categoryName?name=${value}`,
           {}
         )
         .then(resp => {
@@ -578,9 +578,9 @@ const AdminNewForm = ({
         .catch(err => {
           console.error(err);
         });
-      axios
+      api
         .post(
-          `${process.env.REACT_APP_BASE_PATH}/api/dealer/products/category-name`,
+          `/dealer/products/category-name`,
           {
             categoryName: e.target.value,
           }
@@ -594,9 +594,9 @@ const AdminNewForm = ({
         });
     } else if (name === "existname") {
       if (value) {
-        axios
+        api
           .post(
-            `${process.env.REACT_APP_BASE_PATH}/api/dealer/products/product-name`,
+            `/dealer/products/product-name`,
             {
               productName: e.target.value,
             }
@@ -606,9 +606,9 @@ const AdminNewForm = ({
             if (resp?.data?.data?.length > 0) {
               const productImage = resp?.data?.data[0].productImage[0]; // Assuming there's only one image
               const imageName = productImage.split("_")[2];
-              axios
+              api
                 .get(
-                  `${process.env.REACT_APP_BASE_PATH}/api/dealer/products/proxy-image?url=${productImage}`,
+                  `/dealer/products/proxy-image?url=${productImage}`,
                   {
                     responseType: "blob",
                   }
@@ -742,7 +742,7 @@ const AdminNewForm = ({
         data.append("productImage", productsFiles[i]);
       }
       for (let i = 0; i < profileFiles.length; i++) {
-        data.append("profileImage", profileFiles[i]);
+        data.append("image", profileFiles[i]);
       }
       for (let i = 0; i < gstFiles.length; i++) {
         data.append("gstImage", gstFiles[i]);
@@ -774,7 +774,7 @@ const AdminNewForm = ({
         data: data,
       };
       // console.log((config))
-      axios
+      api
         .request(config)
         .then(response => {
           console.log(response);
@@ -810,8 +810,8 @@ const AdminNewForm = ({
       setFormData({});
       setDisableText(false);
     } else {
-      axios
-        .post(`${process.env.REACT_APP_BASE_PATH}/api/dealer/product-detail`, {
+      api
+        .post(`/dealer/product-detail`, {
           id: e.target.value,
         })
         .then(resp => {
@@ -852,7 +852,7 @@ const AdminNewForm = ({
       },
     };
     // console.log(config);
-    axios
+    api
       .request(config)
       .then(response => {
         // console.log(response)
@@ -888,18 +888,18 @@ const AdminNewForm = ({
       let config = {
         method: "post",
         maxBodyLength: Infinity,
-        url: `${process.env.REACT_APP_BASE_PATH}/api/user/update-order-status`,
+        url: `/user/update-order-status`,
         headers: { "Content-Type": "multipart/form-data" },
         data: data,
       };
 
-      axios
+      api
         .request(config)
         .then(async resp => {
           if (resp?.data.data) {
             if (label === "Dispatched") {
-              await axios.post(
-                `${process.env.REACT_APP_BASE_PATH}/api/user/send-delivery-otp`,
+              await api.post(
+                `/user/send-delivery-otp`,
                 {
                   id: orderId,
                 }
@@ -917,8 +917,8 @@ const AdminNewForm = ({
   };
 
   const resendDeliveryOtp = () => {
-    axios
-      .post(`${process.env.REACT_APP_BASE_PATH}/api/user/send-delivery-otp`, {
+    api
+      .post(`/user/send-delivery-otp`, {
         id: orderId,
       })
       .then(response => {
@@ -940,12 +940,12 @@ const AdminNewForm = ({
     let config = {
       method: "post",
       maxBodyLength: Infinity,
-      url: `${process.env.REACT_APP_BASE_PATH}/api/user/update-order-status`,
+      url: `/user/update-order-status`,
       headers: { "Content-Type": "multipart/form-data" },
       data: data,
     };
 
-    axios
+    api
       .request(config)
       .then(resp => {
         if (resp?.data.data) {
@@ -970,12 +970,12 @@ const AdminNewForm = ({
     let config = {
       method: "post",
       maxBodyLength: Infinity,
-      url: `${process.env.REACT_APP_BASE_PATH}/api/user/update-order-status`,
+      url: `/user/update-order-status`,
       headers: { "Content-Type": "multipart/form-data" },
       data: data,
     };
 
-    axios
+    api
       .request(config)
       .then(resp => {
         if (resp?.data.data) {
@@ -998,7 +998,7 @@ const AdminNewForm = ({
       });
       setProductFiles(uploaded);
     }
-    if (type == "profileImage") {
+    if (type == "image") {
       const uploaded = [...profileFiles];
 
       files.some(file => {
@@ -1133,12 +1133,12 @@ const AdminNewForm = ({
     let config = {
       method: "post",
       maxBodyLength: Infinity,
-      url: `${process.env.REACT_APP_BASE_PATH}/api/user/update-order-status`,
+      url: `/user/update-order-status`,
       headers: { "Content-Type": "multipart/form-data" },
       data: data,
     };
 
-    axios
+    api
       .request(config)
       .then(resp => {
         if (resp?.data.data) {
@@ -1457,7 +1457,7 @@ const AdminNewForm = ({
                                     src={
                                       String(image).includes("files") &&
                                       !String(image).includes("bucket.s3")
-                                        ? `${process.env.REACT_APP_BASE_PATH}${image}`
+                                        ? `${process.env.BACKEND_BASE_URL}${image}`
                                         : image
                                     }
                                     alt="Produts"
@@ -1466,7 +1466,7 @@ const AdminNewForm = ({
                                       handleOpenImage(
                                         String(image).includes("files") &&
                                           !String(image).includes("bucket.s3")
-                                          ? `${process.env.REACT_APP_BASE_PATH}${image}`
+                                          ? `${process.env.BACKEND_BASE_URL}${image}`
                                           : image
                                       )
                                     }
@@ -1475,7 +1475,7 @@ const AdminNewForm = ({
                                   <a
                                     href={
                                       String(image).includes("")
-                                        ? `${process.env.REACT_APP_BASE_PATH}${image}`
+                                        ? `${process.env.BACKEND_BASE_URL}${image}`
                                         : image
                                     }
                                   >
@@ -1517,7 +1517,7 @@ const AdminNewForm = ({
                                 }
                               />
                             ))}
-                          {input?.name == "profileImage" &&
+                          {input?.name == "image" &&
                             profileFiles.length > 0 &&
                             profileFiles?.map(file => (
                               <img
@@ -2070,7 +2070,7 @@ const AdminNewForm = ({
                                         src={
                                           String(image).includes("files") &&
                                           !String(image).includes("bucket.s3")
-                                            ? `${process.env.REACT_APP_BASE_PATH}${image}`
+                                            ? `${process.env.BACKEND_BASE_URL}${image}`
                                             : image
                                         }
                                         alt="Produts"
@@ -2081,7 +2081,7 @@ const AdminNewForm = ({
                                               !String(image).includes(
                                                 "bucket.s3"
                                               )
-                                              ? `${process.env.REACT_APP_BASE_PATH}${image}`
+                                              ? `${process.env.BACKEND_BASE_URL}${image}`
                                               : image
                                           )
                                         }
@@ -2090,7 +2090,7 @@ const AdminNewForm = ({
                                       <a
                                         href={
                                           String(image).includes("")
-                                            ? `${process.env.REACT_APP_BASE_PATH}${image}`
+                                            ? `${process.env.BACKEND_BASE_URL}${image}`
                                             : image
                                         }
                                       >
@@ -2132,7 +2132,7 @@ const AdminNewForm = ({
                                     }
                                   />
                                 ))}
-                              {input?.name == "profileImage" &&
+                              {input?.name == "image" &&
                                 profileFiles.length > 0 &&
                                 profileFiles?.map(file => (
                                   <img

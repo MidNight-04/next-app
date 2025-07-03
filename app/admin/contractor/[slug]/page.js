@@ -18,12 +18,12 @@ const ContractorDetail = ({ isView = true, isEdit = false }) => {
           isEdit={isEdit}
           inputs={dealersInputs}
           title="View Details"
-          postUrl={`${process.env.REACT_APP_BASE_PATH}/api/contractor/details`}
-          updateUrl={`${process.env.REACT_APP_BASE_PATH}/api/contractor/update-details`}
-          getUrl={`${process.env.REACT_APP_BASE_PATH}/api/contractor/detail`}
+          postUrl={`/contractor/details`}
+          updateUrl={`/contractor/update-details`}
+          getUrl={`/contractor/detail`}
           role={userType}
           status="approval"
-          approvalUrl={`${process.env.REACT_APP_BASE_PATH}/api/admin/approve-application/contractor`}
+          approvalUrl={`/admin/approve-application/contractor`}
         />
       </div>
     </div>

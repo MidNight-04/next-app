@@ -1,7 +1,7 @@
-"use client";
-import React, { useEffect, useState } from "react";
-import { DataGrid } from "@mui/x-data-grid";
-import axios from "axios";
+'use client';
+import React, { useEffect, useState } from 'react';
+import { DataGrid } from '@mui/x-data-grid';
+import api from '../../../../../lib/api';
 import {
   Button,
   Modal,
@@ -14,17 +14,16 @@ import {
   FormControl,
   Select,
   MenuItem,
-} from "@mui/material";
-import { toast } from "sonner";
-import { FaRupeeSign } from "react-icons/fa";
-import { IoIosArrowBack, IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
-import { useParams } from "next/navigation";
-import AsideContainer from "../../../../../components/AsideContainer";
-import { useRouter } from "next/navigation";
-import { useAuthStore } from "../../../../../store/useAuthStore";
-import { SidebarTrigger } from "../../../../../components/ui/sidebar";
-import { Separator } from "../../../../../components/ui/separator";
-
+} from '@mui/material';
+import { toast } from 'sonner';
+import { FaRupeeSign } from 'react-icons/fa';
+import { IoIosArrowBack, IoIosArrowDown, IoIosArrowUp } from 'react-icons/io';
+import { useParams } from 'next/navigation';
+import AsideContainer from '../../../../../components/AsideContainer';
+import { useRouter } from 'next/navigation';
+import { useAuthStore } from '../../../../../store/useAuthStore';
+import { SidebarTrigger } from '../../../../../components/ui/sidebar';
+import { Separator } from '../../../../../components/ui/separator';
 
 const Page = () => {
   const userType = useAuthStore(state => state.userType);
@@ -35,8 +34,8 @@ const Page = () => {
   const [projectDetails, setProjectDetails] = useState({});
   const [payDetails, setPayDetails] = useState([]);
   const [payBox, setpayBox] = useState(false);
-  const [payAmount, setPayAmount] = useState("");
-  const [paymentStage, setPaymentStage] = useState("");
+  const [payAmount, setPayAmount] = useState('');
+  const [paymentStage, setPaymentStage] = useState('');
   const [OpenStatus, setOpenStatus] = useState(false);
   const [stage, setStage] = useState(null);
   const [status, setStatus] = useState(null);
@@ -63,25 +62,25 @@ const Page = () => {
   };
   const fetchData = async () => {
     try {
-      const projectResponse = await axios.get(
-        `${process.env.REACT_APP_BASE_PATH}/api/project/databyid/${slug}`
+      const projectResponse = await api.get(
+        `/project/databyid/${slug}`
       );
       setProjectDetails(projectResponse?.data?.data[0]);
 
-      const paymentDetailsResponse = await axios.get(
-        `${process.env.REACT_APP_BASE_PATH}/api/project/paymentstages/bysiteid/${slug}`
-        // `${process.env.REACT_APP_BASE_PATH}/api/project/paydetailbysiteid/${slug}`
+      const paymentDetailsResponse = await api.get(
+        `/project/paymentstages/bysiteid/${slug}`
+        // `project/paydetailbysiteid/${slug}`
       );
       setPayDetails(paymentDetailsResponse?.data?.data);
 
       const stagesResponse =
-        userType?.substring(5).toLowerCase() === "client"
-          ? await axios.post(
-              `${process.env.REACT_APP_BASE_PATH}/api/project/paymentstages/forclient`,
+        userType?.substring(5).toLowerCase() === 'client'
+          ? await api.post(
+              `/project/paymentstages/forclient`,
               { siteID: slug, clientID: activeUser }
             )
-          : await axios.get(
-              `${process.env.REACT_APP_BASE_PATH}/api/project/paymentstages/bysiteid/${slug}`
+          : await api.get(
+              `/project/paymentstages/bysiteid/${slug}`
             );
 
       setData(stagesResponse?.data?.data);
@@ -103,9 +102,9 @@ const Page = () => {
   };
 
   const updatePaymentStatus = () => {
-    const fetch = axios
+    const fetch = api
       .post(
-        `${process.env.REACT_APP_BASE_PATH}/api/project/updatepaymentstages/bysiteid/${slug}`,
+        `/project/updatepaymentstages/bysiteid/${slug}`,
         { stage, status, paymentDate, remarks, amount, mode }
       )
       .then(() => fetchData());
@@ -113,27 +112,24 @@ const Page = () => {
 
   const handlePayment = () => {
     // Sandbox Credentials
-    let mid = "WBJIwm08119302462954"; // Merchant ID
+    let mid = 'WBJIwm08119302462954'; // Merchant ID
     let orderId = slug + new Date().getTime();
-    let currency = "INR";
-    let contactType = "Project Payment";
-    let paymentType = "Online";
+    let currency = 'INR';
+    let contactType = 'Project Payment';
+    let paymentType = 'Online';
     const callbackUrl = window.location.href;
     if (payAmount) {
-      axios
-        .post(
-          `${process.env.REACT_APP_BASE_PATH}/api/project/initiate-payment`,
-          {
-            orderId,
-            payAmount,
-            callbackUrl,
-            currency,
-            activeUser,
-          }
-        )
+      api
+        .post(`/project/initiate-payment`, {
+          orderId,
+          payAmount,
+          callbackUrl,
+          currency,
+          activeUser,
+        })
         .then(resp => {
           // console.log("transaction token", resp.data.data)
-          if (resp.data.data.body.resultInfo.resultStatus == "S") {
+          if (resp.data.data.body.resultInfo.resultStatus == 'S') {
             setpayBox(false);
             const transactionToken = resp.data.data.body.txnToken;
             initialize(
@@ -151,7 +147,7 @@ const Page = () => {
           console.error(err);
         });
     } else {
-      toast("Enter amount for payment");
+      toast('Enter amount for payment');
     }
   };
 
@@ -165,25 +161,25 @@ const Page = () => {
     siteID
   ) => {
     var config = {
-      root: "",
+      root: '',
       style: {
-        bodyBackgroundColor: "#fafafb",
-        bodyColor: "",
-        themeBackgroundColor: "#0FB8C9",
-        themeColor: "#ffffff",
-        headerBackgroundColor: "#284055",
-        headerColor: "#ffffff",
-        errorColor: "",
-        successColor: "",
+        bodyBackgroundColor: '#fafafb',
+        bodyColor: '',
+        themeBackgroundColor: '#0FB8C9',
+        themeColor: '#ffffff',
+        headerBackgroundColor: '#284055',
+        headerColor: '#ffffff',
+        errorColor: '',
+        successColor: '',
         card: {
-          padding: "",
-          backgroundColor: "",
+          padding: '',
+          backgroundColor: '',
         },
       },
       data: {
         orderId: orderId,
         token: token,
-        tokenType: "TXN_TOKEN",
+        tokenType: 'TXN_TOKEN',
         amount: amount /* update amount */,
       },
       payMode: {
@@ -191,10 +187,10 @@ const Page = () => {
         filter: {
           exclude: [],
         },
-        order: ["CC", "DC", "NB", "UPI", "PPBL", "PPI", "BALANCE"],
+        order: ['CC', 'DC', 'NB', 'UPI', 'PPBL', 'PPI', 'BALANCE'],
       },
-      website: "DEFAULT",
-      flow: "DEFAULT",
+      website: 'DEFAULT',
+      flow: 'DEFAULT',
       merchant: {
         mid: mid,
         redirect: false,
@@ -213,18 +209,20 @@ const Page = () => {
             orderId: orderId,
           };
           // console.log(data);
-          await axios
+          await api
             .post(
-              `${process.env.REACT_APP_BASE_PATH}/api/project/verify-payment`,
+              `/project/verify-payment`,
               data
             )
             .then(resp => {
-              console.log("transaction token", resp.data);
+              console.log('transaction token', resp.data);
               if (
                 resp.data.data.paymentInformation.body.resultInfo
-                  .resultStatus == "TXN_SUCCESS"
+                  .resultStatus == 'TXN_SUCCESS'
               ) {
-                toast(`Congratulations, Your payment has been successfully done for siteID ${siteID}`);
+                toast(
+                  `Congratulations, Your payment has been successfully done for siteID ${siteID}`
+                );
 
                 const payNotification = {
                   clientID: activeUser,
@@ -232,9 +230,9 @@ const Page = () => {
                   url: window.location.href,
                 };
                 // console.log(payNotification);
-                axios
+                api
                   .post(
-                    `${process.env.REACT_APP_BASE_PATH}/api/payproject/notification/createNotification`,
+                    `/payproject/notification/createNotification`,
                     payNotification
                   )
                   .then(resp1 => {
@@ -248,42 +246,42 @@ const Page = () => {
 
               if (
                 resp.data.data.paymentInformation.body.resultInfo
-                  .resultStatus == "TXN_FAILURE"
+                  .resultStatus == 'TXN_FAILURE'
               ) {
                 toast(
-                  resp.data.data.paymentInformation.body.resultInfo.resultMsg,
+                  resp.data.data.paymentInformation.body.resultInfo.resultMsg
                 );
               }
 
               if (
                 resp.data.data.paymentInformation.body.resultInfo
-                  .resultStatus == "PENDING"
+                  .resultStatus == 'PENDING'
               ) {
                 toast(
-                  resp.data.data.paymentInformation.body.resultInfo.resultMsg,
+                  resp.data.data.paymentInformation.body.resultInfo.resultMsg
                 );
               }
 
               if (
                 resp.data.data.paymentInformation.body.resultInfo
-                  .resultStatus == "NO_RECORD_FOUND"
+                  .resultStatus == 'NO_RECORD_FOUND'
               ) {
                 toast(
-                  resp.data.data.paymentInformation.body.resultInfo.resultMsg,
+                  resp.data.data.paymentInformation.body.resultInfo.resultMsg
                 );
               }
             })
             .catch(err => {
               console.error(err);
-              toast("Something went wrong. Please try again!");
+              toast('Something went wrong. Please try again!');
             });
           setTimeout(() => window.location.reload(), 2000);
           console.log(paymentStatus);
         },
         notifyMerchant: function (eventName, data) {
-          console.log("notifyMerchant handler function called");
-          console.log("eventName => ", eventName);
-          console.log("data => ", data);
+          console.log('notifyMerchant handler function called');
+          console.log('eventName => ', eventName);
+          console.log('data => ', data);
         },
       },
     };
@@ -294,7 +292,7 @@ const Page = () => {
           window.Paytm.CheckoutJS.invoke();
         })
         .catch(function onError(error) {
-          console.log("Error => ", error);
+          console.log('Error => ', error);
         });
     }
   };
@@ -309,24 +307,27 @@ const Page = () => {
   };
 
   let rupee = new Intl.NumberFormat('en-IN', {
-  maximumFractionDigits: 0,
-  useGrouping: true
+    maximumFractionDigits: 0,
+    useGrouping: true,
   });
 
   return (
     <AsideContainer>
       <div className="datatable">
-      <div className='flex w-full items-center gap-1 lg:gap-2'>
-        <SidebarTrigger className="-ml-2 hover:bg-primary" />
-        <Separator orientation="vertical" className="data-[orientation=vertical]:h-4 bg-black" />
-        <IoIosArrowBack
-          onClick={() => router.back()}
-          className="cursor-pointer transition duration-300 hover:scale-150 ease-in-out"
-        />
-        <h1 className="font-ubuntu font-bold text-[25px] leading-7 py-5 text-nowrap">
-          Project Payment Details
-        </h1>
-      </div>
+        <div className="flex w-full items-center gap-1 lg:gap-2">
+          <SidebarTrigger className="-ml-2 hover:bg-primary" />
+          <Separator
+            orientation="vertical"
+            className="data-[orientation=vertical]:h-4 bg-black"
+          />
+          <IoIosArrowBack
+            onClick={() => router.back()}
+            className="cursor-pointer transition duration-300 hover:scale-150 ease-in-out"
+          />
+          <h1 className="font-ubuntu font-bold text-[25px] leading-7 py-5 text-nowrap">
+            Project Payment Details
+          </h1>
+        </div>
         <div className="row mt-4">
           <div className="bg-white rounded-3xl p-5 text-secondary font-semibold text-lg text-center flex flex-row w-full justify-between mb-6">
             <span className="project-payment-stages">Stages</span>
@@ -352,8 +353,9 @@ const Page = () => {
                         {item?.paymentStatus}
                       </span>
                     </div>
-                    {userType !== "ROLE_CLIENT" && userType !== "ROLE_SITE ENGINEER" &&
-                      item.paymentStatus !== "Paid" && (
+                    {userType !== 'ROLE_CLIENT' &&
+                      userType !== 'ROLE_SITE ENGINEER' &&
+                      item.paymentStatus !== 'Paid' && (
                         <button
                           onClick={() => {
                             setStage(item.stage);
@@ -384,70 +386,75 @@ const Page = () => {
                           <FaRupeeSign />
                         </span>
                         <span>
-                          {rupee.format((item.payment * projectDetails.cost) / 100)}
+                          {rupee.format(
+                            (item.payment * projectDetails.cost) / 100
+                          )}
                         </span>
                       </span>
                     </div>
                   </div>
                   {showPaymentDetails[index] && (
-                  <>
-                    {payDetails[0]?.stages
-                      .filter(dt => dt.stage === item.stage)[0]
-                      ?.installments.length > 0 ? (
-                      <div className="text-center">
-                      <table className="w-full">
-                        <thead>
-                          <tr>
-                            <th className="font-semibold">Date</th>
-                            <th className="font-semibold">Mode</th>
-                            <th className="font-semibold">Amount</th>
-                            <th className="font-semibold">Remarks</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {payDetails[0]?.stages
-                            .filter(dt => dt.stage === item.stage)[0]
-                            ?.installments.map((detail, index) => {
-                              return (
-                                <tr key={index}>
-                                  <td>{detail.paymentDate}</td>
-                                  <td>{detail.mode}</td>
-                                  <td>
-                                    <span>
-                                      {/* <FaRupeeSign /> */}
-                                      {rupee.format(detail.amount)}
-                                    </span>
-                                  </td>
-                                  <td>{detail.remarks}</td>
-                                </tr>
-                              );
-                            })}
-                        </tbody>
-                      </table>           
-                    </div> ) : ( 
-                    <p className="text-center p-4">
-                      No payment details available
-                    </p>
-                    )}
-                  </>
-
+                    <>
+                      {payDetails[0]?.stages.filter(
+                        dt => dt.stage === item.stage
+                      )[0]?.installments.length > 0 ? (
+                        <div className="text-center">
+                          <table className="w-full">
+                            <thead>
+                              <tr>
+                                <th className="font-semibold">Date</th>
+                                <th className="font-semibold">Mode</th>
+                                <th className="font-semibold">Amount</th>
+                                <th className="font-semibold">Remarks</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {payDetails[0]?.stages
+                                .filter(dt => dt.stage === item.stage)[0]
+                                ?.installments.map((detail, index) => {
+                                  return (
+                                    <tr key={index}>
+                                      <td>{detail.paymentDate}</td>
+                                      <td>{detail.mode}</td>
+                                      <td>
+                                        <span>
+                                          {/* <FaRupeeSign /> */}
+                                          {rupee.format(detail.amount)}
+                                        </span>
+                                      </td>
+                                      <td>{detail.remarks}</td>
+                                    </tr>
+                                  );
+                                })}
+                            </tbody>
+                          </table>
+                        </div>
+                      ) : (
+                        <p className="text-center p-4">
+                          No payment details available
+                        </p>
+                      )}
+                    </>
                   )}
                   <div className="flex flex-row items-center bg-secondary-foreground  p-2 w-full rounded-b-3xl">
                     <div className="flex flex-row items-center gap-2 w-full p-5 justify-between">
-                      {item.paymentStatus !== "Paid"
-                        ? " Outstanding Amount:"
-                        : "Paid Amount"}
+                      {item.paymentStatus !== 'Paid'
+                        ? ' Outstanding Amount:'
+                        : 'Paid Amount'}
                       <span className="flex flex-row items-center gap">
                         <span>
                           <FaRupeeSign />
                         </span>
-                        {rupee.format((item.payment * projectDetails.cost) / 100 -
-                          payDetails[0]?.stages
-                            .filter(dt => dt.stage === item.stage)[0]
-                            ?.installments.reduce(
-                              (acc, item) => acc + parseFloat(item.amount || 0),
-                              0
-                        ))}
+                        {rupee.format(
+                          (item.payment * projectDetails.cost) / 100 -
+                            payDetails[0]?.stages
+                              .filter(dt => dt.stage === item.stage)[0]
+                              ?.installments.reduce(
+                                (acc, item) =>
+                                  acc + parseFloat(item.amount || 0),
+                                0
+                              )
+                        )}
                       </span>
                     </div>
                     {/* {userType === "ROLE_CLIENT" && (
@@ -469,9 +476,9 @@ const Page = () => {
         open={OpenStatus}
         onClose={() => {}}
         sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
         }}
       >
         <div className="bg-white w-1/3 p-8 rounded-3xl outline-none -md:w-3/4">
@@ -512,32 +519,32 @@ const Page = () => {
               name="status"
               onChange={e => setStatus(e.target.value)}
               sx={{
-                "width": "100%",
-                "borderRadius": "7px",
-                "background": "#f3f4f6",
-                "outline": "none",
-                "& :hover": {
-                  outline: "none",
+                width: '100%',
+                borderRadius: '7px',
+                background: '#f3f4f6',
+                outline: 'none',
+                '& :hover': {
+                  outline: 'none',
                 },
-                "& .MuiInputBase-root": {
-                  "outline": "none",
-                  "background": "#cfcfcf",
-                  "& :hover": {
-                    outline: "none",
+                '& .MuiInputBase-root': {
+                  outline: 'none',
+                  background: '#cfcfcf',
+                  '& :hover': {
+                    outline: 'none',
                   },
                 },
-                "color": "#4b5563",
-                ".MuiOutlinedInput-notchedOutline": {
-                  border: "1px solid #93bfcf",
+                color: '#4b5563',
+                '.MuiOutlinedInput-notchedOutline': {
+                  border: '1px solid #93bfcf',
                 },
-                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                  border: "1px solid #93bfcf",
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  border: '1px solid #93bfcf',
                 },
-                "&:hover .MuiOutlinedInput-notchedOutline": {
-                  border: "1px solid #93bfcf",
+                '&:hover .MuiOutlinedInput-notchedOutline': {
+                  border: '1px solid #93bfcf',
                 },
-                ".MuiSvgIcon-root ": {
-                  fill: "#93bfcf !important",
+                '.MuiSvgIcon-root ': {
+                  fill: '#93bfcf !important',
                 },
               }}
             >
@@ -597,7 +604,7 @@ const Page = () => {
         <DialogTitle className="text-uppercase fs-5 text-center">
           Pay Amount
         </DialogTitle>
-        <DialogContent style={{ width: "500px" }}>
+        <DialogContent style={{ width: '500px' }}>
           <FormControl fullWidth>
             <Typography className="fw-bold">Amount</Typography>
             <TextField

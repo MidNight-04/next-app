@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { MdSkipNext, MdSkipPrevious } from 'react-icons/md';
-import axios from 'axios';
+import api from '../../../../lib/api';
 import Avatar from '@mui/material/Avatar';
 import { toast } from 'sonner';
 import AsideContainer from '../../../../components/AsideContainer';
@@ -56,31 +56,31 @@ const Page = () => {
 
   // switch (activeFilter) {
   //   case 'Today':
-  //     url = `${process.env.REACT_APP_BASE_PATH}/api/task/gettodaytaskbyid`;
+  //     url = `task/gettodaytaskbyid`;
   //     break;
   //   case 'Yesterday':
-  //     url = `${process.env.REACT_APP_BASE_PATH}/api/task/getyesterdaytaskbyid`;
+  //     url = `task/getyesterdaytaskbyid`;
   //     break;
   //   case 'Tomorrow':
-  //     url = `${process.env.REACT_APP_BASE_PATH}/api/task/gettomorrowtaskbyid`;
+  //     url = `task/gettomorrowtaskbyid`;
   //     break;
   //   case 'This Week':
-  //     url = `${process.env.REACT_APP_BASE_PATH}/api/task/getthisweektaskbyid`;
+  //     url = `task/getthisweektaskbyid`;
   //     break;
   //   case 'Next Week':
-  //     url = `${process.env.REACT_APP_BASE_PATH}/api/task/getnextweektaskbyid`;
+  //     url = `task/getnextweektaskbyid`;
   //     break;
   //   case 'Next Month':
-  //     url = `${process.env.REACT_APP_BASE_PATH}/api/task/getnextmonthtaskbyid`;
+  //     url = `task/getnextmonthtaskbyid`;
   //     break;
   //   case 'This Month':
-  //     url = `${process.env.REACT_APP_BASE_PATH}/api/task/getthismonthtaskbyid`;
+  //     url = `task/getthismonthtaskbyid`;
   //     break;
   //   case 'Last Month':
-  //     url = `${process.env.REACT_APP_BASE_PATH}/api/task/getlastmonthtaskbyid`;
+  //     url = `task/getlastmonthtaskbyid`;
   //     break;
   //   case 'Custom':
-  //     url = `${process.env.REACT_APP_BASE_PATH}/api/task/customfilters`;
+  //     url = `task/customfilters`;
   //     break;
   // }
 
@@ -89,15 +89,12 @@ const Page = () => {
     useQuery({
       queryKey: ['delegatedTasks', activeFilter, currentPage],
       queryFn: async () => {
-        const response = await axios.post(
-          `${process.env.REACT_APP_BASE_PATH}/api/task/customfilters`,
-          {
-            page: currentPage,
-            userId: user,
-            filter: activeFilter,
-            ...customFilters,
-          }
-        );
+        const response = await api.post(`/task/customfilters`, {
+          page: currentPage,
+          userId: user,
+          filter: activeFilter,
+          ...customFilters,
+        });
         return response.data;
       },
       keepPreviousData: true,
@@ -120,11 +117,8 @@ const Page = () => {
 
   const searchTask = e => {
     const searchValue = e.target.value.toLowerCase();
-    const data = axios.post(
-      `${process.env.REACT_APP_BASE_PATH}/api/task/search/${searchValue}`
-    );
+    const data = api.post(`/task/search/${searchValue}`);
     setTasks(data);
-    console.log(searchValue);
   };
 
   const handleFilterChange = filter => {
@@ -169,7 +163,8 @@ const Page = () => {
       sx: {
         height: '24px',
         width: '24px',
-        fontSize: '1rem',
+        fontSize: '12px',
+        fontWeight: '400',
         bgcolor: initialsColor,
       },
       children: `${firstLetter}${secondLetter}`,
@@ -303,15 +298,22 @@ const Page = () => {
                                 <span className="font-semibold text-sm flex flex-row gap-2 items-center">
                                   <Avatar
                                     sx={{}}
-                                    {...stringAvatar('ThikedaarDotCom')}
+                                    {...stringAvatar(
+                                      `${
+                                        item.issueMember?.firstname +
+                                        ' ' +
+                                        item.issueMember?.lastname
+                                      }`
+                                    )}
                                   />
-                                  {item.issueMember?.name}
+                                  {item.issueMember?.firstname}
                                 </span>
                                 <span className="text-lg font-bold">
                                   {item.title}
                                 </span>
                               </div>
-                              {item.issueMember?.name === 'ThikedaarDotCom' ? (
+                              {item.issueMember?.firstname ===
+                              'ThikedaarDotCom' ? (
                                 <span className="font-semibold text-sm">
                                   Admin
                                 </span>
@@ -320,10 +322,9 @@ const Page = () => {
                                   <span className="font-semibold text-sm flex flex-row gap-2 items-center">
                                     <FaUserCircle className="text-primary" />
                                     <p className="font-semibold text-sm">
-                                      {item.assignedBy?.name ===
-                                      'ThikedaarDotCom'
-                                        ? 'Admin'
-                                        : item.assignedBy?.name}
+                                      {item.assignedBy?.firstname +
+                                        ' ' +
+                                        item.assignedBy?.lastname}
                                     </p>
                                   </span>
                                   <span className="font-semibold text-sm flex flex-row gap-2 items-center">
@@ -366,7 +367,11 @@ const Page = () => {
                                   </span>
                                   <span className="font-semibold text-sm flex flex-row gap-1 items-center">
                                     <FiRepeat className="text-primary" />
-                                    <p>{item.repeat?.repeatType}</p>
+                                    <p>
+                                      {item.repeat?.repeatType === 'norepeat'
+                                        ? 'Once'
+                                        : item.repeat?.repeatType}
+                                    </p>
                                   </span>
                                 </div>
                               )}
@@ -426,16 +431,24 @@ const Page = () => {
                               <div>
                                 <span className="font-semibold text-sm flex flex-row gap-2 items-center">
                                   <Avatar
-                                    sx={{}}
-                                    {...stringAvatar('ThikedaarDotCom')}
+                                    {...stringAvatar(
+                                      `${
+                                        item.issueMember?.firstname +
+                                        ' ' +
+                                        item.issueMember?.lastname
+                                      }`
+                                    )}
                                   />
-                                  {item.issueMember?.name}
+                                  {item.issueMember?.firstname +
+                                    ' ' +
+                                    item.issueMember?.lastname}
                                 </span>
                                 <span className="text-lg font-bold">
                                   {item.title}
                                 </span>
                               </div>
-                              {item.issueMember?.name === 'ThikedaarDotCom' ? (
+                              {item.issueMember?.firstname ===
+                              'ThikedaarDotCom' ? (
                                 <span className="font-semibold text-sm">
                                   Admin
                                 </span>
@@ -444,10 +457,9 @@ const Page = () => {
                                   <span className="font-semibold text-sm flex flex-row gap-2 items-center">
                                     <FaUserCircle className="text-primary" />
                                     <p className="font-semibold text-sm">
-                                      {item.assignedBy?.name ===
-                                      'ThikedaarDotCom'
-                                        ? 'Admin'
-                                        : item.assignedBy?.name}
+                                      {item.assignedBy?.firstname +
+                                        ' ' +
+                                        item.assignedBy?.lastname}
                                     </p>
                                   </span>
                                   <span className="font-semibold text-sm flex flex-row gap-2 items-center">
@@ -490,7 +502,9 @@ const Page = () => {
                                   </span>
                                   <span className="font-semibold text-sm flex flex-row gap-1 items-center">
                                     <FiRepeat className="text-primary" />
-                                    <p>{item.repeat?.repeatType}</p>
+                                    {item.repeat?.repeatType === 'norepeat'
+                                      ? 'Once'
+                                      : item.repeat?.repeatType}
                                   </span>
                                 </div>
                               )}
@@ -551,9 +565,17 @@ const Page = () => {
                                 <span className="font-semibold text-sm flex flex-row gap-2 items-center">
                                   <Avatar
                                     sx={{}}
-                                    {...stringAvatar('ThikedaarDotCom')}
+                                    {...stringAvatar(
+                                      `${
+                                        item.issueMember?.firstname +
+                                        ' ' +
+                                        item.issueMember?.lastname
+                                      }`
+                                    )}
                                   />
-                                  {item.issueMember?.name}
+                                  {item.issueMember?.firstname +
+                                    ' ' +
+                                    item.issueMember?.lastname}
                                 </span>
                                 <span className="text-lg font-bold">
                                   {item.title}
@@ -568,10 +590,9 @@ const Page = () => {
                                   <span className="font-semibold text-sm flex flex-row gap-2 items-center">
                                     <FaUserCircle className="text-primary" />
                                     <p className="font-semibold text-sm">
-                                      {item.assignedBy?.name ===
-                                      'ThikedaarDotCom'
-                                        ? 'Admin'
-                                        : item.assignedBy?.name}
+                                      {item.assignedBy?.firstname +
+                                        ' ' +
+                                        item.assignedBy?.lastname}
                                     </p>
                                   </span>
                                   <span className="font-semibold text-sm flex flex-row gap-2 items-center">
@@ -614,7 +635,9 @@ const Page = () => {
                                   </span>
                                   <span className="font-semibold text-sm flex flex-row gap-1 items-center">
                                     <FiRepeat className="text-primary" />
-                                    <p>{item.repeat?.repeatType}</p>
+                                    {item.repeat?.repeatType === 'norepeat'
+                                      ? 'Once'
+                                      : item.repeat?.repeatType}
                                   </span>
                                 </div>
                               )}
@@ -675,9 +698,17 @@ const Page = () => {
                                 <span className="font-semibold text-sm flex flex-row gap-2 items-center">
                                   <Avatar
                                     sx={{}}
-                                    {...stringAvatar('ThikedaarDotCom')}
+                                    {...stringAvatar(
+                                      `${
+                                        item.issueMember?.firstname +
+                                        ' ' +
+                                        item.issueMember?.lastname
+                                      }`
+                                    )}
                                   />
-                                  {item.issueMember?.name}
+                                  {item.issueMember?.firstname +
+                                    ' ' +
+                                    item.issueMember?.lastname}
                                 </span>
                                 <span className="text-lg font-bold">
                                   {item.title}
@@ -692,10 +723,9 @@ const Page = () => {
                                   <span className="font-semibold text-sm flex flex-row gap-2 items-center">
                                     <FaUserCircle className="text-primary" />
                                     <p className="font-semibold text-sm">
-                                      {item.assignedBy?.name ===
-                                      'ThikedaarDotCom'
-                                        ? 'Admin'
-                                        : item.assignedBy?.name}
+                                      {item.assignedBy?.firstname +
+                                        ' ' +
+                                        item.assignedBy?.lastname}
                                     </p>
                                   </span>
                                   <span className="font-semibold text-sm flex flex-row gap-2 items-center">
@@ -738,7 +768,9 @@ const Page = () => {
                                   </span>
                                   <span className="font-semibold text-sm flex flex-row gap-1 items-center">
                                     <FiRepeat className="text-primary" />
-                                    <p>{item.repeat?.repeatType}</p>
+                                    {item.repeat?.repeatType === 'norepeat'
+                                      ? 'Once'
+                                      : item.repeat?.repeatType}
                                   </span>
                                 </div>
                               )}

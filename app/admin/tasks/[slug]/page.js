@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { IoIosArrowBack } from 'react-icons/io';
 import AsideContainer from '../../../../components/AsideContainer';
 import Image from 'next/image';
@@ -18,7 +18,7 @@ import {
   Select,
 } from '@mui/material';
 import { useState } from 'react';
-import axios from 'axios';
+import api from '../../../../lib/api';
 import { useAuthStore } from '../../../../store/useAuthStore';
 import { MdChecklist } from 'react-icons/md';
 import { HiOutlineLockOpen } from 'react-icons/hi2';
@@ -32,6 +32,7 @@ import { TbCheckbox } from 'react-icons/tb';
 import LoaderSpinner from '../../../../components/loader/LoaderSpinner';
 import AudioRecorder from '../../../../components/AudioRecorder/AudioRecorder';
 import { Label } from '../../../../components/ui/label';
+import Avatar from '@mui/material/Avatar';
 import {
   RadioGroup,
   RadioGroupItem,
@@ -39,6 +40,44 @@ import {
 import { CiViewList } from 'react-icons/ci';
 import { SidebarTrigger } from '../../../../components/ui/sidebar';
 import { Separator } from '../../../../components/ui/separator';
+
+function stringToColor(string) {
+  let hash = 0;
+  let i;
+
+  for (i = 0; i < string.length; i += 1) {
+    hash = string.charCodeAt(i) + ((hash << 5) - hash);
+  }
+
+  let color = '#';
+
+  for (i = 0; i < 3; i += 1) {
+    const value = (hash >> (i * 8)) & 0xff;
+    color += `00${value.toString(16)}`.slice(-2);
+  }
+  return color;
+}
+
+function stringAvatar(name) {
+  const splitName = name.split(' ');
+  const initials = splitName
+    .map(n => n[0])
+    .join('')
+    .toUpperCase();
+  const firstLetter = splitName[0][0].toUpperCase();
+  const secondLetter = splitName[1] ? splitName[1][0].toUpperCase() : '';
+  const initialsColor = stringToColor(initials);
+  return {
+    sx: {
+      height: '24px',
+      width: '24px',
+      fontSize: '12px',
+      fontWeight: '400',
+      bgcolor: initialsColor,
+    },
+    children: `${firstLetter}${secondLetter}`,
+  };
+}
 
 const Page = () => {
   const { slug } = useParams();
@@ -67,24 +106,17 @@ const Page = () => {
   const [workers, setWorkers] = useState(0);
   const [newMember, setNewMember] = useState(null);
   const [openManualClose, setOpenManualClose] = useState(false);
+  const { token } = useAuthStore.getState();
   const [manualDate, setManualDate] = useState(
     new Date().toISOString().split('T')[0]
   );
+
   const { data, error, isFetched, refetch } = useQuery({
-    queryKey: [`gettaskbyid/${slug}`],
-    queryFn: async () =>
-      await fetch(
-        `${process.env.REACT_APP_BASE_PATH}/api/task/gettaskbyid/${slug}`
-      )
-        .then(res => {
-          if (!res.ok) {
-            throw new Error('Network response was not ok');
-          }
-          return res.json();
-        })
-        .catch(error => {
-          throw new Error('Failed to fetch data');
-        }),
+    queryKey: ['gettaskbyid', slug],
+    queryFn: async () => {
+      const response = await api.get(`/task/gettaskbyid/${slug}`);
+      return response.data;
+    },
   });
 
   const toggleDelete = () => {
@@ -115,14 +147,10 @@ const Page = () => {
 
       setOpenComment(prev => !prev);
 
-      const api = axios
-        .post(
-          `${process.env.REACT_APP_BASE_PATH}/api/task/taskaddcomment`,
-          formData,
-          {
-            headers: { 'Content-Type': 'multipart/form-data' },
-          }
-        )
+      const data = api
+        .post(`/task/taskaddcomment`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        })
         .then(() => {
           toast('Comment Added!', {
             description: 'Comment Added Successfully.',
@@ -134,16 +162,89 @@ const Page = () => {
     }
   };
 
+  // const mutation = useMutation({
+  //   mutationFn: async ({
+  //     userId,
+  //     taskId,
+  //     type,
+  //     comment,
+  //     isWorking,
+  //     material,
+  //     workers,
+  //     audioData,
+  //     points,
+  //   }) => {
+  //     const formData = new FormData();
+
+  //     formData.append('userId', userId);
+  //     formData.append('taskId', taskId);
+  //     formData.append('type', type);
+  //     formData.append('comment', comment);
+  //     formData.append('isWorking', isWorking);
+
+  //     if (material) formData.append('material', material);
+  //     if (workers) formData.append('workers', workers);
+  //     if (audioData?.blob) {
+  //       formData.append('audio', audioData.blob, 'recording.wav');
+  //     }
+
+  //     if (Array.isArray(points)) {
+  //       for (let i = 0; i < points.length; i++) {
+  //         formData.append('image', points[i]);
+  //       }
+  //     }
+
+  //     const response = await api.post('/task/taskaddcomment', formData, {
+  //       headers: { 'Content-Type': 'multipart/form-data' },
+  //     });
+
+  //     return response.data;
+  //   },
+  //   onSuccess: () => {
+  //     toast('Comment Added!', {
+  //       description: 'Comment Added Successfully.',
+  //     });
+  //     setPoints([]);
+  //     setAudioData(null);
+  //     setComment('');
+  //     setOpenComment(prev => !prev);
+  //     refetch();
+  //   },
+  //   onError: error => {
+  //     console.error(error);
+  //     toast.error('Failed to add comment.', {
+  //       description: error?.response?.data?.message || 'Something went wrong.',
+  //     });
+  //   },
+  // });
+
+  // const addComment = () => {
+  //   if (!comment) {
+  //     toast('Please enter a comment before submitting.');
+  //     return;
+  //   }
+
+  //   mutation.mutate({
+  //     userId,
+  //     taskId: slug,
+  //     type,
+  //     comment,
+  //     isWorking,
+  //     material,
+  //     workers,
+  //     audioData,
+  //     points,
+  //   });
+  // };
+
   const deleteTask = () => {
     setOpenDelete(prev => !prev);
-    const api = axios
-      .delete(`${process.env.REACT_APP_BASE_PATH}/api/task/delete/${slug}`)
-      .then(() => {
-        toast('Task Deleted!', {
-          description: 'Task Deleted Successfully.',
-        });
-        router.back();
+    const api = api.delete(`/task/delete/${slug}`).then(() => {
+      toast('Task Deleted!', {
+        description: 'Task Deleted Successfully.',
       });
+      router.back();
+    });
   };
 
   const toggleShowImage = () => {
@@ -157,11 +258,11 @@ const Page = () => {
   const deleteCommentImage = id => {
     toggleShowImage();
 
-    const api = axios
-      .post(
-        `${process.env.REACT_APP_BASE_PATH}/api/task/deletetaskcommentimage`,
-        { commentId: id, imageUrl: showImageUrl }
-      )
+    const api = api
+      .post(`/task/deletetaskcommentimage`, {
+        commentId: id,
+        imageUrl: showImageUrl,
+      })
       .then(res => {
         refetch();
         toast('Image deleted successfully.');
@@ -173,8 +274,8 @@ const Page = () => {
   };
 
   const approveComment = async id => {
-    const res = axios
-      .post(`${process.env.REACT_APP_BASE_PATH}/api/task/approvetaskcomment`, {
+    const res = api
+      .post(`/task/approvetaskcomment`, {
         commentId: id,
         userId,
         taskId: slug,
@@ -190,8 +291,8 @@ const Page = () => {
   };
 
   const deleteComment = async id => {
-    const data = axios
-      .post(`${process.env.REACT_APP_BASE_PATH}/api/task/deletetaskcomment`, {
+    const data = api
+      .post(`/task/deletetaskcomment`, {
         commentId: id,
       })
       .then(res => {
@@ -204,8 +305,8 @@ const Page = () => {
   };
 
   const reassignTask = async () => {
-    const data = axios
-      .post(`${process.env.REACT_APP_BASE_PATH}/api/task/reassignTask`, {
+    const data = api
+      .post(`/task/reassignTask`, {
         taskId: slug,
         userId,
         newAssigneeId: newMember,
@@ -220,26 +321,22 @@ const Page = () => {
   };
 
   const getTeammembers = async () => {
-    const response = await axios.get(
-      `${process.env.REACT_APP_BASE_PATH}/api/teammember/getall`
-    );
+    const response = await api.get(`/teammember/getall`);
     setTeammembers(response.data.data);
   };
 
   useEffect(() => {
     const getChecklist = async () => {
-      const response = await axios.get(
-        `${process.env.REACT_APP_BASE_PATH}/api/project/checklist/all`
-      );
+      const response = await api.get(`/project/checklist/all`);
       setChecklistData(response.data.data);
     };
     getChecklist();
-  }, [addChecklist]);
+  }, [addChecklist, token]);
 
   const addChecklistHandler = async () => {
     setAddChecklist(false);
-    const data = await axios
-      .post(`${process.env.REACT_APP_BASE_PATH}/api/task/addchecklist`, {
+    const data = await api
+      .post(`/task/addchecklist`, {
         taskId: slug,
         checklistId: checklist,
       })
@@ -256,18 +353,15 @@ const Page = () => {
     if (data?.data?.checkList) {
       setTaskChecklist(data.data.checkList);
     }
-  }, [data, isFetched]);
+  }, [data, isFetched, token]);
 
   const handleUpdateChecklistPoint = async () => {
     setShowChecklist(false);
-    const data = await axios
-      .post(
-        `${process.env.REACT_APP_BASE_PATH}/api/task/updatechecklistpoint`,
-        {
-          taskId: slug,
-          updatedChecklist: taskChecklist,
-        }
-      )
+    const data = await api
+      .post(`/task/updatechecklistpoint`, {
+        taskId: slug,
+        updatedChecklist: taskChecklist,
+      })
       .then(res => {
         refetch();
         toast('Checklist Updated Successfully.');
@@ -279,8 +373,8 @@ const Page = () => {
 
   const deleteChecklistHandler = async () => {
     setOpenDeleteChecklist(false);
-    const data = await axios
-      .post(`${process.env.REACT_APP_BASE_PATH}/api/task/deletechecklist`, {
+    const data = await api
+      .post(`/task/deletechecklist`, {
         taskId: slug,
       })
       .then(res => {
@@ -294,8 +388,8 @@ const Page = () => {
 
   const closelManuallyHandler = async () => {
     setOpenManualClose(false);
-    const data = await axios
-      .post(`${process.env.REACT_APP_BASE_PATH}/api/task/manuallyclosetask`, {
+    const data = await api
+      .post(`/task/manuallyclosetask`, {
         taskId: slug,
         date: manualDate,
       })
@@ -339,33 +433,41 @@ const Page = () => {
                   <p className="font-ubuntu font-semibold text-gray-600">
                     Assigned To :
                   </p>
-                  <Image
-                    src={'/assets/profile-placeholder.png'}
-                    alt="project image"
-                    width={20}
-                    height={20}
-                    className="rounded-full"
+                  <Avatar
+                    sx={{}}
+                    {...stringAvatar(
+                      `${
+                        data.data?.issueMember?.firstname +
+                        ' ' +
+                        data.data?.issueMember?.lastname
+                      }`
+                    )}
                   />
-                  <p>{data.data.issueMember?.name}</p>
+                  <p>
+                    {data.data?.issueMember?.firstname +
+                      ' ' +
+                      data.data?.issueMember?.lastname}
+                  </p>
                 </span>
                 <span className="flex flex-row gap-2 items-center">
                   <p className="font-ubuntu font-semibold text-gray-600">
                     Assigned By :
                   </p>
-                  <Image
-                    src={'/assets/profile-placeholder.png'}
-                    alt="project image"
-                    width={20}
-                    height={20}
-                    className="rounded-full"
-                  />
-                  <>
-                    {data.data.assignedBy?.name === 'ThikedaarDotCom' ? (
-                      <span className="font-semibold text-sm">Admin</span>
-                    ) : (
-                      <span>{data.data.assignedBy?.name}</span>
+                  <Avatar
+                    sx={{}}
+                    {...stringAvatar(
+                      `${
+                        data.data?.assignedBy?.firstname +
+                        ' ' +
+                        data.data?.assignedBy?.lastname
+                      }`
                     )}
-                  </>
+                  />
+                  <span>
+                    {data.data?.assignedBy?.firstname +
+                      ' ' +
+                      data.data?.assignedBy?.lastname}
+                  </span>
                 </span>
               </div>
               <div className="flex flex-row gap-2 items-center">

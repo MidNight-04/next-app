@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import imageUrl from '../../constant/imageUrl';
 import CurrencyRupeeIcon from '@mui/icons-material/CurrencyRupee';
-import axios from 'axios';
+import api from '../../lib/api';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useQueries } from '@tanstack/react-query';
@@ -107,8 +107,8 @@ const Page = () => {
   });
 
   const getStates = () => {
-    axios
-      .post(`${process.env.REACT_APP_BASE_PATH}/api/auth/getStates`, {
+    api
+      .post(`/auth/getStates`, {
         country_name: suitableCountry,
       })
       .then(resp => {
@@ -128,8 +128,8 @@ const Page = () => {
   };
 
   const getCities = state => {
-    axios
-      .post(`${process.env.REACT_APP_BASE_PATH}/api/auth/getCities`, {
+    api
+      .post(`/auth/getCities`, {
         state_name: state,
       })
       .then(resp => {
@@ -518,7 +518,7 @@ const Page = () => {
                                   !String(item?.productImage[0]).includes(
                                     'bucket.s3'
                                   )
-                                    ? `${process.env.REACT_APP_BASE_PATH}${item?.productImage[0]}`
+                                    ? `${process.env.BACKEND_BASE_URL}${item?.productImage[0]}`
                                     : item?.productImage[0]
                                 }
                                 alt={item?.name}

@@ -1,5 +1,5 @@
 'use client';
-import axios from 'axios';
+import api from '../../../../lib/api';
 import { useRouter, redirect } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -12,8 +12,8 @@ const AddProjectFloorForm = () => {
 
   const submitFormData = () => {
     if (floor) {
-      axios
-        .post(`${process.env.REACT_APP_BASE_PATH}/api/floor/add`, {
+      api
+        .post(`/floor/add`, {
           name: floor,
         })
         .then(response => {

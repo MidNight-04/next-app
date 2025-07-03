@@ -3,7 +3,7 @@ import { Card, CardContent } from '../ui/card';
 import { Button } from '../ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQueries } from '@tanstack/react-query';
-import axios from 'axios';
+import api from '../../lib/api';
 import LoaderSpinner from '../loader/LoaderSpinner';
 
 const TaskFilterPopup = ({
@@ -42,8 +42,8 @@ const TaskFilterPopup = ({
       {
         queryKey: ['categories'],
         queryFn: async () => {
-          const response = await axios.get(
-            `${process.env.REACT_APP_BASE_PATH}/api/category/list`
+          const response = await api.get(
+            `/category/list`
           );
           return response.data.data;
         },
@@ -51,8 +51,8 @@ const TaskFilterPopup = ({
       {
         queryKey: ['employees'],
         queryFn: async () => {
-          const response = await axios.get(
-            `${process.env.REACT_APP_BASE_PATH}/api/teammember/getall`
+          const response = await api.get(
+            `/teammember/getall`
           );
           return response.data.data;
         },

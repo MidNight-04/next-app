@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import TableContainer from '@mui/material/TableContainer';
 import Paper from '@mui/material/Paper';
 import InfoIcon from '@mui/icons-material/Info';
-import axios from 'axios';
 import { Box, Chip, Modal, Typography } from '@mui/material';
 import { DataGrid } from '@mui/x-data-grid';
 import Link from 'next/link';
@@ -34,8 +33,8 @@ const UserOrders = () => {
   // const { userRole } = useSelector(store => store.userReducer);
   const handleClose = () => setOpen(false);
   const handleOpen = addressId => {
-    axios
-      .post(`${process.env.REACT_APP_BASE_PATH}/api/user/get-address`, {
+    api
+      .post(`/user/get-address`, {
         id: addressId,
       })
       .then(resp => {
@@ -51,8 +50,8 @@ const UserOrders = () => {
   // MY-DESIGN api Call here
   useEffect(() => {
     if (type === 'architect' || type === 'dealer') {
-      axios
-        .post(`${process.env.REACT_APP_BASE_PATH}/api/user/order-details`, {
+      api
+        .post(`/user/order-details`, {
           architectId: activeUser,
         })
         .then(resp => {
@@ -64,8 +63,8 @@ const UserOrders = () => {
           setError(err);
         });
     } else if (type === 'order-list' || type === 'admin') {
-      axios
-        .post(`${process.env.REACT_APP_BASE_PATH}/api/user/order-details`)
+      api
+        .post(`/user/order-details`)
         .then(resp => {
           // console.log(resp?.data?.data)
           setRows(resp?.data?.data);
@@ -75,8 +74,8 @@ const UserOrders = () => {
           setError(err);
         });
     } else if (type == 'user') {
-      axios
-        .post(`${process.env.REACT_APP_BASE_PATH}/api/user/order-details`, {
+      api
+        .post(`/user/order-details`, {
           userId: activeUser,
         })
         .then(resp => {

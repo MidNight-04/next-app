@@ -8,7 +8,7 @@ import { MdAttachFile, MdOutlineAccessAlarm } from 'react-icons/md';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { toast } from 'sonner';
-import axios from 'axios';
+import api from '../../../../lib/api';
 import {
   Button,
   Dialog,
@@ -39,6 +39,7 @@ import {
 } from '../../../../components/ui/select';
 import { useAuthStore } from '../../../../store/useAuthStore';
 import { useRouter } from 'next/navigation';
+import { useQueries } from '@tanstack/react-query';
 
 const styles = {
   container: {
@@ -114,7 +115,6 @@ const Page = () => {
   const [reminders, setReminders] = useState([
     { type: '', time: '', unit: '' },
   ]);
-  const [categoryList, setCategoryList] = useState([]);
   const [fileSelected, setFileSelected] = useState(false);
   const [reminderOpen, setReminderOpen] = useState(false);
   const [selectedTime, setSelectedTime] = useState(dayjs());
@@ -124,7 +124,7 @@ const Page = () => {
   const mediaRecorderRef = useRef(null);
   const chunksRef = useRef([]);
   const [fileName, setFileName] = useState('');
-  const [memberList, setMemberList] = useState([]);
+
   const [selectedDate, setSelectedDate] = useState(null);
   const [dateOpen, setDateOpen] = useState(false);
   const [timeOpen, setTimeOpen] = useState(false);
@@ -174,28 +174,29 @@ const Page = () => {
     },
   });
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [memberResponse, categoryResponse] = await Promise.all([
-          axios.get(`${process.env.REACT_APP_BASE_PATH}/api/teammember/getall`),
-          axios.get(`${process.env.REACT_APP_BASE_PATH}/api/category/list`),
-        ]);
-        if (memberResponse?.data?.data) {
-          setMemberList(memberResponse.data.data);
-        }
-        if (categoryResponse?.data?.data) {
-          setCategoryList(categoryResponse.data.data);
-        }
-      } catch (err) {
-        setError(err);
-        console.log('Error fetching data:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
+  const [
+    {
+      data: memberList = [],
+      isPending: isMembersLoading,
+      isError: isMembersError,
+    },
+    {
+      data: categoryList = [],
+      isPending: isCategoriesLoading,
+      isError: isCategoriesError,
+    },
+  ] = useQueries({
+    queries: [
+      {
+        queryKey: ['members'],
+        queryFn: () => api.get('/teammember/getall').then(res => res.data.data),
+      },
+      {
+        queryKey: ['categories'],
+        queryFn: () => api.get('/category/list').then(res => res.data.data),
+      },
+    ],
+  });
 
   useEffect(() => {
     if (!checked) {
@@ -206,6 +207,14 @@ const Page = () => {
       setSelectedDate(null);
     }
   }, [checked]);
+
+  if (isMembersLoading || isCategoriesLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (isMembersError || isCategoriesError) {
+    return <div>Error fetching data</div>;
+  }
 
   const handleFormData = e => {
     const { value, name, files } = e.target;
@@ -381,10 +390,7 @@ const Page = () => {
 
       formData.append('reminder', JSON.stringify(data.reminder || []));
 
-      const response = await axios.post(
-        `${process.env.REACT_APP_BASE_PATH}/api/task/add`,
-        formData
-      );
+      const response = await api.post(`/task/add`, formData);
 
       console.log('Response:', response.status);
 
@@ -472,13 +478,6 @@ const Page = () => {
             className="grid grid-cols-2 gap-2"
           >
             {renderInput('Task Title', 'title', 'text', 'Enter task title')}
-            {renderInput(
-              'Description',
-              'description',
-              'text',
-              'Enter description'
-            )}
-
             {renderSelect(
               'Member',
               'member',
@@ -486,9 +485,25 @@ const Page = () => {
                 .filter(item => item._id !== userId)
                 .map(m => ({
                   value: `${m._id}/${m.name}`,
-                  label: `${m.name} (${m.role?.name ?? 'N/A'})`,
+                  label: `${m.firstname} ${m.lastname} (${
+                    m.roles?.name ?? 'N/A'
+                  })`,
                 }))
             )}
+            <div className="flex flex-col gap-2 col-span-2">
+              <label className="font-semibold">Description</label>
+              <textarea
+                {...register('description')}
+                placeholder="Enter description"
+                rows={4}
+                className="border border-primary px-4 py-3 text-gray-600 outline-none rounded-[7px] bg-gray-100 font-semibold resize-none"
+              />
+              {errors.description && (
+                <p className="text-red-500 text-sm">
+                  {errors.description.message}
+                </p>
+              )}
+            </div>
 
             {renderSelect(
               'Category',

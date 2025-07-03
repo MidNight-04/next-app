@@ -1,6 +1,6 @@
 'use client';
 import { Button } from '@mui/material';
-import axios from 'axios';
+import api from '../../../../lib/api';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
@@ -18,8 +18,8 @@ const AddPaymentStagesForm = () => {
   const [stages, setStages] = useState('');
 
   useEffect(() => {
-    axios
-      .get(`${process.env.REACT_APP_BASE_PATH}/api/floor/getall`)
+    api
+      .get(`/floor/getall`)
       .then(response => {
         if (response) {
           //   console.log(response.data.data);
@@ -42,9 +42,9 @@ const AddPaymentStagesForm = () => {
       const formData = new FormData();
       formData.append('floor', floor);
       formData.append('stages', stages);
-      axios
+      api
         .post(
-          `${process.env.REACT_APP_BASE_PATH}/api/paymentstages/add`,
+          `/paymentstages/add`,
           formData,
           {
             headers: { 'Content-Type': 'multipart/form-data' },

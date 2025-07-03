@@ -1,23 +1,21 @@
-"use client";
-import * as Yup from "yup";
-import { Formik, Form, Field } from "formik";
-import { Button } from "@mui/material";
-import { useAuthStore } from "../../../store/useAuthStore";
-import { useMutation } from "@tanstack/react-query";
-import { postEndpoint } from "../../../helpers/endpoints";
-import { useState } from "react";
-import LoaderSpinner from "../../../components/loader/LoaderSpinner";
-import { redirect, useParams } from "next/navigation";
-import { toast } from "sonner";
+'use client';
+import * as Yup from 'yup';
+import { Formik, Form, Field } from 'formik';
+import { Button } from '@mui/material';
+import { useAuthStore } from '../../../store/useAuthStore';
+import { useMutation } from '@tanstack/react-query';
+import { postEndpoint } from '../../../helpers/endpoints';
+import { useState } from 'react';
+import LoaderSpinner from '../../../components/loader/LoaderSpinner';
+import { redirect, useParams } from 'next/navigation';
+import { toast } from 'sonner';
+import api from '../../../lib/api';
 
 const logInSchema = Yup.object({
-  username: Yup.string().required("Username is required."),
-  // password: Yup.string()
-  //   .min("Minimum 8 characters are required.")
-  //   .required("Password is Required."),
+  username: Yup.string().required('Username is required.'),
 });
 
-const style = { color: "red", fontSize: ".75rem", paddingLeft: ".25rem" };
+const style = { color: 'red', fontSize: '.75rem', paddingLeft: '.25rem' };
 
 const SigninForm = ({ showOtp }) => {
   const { slug } = useParams();
@@ -26,21 +24,21 @@ const SigninForm = ({ showOtp }) => {
   const setUsername = useAuthStore(state => state.setUsername);
 
   const loginMutation = useMutation({
-    mutationKey: ["login", slug],
-    mutationFn: data =>
-      postEndpoint({
-        endpoint: `${slug}/signin-otp`,
-        data,
-      }),
+    mutationKey: ['login', slug],
+    mutationFn: async data => {
+      const response = await api.post('/auth/signin-otp', data);
+      return response.data;
+    },
     onSuccess: data => {
       setUsername(data.username);
       setShowLoader(false);
       showOtp();
-      toast("OTP sent to you registered mobile number.");
+      toast('OTP sent to your registered mobile number.');
     },
     onError: error => {
+      console.error(error);
       setShowLoader(false);
-      toast("User not found, Please enter a valid username.");
+      toast('User not found, please enter a valid username.');
     },
   });
 
@@ -53,7 +51,7 @@ const SigninForm = ({ showOtp }) => {
       {showLoader && <LoaderSpinner />}
       <Formik
         initialValues={{
-          username: "",
+          username: '',
         }}
         validationSchema={logInSchema}
         onSubmit={data => {
@@ -72,34 +70,11 @@ const SigninForm = ({ showOtp }) => {
                 id="username"
                 name="username"
                 placeholder="Enter Email or Phone"
-                // style={{
-                //   padding: ".5rem",
-                //   width: "100%",
-                //   border: "1px solid #e5e5e5",
-                //   borderRadius: "6px",
-                // }}
               />
               {errors.username && touched.username ? (
                 <div style={style}>{errors.username}</div>
               ) : null}
             </div>
-            {/* <div className="mt-4">
-                          <label htmlFor="password">password</label>
-                          <Field
-                          id="password"
-                          name="password"
-                          placeholder="Enter password"
-                          style={{
-                              padding: ".5rem",
-                              width: "100%",
-                              border: "1px solid #e5e5e5",
-                              borderRadius: "6px",
-                              }}
-                              />
-                              {errors.password && touched.password ? (
-                                <div style={style}>{errors.password}</div>
-                                ) : null}
-                                </div> */}
             <div className="flex justify-end mt-4 w-full">
               <button
                 className="p-[6px] px-3 bg-secondary rounded-full font-ubuntu text-primary font-semibold"

@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
-import axios from 'axios';
+import api from '../../../../lib/api';
 import NoImage from '../../../../public/assets/no-image-available.png';
 import { FormControl, TextField } from '@mui/material';
 import { toast } from 'sonner';
@@ -56,9 +56,9 @@ const TicketViewClient = () => {
   const router = useRouter();
 
   const fetchTicketData = () => {
-    const data = axios
+    const data = api
       .get(
-        `${process.env.REACT_APP_BASE_PATH}/api/projecttask/viewbyid/${slug}`
+        `/projecttask/viewbyid/${slug}`
       )
       .then(response => {
         // console.log(response?.data.data);
@@ -149,11 +149,11 @@ const TicketViewClient = () => {
       let config = {
         method: 'put',
         maxBodyLength: Infinity,
-        url: `${process.env.REACT_APP_BASE_PATH}/api/project/ticketupdatemember/byid`,
+        url: `/project/ticketupdatemember/byid`,
         headers: { 'Content-Type': 'multipart/form-data' },
         data: formData,
       };
-      axios
+      api
         .request(config)
         .then(resp => {
           toast(resp?.data?.message);

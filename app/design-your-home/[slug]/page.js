@@ -12,7 +12,7 @@ import {
   TableContainer,
   TableRow,
 } from '@mui/material';
-import axios from 'axios';
+import api from '../../../lib/api';
 import React, { useEffect, useState } from 'react';
 import StarIcon from '@mui/icons-material/Star';
 import { toast } from 'sonner';
@@ -194,8 +194,8 @@ const ViewDesignsPage = () => {
   };
 
   const handleArchitectOpen = () => {
-    axios
-      .post(`${process.env.REACT_APP_BASE_PATH}/api/architect/detail`, {
+    api
+      .post(`/architect/detail`, {
         id: designDetails?.uploadingUser,
       })
       .then(resp => {
@@ -213,8 +213,8 @@ const ViewDesignsPage = () => {
     .toFixed(1);
 
   const getAllDesigns = () => {
-    axios
-      .post(`${process.env.REACT_APP_BASE_PATH}/api/user/filterDesign`)
+    api
+      .post(`/user/filterDesign`)
       .then(resp => {
         setFeaturedData(resp?.data?.data);
         handleClose();
@@ -289,9 +289,9 @@ const ViewDesignsPage = () => {
             productDetail: designDetails,
             orderId: orderId,
           };
-          axios
+          api
             .post(
-              `${process.env.REACT_APP_BASE_PATH}/api/user/verify-payment`,
+              `/user/verify-payment`,
               data
             )
             .then(resp => {
@@ -324,9 +324,9 @@ const ViewDesignsPage = () => {
                   userType: 'ROLE_USER',
                 };
 
-                axios
+                api
                   .post(
-                    `${process.env.REACT_APP_BASE_PATH}/api/notification/createNotification`,
+                    `/notification/createNotification`,
                     userNotification
                   )
                   .then(resp => {
@@ -336,9 +336,9 @@ const ViewDesignsPage = () => {
                     console.error(err);
                   });
 
-                axios
+                api
                   .post(
-                    `${process.env.REACT_APP_BASE_PATH}/api/notification/createNotification`,
+                    `/notification/createNotification`,
                     adminNotification
                   )
                   .then(resp => {
@@ -347,9 +347,9 @@ const ViewDesignsPage = () => {
                   .catch(err => {
                     console.error(err);
                   });
-                axios
+                api
                   .post(
-                    `${process.env.REACT_APP_BASE_PATH}/api/notification/createNotification`,
+                    `/notification/createNotification`,
                     dealerNotification
                   )
                   .then(resp => {
@@ -425,8 +425,8 @@ const ViewDesignsPage = () => {
     let orderId = 'Order_' + new Date().getTime();
     const callbackUrl = path;
     const userId = userId;
-    axios
-      .post(`${process.env.REACT_APP_BASE_PATH}/api/user/initiate-payment`, {
+    api
+      .post(`/user/initiate-payment`, {
         orderId,
         amount,
         callbackUrl,
@@ -461,17 +461,14 @@ const ViewDesignsPage = () => {
         userId,
       };
       // wishlistMutation.mutate(data);
-      axios
-        .post(`${process.env.REACT_APP_BASE_PATH}/api/user/addWishList`, data)
+      api
+        .post(`/user/addWishList`, data)
         .then(resp => {
           // console.log(resp.data);
-          axios
-            .post(
-              `${process.env.REACT_APP_BASE_PATH}/api/user/get-design-by-id`,
-              {
-                id: slug,
-              }
-            )
+          api
+            .post(`/user/get-design-by-id`, {
+              id: slug,
+            })
             .then(resp => {
               // console.log("Show all designs for users", resp?.data?.data[0]);
               setDesignDetails(resp?.data?.data[0]);
@@ -507,8 +504,8 @@ const ViewDesignsPage = () => {
   };
 
   useEffect(() => {
-    axios
-      .post(`${process.env.REACT_APP_BASE_PATH}/api/user/get-design-by-id`, {
+    api
+      .post(`/user/get-design-by-id`, {
         id: slug,
       })
       .then(resp => {
@@ -521,8 +518,8 @@ const ViewDesignsPage = () => {
         console.error(err);
       });
 
-    axios
-      .post(`${process.env.REACT_APP_BASE_PATH}/api/user/order-details`, {
+    api
+      .post(`/user/order-details`, {
         designId: slug,
         userId: userId,
         contactType: 'Image Download',
@@ -540,9 +537,9 @@ const ViewDesignsPage = () => {
     const data = {
       id: id,
     };
-    axios
+    api
       .post(
-        `${process.env.REACT_APP_BASE_PATH}/api/dealer/get-dealer-rating-by-id`,
+        `/dealer/get-dealer-rating-by-id`,
         data
       )
       .then(resp => {
@@ -581,9 +578,9 @@ const ViewDesignsPage = () => {
         userType: 'ROLE_ADMIN',
       };
 
-      axios
+      api
         .post(
-          `${process.env.REACT_APP_BASE_PATH}/api/notification/createNotification`,
+          `/notification/createNotification`,
           userNotification
         )
         .then(resp => {
@@ -593,9 +590,9 @@ const ViewDesignsPage = () => {
           console.error(err);
         });
 
-      axios
+      api
         .post(
-          `${process.env.REACT_APP_BASE_PATH}/api/notification/createNotification`,
+          `/notification/createNotification`,
           architectNotification
         )
         .then(resp => {
@@ -605,8 +602,8 @@ const ViewDesignsPage = () => {
           console.error(err);
         });
 
-      axios
-        .post(`${process.env.REACT_APP_BASE_PATH}/api/architect/order`, data)
+      api
+        .post(`/architect/order`, data)
         .then(resp => {
           if (resp) {
             toast(
@@ -644,7 +641,7 @@ const ViewDesignsPage = () => {
                       selectedImage.match(/jpg|jpeg|png|gif|webp/)
                         ? String(selectedImage).includes('files') &&
                           !String(selectedImage).includes('bucket.s3')
-                          ? `${process.env.REACT_APP_BASE_PATH}${selectedImage}`
+                          ? `${process.env.BACKEND_BASE_URL}${selectedImage}`
                           : selectedImage
                         : dummyImagePdf
                     }
@@ -669,7 +666,7 @@ const ViewDesignsPage = () => {
                         file && file.match(/jpg|jpeg|png|gif/)
                           ? String(file).includes('files') &&
                             !String(file).includes('bucket.s3')
-                            ? `${process.env.REACT_APP_BASE_PATH}${file}`
+                            ? `${process.env.BACKEND_BASE_URL}${file}`
                             : file
                           : dummyImagePdf
                       }
@@ -694,7 +691,7 @@ const ViewDesignsPage = () => {
                       file && file.match(/jpg|jpeg|png|gif/)
                         ? String(file).includes('files') &&
                           !String(file).includes('bucket.s3')
-                          ? `${process.env.REACT_APP_BASE_PATH}${file}`
+                          ? `${process.env.BACKEND_BASE_URL}${file}`
                           : file
                         : dummyImagePdf
                     }
@@ -713,7 +710,7 @@ const ViewDesignsPage = () => {
                       file && file.match(/jpg|jpeg|png|gif/)
                         ? String(file).includes('files') &&
                           !String(file).includes('bucket.s3')
-                          ? `${process.env.REACT_APP_BASE_PATH}${file}`
+                          ? `${process.env.BACKEND_BASE_URL}${file}`
                           : file
                         : dummyImagePdf
                     }
@@ -726,7 +723,7 @@ const ViewDesignsPage = () => {
             </div>
             <div className="text-center mt-4">
               <a
-                href={`${process.env.REACT_APP_BASE_PATH}${selectedImage}`}
+                href={`${process.env.BACKEND_BASE_URL}${selectedImage}`}
                 download="Design Image"
               >
                 <Button
@@ -1016,7 +1013,7 @@ const ViewDesignsPage = () => {
                                 !String(item?.twoDImage[index]).includes(
                                   'bucket.s3'
                                 )
-                                  ? `${process.env.REACT_APP_BASE_PATH}${item?.twoDImage[index]}`
+                                  ? `${process.env.BACKEND_BASE_URL}${item?.twoDImage[index]}`
                                   : item?.twoDImage[index]
                               }
                               alt="item"

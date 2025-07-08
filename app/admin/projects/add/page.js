@@ -802,7 +802,6 @@ const AddProjectForm = () => {
                 placeholder="Start Date"
                 register={register}
                 errors={errors}
-                inputProps={{ min: new Date().toISOString().split('T')[0] }}
               />
               <FormInput
                 label="Duration (In months)"

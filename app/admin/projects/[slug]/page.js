@@ -1,6 +1,6 @@
 'use client';
 import api from '../../../../lib/api';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   DialogActions,
   DialogContent,
@@ -27,14 +27,13 @@ import { BsCalendar4Event } from 'react-icons/bs';
 import { TbProgress } from 'react-icons/tb';
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
-import { TiArrowSortedDown, TiArrowSortedUp } from 'react-icons/ti';
-import { useParams } from 'next/navigation';
+import { useParams, usePathname, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import LoaderSpinner from '../../../../components/loader/LoaderSpinner';
 import { cn } from '../../../../lib/utils';
 import { Check } from '@mui/icons-material';
 import { BsClockHistory } from 'react-icons/bs';
-import { RiDeleteBin6Line, RiLockPasswordLine } from 'react-icons/ri';
+import { RiDeleteBin6Line } from 'react-icons/ri';
 import AsideContainer from '../../../../components/AsideContainer';
 import {
   Select,
@@ -50,11 +49,13 @@ import {
   AccordionTrigger,
 } from '../../../../components/ui/accordion';
 import { useAuthStore } from '../../../../store/useAuthStore';
+import { usePageStore } from '../../../../store/usePageStore';
 import { IoIosArrowBack } from 'react-icons/io';
 import { useRouter } from 'next/navigation';
 import { LuTimerReset } from 'react-icons/lu';
 import { SidebarTrigger } from '../../../../components/ui/sidebar';
 import { Separator } from '../../../../components/ui/separator';
+import { useQuery, useMutation } from '@tanstack/react-query';
 
 let today = new Date();
 let yyyy = today.getFullYear();
@@ -106,62 +107,46 @@ const StatCard = ({ label, value, onClick }) => (
   </div>
 );
 
+const formatDate = date => date.toLocaleDateString('en-GB'); // DD/MM/YYYY
+
+const fetchProjectDetail = async slug => {
+  const res = await api.get(`/project/databyid/${slug}`);
+  const data = res?.data?.data?.[0];
+  if (!data) throw new Error('Project not found');
+  return data;
+};
+
 const ClientProjectView = () => {
   const linkRef = useRef(null);
   const { slug } = useParams();
   const router = useRouter();
-  const [projectDetails, setProjectDetails] = useState(null);
   const [confirmationOpen, setConfirmationOpen] = useState(false);
   const [status, setStatus] = useState('');
   const [log, setLog] = useState('');
   const [image, setImage] = useState('');
   const [date, setDate] = useState('');
-  const [id, setId] = useState('');
   const [point, setPoint] = useState('');
   const [content, setContent] = useState('');
   const [name, setName] = useState('');
-  const [workDetailOpen, setWorkDetailOpen] = useState(false);
-  const [workDetails, setWorkDetails] = useState([]);
-  const [showContent, setShowContent] = useState([]);
   const [documentOpen, setDocumentOpen] = useState(false);
   const [teamOpen, setTeamOpen] = useState(false);
   const [documentList, setDocumentList] = useState([]);
   const [inspectionDialogOpen, setInspectionDialogOpen] = useState(false);
-  const [totalInspection, setTotalInspection] = useState(0);
   const [singleInspection, setSingleInspection] = useState(0);
   const [step, setStep] = useState('');
   const [pointList, setPointList] = useState([]);
   const [assignMember, setAssignMember] = useState(null);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
-  const [detailsIsloading, setDetailsIsLoading] = useState(true);
-  const [expandedDetails, setExpandedDetails] = useState(false);
-  const [showInspection, setShowInspection] = useState(null);
   const [checkListName, setCheckListName] = useState('');
-  const [checkedItems, setCheckedItems] = useState([]);
-  const [inspectionList, setInspectionList] = useState([]);
-  const [workStatusOpen, setWorkStatusOpen] = useState(false);
   const [documentDialogOpen, setDocumentDialogOpen] = useState(false);
-  const [Loading, setLoading] = useState(false);
-  const [showImage, setShowImage] = useState(false);
-  const [showImageUrl, setShowImageUrl] = useState(null);
-  const [taskDetails, setTaskDetails] = useState([]);
-  const [approveImage, setApproveImage] = useState([]);
-  const [logList, setLogList] = useState([]);
-  const [refresh, setRefresh] = useState(false);
-  const [fileCount, setFileCount] = useState([]);
-  const [currentStatus, setCurrentStatus] = useState(null);
-  const [openAcc, setOpenAcc] = useState(null);
-  const [openAccordion, setOpenAccordion] = useState(null);
   const [document, setDocument] = useState('');
   const [documentName, setDocumentName] = useState('');
-  const [activeTab, setActiveTab] = useState('Send Message');
   const [stepModal, setStepModal] = useState(false);
   const [pointName, setPointName] = useState('');
   const [checkList, setCheckList] = useState('');
   const [stepDuration, setStepDuration] = useState(null);
   const [duration, setDuration] = useState('');
-  const [memberList, setMemberList] = useState([]);
   const [prevContent, setPrevContent] = useState('');
   const [stepName, setStepName] = useState('');
   const [issueMember, setIssueMember] = useState(null);
@@ -173,66 +158,97 @@ const ClientProjectView = () => {
   const [endForceDate, setEndForceDate] = useState(null);
   const [prevPoint, setPrevPoint] = useState(0);
   const [stepArray, setStepArray] = useState([]);
-  const userName = useAuthStore(state => state.username);
-  const userId = useAuthStore(state => state.userId);
-  const userType = useAuthStore(state => state.userType);
+  const { userName, userId, userType } = useAuthStore.getState();
   const [openChangeMember, setOpenChangeMember] = useState(false);
   const [issue, setIssue] = useState(null);
   const [newMember, setNewMember] = useState(null);
   const [teammembersByRole, setTeammembersByRole] = useState([]);
-  const { token } = useAuthStore.getState();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
 
-  const toggleShowImage = () => {
-    setShowImage(prev => !prev);
-  };
+  const {
+    activeTab,
+    setActiveTab,
+    scrollY,
+    setScrollY,
+    hasRestoredScroll,
+    setHasRestoredScroll,
+  } = usePageStore();
 
-  const handleDetailsChange = (panel, isExpanded) => {
-    setExpandedDetails(isExpanded ? panel : false);
-  };
+  const {
+    data: projectDetails,
+    refetch: refetchProjectDetails,
+    isLoading,
+    isSuccess,
+  } = useQuery({
+    queryKey: ['projectDetail', slug],
+    queryFn: () => fetchProjectDetail(slug),
+    enabled: !!slug,
+    staleTime: 5 * 60 * 1000,
+  });
 
-  useEffect(() => {
-    if (projectDetails?.project_status) {
-      setShowContent(
-        new Array(projectDetails?.project_status.length).fill(false)
-      );
-    }
+  const derived = useMemo(() => {
+    if (!projectDetails)
+      return { startDate: '', endDate: '', totalInspection: 0 };
+
+    const initialDate = new Date(projectDetails.date);
+    const durationInMonths = parseInt(projectDetails.duration || '0', 10);
+    const endDate = new Date(initialDate);
+    endDate.setMonth(endDate.getMonth() + durationInMonths);
+
+    return {
+      startDate: formatDate(initialDate),
+      endDate: formatDate(endDate),
+      totalInspection: projectDetails?.inspections?.length || 0,
+    };
   }, [projectDetails]);
 
-  const getprojectDetail = () => {
-    api
-      .get(`/project/databyid/${slug}`)
-      .then(response => {
-        const data = response?.data?.data?.[0];
-        if (!data) return;
-
-        setProjectDetails(data);
-        setTotalInspection(data?.inspections?.length || 0);
-
-        const durationInMonths = parseInt(data?.duration || '0', 10);
-        const initialDate = new Date(data?.date);
-
-        const start = new Date(initialDate);
-        const end = new Date(initialDate);
-        end.setMonth(end.getMonth() + durationInMonths);
-
-        const formatDate = date => {
-          const day = String(date.getDate()).padStart(2, '0');
-          const month = String(date.getMonth() + 1).padStart(2, '0');
-          const year = date.getFullYear();
-          return `${day}/${month}/${year}`;
-        };
-
-        setStartDate(formatDate(start));
-        setEndDate(formatDate(end));
-      })
-      .catch(error => {
-        console.error('Error fetching project detail:', error);
-      });
+  const handleTabChange = newTab => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('tab', newTab);
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
+    setActiveTab(newTab);
   };
 
   useEffect(() => {
-    getprojectDetail();
-  }, [slug, token]);
+    if (!hasRestoredScroll && scrollY > 0) {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setTimeout(() => {
+            window.scrollTo({ top: scrollY, behavior: 'auto' });
+            setHasRestoredScroll(true);
+          }, 0);
+        });
+      });
+    }
+  }, [isSuccess, scrollY, hasRestoredScroll, setHasRestoredScroll]);
+
+  useEffect(() => {
+    return () => {
+      setScrollY(window.scrollY);
+    };
+  }, [setScrollY]);
+
+  const deleteStepMutation = useMutation({
+    mutationFn: async () => {
+      const response = await api.put('/project/deletestep', { id: slug, name });
+      return response.data;
+    },
+    onSuccess: data => {
+      toast(data.message || 'Step deleted successfully');
+      refetchProjectDetails();
+      setDeleteStepOpen(false);
+      handleCancel();
+    },
+    onError: error => {
+      console.error('Delete step error:', error);
+      toast(error?.message || 'Error while deleting project step');
+    },
+  });
+
+  const deleteProjectStep = () => {
+    deleteStepMutation.mutate();
+  };
 
   useEffect(() => {
     if (Array.isArray(pointList) && pointList.length > 0) {
@@ -291,9 +307,6 @@ const ClientProjectView = () => {
         console.log(error);
       });
   };
-  const workDetailCancel = () => {
-    setWorkDetailOpen(false);
-  };
 
   const handleUpdate = () => {
     if (!status) return toast('Work is required');
@@ -338,18 +351,10 @@ const ClientProjectView = () => {
   };
 
   const handleCancel = () => {
-    // Close the confirmation dialog
     setConfirmationOpen(false);
-
-    // close step add modal
     setStepModal(false);
-
-    // close step delete modal
     setStepModalDelete(false);
-
-    // close step delete modal
     setDeleteStepOpen(false);
-
     setIssueMember([]);
   };
 
@@ -372,113 +377,6 @@ const ClientProjectView = () => {
 
   const handleInspectionDialog = () => {
     setInspectionDialogOpen(false);
-  };
-
-  const workStatusCancel = () => {
-    // Close the task dialog
-    setWorkStatusOpen(false);
-    setCheckListName('');
-    setInspectionList([]);
-  };
-
-  const handleWorkStatusUpdate = () => {
-    setOpenAccordion('');
-    setWorkStatusOpen(false);
-    setLoading(true);
-
-    const mandatoryPoints = inspectionList[0]?.checkList?.flatMap(
-      item =>
-        item.points?.filter(
-          point => point.status?.toLowerCase() === 'mandatory'
-        ) || []
-    );
-
-    const hasUnCheckedMandatory = mandatoryPoints?.some(mandatoryPoint => {
-      const checkedPoint = checkedItems?.find(
-        point => point.point === mandatoryPoint.point
-      );
-      return !checkedPoint?.checked;
-    });
-
-    if (!status) {
-      toast('Status is required');
-      setLoading(false);
-      return;
-    }
-
-    if (
-      hasUnCheckedMandatory ||
-      (inspectionList?.length > 0 && checkedItems?.length === 0)
-    ) {
-      toast('Checked all mandatory inspection is required');
-      setLoading(false);
-      return;
-    }
-
-    if (currentStatus === 'Completed') {
-      toast('You have already completed this point.');
-      setLoading(false);
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append('id', slug);
-    formData.append('name', name);
-    formData.append('point', point);
-    formData.append('content', content);
-    formData.append('status', status);
-    formData.append('date', date);
-    formData.append('checkListName', checkListName);
-    formData.append('userName', userName);
-    formData.append('userId', userId);
-    // formData.append('chatLog', chatLog);
-
-    if (Array.isArray(approveImage)) {
-      approveImage.forEach(image => formData.append('image', image));
-    }
-
-    api
-      .put(`/project/updatestatusbyid`, formData)
-      .then(response => {
-        toast(`${response.data.message}`);
-        clearWorkStatusState();
-
-        // Fetch updated project details
-        return api.get(`/project/databyid/${slug}`);
-      })
-      .then(response => {
-        setProjectDetails(response?.data?.data[0]);
-        setRefresh(prev => !prev);
-      })
-      .catch(error => {
-        console.error(error);
-        toast('Error while updating project status');
-        clearWorkStatusState();
-      });
-  };
-
-  const clearWorkStatusState = () => {
-    setLoading(false);
-    setApproveImage([]);
-    setName('');
-    setPoint('');
-    setContent('');
-    setStatus('');
-    setCheckListName('');
-    setInspectionList([]);
-    setCheckedItems([]);
-    setWorkStatusOpen(false);
-  };
-
-  const handleWorkStatusChange = e => {
-    const { checked, value } = e.target;
-    if (checked) {
-      // Add checkbox value to array if checked
-      setApproveImage([...approveImage, value]);
-    } else {
-      // Remove checkbox value from array if unchecked
-      setApproveImage(approveImage.filter(val => val !== value));
-    }
   };
 
   const handleUploadDocument = () => {
@@ -512,7 +410,6 @@ const ClientProjectView = () => {
       .then(resp => {
         setDocumentName('');
         setDocument('');
-        setRefresh(prev => !prev);
         toast(resp?.data?.message || 'Document uploaded successfully');
       })
       .catch(err => {
@@ -533,6 +430,26 @@ const ClientProjectView = () => {
     setDocumentName('');
     setDocument('');
   };
+
+  const addStepMutation = useMutation({
+    mutationFn: async formData => {
+      const response = await api.put('/project/createnewpoint', formData);
+      if (response?.data?.status !== 200) {
+        throw new Error(response?.data?.message || 'Failed to add point');
+      }
+      return response.data;
+    },
+    onSuccess: data => {
+      toast(data.message || 'Point added successfully');
+      setStepModal(false);
+      refetchProjectDetails();
+      setPointList([]);
+    },
+    onError: error => {
+      console.error(error);
+      toast(error.message || 'Error while adding new point');
+    },
+  });
 
   const AddProjectStepSubmit = () => {
     if (!pointName) return toast('Point Name is required');
@@ -567,42 +484,24 @@ const ClientProjectView = () => {
       activeUser: userId,
       userName,
       uploadData: {
-        engineer: projectDetails?.site_engineer,
-        sr_engineer: projectDetails?.sr_engineer,
+        engineer: projectDetails?.site_engineer._id,
+        sr_engineer: projectDetails?.sr_engineer._id,
         contractor: projectDetails?.contractor,
-        operation: projectDetails?.operation,
-        sales: projectDetails?.sales,
-        admin: projectDetails?.project_admin,
-        accountant: projectDetails?.accountant,
+        operation: projectDetails?.operation._id,
+        sales: projectDetails?.sales._id,
+        admin: projectDetails?.project_admin._id,
+        accountant: projectDetails?.accountant._id,
       },
       date: formatedtoday,
     };
 
-    api
-      .put(`/project/createnewpoint`, data)
-      .then(response => {
-        if (response.data.status === 200) {
-          toast(response.data.message);
-          setStepModal(false);
-          getprojectDetail();
-          setPointList([]);
-          setRefresh(prev => !prev);
-        } else {
-          toast('Unexpected response from server');
-        }
-      })
-      .catch(error => {
-        console.error(error);
-        toast('Error while adding new point');
-      });
+    addStepMutation.mutate(data);
   };
 
   const AddStepOpenModal = (step, name) => {
     setStepModal(true);
     setStepName(name);
     setPointList(step);
-
-    // Reset relevant form fields and state
     setPointName('');
     setCheckList('');
     setCheckListName('');
@@ -612,21 +511,6 @@ const ClientProjectView = () => {
     setPoint('');
     setIssueMember([]);
     setPrevContent('');
-
-    // Fetch unique roles from team member list
-    api
-      .get(`teammember/getall`)
-      .then(response => {
-        const data = response?.data?.data || [];
-        const uniqueRoles = data.filter(
-          (user, index, self) =>
-            index === self.findIndex(u => u.role === user.role)
-        );
-        setMemberList(uniqueRoles);
-      })
-      .catch(error => {
-        console.error('Error fetching team members:', error);
-      });
   };
 
   const DeleteStepOpenModal = (step, name) => {
@@ -642,36 +526,45 @@ const ClientProjectView = () => {
     setPrevPoint(pt);
   };
 
-  const DeleteProjectStepSubmit = () => {
-    const data = {
-      id: slug,
-      name: stepName,
-      point: parseInt(point),
-      content: content?.split('$')[0] || '',
-      duration: stepDuration,
-      checkList,
-      checkListName,
-      activeUser: userId,
-      userName,
-      date: formatedtoday,
-    };
+  const deletePointMutation = useMutation({
+    mutationFn: async () => {
+      const data = {
+        id: slug,
+        name: stepName,
+        point: parseInt(point),
+        content: content?.split('$')[0] || '',
+        duration: stepDuration,
+        checkList,
+        checkListName,
+        activeUser: userId,
+        userName,
+        date: formatedtoday,
+      };
 
-    api
-      .put(`/project/deletepoint`, data)
-      .then(response => {
-        if (response?.data?.status === 200) {
-          toast(response.data.message);
-          setStepModalDelete(false);
-          getprojectDetail();
-          setRefresh(prev => !prev);
-        } else {
-          toast('Unexpected server response while deleting step');
-        }
-      })
-      .catch(error => {
-        console.error('Delete step error:', error);
-        toast('Error while deleting project step');
-      });
+      const response = await api.put('/project/deletepoint', data);
+
+      if (response?.data?.status !== 200) {
+        throw new Error(
+          response?.data?.message ||
+            'Unexpected server response while deleting step'
+        );
+      }
+
+      return response.data;
+    },
+    onSuccess: data => {
+      toast(data.message || 'Step deleted successfully');
+      setStepModalDelete(false);
+      refetchProjectDetails();
+    },
+    onError: error => {
+      console.error('Delete step error:', error);
+      toast(error?.message || 'Error while deleting project step');
+    },
+  });
+
+  const DeleteProjectStepSubmit = () => {
+    deletePointMutation.mutate();
   };
 
   const getPoint = value => {
@@ -689,70 +582,63 @@ const ClientProjectView = () => {
     setStepArray(p_step);
   };
 
-  const DeleteProjectStep = () => {
-    const data = {
-      id: slug,
-      name,
-      project_step: stepArray,
-      userName,
-      activeUser: userId,
-    };
+  const { mutate: fetchTeammembersByRole, isPending: isFetchingMembers } =
+    useMutation({
+      mutationFn: async roleId => {
+        const response = await api.post('/teammember/getTeammemberByRole', {
+          role: roleId,
+        });
 
-    api
-      .put(`/project/deletestep`, data)
-      .then(response => {
-        if (response?.data?.status === 200) {
-          toast(response.data.message);
-          setDeleteStepOpen(false);
-          getprojectDetail();
-        } else {
-          toast('Failed to delete step: unexpected server response');
+        const data = response?.data?.data;
+
+        if (!data || data.length === 0) {
+          throw new Error('No team members found for this role');
         }
-      })
-      .catch(error => {
-        console.error('Delete step error:', error);
-        toast('Error while deleting project step');
-      });
+
+        return data;
+      },
+      onSuccess: data => {
+        setTeammembersByRole(data);
+      },
+      onError: error => {
+        console.error('Error fetching team members by role:', error);
+        toast(error.message || 'Failed to fetch team members');
+      },
+    });
+
+  const getTeammembersByRole = roleId => {
+    fetchTeammembersByRole(roleId);
   };
 
-  const getTeammembersByRole = async roleId => {
-    try {
-      const response = await api.post(`/teammember/getTeammemberByRole`, {
-        role: roleId,
-      });
+  const changeIssueMemberMutation = useMutation({
+    mutationFn: async () => {
+      const data = {
+        userId,
+        siteId: slug,
+        issue: issue?.role?.name,
+        newMember,
+      };
 
-      if (response?.data?.data) {
-        setTeammembersByRole(response.data.data);
-      } else {
-        toast('No team members found for this role');
+      const response = await api.post('/project/changeissuemember', data);
+
+      if (response?.data?.status !== 200) {
+        throw new Error('Failed to update issue member');
       }
-    } catch (error) {
-      console.error('Error fetching team members by role:', error);
-      toast('Failed to fetch team members');
-    }
-  };
 
-  const changeIssueMember = async () => {
-    const data = {
-      userId,
-      siteId: slug,
-      issue: issue?.role?.name,
-      newMember,
-    };
-
-    try {
-      const response = await api.post(`/project/changeissuemember`, data);
-
-      if (response?.data?.status === 200) {
-        toast(response.data.message || 'Issue member updated successfully');
-        getprojectDetail();
-      } else {
-        toast('Failed to update issue member');
-      }
-    } catch (error) {
+      return response.data;
+    },
+    onSuccess: data => {
+      toast(data.message || 'Issue member updated successfully');
+      refetchProjectDetails();
+    },
+    onError: error => {
       console.error('Error changing issue member:', error);
-      toast('Error occurred while changing issue member');
-    }
+      toast(error.message || 'Error occurred while changing issue member');
+    },
+  });
+
+  const changeIssueMember = () => {
+    changeIssueMemberMutation.mutate();
   };
 
   let initialDate = new Date(projectDetails?.date);
@@ -760,7 +646,7 @@ const ClientProjectView = () => {
 
   return (
     <AsideContainer>
-      {Loading && <LoaderSpinner />}
+      {isLoading && <LoaderSpinner />}
       <div className="flex flex-row -md:flex-col -md:pl-0 -md:my-2 w-full justify-between">
         <div className="flex items-center gap-1 lg:gap-2">
           <SidebarTrigger className="-ml-2 hover:bg-primary" />
@@ -873,14 +759,8 @@ const ClientProjectView = () => {
           onClick={() => setExtensionOpen(prev => !prev)}
         />
       </div>
-      <section className="inspection-box mt-2">
-        <div className="row mx-0">
-          <div className="flex flex-row gap-4 items-center justify-between mb-4 w-full">
-            {/* <p className="number">{totalInspection}</p> */}
-          </div>
-        </div>
-      </section>
-      <div className="mb-4">
+
+      <div className="my-4">
         {projectDetails?.project_status
           ?.sort((a, b) => a.priority - b.priority)
           .map((item, index) => {
@@ -898,8 +778,8 @@ const ClientProjectView = () => {
                 type="single"
                 collapsible
                 key={item.name}
-                value={openAcc}
-                onValueChange={value => setOpenAcc(value)}
+                value={activeTab}
+                onValueChange={value => handleTabChange(value)}
               >
                 <AccordionItem
                   value={item.name}
@@ -932,7 +812,7 @@ const ClientProjectView = () => {
                               confirmDeleteProjectStep(
                                 item?.siteID,
                                 item?.name,
-                                item?.step
+                                item?._id
                               )
                             }
                           >
@@ -1125,166 +1005,6 @@ const ClientProjectView = () => {
           })}
       </div>
 
-      <Dialog open={workStatusOpen} onClose={workStatusCancel}>
-        <DialogTitle>Update Project Work By Admin</DialogTitle>
-        <DialogContent style={{ width: '600px' }}>
-          <FormControl fullWidth className="mt-1 mb-1">
-            <Typography id="demo-simple-select-label">
-              Status<span className="text-danger">*</span>
-            </Typography>
-            <MUISelect
-              labelId="demo-simple-select-label"
-              id="demo-simple-select"
-              value={status}
-              name="status"
-              onChange={e => setStatus(e.target.value)}
-            >
-              <MenuItem value="Pending">Pending</MenuItem>
-              <MenuItem value="Work in Progress">Work in Progress</MenuItem>
-              <MenuItem value="Completed">Completed</MenuItem>
-            </MUISelect>
-          </FormControl>
-          <FormControl fullWidth>
-            {taskDetails?.length > 0 ? (
-              taskDetails?.map((item, index) => {
-                return (
-                  <div key={index}>
-                    {item?.taskImage?.map((dt, idx) => {
-                      return (
-                        <ImageListItem
-                          key={idx}
-                          style={{ display: 'flex', margin: '10px 0px' }}
-                        >
-                          <input
-                            type="checkbox"
-                            className="me-3"
-                            name="image"
-                            value={dt}
-                            onChange={handleWorkStatusChange}
-                          />
-                          <img
-                            src={dt}
-                            alt="task"
-                            loading="lazy"
-                            style={{ width: '525px' }}
-                          />
-                        </ImageListItem>
-                      );
-                    })}
-                  </div>
-                );
-              })
-            ) : (
-              <>
-                <Typography>
-                  File<span className="text-danger">*</span>
-                </Typography>
-                <TextField
-                  type="file"
-                  className=""
-                  name="image"
-                  inputProps={{ multiple: true }}
-                  onChange={e => setApproveImage(e.target.files)}
-                />
-              </>
-            )}
-          </FormControl>
-          <FormControl fullWidth className="mt-1 mb-1">
-            <Typography>
-              Date<span className="text-danger">*</span>
-            </Typography>
-            <TextField
-              type="date"
-              name="date"
-              value={date}
-              onChange={e => setDate(e.target.value)}
-              // disabled
-            />
-          </FormControl>
-          <div className="row mt-2">
-            {inspectionList?.length > 0 ? (
-              <>
-                <span className="heads_inspection text-uppercase">
-                  Inspections <span className="text-danger">*</span>
-                </span>
-                {inspectionList[0]?.checkList?.map((item, id) => {
-                  return (
-                    <div key={id} className="col-lg-12 col-md-12">
-                      <span
-                        className="heads_inspection text-warning"
-                        style={{ fontSize: '14px' }}
-                      >
-                        {item?.heading}
-                      </span>
-                      {item?.points?.map((pt, idx) => {
-                        return (
-                          <div key={idx} className="inspection-box-col-points">
-                            <span className="text text-warning">
-                              {idx + 1}
-                              {`- `}
-                            </span>
-                            <span className="number mx-2">
-                              <span>
-                                {pt.point}
-                                {pt?.status?.toLowerCase() === 'mandatory' ? (
-                                  <span className="text-danger">*</span>
-                                ) : (
-                                  ''
-                                )}
-                              </span>
-                              <span
-                                className="mx-2"
-                                style={{ marginTop: '3px' }}
-                              >
-                                <input
-                                  type="checkbox"
-                                  id="c1s"
-                                  name={pt.status}
-                                  value={pt.point}
-                                  className="inputs"
-                                  checked={
-                                    !!checkedItems.find(
-                                      item => item.point === pt.point
-                                    )?.checked
-                                  }
-                                  onChange={handleInspectionChange}
-                                />
-                              </span>
-                            </span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  );
-                })}
-              </>
-            ) : (
-              ''
-            )}
-          </div>
-          {/* <FormControl fullWidth>
-            <Typography>
-              Log<span className="text-danger">*</span>
-            </Typography>
-            <TextField
-              type="text"
-              className=""
-              name="chatLog"
-              onChange={(e) => setChatLog(e.target.value)}
-            />
-          </FormControl> */}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={workStatusCancel} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleWorkStatusUpdate} color="primary">
-            Update To Client
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Team list open dialog */}
       <Dialog open={teamOpen} onClose={teamOpenCancel}>
         <DialogTitle
           className="text-center"
@@ -1308,7 +1028,7 @@ const ClientProjectView = () => {
                       key={index}
                     >
                       <div className="mt-1 flex flex-row items-center gap-4">
-                        <span>{item.name}</span>
+                        <span>{item.firstname + ' ' + item?.lastname}</span>
                         <span
                           className="bg-secondary text-primary p-2 rounded-full cursor-pointer"
                           onClick={() => {
@@ -1328,37 +1048,6 @@ const ClientProjectView = () => {
                   );
                 })}
               </div>
-              {/* <div className="mb-2">
-                <span className="font-ubuntu font-semibold">
-                  Project Manager
-                </span>
-                {projectDetails?.project_manager?.map((item, index) => {
-                  return (
-                    <div
-                      className="flex flex-row items-center justify-between"
-                      key={index}
-                    >
-                      <div className="mt-1 flex flex-row items-center gap-4">
-                        <span>{item.name}</span>
-                        <span
-                          className="bg-secondary text-primary p-2 rounded-full cursor-pointer"
-                          onClick={() => {
-                            setIssue(item);
-                            setOpenChangeMember(true);
-                            getTeammembersByRole(item.role._id);
-                            teamOpenCancel();
-                          }}
-                        >
-                          <MdOutlineEdit />
-                        </span>
-                      </div>
-                      <span className="p-2 bg-green-600 rounded-full cursor-pointer">
-                        <IoCallSharp className="text-white" />
-                      </span>
-                    </div>
-                  );
-                })}
-              </div> */}
               <div className="mb-2">
                 <span className="font-ubuntu font-semibold">
                   Architect/Designer
@@ -1370,7 +1059,7 @@ const ClientProjectView = () => {
                       key={index}
                     >
                       <div className="mt-1 flex flex-row items-center gap-4">
-                        <span>{item.name}</span>
+                        <span>{item.firstname + ' ' + item?.lastname}</span>
                         <span
                           className="bg-secondary text-primary p-2 rounded-full cursor-pointer"
                           onClick={() => {
@@ -1399,7 +1088,7 @@ const ClientProjectView = () => {
                       key={index}
                     >
                       <div className="mt-1 flex flex-row items-center gap-4">
-                        <span>{item.name}</span>
+                        <span>{item.firstname + ' ' + item?.lastname}</span>
                         <span
                           className="bg-secondary text-primary p-2 rounded-full cursor-pointer"
                           onClick={() => {
@@ -1428,7 +1117,7 @@ const ClientProjectView = () => {
                       key={index}
                     >
                       <div className="mt-1 flex flex-row items-center gap-4">
-                        <span>{item.name}</span>
+                        <span>{item.firstname + ' ' + item?.lastname}</span>
                         <span
                           className="bg-secondary text-primary p-2 rounded-full cursor-pointer"
                           onClick={() => {
@@ -1448,23 +1137,6 @@ const ClientProjectView = () => {
                   );
                 })}
               </div>
-              {/* <div className="mb-2">
-                <span className="font-ubuntu font-semibold">Contractor</span>
-                {projectDetails?.contractor?.map((item, index) => {
-                  return (
-                    <div
-                      className="flex flex-row items-center justify-between"
-                      key={index}
-                    >
-                      <span className="pdm-name mt-1">{item.name}</span>
-                      <span className="p-2 bg-green-600 rounded-full cursor-pointer">
-                        {" "}
-                        <IoCallSharp className="text-white" />
-                      </span>
-                    </div>
-                  );
-                })}
-              </div> */}
               <div className="mb-2">
                 <span className="font-ubuntu font-semibold">Operation</span>
                 {projectDetails?.operation?.map((item, index) => {
@@ -1474,7 +1146,7 @@ const ClientProjectView = () => {
                       key={index}
                     >
                       <div className="mt-1 flex flex-row items-center gap-4">
-                        <span>{item.name}</span>
+                        <span>{item.firstname + ' ' + item?.lastname}</span>
                         <span
                           className="bg-secondary text-primary p-2 rounded-full cursor-pointer"
                           onClick={() => {
@@ -1504,7 +1176,7 @@ const ClientProjectView = () => {
                       key={index}
                     >
                       <div className="mt-1 flex flex-row items-center gap-4">
-                        <span>{item.name}</span>
+                        <span>{item.firstname + ' ' + item?.lastname}</span>
                         <span
                           className="bg-secondary text-primary p-2 rounded-full cursor-pointer"
                           onClick={() => {
@@ -1534,6 +1206,7 @@ const ClientProjectView = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
       <Dialog
         open={openChangeMember}
         onClose={() => setOpenChangeMember(false)}
@@ -1580,7 +1253,7 @@ const ClientProjectView = () => {
           </Button>
         </DialogActions>
       </Dialog>
-      {/* Project document dialog */}
+
       <Dialog open={documentOpen} onClose={documentOpenCancel}>
         <DialogTitle
           className="text-center"
@@ -1666,7 +1339,6 @@ const ClientProjectView = () => {
         </DialogActions>
       </Dialog>
 
-      {/* RAISE TIKCET */}
       <Modal
         open={confirmationOpen}
         onClose={handleCancel}
@@ -1764,14 +1436,6 @@ const ClientProjectView = () => {
                 sx={{ borderRadius: '16px', background: '#f3f4f6' }}
               />
             </FormControl>
-            {/* <FormControl fullWidth className="mt-1 mb-1">
-            <TextField
-              type="file"
-              name="image"
-              inputProps={{ multiple: true }}
-              onChange={e => setImage(e.target.files)}
-            />
-          </FormControl> */}
             <div className="w-full">
               <input
                 type="file"
@@ -1816,47 +1480,6 @@ const ClientProjectView = () => {
         </div>
       </Modal>
 
-      {/* Work details view dialog */}
-      <Dialog open={workDetailOpen} onClose={workDetailCancel}>
-        <DialogTitle>Work Details</DialogTitle>
-        <DialogContent style={{ width: '600px' }}>
-          {workDetails?.map((item, index) => {
-            return (
-              <div key={index}>
-                <InputLabel className="text-dark fw-bold">Status</InputLabel>
-                <Typography className="mx-1" style={{ fontSize: '14px' }}>
-                  {item.status}
-                </Typography>
-                <InputLabel className="text-dark fw-bold mt-3">
-                  Work Image
-                </InputLabel>
-                {item?.image?.map((dt, idx) => {
-                  return (
-                    <ImageListItem
-                      key={idx}
-                      style={{ display: 'flex', margin: '10px 0px' }}
-                    >
-                      <img
-                        src={dt}
-                        alt="task"
-                        loading="lazy"
-                        style={{ width: '525px' }}
-                      />
-                    </ImageListItem>
-                  );
-                })}
-              </div>
-            );
-          })}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={workDetailCancel} color="primary">
-            Cancel
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Dialog for show checklist/inspection */}
       <Dialog open={inspectionDialogOpen} onClose={handleInspectionDialog}>
         <DialogTitle className="text-uppercase fs-5 text-center">
           Inspection Details
@@ -1950,7 +1573,6 @@ const ClientProjectView = () => {
         <DialogTitle>Add Point</DialogTitle>
         <DialogContent style={{ width: '600px' }}>
           <FormControl fullWidth className="mt-1 mb-1">
-            {/* <InputLabel id="demo-simple-select-label">Point Name</InputLabel> */}
             <label className="text-primary">Point Name</label>
             <TextField
               type="text"
@@ -1960,7 +1582,6 @@ const ClientProjectView = () => {
             />
           </FormControl>
           <FormControl fullWidth className="mt-1 mb-1">
-            {/* <InputLabel id="demo-simple-select-label">CheckList</InputLabel> */}
             <label className="text-primary">CheckList</label>
             <MUISelect
               labelId="demo-simple-select-label"
@@ -1974,7 +1595,6 @@ const ClientProjectView = () => {
             </MUISelect>
           </FormControl>
           <FormControl fullWidth className="mt-1 mb-1">
-            {/* <InputLabel id="demo-simple-select-label">CheckList</InputLabel> */}
             <label className="text-primary">Force Majeure</label>
             <MUISelect
               labelId="demo-simple-select-label"
@@ -2011,9 +1631,6 @@ const ClientProjectView = () => {
           )}
           {checkList === 'yes' && (
             <FormControl fullWidth className="mt-1 mb-1">
-              {/* <InputLabel id="demo-simple-select-label">
-                CheckList Name
-              </InputLabel> */}
               <label className="text-primary">CheckList Name</label>
               <TextField
                 type="text"
@@ -2045,29 +1662,35 @@ const ClientProjectView = () => {
                 name="issueMember"
                 onChange={e => setIssueMember(e.target.value)}
               >
-                <MenuItem
-                  value={projectDetails?.project_admin[0]}
-                >{`${projectDetails?.project_admin[0]?.name} (Project Admin)`}</MenuItem>
-                {/* <MenuItem
-                  value={projectDetails?.project_manager[0]}
-                >{`${projectDetails?.project_manager[0]?.name} (Project Manager)`}</MenuItem> */}
-                <MenuItem
-                  value={projectDetails?.sr_engineer[0]}
-                >{`${projectDetails?.sr_engineer[0]?.name} (Senior Engineer)`}</MenuItem>
-                <MenuItem
-                  value={projectDetails?.site_engineer[0]}
-                >{`${projectDetails?.site_engineer[0]?.name} (Site Engineer)`}</MenuItem>
-                <MenuItem
-                  value={projectDetails?.accountant[0]}
-                >{`${projectDetails?.accountant[0]?.name} (Accountant)`}</MenuItem>
-                <MenuItem
-                  value={projectDetails?.sales[0]}
-                >{`${projectDetails?.sales[0]?.name} (Sales)`}</MenuItem>
+                <MenuItem value={projectDetails?.project_admin[0]._id}>{`${
+                  projectDetails?.project_admin[0]?.firstname +
+                  ' ' +
+                  projectDetails?.project_admin[0]?.lastname
+                } (Project Admin)`}</MenuItem>
+                <MenuItem value={projectDetails?.sr_engineer[0]._id}>{`${
+                  projectDetails?.sr_engineer[0]?.firstname +
+                  ' ' +
+                  projectDetails?.sr_engineer[0]?.lastname
+                } (Senior Engineer)`}</MenuItem>
+                <MenuItem value={projectDetails?.site_engineer[0]._id}>{`${
+                  projectDetails?.site_engineer[0]?.firstname +
+                  ' ' +
+                  projectDetails?.site_engineer[0]?.lastname
+                } (Site Engineer)`}</MenuItem>
+                <MenuItem value={projectDetails?.accountant[0]._id}>{`${
+                  projectDetails?.accountant[0]?.firstname +
+                  ' ' +
+                  projectDetails?.accountant[0]?.lastname
+                } (Accountant)`}</MenuItem>
+                <MenuItem value={projectDetails?.sales[0]._id}>{`${
+                  projectDetails?.sales[0]?.firstname +
+                  ' ' +
+                  projectDetails?.sales[0]?.lastname
+                } (Sales)`}</MenuItem>
               </MUISelect>
             )}
           </FormControl>
           <FormControl fullWidth className="mt-1 mb-1">
-            {/* <InputLabel id="demo-simple-select-label">Content</InputLabel> */}
             <label className="text-primary">After Content</label>
             <MUISelect
               labelId="demo-simple-select-label"
@@ -2103,12 +1726,11 @@ const ClientProjectView = () => {
         <DialogTitle>Delete Point</DialogTitle>
         <DialogContent style={{ width: '600px' }}>
           <FormControl fullWidth className="mt-1 mb-1">
-            {/* <InputLabel id="demo-simple-select-label">Content</InputLabel> */}
             <label className="text-primary">Content</label>
             <MUISelect
               labelId="demo-simple-select-label"
               id="demo-simple-select"
-              value={content} // Adjust value to reflect state
+              value={content}
               name="content"
               onChange={e => {
                 setContent(e.target.value);
@@ -2145,7 +1767,7 @@ const ClientProjectView = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCancel}>Cancel</Button>
-          <Button onClick={DeleteProjectStep}>Delete</Button>
+          <Button onClick={deleteProjectStep}>Delete</Button>
         </DialogActions>
       </Dialog>
 

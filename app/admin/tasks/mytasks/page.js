@@ -274,13 +274,13 @@ const Page = () => {
                                     sx={{}}
                                     {...stringAvatar('ThikedaarDotCom')}
                                   />
-                                  {item.issueMember?.name}
+                                  {item.issueMember?.firstname}
                                 </span>
                                 <span className="text-lg font-bold">
                                   {item.title}
                                 </span>
                               </div>
-                              {item.issueMember?.name === 'ThikedaarDotCom' ? (
+                              {item.issueMember?.firstname === 'ThikedaarDotCom' ? (
                                 <span className="font-semibold text-sm">
                                   Admin
                                 </span>
@@ -289,10 +289,10 @@ const Page = () => {
                                   <span className="font-semibold text-sm flex flex-row gap-2 items-center">
                                     <FaUserCircle className="text-primary" />
                                     <p className="font-semibold text-sm">
-                                      {item.assignedBy?.name ===
+                                      {item.assignedBy?.firstname ===
                                       'ThikedaarDotCom'
                                         ? 'Admin'
-                                        : item.assignedBy?.name}
+                                        : item.assignedBy?.firstname}
                                     </p>
                                   </span>
                                   <span className="font-semibold text-sm flex flex-row gap-2 items-center">
@@ -398,13 +398,13 @@ const Page = () => {
                                     sx={{}}
                                     {...stringAvatar('ThikedaarDotCom')}
                                   />
-                                  {item.issueMember?.name}
+                                  {item.issueMember?.firstname}
                                 </span>
                                 <span className="text-lg font-bold">
                                   {item.title}
                                 </span>
                               </div>
-                              {item.issueMember?.name === 'ThikedaarDotCom' ? (
+                              {item.issueMember?.firstname === 'ThikedaarDotCom' ? (
                                 <span className="font-semibold text-sm">
                                   Admin
                                 </span>
@@ -413,10 +413,10 @@ const Page = () => {
                                   <span className="font-semibold text-sm flex flex-row gap-2 items-center">
                                     <FaUserCircle className="text-primary" />
                                     <p className="font-semibold text-sm">
-                                      {item.assignedBy?.name ===
+                                      {item.assignedBy?.firstname ===
                                       'ThikedaarDotCom'
                                         ? 'Admin'
-                                        : item.assignedBy?.name}
+                                        : item.assignedBy?.firstname}
                                     </p>
                                   </span>
                                   <span className="font-semibold text-sm flex flex-row gap-2 items-center">
@@ -522,13 +522,13 @@ const Page = () => {
                                     sx={{}}
                                     {...stringAvatar('ThikedaarDotCom')}
                                   />
-                                  {item.issueMember?.name}
+                                  {item.issueMember?.firstname}
                                 </span>
                                 <span className="text-lg font-bold">
                                   {item.title}
                                 </span>
                               </div>
-                              {item.issueMember?.name === 'ThikedaarDotCom' ? (
+                              {item.issueMember?.firstname === 'ThikedaarDotCom' ? (
                                 <span className="font-semibold text-sm">
                                   Admin
                                 </span>
@@ -537,10 +537,10 @@ const Page = () => {
                                   <span className="font-semibold text-sm flex flex-row gap-2 items-center">
                                     <FaUserCircle className="text-primary" />
                                     <p className="font-semibold text-sm">
-                                      {item.assignedBy?.name ===
+                                      {item.assignedBy?.firstname ===
                                       'ThikedaarDotCom'
                                         ? 'Admin'
-                                        : item.assignedBy?.name}
+                                        : item.assignedBy?.firstname}
                                     </p>
                                   </span>
                                   <span className="font-semibold text-sm flex flex-row gap-2 items-center">
@@ -646,13 +646,13 @@ const Page = () => {
                                     sx={{}}
                                     {...stringAvatar('ThikedaarDotCom')}
                                   />
-                                  {item.issueMember?.name}
+                                  {item.issueMember?.firstname}
                                 </span>
                                 <span className="text-lg font-bold">
                                   {item.title}
                                 </span>
                               </div>
-                              {item.issueMember?.name === 'ThikedaarDotCom' ? (
+                              {item.issueMember?.firstname === 'ThikedaarDotCom' ? (
                                 <span className="font-semibold text-sm">
                                   Admin
                                 </span>
@@ -661,10 +661,10 @@ const Page = () => {
                                   <span className="font-semibold text-sm flex flex-row gap-2 items-center">
                                     <FaUserCircle className="text-primary" />
                                     <p className="font-semibold text-sm">
-                                      {item.assignedBy?.name ===
+                                      {item.assignedBy?.firstname ===
                                       'ThikedaarDotCom'
                                         ? 'Admin'
-                                        : item.assignedBy?.name}
+                                        : item.assignedBy?.firstname}
                                     </p>
                                   </span>
                                   <span className="font-semibold text-sm flex flex-row gap-2 items-center">

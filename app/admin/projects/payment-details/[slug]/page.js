@@ -1,6 +1,5 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { DataGrid } from '@mui/x-data-grid';
 import api from '../../../../../lib/api';
 import {
   Button,
@@ -25,6 +24,36 @@ import { useAuthStore } from '../../../../../store/useAuthStore';
 import { SidebarTrigger } from '../../../../../components/ui/sidebar';
 import { Separator } from '../../../../../components/ui/separator';
 
+const selectStyles = {
+  width: '100%',
+  borderRadius: '7px',
+  background: '#f3f4f6',
+  outline: 'none',
+  '& :hover': {
+    outline: 'none',
+  },
+  '& .MuiInputBase-root': {
+    outline: 'none',
+    background: '#cfcfcf',
+    '& :hover': {
+      outline: 'none',
+    },
+  },
+  color: '#4b5563',
+  '.MuiOutlinedInput-notchedOutline': {
+    border: '1px solid #93bfcf',
+  },
+  '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+    border: '1px solid #93bfcf',
+  },
+  '&:hover .MuiOutlinedInput-notchedOutline': {
+    border: '1px solid #93bfcf',
+  },
+  '.MuiSvgIcon-root ': {
+    fill: '#93bfcf !important',
+  },
+};
+
 const Page = () => {
   const userType = useAuthStore(state => state.userType);
   const activeUser = useAuthStore(state => state.userId);
@@ -47,7 +76,6 @@ const Page = () => {
   const router = useRouter();
 
   useEffect(() => {
-    // Initialize showContent state based on the number of project steps
     if (data[0]?.stages) {
       setShowPaymentDetails(new Array(data[0]?.stages.length).fill(false));
     }
@@ -60,11 +88,10 @@ const Page = () => {
       return newState;
     });
   };
+  
   const fetchData = async () => {
     try {
-      const projectResponse = await api.get(
-        `/project/databyid/${slug}`
-      );
+      const projectResponse = await api.get(`/project/databyid/${slug}`);
       setProjectDetails(projectResponse?.data?.data[0]);
 
       const paymentDetailsResponse = await api.get(
@@ -75,13 +102,11 @@ const Page = () => {
 
       const stagesResponse =
         userType?.substring(5).toLowerCase() === 'client'
-          ? await api.post(
-              `/project/paymentstages/forclient`,
-              { siteID: slug, clientID: activeUser }
-            )
-          : await api.get(
-              `/project/paymentstages/bysiteid/${slug}`
-            );
+          ? await api.post(`/project/paymentstages/forclient`, {
+              siteID: slug,
+              clientID: activeUser,
+            })
+          : await api.get(`/project/paymentstages/bysiteid/${slug}`);
 
       setData(stagesResponse?.data?.data);
     } catch (error) {
@@ -103,10 +128,14 @@ const Page = () => {
 
   const updatePaymentStatus = () => {
     const fetch = api
-      .post(
-        `/project/updatepaymentstages/bysiteid/${slug}`,
-        { stage, status, paymentDate, remarks, amount, mode }
-      )
+      .post(`/project/updatepaymentstages/bysiteid/${slug}`, {
+        stage,
+        status,
+        paymentDate,
+        remarks,
+        amount,
+        mode,
+      })
       .then(() => fetchData());
   };
 
@@ -210,10 +239,7 @@ const Page = () => {
           };
           // console.log(data);
           await api
-            .post(
-              `/project/verify-payment`,
-              data
-            )
+            .post(`/project/verify-payment`, data)
             .then(resp => {
               console.log('transaction token', resp.data);
               if (
@@ -418,7 +444,6 @@ const Page = () => {
                                       <td>{detail.mode}</td>
                                       <td>
                                         <span>
-                                          {/* <FaRupeeSign /> */}
                                           {rupee.format(detail.amount)}
                                         </span>
                                       </td>
@@ -445,16 +470,24 @@ const Page = () => {
                         <span>
                           <FaRupeeSign />
                         </span>
-                        {rupee.format(
-                          (item.payment * projectDetails.cost) / 100 -
-                            payDetails[0]?.stages
+                        {item.paymentStatus !== 'Paid'
+                          ? rupee.format(
+                              (item.payment * projectDetails.cost) / 100 -
+                                payDetails[0]?.stages
+                                  .filter(dt => dt.stage === item.stage)[0]
+                                  ?.installments.reduce(
+                                    (acc, item) =>
+                                      acc + parseFloat(item.amount || 0),
+                                    0
+                                  )
+                            )
+                          : payDetails[0]?.stages
                               .filter(dt => dt.stage === item.stage)[0]
                               ?.installments.reduce(
                                 (acc, item) =>
                                   acc + parseFloat(item.amount || 0),
                                 0
-                              )
-                        )}
+                              )}
                       </span>
                     </div>
                     {/* {userType === "ROLE_CLIENT" && (
@@ -474,7 +507,9 @@ const Page = () => {
       </div>
       <Modal
         open={OpenStatus}
-        onClose={() => {}}
+        onClose={() => {
+          setOpenStatus(preb => !prev);
+        }}
         sx={{
           display: 'flex',
           justifyContent: 'center',
@@ -518,35 +553,7 @@ const Page = () => {
               value={status}
               name="status"
               onChange={e => setStatus(e.target.value)}
-              sx={{
-                width: '100%',
-                borderRadius: '7px',
-                background: '#f3f4f6',
-                outline: 'none',
-                '& :hover': {
-                  outline: 'none',
-                },
-                '& .MuiInputBase-root': {
-                  outline: 'none',
-                  background: '#cfcfcf',
-                  '& :hover': {
-                    outline: 'none',
-                  },
-                },
-                color: '#4b5563',
-                '.MuiOutlinedInput-notchedOutline': {
-                  border: '1px solid #93bfcf',
-                },
-                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                  border: '1px solid #93bfcf',
-                },
-                '&:hover .MuiOutlinedInput-notchedOutline': {
-                  border: '1px solid #93bfcf',
-                },
-                '.MuiSvgIcon-root ': {
-                  fill: '#93bfcf !important',
-                },
-              }}
+              sx={selectStyles}
             >
               <MenuItem value="Not Due Yet">Not Due Yet</MenuItem>
               <MenuItem value="Due">Due</MenuItem>

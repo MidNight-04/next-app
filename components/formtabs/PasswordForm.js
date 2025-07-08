@@ -3,12 +3,13 @@
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { signIn, getSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../store/useAuthStore';
 import { toast } from 'sonner';
 import LoaderSpinner from '../loader/LoaderSpinner';
+import { Eye, EyeOff } from 'lucide-react';
 
 const schema = Yup.object().shape({
   username: Yup.string().required('Username is required'),
@@ -17,6 +18,7 @@ const schema = Yup.object().shape({
 
 const PasswordForm = ({ inputRef }) => {
   const [showLoader, setShowLoader] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
   const setLogIn = useAuthStore(state => state.setLogIn);
 
@@ -33,7 +35,7 @@ const PasswordForm = ({ inputRef }) => {
     setShowLoader(true);
     const result = await signIn('credentials', {
       redirect: false,
-      username: username,
+      username,
       password,
     });
 
@@ -88,7 +90,7 @@ const PasswordForm = ({ inputRef }) => {
             }
           }
         }}
-        className={`p-2 w-full border rounded ${
+        className={`p-2 w-full border rounded outline-none ${
           errors.username ? 'border-red-500' : 'border-gray-300'
         }`}
       />
@@ -97,21 +99,30 @@ const PasswordForm = ({ inputRef }) => {
       )}
 
       <label className="block mt-4 mb-2">Password</label>
-      <input
-        type="password"
-        {...register('password')}
-        placeholder="Enter Password"
-        className={`p-2 w-full border rounded ${
-          errors.password ? 'border-red-500' : 'border-gray-300'
-        }`}
-      />
+      <div className="relative">
+        <input
+          type={showPassword ? 'text' : 'password'}
+          {...register('password')}
+          placeholder="Enter Password"
+          className={`p-2 w-full border rounded pr-10 outline-none ${
+            errors.password ? 'border-red-500' : 'border-gray-300'
+          }`}
+        />
+        <button
+          type="button"
+          onClick={() => setShowPassword(prev => !prev)}
+          className="absolute inset-y-0 right-2 flex items-center text-gray-600"
+        >
+          {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+        </button>
+      </div>
       {errors.password && (
         <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>
       )}
 
       <button
         type="submit"
-        className="mt-4 bg-secondary text-primary  w-full py-2 rounded-full"
+        className="mt-4 bg-secondary text-primary w-full py-2 rounded-full"
       >
         Login
       </button>

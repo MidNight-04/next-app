@@ -105,6 +105,7 @@ const Page = () => {
   const [material, setMaterial] = useState('no');
   const [workers, setWorkers] = useState(0);
   const [newMember, setNewMember] = useState(null);
+  const [taskId, setTaskId] = useState(null);
   const [openManualClose, setOpenManualClose] = useState(false);
   const { token } = useAuthStore.getState();
   const [manualDate, setManualDate] = useState(
@@ -239,7 +240,7 @@ const Page = () => {
 
   const deleteTask = () => {
     setOpenDelete(prev => !prev);
-    const api = api.delete(`/task/delete/${slug}`).then(() => {
+    const data = api.delete(`/task/delete/${slug}`).then(() => {
       toast('Task Deleted!', {
         description: 'Task Deleted Successfully.',
       });
@@ -255,18 +256,20 @@ const Page = () => {
     saveAs(url, 'site_image.jpg');
   };
 
-  const deleteCommentImage = id => {
-    toggleShowImage();
-
-    const api = api
-      .post(`/task/deletetaskcommentimage`, {
-        commentId: id,
+  const deleteCommentImage = async () => {
+    try {
+      toggleShowImage();
+      const response = await api.post('/task/deletetaskcommentimage', {
+        commentId: taskId,
         imageUrl: showImageUrl,
-      })
-      .then(res => {
-        refetch();
-        toast('Image deleted successfully.');
       });
+
+      toast.success('Image deleted successfully.');
+      refetch();
+    } catch (error) {
+      console.error('Failed to delete image:', error);
+      toast.error('Failed to delete image. Please try again.');
+    }
   };
 
   const handleAudioRecorded = data => {
@@ -476,7 +479,7 @@ const Page = () => {
                 </p>
                 <p>
                   {`${new Date(
-                    data.data.updatedOn || data.data.createdAt
+                    data.data.assignedOn || data.data.createdAt
                   ).toLocaleString('en-US', {
                     dateStyle: 'medium',
                     timeStyle: 'short',
@@ -697,7 +700,7 @@ const Page = () => {
             </div>
           </div>
           {data.data.comments.length > 0 && (
-            <div id="comments">
+            <>
               <div className="flex flex-row gap-2 my-4">
                 <MdChecklist className="text-3xl text-primary" />
                 <h3 className="text-xl font-bold font-ubuntu">
@@ -708,7 +711,7 @@ const Page = () => {
                 {data.data.comments.map(item => (
                   <React.Fragment key={item._id}>
                     {(item.approved.isApproved ||
-                      userType !== 'ROLE_CLEINT') && (
+                      userType !== 'ROLE_CLIENT') && (
                       <div
                         key={item._id}
                         className="bg-white rounded-xl p-5 flex flex-row w-full min-h-40 gap-4"
@@ -725,7 +728,9 @@ const Page = () => {
                               />
                               <div className="text-sm flex flex-col">
                                 <span className="font-semibold">
-                                  {item.createdBy?.name}
+                                  {item.createdBy?.firstname +
+                                    ' ' +
+                                    item.createdBy?.lastname}
                                 </span>
                                 <span>
                                   At{' '}
@@ -770,6 +775,7 @@ const Page = () => {
                                       onClick={() => {
                                         setShowImageUrl(imgObj);
                                         toggleShowImage(imgObj);
+                                        setTaskId(item._id);
                                       }}
                                     >
                                       {!showImage && (
@@ -816,9 +822,7 @@ const Page = () => {
                                             <>
                                               <button
                                                 className="py-2 px-4 font-semibold bg-secondary text-primary rounded-full flex flex-row items-center justify-center gap-1 text-nowrap"
-                                                onClick={() => {
-                                                  deleteCommentImage(item._id);
-                                                }}
+                                                onClick={deleteCommentImage}
                                               >
                                                 <MdDeleteOutline className="text-xl" />
                                                 Delete Image
@@ -830,7 +834,7 @@ const Page = () => {
                                           <button
                                             className="py-2 px-4 font-semibold bg-secondary text-primary rounded-full flex flex-row items-center justify-center gap-1 text-nowrap"
                                             onClick={() => {
-                                              downloadImage(imgObj.image);
+                                              downloadImage(imgObj);
                                             }}
                                           >
                                             <FiDownload className="text-xl" />
@@ -875,7 +879,7 @@ const Page = () => {
                   No Update Posted Yet!
                 </p>
               )}
-            </div>
+            </>
           )}
           <Modal
             open={openComment}

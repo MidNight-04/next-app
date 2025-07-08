@@ -124,18 +124,14 @@ const Page = () => {
       {
         queryKey: ['teammembers'],
         queryFn: async () => {
-          const response = await api.get(
-            `/teammember/getall`
-          );
+          const response = await api.get(`/teammember/getall`);
           return response.data.data;
         },
       },
       {
         queryKey: ['categories'],
         queryFn: async () => {
-          const response = await api.get(
-            `/category/list`
-          );
+          const response = await api.get(`/category/list`);
           return response.data.data;
         },
       },
@@ -155,9 +151,7 @@ const Page = () => {
 
   const searchTask = e => {
     const searchValue = e.target.value.toLowerCase();
-    const data = api.post(
-      `/task/search/${searchValue}`
-    );
+    const data = api.post(`/task/search/${searchValue}`);
     setTasks(data);
   };
 
@@ -192,7 +186,8 @@ const Page = () => {
         day: '2-digit',
         year: 'numeric',
       });
-      const employee = task.issueMember.name;
+      const employee =
+        task.issueMember?.firstname + ' ' + task.issueMember?.lastname;
       const category = task.category;
       const isOverdue = task.status === 'Overdue';
 
@@ -230,7 +225,7 @@ const Page = () => {
         groupedByCategoryMap.set(category, []);
       groupedByCategoryMap.get(category).push(task);
 
-      if (task.issueMember._id === userId) {
+      if (task.issueMember?._id === userId) {
         if (!groupedByCategoryAndUserIdMap.has(category))
           groupedByCategoryAndUserIdMap.set(category, []);
         groupedByCategoryAndUserIdMap.get(category).push(task);

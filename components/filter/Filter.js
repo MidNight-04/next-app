@@ -42,18 +42,14 @@ const TaskFilterPopup = ({
       {
         queryKey: ['categories'],
         queryFn: async () => {
-          const response = await api.get(
-            `/category/list`
-          );
+          const response = await api.get(`/category/list`);
           return response.data.data;
         },
       },
       {
         queryKey: ['employees'],
         queryFn: async () => {
-          const response = await api.get(
-            `/teammember/getall`
-          );
+          const response = await api.get(`/teammember/getall`);
           return response.data.data;
         },
       },
@@ -152,7 +148,7 @@ const TaskFilterPopup = ({
                 />
                 {employeeData
                   .filter(item =>
-                    item.name
+                    item.firstname
                       .toLowerCase()
                       .includes(searchAssignedBy.toLowerCase())
                   )
@@ -170,7 +166,7 @@ const TaskFilterPopup = ({
                         onChange={() => setAssignedBy(person._id)}
                         className="mr-2"
                       />
-                      <label>{person.name}</label>
+                      <label>{person.firstname + ' ' + person.lastname}</label>
                     </div>
                   ))}
               </div>
@@ -191,7 +187,7 @@ const TaskFilterPopup = ({
                 />
                 {employeeData
                   .filter(item =>
-                    item.name
+                    item.firstname
                       .toLowerCase()
                       .includes(searchAssignedTo.toLowerCase())
                   )
@@ -209,7 +205,7 @@ const TaskFilterPopup = ({
                         onChange={() => setAssignedTo(person._id)}
                         className="mr-2"
                       />
-                      <label>{person.name}</label>
+                      <label>{person.firstname + ' ' + person.lastname}</label>
                     </div>
                   ))}
               </div>

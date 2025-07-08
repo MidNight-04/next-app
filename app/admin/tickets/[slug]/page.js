@@ -424,7 +424,7 @@ const TicketViewClient = () => {
                       />
                       <div className="text-sm flex flex-col">
                         <span className="font-semibold">
-                          {item?.createdBy?.name}
+                          {item?.createdBy?.firstname}
                         </span>
                         <span>
                           At{' '}

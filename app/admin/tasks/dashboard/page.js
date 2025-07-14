@@ -1,8 +1,6 @@
 'use client';
-import React, { useEffect, useState } from 'react';
-import { MdSkipNext, MdSkipPrevious } from 'react-icons/md';
+import React, { useEffect, useMemo, useReducer, useState } from 'react';
 import api from '../../../../lib/api';
-import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 import AsideContainer from '../../../../components/AsideContainer';
 import { cn } from '../../../../lib/utils';
@@ -22,17 +20,123 @@ import {
   SelectValue,
 } from '../../../../components/ui/select';
 import LoaderSpinner from '../../../../components/loader/LoaderSpinner';
-import { RiTeamFill } from 'react-icons/ri';
-import { PiTagChevronFill } from 'react-icons/pi';
 import { FaCheckCircle } from 'react-icons/fa';
-import { IoCalendarClearOutline } from 'react-icons/io5';
-import { FaRegCalendarAlt } from 'react-icons/fa';
 import { FaRegClock } from 'react-icons/fa';
-import { FaClockRotateLeft } from 'react-icons/fa6';
 import { MdFilterListOff } from 'react-icons/md';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SidebarTrigger } from '../../../../components/ui/sidebar';
 import { Separator } from '../../../../components/ui/separator';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { debounce } from 'lodash';
+import dynamic from 'next/dynamic';
+
+const EmployeeWiseTable = dynamic(() =>
+  import('../../../../components/TaskDashboard/EmployeeWiseTable')
+);
+const MonthlyReportTable = dynamic(() =>
+  import('../../../../components/TaskDashboard/MonthlyReportTable')
+);
+const CateogryWiseTable = dynamic(() =>
+  import('../../../../components/TaskDashboard/CateogryWiseTable')
+);
+const DailyReportTable = dynamic(() =>
+  import('../../../../components/TaskDashboard/DailyReportTable')
+);
+const OverdueReportTable = dynamic(() =>
+  import('../../../../components/TaskDashboard/OverdueReportTable')
+);
+const MyReportTable = dynamic(() =>
+  import('../../../../components/TaskDashboard/MyReportTable')
+);
+
+const FilterChipList = ({ filtersList, activeFilter, onSelect }) => {
+  return (
+    <div className="flex flex-row items-center justify-center gap-2 flex-wrap">
+      {filtersList.map(filter => (
+        <span
+          key={filter}
+          className={cn(
+            'flex gap-2 py-[6px] px-3 bg-primary-foreground text-primary rounded-full border border-primary text-nowrap cursor-pointer',
+            activeFilter === filter
+              ? 'text-green-800 bg-green-200 border-green-800'
+              : ''
+          )}
+          onClick={() => onSelect(filter)}
+        >
+          {filter}
+        </span>
+      ))}
+    </div>
+  );
+};
+
+const CountCard = ({
+  color = 'text-gray-500',
+  title,
+  count,
+  icon,
+  bgColor = '',
+  borderColor = '',
+}) => (
+  <div
+    className={cn(
+      'flex flex-col items-center px-4 py-2 border rounded-lg shadow text-center',
+      color,
+      borderColor,
+      bgColor
+    )}
+  >
+    <div className="flex items-center gap-1">
+      {icon}
+      <span className="text-sm font-medium">{title}</span>
+    </div>
+    <span className="text-2xl font-bold mt-1 text-black">{count}</span>
+  </div>
+);
+
+const filtersList = [
+  'Yesterday',
+  'Today',
+  'This Week',
+  'Last Week',
+  'This Month',
+  'Last Month',
+  'This Year',
+  // 'All Time',
+];
+
+const getInitialFilterState = params => ({
+  activeFilter: params.get('activeFilter') || 'Today',
+  employeeId: params.get('employeeId') || '',
+  siteId: params.get('siteId') || '',
+  categoryId: params.get('categoryId') || '',
+  frequency: params.get('frequency') || '',
+  working: params.get('working') || '',
+  mataval: params.get('mataval') || '',
+  onTime: params.get('onTime') || '',
+  branch: params.get('branch') || '',
+});
+
+function filterReducer(state, action) {
+  switch (action.type) {
+    case 'SET_FILTER':
+      return { ...state, [action.field]: action.value };
+    case 'RESET_FILTERS':
+      return {
+        ...state,
+        employeeId: '',
+        siteId: '',
+        categoryId: '',
+        frequency: '',
+        working: '',
+        mataval: '',
+        onTime: '',
+        branch: '',
+      };
+    default:
+      return state;
+  }
+}
 
 const Page = () => {
   const userType = useAuthStore(state => state.userType);
@@ -41,40 +145,30 @@ const Page = () => {
   const [activeTab, setActiveTab] = useState('Employee Wise');
   const [currentPage, setCurrentPage] = useState(1);
   const [tasks, setTasks] = useState([]);
-  const [selectedTeam, setSelectedTeam] = useState([]);
   const [employeeId, setEmployeeId] = useState('');
   const [categoryId, setCategoryId] = useState('');
   const [frequency, setFrequency] = useState('');
   const [branch, setBranch] = useState('');
+  const params = useSearchParams();
+  const pathname = usePathname();
+  const router = useRouter();
 
-  let url;
+  const [filters, dispatch] = useReducer(
+    filterReducer,
+    getInitialFilterState(params)
+  );
 
-  switch (activeFilter) {
-    case 'Today':
-      url = `/task/gettodaytaskbyid`;
-      break;
-    case 'Yesterday':
-      url = `/task/getyesterdaytaskbyid`;
-      break;
-    case 'This Week':
-      url = `/task/getthisweektaskbyid`;
-      break;
-    case 'Last Week':
-      url = `/task/getlastweektaskbyid`;
-      break;
-    case 'This Month':
-      url = `/task/getthismonthtaskbyid`;
-      break;
-    case 'Last Month':
-      url = `/task/getlastmonthtaskbyid`;
-      break;
-    case 'This Year':
-      url = `/task/getthisyeartaskbyid`;
-      break;
-    case 'Custom':
-      url = `/task/customfilters`;
-      break;
-  }
+  const debouncedUpdateUrl = useMemo(
+    () =>
+      debounce(filters => {
+        const query = new URLSearchParams();
+        Object.entries(filters).forEach(([key, value]) => {
+          if (value) query.set(key, value);
+        });
+        router.replace(`${pathname}?${query.toString()}`);
+      }, 400),
+    [pathname, router]
+  );
 
   useEffect(() => {
     if (userType === 'ROLE_SITE ENGINEER') {
@@ -138,26 +232,11 @@ const Page = () => {
     ],
   });
 
-  const filters = [
-    'Yesterday',
-    'Today',
-    'This Week',
-    'Last Week',
-    'This Month',
-    'Last Month',
-    'This Year',
-    // 'All Time',
-  ];
-
   const searchTask = e => {
     const searchValue = e.target.value.toLowerCase();
     const data = api.post(`/task/search/${searchValue}`);
     setTasks(data);
   };
-
-  if (isFetching && !isError) {
-    return <LoaderSpinner />;
-  }
 
   let overdueCount = 0;
   let pendingCount = 0;
@@ -176,7 +255,7 @@ const Page = () => {
   if (isFetched && Array.isArray(data) && data.length > 0) {
     for (const task of data) {
       // const activatedDate = new Date(task.updatedOn);
-      const activatedDate = new Date(task.updatedAt);
+      const activatedDate = new Date(task.updatedOn || task.updatedAt);
       const month = activatedDate.toLocaleString('default', {
         month: 'long',
         year: 'numeric',
@@ -266,126 +345,102 @@ const Page = () => {
     }
   );
 
-  const getOverdueCount = () => {
+  const getGroupedDataByTab = () => {
     switch (activeTab) {
       case 'Employee Wise':
-        return groupedByEmployee
-          .flatMap(item => item.obj)
-          .filter(item => item.status === 'Overdue').length;
-      case 'Monthly Report':
-        return groupedByMonth
-          .flatMap(item => item.obj)
-          .filter(item => item.status === 'Overdue').length;
       case 'Daily Report':
-        return groupedByEmployee
-          .flatMap(item => item.obj)
-          .filter(item => item.status === 'Overdue').length;
+        return groupedByEmployee;
+      case 'Monthly Report':
+        return groupedByMonth;
       case 'My Report':
-        return groupedByCategoryAndUserId
-          .flatMap(item => item.obj)
-          .filter(item => item.status === 'Overdue').length;
+        return groupedByCategoryAndUserId;
       case 'Category Wise':
-        return groupedByCategory
-          .flatMap(item => item.obj)
-          .filter(item => item.status === 'Overdue').length;
+        return groupedByCategory;
       case 'OverDue Report':
-        return groupedByOverdueByEmployee
-          .flatMap(item => item.obj)
-          .filter(item => item.status === 'Overdue').length;
+        return groupedByOverdueByEmployee;
       default:
-        return 0;
+        return [];
     }
   };
-  const getPendingCount = () => {
-    switch (activeTab) {
-      case 'Employee Wise':
-        return groupedByEmployee
-          .flatMap(item => item.obj)
-          .filter(item => item.status === 'Pending').length;
-      case 'Monthly Report':
-        return groupedByMonth
-          .flatMap(item => item.obj)
-          .filter(item => item.status === 'Pending').length;
-      case 'Daily Report':
-        return groupedByEmployee
-          .flatMap(item => item.obj)
-          .filter(item => item.status === 'Pending').length;
-      case 'My Report':
-        return groupedByCategoryAndUserId
-          .flatMap(item => item.obj)
-          .filter(item => item.status === 'Pending').length;
-      case 'Category Wise':
-        return groupedByCategory
-          .flatMap(item => item.obj)
-          .filter(item => item.status === 'Pending').length;
-      case 'OverDue Report':
-        return groupedByOverdueByEmployee
-          .flatMap(item => item.obj)
-          .filter(item => item.status === 'Pending').length;
-      default:
-        return 0;
-    }
+
+  const statusCounts = useMemo(() => {
+    const grouped = getGroupedDataByTab();
+    const tasks = grouped.flatMap(item => item.obj);
+
+    const completeTasks = tasks.filter(item => item.status === 'Complete');
+
+    const inTimeCount = completeTasks.filter(
+      task => new Date(task.updatedOn) <= new Date(task.dueDate)
+    ).length;
+
+    const delayedCount = completeTasks.length - inTimeCount;
+
+    return {
+      Overdue: tasks.filter(item => item.status === 'Overdue').length,
+      Pending: tasks.filter(item => item.status === 'Pending').length,
+      InProgress: tasks.filter(item => item.status === 'In Progress').length,
+      Complete: completeTasks.length,
+      InTime: inTimeCount,
+      Delayed: delayedCount,
+      CompleteTasks: completeTasks, // optionally keep full data
+    };
+  }, [
+    activeTab,
+    groupedByEmployee,
+    groupedByMonth,
+    groupedByCategoryAndUserId,
+    groupedByCategory,
+    groupedByOverdueByEmployee,
+  ]);
+
+  const tabComponents = {
+    'Employee Wise': (
+      <EmployeeWiseTable
+        isFetched={isFetched}
+        groupedByEmployee={groupedByEmployee}
+        activeTab={activeTab}
+      />
+    ),
+    'Monthly Report': (
+      <MonthlyReportTable
+        isFetched={isFetched}
+        groupedByMonth={groupedByMonth}
+        activeTab={activeTab}
+      />
+    ),
+    'Daily Report': (
+      <DailyReportTable
+        isFetched={isFetched}
+        groupedByDate={groupedByDate}
+        activeTab={activeTab}
+      />
+    ),
+    'My Report': (
+      <MyReportTable
+        isFetched={isFetched}
+        groupedByCategoryAndUserId={groupedByCategoryAndUserId}
+        activeTab={activeTab}
+      />
+    ),
+    'Category Wise': (
+      <CateogryWiseTable
+        isFetched={isFetched}
+        groupedByCategory={groupedByCategory}
+        activeTab={activeTab}
+      />
+    ),
+    'OverDue Report': (
+      <OverdueReportTable
+        isFetched={isFetched}
+        groupedByOverdueByEmployee={groupedByOverdueByEmployee}
+        activeTab={activeTab}
+      />
+    ),
   };
-  const getInProgressCount = () => {
-    switch (activeTab) {
-      case 'Employee Wise':
-        return groupedByEmployee
-          .flatMap(item => item.obj)
-          .filter(item => item.status === 'In Progress').length;
-      case 'Monthly Report':
-        return groupedByMonth
-          .flatMap(item => item.obj)
-          .filter(item => item.status === 'In Progress').length;
-      case 'Daily Report':
-        return groupedByEmployee
-          .flatMap(item => item.obj)
-          .filter(item => item.status === 'In Progress').length;
-      case 'My Report':
-        return groupedByCategoryAndUserId
-          .flatMap(item => item.obj)
-          .filter(item => item.status === 'In Progress').length;
-      case 'Category Wise':
-        return groupedByCategory
-          .flatMap(item => item.obj)
-          .filter(item => item.status === 'In Progress').length;
-      case 'OverDue Report':
-        return groupedByOverdueByEmployee
-          .flatMap(item => item.obj)
-          .filter(item => item.status === 'In Progress').length;
-      default:
-        return 0;
-    }
-  };
-  const getCompleteCount = () => {
-    switch (activeTab) {
-      case 'Employee Wise':
-        return groupedByEmployee
-          .flatMap(item => item.obj)
-          .filter(item => item.status === 'Complete');
-      case 'Monthly Report':
-        return groupedByMonth
-          .flatMap(item => item.obj)
-          .filter(item => item.status === 'Complete');
-      case 'Daily Report':
-        return groupedByEmployee
-          .flatMap(item => item.obj)
-          .filter(item => item.status === 'Complete');
-      case 'My Report':
-        return groupedByCategoryAndUserId
-          .flatMap(item => item.obj)
-          .filter(item => item.status === 'Complete');
-      case 'Category Wise':
-        return groupedByCategory
-          .flatMap(item => item.obj)
-          .filter(item => item.status === 'Complete');
-      case 'OverDue Report':
-        return groupedByOverdueByEmployee
-          .flatMap(item => item.obj)
-          .filter(item => item.status === 'Complete');
-      default:
-        return 0;
-    }
-  };
+
+  if (isFetching && !isError) {
+    return <LoaderSpinner />;
+  }
 
   return (
     <AsideContainer>
@@ -401,85 +456,66 @@ const Page = () => {
           </h1>
         </div>
         <div>
-          <div className="flex flex-row items-center justify-center gap-2 -xl:flex-wrap">
-            {filters.map(filter => (
-              <span
-                key={filter}
-                className={cn(
-                  'flex flex-row gap-2 py-[6px] text-nowrap px-3 bg-primary-foreground text-primary rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl cursor-pointer',
-                  activeFilter === filter
-                    ? 'text-green-800 bg-green-200 border-green-800'
-                    : ''
-                )}
-                onClick={() => setActiveFilter(filter)}
-              >
-                {filter}
-              </span>
-            ))}
-          </div>
+          <FilterChipList
+            filtersList={filtersList}
+            activeFilter={filters.activeFilter}
+            onSelect={value =>
+              dispatch({ type: 'SET_FILTER', field: 'activeFilter', value })
+            }
+          />
           <div className="flex flex-row items-center justify-center my-4 text-nowrap flex-wrap gap-2 [&>div]:w-32">
-            <div className="flex flex-col items-center px-4 py-2 border rounded-lg shadow text-red-500 border-red-200 bg-red-50">
-              <div className="flex items-center gap-1">
-                <span className="w-3 h-3 bg-red-500 rounded-full" />
-                <span className="text-sm font-medium">Overdue</span>
-              </div>
-              <span className="text-2xl font-bold mt-1 text-black">
-                {getOverdueCount()}
-              </span>
-            </div>
-            <div className="flex flex-col items-center px-4 py-2 border rounded-lg shadow text-yellow-500 border-yellow-200 bg-yellow-50">
-              <div className="flex items-center gap-1">
+            <CountCard
+              title="Overdue"
+              count={statusCounts.Overdue}
+              icon={<span className="w-3 h-3 bg-red-500 rounded-full" />}
+              color="text-red-500"
+              borderColor="border-red-200"
+              bgColor="bg-red-50"
+            />
+            <CountCard
+              title="Pending"
+              count={statusCounts.Pending}
+              icon={
                 <span className="w-3 h-3 border-2 border-yellow-500 rounded-full" />
-                <span className="text-sm font-medium">Pending</span>
-              </div>
-              <span className="text-2xl font-bold mt-1 text-black">
-                {getPendingCount()}
-              </span>
-            </div>
-            <div className="flex flex-col items-center px-4 py-2 border rounded-lg shadow text-orange-500 border-orange-200 bg-orange-50">
-              <div className="flex items-center gap-1">
+              }
+              color="text-yellow-500"
+              borderColor="border-yellow-200"
+              bgColor="bg-yellow-50"
+            />
+            <CountCard
+              title="In Progress"
+              count={statusCounts.InProgress}
+              icon={
                 <span className="w-3 h-3 bg-orange-500 rounded-full animate-spin" />
-                <span className="text-sm font-medium">In Progress</span>
-              </div>
-              <span className="text-2xl font-bold mt-1 text-black">
-                {getInProgressCount()}
-              </span>
-            </div>
-            <div className="flex flex-col items-center px-4 py-2 border rounded-lg shadow text-emerald-500 border-emerald-200 bg-emerald-50">
-              <div className="flex items-center gap-1">
-                <FaCheckCircle className="text-secondary fill-green-500" />
-                <span className="text-sm font-medium">Completed</span>
-              </div>
-              <span className="text-2xl font-bold mt-1 text-black">
-                {getCompleteCount().length}
-              </span>
-            </div>
-            <div className="flex flex-col items-center px-4 py-2 border rounded-lg shadow text-green-500 border-green-200 bg-green-50">
-              <div className="flex items-center gap-1">
-                <FaRegClock className="text-secondary fill-green-500" />
-                <span className="text-sm font-medium ">In Time</span>
-              </div>
-              <span className="text-2xl font-bold mt-1 text-black">
-                {getCompleteCount()
-                  ?.filter(item => item.status === 'Complete')
-                  .filter(
-                    item => new Date(item.updatedOn) <= new Date(item.dueDate)
-                  ).length || 0}
-              </span>
-            </div>
-            <div className="flex flex-col items-center px-4 py-2 border rounded-lg shadow text-rose-500 border-rose-200 bg-rose-50">
-              <div className="flex items-center gap-1">
-                <FaRegClock className="text-secondary fill-red-500" />
-                <span className="text-sm font-medium">Delayed</span>
-              </div>
-              <span className="text-2xl font-bold mt-1 text-black">
-                {getCompleteCount()?.filter(
-                  item =>
-                    item.status === 'Complete' &&
-                    new Date(item.updatedOn) >= new Date(item.dueDate)
-                ).length || 0}
-              </span>
-            </div>
+              }
+              color="text-orange-500"
+              borderColor="border-orange-200"
+              bgColor="bg-orange-50"
+            />
+            <CountCard
+              title="Completed"
+              count={statusCounts.Complete}
+              icon={<FaCheckCircle className="text-secondary fill-green-500" />}
+              color="text-emerald-500"
+              borderColor="border-emerald-200"
+              bgColor="bg-emerald-50"
+            />
+            <CountCard
+              title="In Time"
+              count={statusCounts.InTime}
+              icon={<FaRegClock className="text-secondary fill-green-500" />}
+              color="text-green-500"
+              borderColor="border-green-200"
+              bgColor="bg-green-50"
+            />
+            <CountCard
+              title="Delayed"
+              count={statusCounts.Delayed}
+              icon={<FaRegClock className="text-secondary fill-red-500" />}
+              color="text-rose-500"
+              borderColor="border-rose-200"
+              bgColor="bg-rose-50"
+            />
           </div>
           <div className="flex flex-row items-center justify-center my-4 text-nowrap flex-wrap gap-2 [&>div]:w-32">
             <Select
@@ -568,1312 +604,31 @@ const Page = () => {
             <Tabs
               defaultValue="Employee Wise"
               value={activeTab}
-              onValueChange={value => setActiveTab(value)}
-              className="flex flex-col w-full justify-center items-center my-4"
+              onValueChange={setActiveTab}
+              className="w-full my-4"
             >
-              <TabsList className="flex flex-row flex-wrap">
-                <TabsTrigger value="Employee Wise">
-                  <RiTeamFill className="text-secondary mr-1" />
-                  Employee Wise
-                </TabsTrigger>
-                <TabsTrigger value="Category Wise">
-                  <PiTagChevronFill className="text-secondary mr-1" />
-                  Category Wise
-                </TabsTrigger>
-                <TabsTrigger value="My Report">
-                  <PiTagChevronFill className="text-secondary mr-1" />
-                  My Report
-                </TabsTrigger>
-                <TabsTrigger value="Monthly Report">
-                  <IoCalendarClearOutline className="text-secondary mr-1" />
-                  Monthly Report
-                </TabsTrigger>
-                <TabsTrigger value="Daily Report">
-                  <FaRegCalendarAlt className="text-secondary mr-1" />
-                  Daily Report
-                </TabsTrigger>
-                <TabsTrigger value="OverDue Report">
-                  <FaRegClock className="text-secondary mr-1" />
-                  OverDue Report
-                </TabsTrigger>
-              </TabsList>
+              <div className="flex justify-center items-center">
+                <TabsList className="flex flex-wrap">
+                  {Object.keys(tabComponents).map(tab => (
+                    <TabsTrigger key={tab} value={tab}>
+                      {tab}
+                    </TabsTrigger>
+                  ))}
+                </TabsList>
+              </div>
               <AnimatePresence mode="wait">
-                {activeTab === 'Employee Wise' && (
-                  <motion.div
-                    key="Employee Wise"
-                    initial={{ x: 100, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    exit={{ x: -100, opacity: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="w-full"
-                  >
-                    <TabsContent
-                      value="Employee Wise"
-                      className="w-full text-nowrap"
-                    >
-                      <div className="w-full overflow-x-auto bg-secondary font-semibold rounded-2xl">
-                        <table className="w-full table-auto text-center">
-                          <thead>
-                            <tr className="text-primary">
-                              <th className="p-4">Employee Name</th>
-                              <th className="px-4">Total</th>
-                              <th>
-                                <div className="flex flex-col items-center px-4">
-                                  <span>Not Completed</span>
-                                  <div className="flex gap-2 mt-1 flex-row justify-evenly w-full">
-                                    <div className="flex items-center gap-1">
-                                      <span className="w-3 h-3 bg-red-500 rounded-full" />
-                                      Overdue
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                      <span className="w-3 h-3 border-2 border-yellow-500 rounded-full" />
-                                      Pending
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                      <span className="w-3 h-3 bg-orange-500 rounded-full animate-spin" />
-                                      In Progress
-                                    </div>
-                                  </div>
-                                </div>
-                              </th>
-                              <th>
-                                <div className="flex flex-col items-center">
-                                  <span>Completed</span>
-                                  <div className="flex flex-row gap-2 justify-between w-full mt-1 px-4">
-                                    <div className="flex items-center gap-1">
-                                      <FaRegClock className="text-secondary fill-green-500" />
-                                      In Time
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                      <FaRegClock className="text-secondary fill-red-500" />
-                                      Delayed
-                                    </div>
-                                  </div>
-                                </div>
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {isFetched &&
-                              groupedByEmployee.length > 0 &&
-                              groupedByEmployee
-                                // .filter(item => item.branch === branch || branch === '')
-                                .map((item, index) => {
-                                  const percent =
-                                    (item.obj.filter(
-                                      task => task.status === 'Complete'
-                                    ).length /
-                                      item.obj.length) *
-                                    100;
-                                  const totalTasks = item.obj.length;
-                                  const overdue = item.obj.filter(
-                                    task => task.status === 'Overdue'
-                                  ).length;
-                                  const pending = item.obj.filter(
-                                    task => task.status === 'Pending'
-                                  ).length;
-                                  const inProgress = item.obj.filter(
-                                    task => task.status === 'In Progress'
-                                  ).length;
-                                  const completed = item.obj.filter(
-                                    task => task.status === 'Complete'
-                                  ).length;
-                                  const completedInTime = item.obj
-                                    .filter(task => task.status === 'Complete')
-                                    .filter(
-                                      task =>
-                                        new Date(task.updatedOn) <=
-                                        new Date(task.dueDate)
-                                    ).length;
-                                  const completedDelayed = item.obj
-                                    .filter(task => task.status === 'Complete')
-                                    .filter(
-                                      task =>
-                                        new Date(task.updatedOn) >
-                                        new Date(task.dueDate)
-                                    ).length;
-                                  return (
-                                    <tr
-                                      key={index}
-                                      className="bg-white rounded-2xl shadow-md group cursor-pointer hover:bg-gray-100 transition duration-300"
-                                    >
-                                      <td className="p-4 flex items-center justify-start">
-                                        <div className="flex flex-row items-center justify-start gap-16 -lg:gap-2">
-                                          <div className="h-10 w-10">
-                                            <CircularProgressbar
-                                              value={percent}
-                                              text={`${percent.toFixed(0)}%`}
-                                              strokeWidth={8}
-                                              className="h-10 w-10"
-                                              styles={buildStyles({
-                                                backgroundColor: '#3e98c7',
-                                                textColor: 'black',
-                                                pathColor: '#6cf55f',
-                                                trailColor: '#fa7878',
-                                                textSize: '24px',
-                                              })}
-                                            />
-                                          </div>
-                                          <span>{item.employee}</span>
-                                        </div>
-                                      </td>
-                                      <td>{totalTasks}</td>
-                                      <td>
-                                        <div className="flex flex-col gap-1">
-                                          <span>
-                                            {overdue + pending + inProgress} (
-                                            {(
-                                              ((overdue +
-                                                pending +
-                                                inProgress) /
-                                                totalTasks) *
-                                              100
-                                            ).toFixed(0)}
-                                            %)
-                                          </span>
-                                          <div className="hidden group-hover:flex -md:flex flex-row gap-1 mt-2 justify-evenly">
-                                            <span className="text-red-500">
-                                              {overdue} (
-                                              {(
-                                                (overdue / totalTasks) *
-                                                100
-                                              ).toFixed(0)}
-                                              %)
-                                            </span>
-                                            <span className="text-yellow-500">
-                                              {pending} (
-                                              {(
-                                                (pending / totalTasks) *
-                                                100
-                                              ).toFixed(0)}
-                                              %)
-                                            </span>
-                                            <span className="text-orange-500">
-                                              {inProgress} (
-                                              {(
-                                                (inProgress / totalTasks) *
-                                                100
-                                              ).toFixed(0)}
-                                              %)
-                                            </span>
-                                          </div>
-                                        </div>
-                                      </td>
-                                      <td>
-                                        <div className="flex flex-col gap-1">
-                                          <span>
-                                            {completed} (
-                                            {(
-                                              (completed / totalTasks) *
-                                              100
-                                            ).toFixed(0)}
-                                            %)
-                                          </span>
-                                          <div className="hidden group-hover:flex -md:flex mt-2 flex-row gap-2 justify-between w-full px-8">
-                                            <span className="text-green-500">
-                                              {completedInTime} (
-                                              {(
-                                                (completedInTime / totalTasks) *
-                                                100
-                                              ).toFixed(0)}
-                                              %)
-                                            </span>
-                                            <span className="text-red-500">
-                                              {completedDelayed} (
-                                              {(
-                                                (completedDelayed /
-                                                  totalTasks) *
-                                                100
-                                              ).toFixed(0)}
-                                              %)
-                                            </span>
-                                          </div>
-                                        </div>
-                                      </td>
-                                    </tr>
-                                  );
-                                })}
-                          </tbody>
-                        </table>
-                        {groupedByDate?.filter(
-                          item => item.status === activeTab
-                        )?.length >= 10 && (
-                          <div className="flex flex-row gap-2 items-center justify-center mt-4">
-                            <button
-                              onClick={() =>
-                                setCurrentPage(prev => Math.max(prev - 1, 1))
-                              }
-                              className="flex flex-row gap-2 items-center bg-primary text-secondary px-3 py-2 rounded-3xl"
-                              disabled={currentPage === 1}
-                            >
-                              <MdSkipPrevious />
-                              Last Page
-                            </button>
-                            <span className="text-primary font-semibold">
-                              Page {currentPage}
-                            </span>
-                            <button
-                              onClick={() => {
-                                setCurrentPage(prev => prev + 1);
-                              }}
-                              className="flex flex-row gap-2 items-center bg-primary text-secondary px-3 py-2 rounded-3xl"
-                              disabled={isPreviousData || !data?.hasMore}
-                            >
-                              Next Page
-                              <MdSkipNext />
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                      {isFetched && groupedByEmployee.length <= 0 && (
-                        <p className="font-semibold text-center mt-4 text-xl">
-                          No Tasks Found!
-                        </p>
-                      )}
-                    </TabsContent>
-                  </motion.div>
-                )}
-                {activeTab === 'Monthly Report' && (
-                  <motion.div
-                    key="Monthly Report"
-                    initial={{ x: 100, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    exit={{ x: -100, opacity: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="w-full"
-                  >
-                    <TabsContent
-                      value="Monthly Report"
-                      className="w-full text-nowrap"
-                    >
-                      <div className="w-full overflow-x-auto bg-secondary font-semibold rounded-2xl">
-                        <table className="w-full table-auto text-center">
-                          <thead>
-                            <tr className="text-primary">
-                              <th className="p-4">Month</th>
-                              <th className="px-4">Total</th>
-                              <th>
-                                <div className="flex flex-col items-center justify-between px-4">
-                                  <span>Not Completed</span>
-                                  <div className="flex gap-2 mt-1 flex-row justify-evenly w-full">
-                                    <div className="flex items-center gap-1">
-                                      <span className="w-3 h-3 bg-red-500 rounded-full"></span>
-                                      Overdue
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                      <span className="w-3 h-3 border-2 border-yellow-500 rounded-full"></span>
-                                      Pending
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                      <span className="w-3 h-3 bg-orange-500 rounded-full animate-spin"></span>
-                                      In Progress
-                                    </div>
-                                  </div>
-                                </div>
-                              </th>
-                              <th>
-                                <div className="flex flex-col items-center">
-                                  <span>Completed</span>
-                                  <div className="flex flex-row gap-2 justify-between w-full mt-1 px-4">
-                                    <div className="flex items-center gap-1">
-                                      <FaRegClock className="text-secondary fill-green-500" />
-                                      In Time
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                      <FaRegClock className="text-secondary fill-red-500" />
-                                      Delayed
-                                    </div>
-                                  </div>
-                                </div>
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {isFetched &&
-                              groupedByMonth.length > 0 &&
-                              groupedByMonth
-                                .map(item => {
-                                  if (selectedTeam.length > 0) {
-                                    const filteredTasks = item.obj.filter(
-                                      task =>
-                                        selectedTeam.includes(
-                                          task.issueMember?._id
-                                        )
-                                    );
-                                    return {
-                                      ...item,
-                                      obj: filteredTasks,
-                                    };
-                                  }
-                                  return item;
-                                })
-                                .map((item, index) => {
-                                  const percent =
-                                    (item.obj.filter(
-                                      task => task.status === 'Complete'
-                                    ).length /
-                                      item.obj.length) *
-                                    100;
-                                  const totalTasks = item.obj.length;
-                                  const overdue = item.obj.filter(
-                                    task => task.status === 'Overdue'
-                                  ).length;
-                                  const pending = item.obj.filter(
-                                    task => task.status === 'Pending'
-                                  ).length;
-                                  const inProgress = item.obj.filter(
-                                    task => task.status === 'In Progress'
-                                  ).length;
-                                  const completed = item.obj.filter(
-                                    task => task.status === 'Complete'
-                                  ).length;
-                                  const completedInTime = item.obj
-                                    .filter(task => task.status === 'Complete')
-                                    .filter(
-                                      task =>
-                                        new Date(task.updatedOn) <=
-                                        new Date(task.dueDate)
-                                    ).length;
-                                  const completedDelayed = item.obj
-                                    .filter(task => task.status === 'Complete')
-                                    .filter(
-                                      task =>
-                                        new Date(task.updatedOn) >
-                                        new Date(task.dueDate)
-                                    ).length;
-                                  return (
-                                    <tr
-                                      key={index}
-                                      className="bg-white rounded-2xl shadow-md group cursor-pointer hover:bg-gray-100 transition duration-300"
-                                    >
-                                      <td className="p-4 flex items-center justify-start">
-                                        <div className="flex flex-row items-center justify-start gap-16 -lg:gap-2">
-                                          <div className="h-10 w-10">
-                                            <CircularProgressbar
-                                              value={percent}
-                                              text={`${percent.toFixed(0)}%`}
-                                              strokeWidth={8}
-                                              className="h-10 w-10"
-                                              styles={buildStyles({
-                                                backgroundColor: '#3e98c7',
-                                                textColor: 'black',
-                                                pathColor: '#6cf55f',
-                                                trailColor: '#fa7878',
-                                                textSize: '24px',
-                                              })}
-                                            />
-                                          </div>
-                                          <span>{item.month}</span>
-                                        </div>
-                                      </td>
-                                      <td>{totalTasks}</td>
-                                      <td>
-                                        <div className="flex flex-col gap-1 ">
-                                          <span>
-                                            {overdue + pending + inProgress} (
-                                            {(
-                                              ((overdue +
-                                                pending +
-                                                inProgress) /
-                                                totalTasks) *
-                                              100
-                                            ).toFixed(0)}
-                                            %)
-                                          </span>
-                                          <div className="hidden group-hover:flex -md:flex flex-row gap-1 mt-2 justify-evenly ">
-                                            <span className="text-red-500">
-                                              {overdue} (
-                                              {(
-                                                (overdue / totalTasks) *
-                                                100
-                                              ).toFixed(0)}
-                                              %)
-                                            </span>
-                                            <span className="text-yellow-500">
-                                              {pending} (
-                                              {(
-                                                (pending / totalTasks) *
-                                                100
-                                              ).toFixed(0)}
-                                              %)
-                                            </span>
-                                            <span className="text-orange-500">
-                                              {inProgress} (
-                                              {(
-                                                (inProgress / totalTasks) *
-                                                100
-                                              ).toFixed(0)}
-                                              %)
-                                            </span>
-                                          </div>
-                                        </div>
-                                      </td>
-                                      <td>
-                                        <div className="flex flex-col gap-1">
-                                          <span>
-                                            {completed} (
-                                            {(
-                                              (completed / totalTasks) *
-                                              100
-                                            ).toFixed(0)}
-                                            %)
-                                          </span>
-                                          <div className="hidden group-hover:flex -md:flex mt-2 flex-row gap-2 justify-between w-full px-8">
-                                            <span className="text-green-500">
-                                              {completedInTime} (
-                                              {(
-                                                (completedInTime / totalTasks) *
-                                                100
-                                              ).toFixed(0)}
-                                              %)
-                                            </span>
-                                            <span className="text-red-500">
-                                              {completedDelayed} (
-                                              {(
-                                                (completedDelayed /
-                                                  totalTasks) *
-                                                100
-                                              ).toFixed(0)}
-                                              %)
-                                            </span>
-                                          </div>
-                                        </div>
-                                      </td>
-                                    </tr>
-                                  );
-                                })}
-                          </tbody>
-                        </table>
-
-                        {groupedByMonth?.filter(
-                          item => item.status === activeTab
-                        )?.length >= 10 && (
-                          <div className="flex flex-row gap-2 items-center justify-center mt-4">
-                            <button
-                              onClick={() =>
-                                setCurrentPage(prev => Math.max(prev - 1, 1))
-                              }
-                              className="flex flex-row gap-2 items-center bg-primary text-secondary px-3 py-2 rounded-3xl"
-                              disabled={currentPage === 1}
-                            >
-                              <MdSkipPrevious />
-                              Last Page
-                            </button>
-                            <span className="text-primary font-semibold">
-                              Page {currentPage}
-                            </span>
-                            <button
-                              onClick={() => {
-                                setCurrentPage(prev => prev + 1);
-                              }}
-                              className="flex flex-row gap-2 items-center bg-primary text-secondary px-3 py-2 rounded-3xl"
-                              disabled={isPreviousData || !data?.hasMore}
-                            >
-                              Next Page
-                              <MdSkipNext />
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    </TabsContent>
-                    {isFetched && groupedByMonth.length <= 0 && (
-                      <p className="font-semibold text-center mt-4 text-xl">
-                        No Tasks Found!
-                      </p>
-                    )}
-                  </motion.div>
-                )}
-                {activeTab === 'Daily Report' && (
-                  <motion.div
-                    key="Daily Report"
-                    initial={{ x: 100, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    exit={{ x: -100, opacity: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="w-full"
-                  >
-                    <TabsContent
-                      value="Daily Report"
-                      className="w-full text-nowrap"
-                    >
-                      <div className="w-full overflow-x-auto bg-secondary font-semibold rounded-2xl">
-                        <table className="w-full table-auto text-center">
-                          <thead>
-                            <tr className="text-primary">
-                              <th className="p-4">Date</th>
-                              <th className="px-4">Total</th>
-                              <th>
-                                <div className="flex flex-col items-center px-4">
-                                  <span>Not Completed</span>
-                                  <div className="flex gap-2 mt-1 flex-row justify-evenly w-full">
-                                    <div className="flex items-center gap-1">
-                                      <span className="w-3 h-3 bg-red-500 rounded-full"></span>
-                                      Overdue
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                      <span className="w-3 h-3 border-2 border-yellow-500 rounded-full"></span>
-                                      Pending
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                      <span className="w-3 h-3 bg-orange-500 rounded-full animate-spin"></span>
-                                      In Progress
-                                    </div>
-                                  </div>
-                                </div>
-                              </th>
-                              <th>
-                                <div className="flex flex-col items-center">
-                                  <span>Completed</span>
-                                  <div className="flex flex-row gap-2 justify-between w-full mt-1 px-4">
-                                    <div className="flex items-center gap-1">
-                                      <FaRegClock className="text-secondary fill-green-500" />
-                                      In Time
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                      <FaRegClock className="text-secondary fill-red-500" />
-                                      Delayed
-                                    </div>
-                                  </div>
-                                </div>
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {isFetched &&
-                              groupedByDate.length > 0 &&
-                              groupedByDate.map((item, index) => {
-                                const percent =
-                                  (item.obj.filter(
-                                    task => task.status === 'Complete'
-                                  ).length /
-                                    item.obj.length) *
-                                  100;
-                                const totalTasks = item.obj.length;
-                                const overdue = item.obj.filter(
-                                  task => task.status === 'Overdue'
-                                ).length;
-                                const pending = item.obj.filter(
-                                  task => task.status === 'Pending'
-                                ).length;
-                                const inProgress = item.obj.filter(
-                                  task => task.status === 'In Progress'
-                                ).length;
-                                const completed = item.obj.filter(
-                                  task => task.status === 'Complete'
-                                ).length;
-                                const completedInTime = item.obj
-                                  .filter(task => task.status === 'Complete')
-                                  .filter(
-                                    task =>
-                                      new Date(task.updatedOn) <=
-                                      new Date(task.dueDate)
-                                  ).length;
-                                const completedDelayed = item.obj
-                                  .filter(task => task.status === 'Complete')
-                                  .filter(
-                                    task =>
-                                      new Date(task.updatedOn) >
-                                      new Date(task.dueDate)
-                                  ).length;
-
-                                return (
-                                  <tr
-                                    key={index}
-                                    className="bg-white rounded-2xl shadow-md group cursor-pointer hover:bg-gray-100 transition duration-300"
-                                  >
-                                    <td className="p-4 flex items-center justify-start">
-                                      <div className="flex flex-row items-center justify-start gap-16 -lg:gap-2">
-                                        <div className="h-10 w-10">
-                                          <CircularProgressbar
-                                            value={percent}
-                                            text={`${percent.toFixed(0)}%`}
-                                            strokeWidth={8}
-                                            className="h-10 w-10"
-                                            styles={buildStyles({
-                                              backgroundColor: '#3e98c7',
-                                              textColor: 'black',
-                                              pathColor: '#6cf55f',
-                                              trailColor: '#fa7878',
-                                              textSize: '24px',
-                                            })}
-                                          />
-                                        </div>
-                                        <span>{item.date}</span>
-                                      </div>
-                                    </td>
-                                    <td>{totalTasks}</td>
-                                    <td>
-                                      <div className="flex flex-col gap-1">
-                                        <span>
-                                          {overdue + pending + inProgress} (
-                                          {(
-                                            ((overdue + pending + inProgress) /
-                                              totalTasks) *
-                                            100
-                                          ).toFixed(0)}
-                                          %)
-                                        </span>
-                                        <div className="hidden group-hover:flex -md:flex flex-row gap-1 mt-2 justify-evenly">
-                                          <span className="text-red-500">
-                                            {overdue} (
-                                            {(
-                                              (overdue / totalTasks) *
-                                              100
-                                            ).toFixed(0)}
-                                            %)
-                                          </span>
-                                          <span className="text-yellow-500">
-                                            {pending} (
-                                            {(
-                                              (pending / totalTasks) *
-                                              100
-                                            ).toFixed(0)}
-                                            %)
-                                          </span>
-                                          <span className="text-orange-500">
-                                            {inProgress} (
-                                            {(
-                                              (inProgress / totalTasks) *
-                                              100
-                                            ).toFixed(0)}
-                                            %)
-                                          </span>
-                                        </div>
-                                      </div>
-                                    </td>
-                                    <td>
-                                      <div className="flex flex-col gap-1">
-                                        <span>
-                                          {completed} (
-                                          {(
-                                            (completed / totalTasks) *
-                                            100
-                                          ).toFixed(0)}
-                                          %)
-                                        </span>
-                                        <div className="hidden group-hover:flex -md:flex mt-2 flex-row gap-2 justify-between w-full px-8">
-                                          <span className="text-green-500">
-                                            {completedInTime} (
-                                            {(
-                                              (completedInTime / totalTasks) *
-                                              100
-                                            ).toFixed(0)}
-                                            %)
-                                          </span>
-                                          <span className="text-red-500">
-                                            {completedDelayed} (
-                                            {(
-                                              (completedDelayed / totalTasks) *
-                                              100
-                                            ).toFixed(0)}
-                                            %)
-                                          </span>
-                                        </div>
-                                      </div>
-                                    </td>
-                                  </tr>
-                                );
-                              })}
-                          </tbody>
-                        </table>
-
-                        {groupedByDate?.filter(
-                          item => item.status === activeTab
-                        )?.length >= 10 && (
-                          <div className="flex flex-row gap-2 items-center justify-center mt-4">
-                            <button
-                              onClick={() =>
-                                setCurrentPage(prev => Math.max(prev - 1, 1))
-                              }
-                              className="flex flex-row gap-2 items-center bg-primary text-secondary px-3 py-2 rounded-3xl"
-                              disabled={currentPage === 1}
-                            >
-                              <MdSkipPrevious />
-                              Last Page
-                            </button>
-                            <span className="text-primary font-semibold">
-                              Page {currentPage}
-                            </span>
-                            <button
-                              onClick={() => {
-                                setCurrentPage(prev => prev + 1);
-                              }}
-                              className="flex flex-row gap-2 items-center bg-primary text-secondary px-3 py-2 rounded-3xl"
-                              disabled={isPreviousData || !data?.hasMore}
-                            >
-                              Next Page
-                              <MdSkipNext />
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                      {isFetched && groupedByDate.length <= 0 && (
-                        <p className="font-semibold text-center mt-4 text-xl">
-                          No Tasks Found!
-                        </p>
-                      )}
-                    </TabsContent>
-                  </motion.div>
-                )}
-                {activeTab === 'My Report' && (
-                  <motion.div
-                    key="My Report"
-                    initial={{ x: 100, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    exit={{ x: -100, opacity: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="w-full"
-                  >
-                    <TabsContent
-                      value="My Report"
-                      className="w-full text-nowrap"
-                    >
-                      <div className="w-full overflow-x-auto bg-secondary font-semibold rounded-2xl">
-                        <table className="w-full table-auto text-center">
-                          <thead>
-                            <tr className="text-primary">
-                              <th className="p-4">Category</th>
-                              <th className="px-4">Total</th>
-                              <th>
-                                <div className="flex flex-col items-center px-4">
-                                  <span>Not Completed</span>
-                                  <div className="flex gap-2 mt-1 flex-row justify-evenly w-full">
-                                    <div className="flex items-center gap-1">
-                                      <span className="w-3 h-3 bg-red-500 rounded-full"></span>
-                                      Overdue
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                      <span className="w-3 h-3 border-2 border-yellow-500 rounded-full"></span>
-                                      Pending
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                      <span className="w-3 h-3 bg-orange-500 rounded-full animate-spin"></span>
-                                      In Progress
-                                    </div>
-                                  </div>
-                                </div>
-                              </th>
-                              <th>
-                                <div className="flex flex-col items-center">
-                                  <span>Completed</span>
-                                  <div className="flex flex-row gap-2 justify-between w-full mt-1 px-4">
-                                    <div className="flex items-center gap-1">
-                                      <FaRegClock className="text-secondary fill-green-500" />
-                                      In Time
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                      <FaRegClock className="text-secondary fill-red-500" />
-                                      Delayed
-                                    </div>
-                                  </div>
-                                </div>
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {isFetched &&
-                              groupedByCategoryAndUserId.length > 0 &&
-                              groupedByCategoryAndUserId.map((item, index) => {
-                                const percent =
-                                  (item.obj.filter(
-                                    task => task.status === 'Complete'
-                                  ).length /
-                                    item.obj.length) *
-                                  100;
-                                const totalTasks = item.obj.length;
-                                const overdue = item.obj.filter(
-                                  task => task.status === 'Overdue'
-                                ).length;
-                                const pending = item.obj.filter(
-                                  task => task.status === 'Pending'
-                                ).length;
-                                const inProgress = item.obj.filter(
-                                  task => task.status === 'In Progress'
-                                ).length;
-                                const completed = item.obj.filter(
-                                  task => task.status === 'Complete'
-                                ).length;
-                                const completedInTime = item.obj
-                                  .filter(task => task.status === 'Complete')
-                                  .filter(
-                                    task =>
-                                      new Date(task.updatedOn) <=
-                                      new Date(task.dueDate)
-                                  ).length;
-                                const completedDelayed = item.obj
-                                  .filter(task => task.status === 'Complete')
-                                  .filter(
-                                    task =>
-                                      new Date(task.updatedOn) >
-                                      new Date(task.dueDate)
-                                  ).length;
-                                return (
-                                  <tr
-                                    key={index}
-                                    className="bg-white rounded-2xl shadow-md group cursor-pointer hover:bg-gray-100 transition duration-300"
-                                  >
-                                    <td className="p-4 flex items-center justify-start">
-                                      <div className="flex flex-row items-center justify-start gap-16 -lg:gap-2">
-                                        <div className="h-10 w-10">
-                                          <CircularProgressbar
-                                            value={percent}
-                                            text={`${percent.toFixed(0)}%`}
-                                            strokeWidth={8}
-                                            className="h-10 w-10"
-                                            styles={buildStyles({
-                                              backgroundColor: '#3e98c7',
-                                              textColor: 'black',
-                                              pathColor: '#6cf55f',
-                                              trailColor: '#fa7878',
-                                              textSize: '24px',
-                                            })}
-                                          />
-                                        </div>
-                                        <span>{item.category}</span>
-                                      </div>
-                                    </td>
-                                    <td>{totalTasks}</td>
-                                    <td>
-                                      <div className="flex flex-col gap-1">
-                                        <span>
-                                          {overdue + pending + inProgress} (
-                                          {(
-                                            ((overdue + pending + inProgress) /
-                                              totalTasks) *
-                                            100
-                                          ).toFixed(0)}
-                                          %)
-                                        </span>
-                                        <div className="hidden group-hover:flex -md:flex flex-row gap-1 mt-2 justify-evenly">
-                                          <span className="text-red-500">
-                                            {overdue} (
-                                            {(
-                                              (overdue / totalTasks) *
-                                              100
-                                            ).toFixed(0)}
-                                            %)
-                                          </span>
-                                          <span className="text-yellow-500">
-                                            {pending} (
-                                            {(
-                                              (pending / totalTasks) *
-                                              100
-                                            ).toFixed(0)}
-                                            %)
-                                          </span>
-                                          <span className="text-orange-500">
-                                            {inProgress} (
-                                            {(
-                                              (inProgress / totalTasks) *
-                                              100
-                                            ).toFixed(0)}
-                                            %)
-                                          </span>
-                                        </div>
-                                      </div>
-                                    </td>
-                                    <td>
-                                      <div className="flex flex-col gap-1">
-                                        <span>
-                                          {completed} (
-                                          {(
-                                            (completed / totalTasks) *
-                                            100
-                                          ).toFixed(0)}
-                                          %)
-                                        </span>
-                                        <div className="hidden group-hover:flex -md:flex mt-2 flex-row gap-2 justify-between w-full px-8">
-                                          <span className="text-green-500">
-                                            {completedInTime} (
-                                            {(
-                                              (completedInTime / totalTasks) *
-                                              100
-                                            ).toFixed(0)}
-                                            %)
-                                          </span>
-                                          <span className="text-red-500">
-                                            {completedDelayed} (
-                                            {(
-                                              (completedDelayed / totalTasks) *
-                                              100
-                                            ).toFixed(0)}
-                                            %)
-                                          </span>
-                                        </div>
-                                      </div>
-                                    </td>
-                                  </tr>
-                                );
-                              })}
-                          </tbody>
-                        </table>
-
-                        {groupedByCategory?.filter(
-                          item => item.status === activeTab
-                        )?.length >= 10 && (
-                          <div className="flex flex-row gap-2 items-center justify-center mt-4">
-                            <button
-                              onClick={() =>
-                                setCurrentPage(prev => Math.max(prev - 1, 1))
-                              }
-                              className="flex flex-row gap-2 items-center bg-primary text-secondary px-3 py-2 rounded-3xl"
-                              disabled={currentPage === 1}
-                            >
-                              <MdSkipPrevious />
-                              Last Page
-                            </button>
-                            <span className="text-primary font-semibold">
-                              Page {currentPage}
-                            </span>
-                            <button
-                              onClick={() => {
-                                setCurrentPage(prev => prev + 1);
-                              }}
-                              className="flex flex-row gap-2 items-center bg-primary text-secondary px-3 py-2 rounded-3xl"
-                              disabled={isPreviousData || !data?.hasMore}
-                            >
-                              Next Page
-                              <MdSkipNext />
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                      {isFetched && groupedByCategoryAndUserId.length <= 0 && (
-                        <p className="font-semibold text-center mt-4 text-xl">
-                          No Tasks Found!
-                        </p>
-                      )}
-                    </TabsContent>
-                  </motion.div>
-                )}
-                {activeTab === 'Category Wise' && (
-                  <motion.div
-                    key="Category Wise"
-                    initial={{ x: 100, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    exit={{ x: -100, opacity: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="w-full"
-                  >
-                    <TabsContent
-                      value="Category Wise"
-                      className="w-full text-nowrap"
-                    >
-                      <div className="w-full overflow-x-auto bg-secondary font-semibold rounded-2xl">
-                        <table className="w-full table-auto text-center">
-                          <thead>
-                            <tr className="text-primary">
-                              <th className="p-4">Category</th>
-                              <th className="px-4">Total</th>
-                              <th>
-                                <div className="flex flex-col items-center px-4">
-                                  <span>Not Completed</span>
-                                  <div className="flex gap-2 mt-1 flex-row justify-evenly w-full">
-                                    <div className="flex items-center gap-1">
-                                      <span className="w-3 h-3 bg-red-500 rounded-full"></span>
-                                      Overdue
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                      <span className="w-3 h-3 border-2 border-yellow-500 rounded-full"></span>
-                                      Pending
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                      <span className="w-3 h-3 bg-orange-500 rounded-full animate-spin"></span>
-                                      In Progress
-                                    </div>
-                                  </div>
-                                </div>
-                              </th>
-                              <th>
-                                <div className="flex flex-col items-center">
-                                  <span>Completed</span>
-                                  <div className="flex flex-row gap-2 justify-between w-full mt-1 px-4">
-                                    <div className="flex items-center gap-1">
-                                      <FaRegClock className="text-secondary fill-green-500" />
-                                      In Time
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                      <FaRegClock className="text-secondary fill-red-500" />
-                                      Delayed
-                                    </div>
-                                  </div>
-                                </div>
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {isFetched &&
-                              groupedByCategory.length > 0 &&
-                              groupedByCategory.map((item, index) => {
-                                const percent =
-                                  (item.obj.filter(
-                                    task => task.status === 'Complete'
-                                  ).length /
-                                    item.obj.length) *
-                                  100;
-                                const totalTasks = item.obj.length;
-                                const overdue = item.obj.filter(
-                                  task => task.status === 'Overdue'
-                                ).length;
-                                const pending = item.obj.filter(
-                                  task => task.status === 'Pending'
-                                ).length;
-                                const inProgress = item.obj.filter(
-                                  task => task.status === 'In Progress'
-                                ).length;
-                                const completed = item.obj.filter(
-                                  task => task.status === 'Complete'
-                                ).length;
-                                const completedInTime = item.obj
-                                  .filter(task => task.status === 'Complete')
-                                  .filter(
-                                    task =>
-                                      new Date(task.updatedOn) <=
-                                      new Date(task.dueDate)
-                                  ).length;
-                                const completedDelayed = item.obj
-                                  .filter(task => task.status === 'Complete')
-                                  .filter(
-                                    task =>
-                                      new Date(task.updatedOn) >
-                                      new Date(task.dueDate)
-                                  ).length;
-                                return (
-                                  <tr
-                                    key={index}
-                                    className="bg-white rounded-2xl shadow-md group cursor-pointer hover:bg-gray-100 transition duration-300"
-                                  >
-                                    <td className="p-4 flex items-center justify-start">
-                                      <div className="flex flex-row items-center justify-start gap-16 -lg:gap-2">
-                                        <div className="h-10 w-10">
-                                          <CircularProgressbar
-                                            value={percent}
-                                            text={`${percent.toFixed(0)}%`}
-                                            strokeWidth={8}
-                                            className="h-10 w-10"
-                                            styles={buildStyles({
-                                              backgroundColor: '#3e98c7',
-                                              textColor: 'black',
-                                              pathColor: '#6cf55f',
-                                              trailColor: '#fa7878',
-                                              textSize: '24px',
-                                            })}
-                                          />
-                                        </div>
-                                        <span>{item.category}</span>
-                                      </div>
-                                    </td>
-                                    <td>{totalTasks}</td>
-                                    <td>
-                                      <div className="flex flex-col gap-1">
-                                        <span>
-                                          {overdue + pending + inProgress} (
-                                          {(
-                                            ((overdue + pending + inProgress) /
-                                              totalTasks) *
-                                            100
-                                          ).toFixed(0)}
-                                          %)
-                                        </span>
-                                        <div className="hidden group-hover:flex -md:flex flex-row gap-1 mt-2 justify-evenly">
-                                          <span className="text-red-500">
-                                            {overdue} (
-                                            {(
-                                              (overdue / totalTasks) *
-                                              100
-                                            ).toFixed(0)}
-                                            %)
-                                          </span>
-                                          <span className="text-yellow-500">
-                                            {pending} (
-                                            {(
-                                              (pending / totalTasks) *
-                                              100
-                                            ).toFixed(0)}
-                                            %)
-                                          </span>
-                                          <span className="text-orange-500">
-                                            {inProgress} (
-                                            {(
-                                              (inProgress / totalTasks) *
-                                              100
-                                            ).toFixed(0)}
-                                            %)
-                                          </span>
-                                        </div>
-                                      </div>
-                                    </td>
-                                    <td>
-                                      <div className="flex flex-col gap-1">
-                                        <span>
-                                          {completed} (
-                                          {(
-                                            (completed / totalTasks) *
-                                            100
-                                          ).toFixed(0)}
-                                          %)
-                                        </span>
-                                        <div className="hidden group-hover:flex -md:flex mt-2 flex-row gap-2 justify-between w-full px-8">
-                                          <span className="text-green-500">
-                                            {completedInTime} (
-                                            {(
-                                              (completedInTime / totalTasks) *
-                                              100
-                                            ).toFixed(0)}
-                                            %)
-                                          </span>
-                                          <span className="text-red-500">
-                                            {completedDelayed} (
-                                            {(
-                                              (completedDelayed / totalTasks) *
-                                              100
-                                            ).toFixed(0)}
-                                            %)
-                                          </span>
-                                        </div>
-                                      </div>
-                                    </td>
-                                  </tr>
-                                );
-                              })}
-                          </tbody>
-                        </table>
-
-                        {groupedByCategory?.filter(
-                          item => item.status === activeTab
-                        )?.length >= 10 && (
-                          <div className="flex flex-row gap-2 items-center justify-center mt-4">
-                            <button
-                              onClick={() =>
-                                setCurrentPage(prev => Math.max(prev - 1, 1))
-                              }
-                              className="flex flex-row gap-2 items-center bg-primary text-secondary px-3 py-2 rounded-3xl"
-                              disabled={currentPage === 1}
-                            >
-                              <MdSkipPrevious />
-                              Last Page
-                            </button>
-                            <span className="text-primary font-semibold">
-                              Page {currentPage}
-                            </span>
-                            <button
-                              onClick={() => {
-                                setCurrentPage(prev => prev + 1);
-                              }}
-                              className="flex flex-row gap-2 items-center bg-primary text-secondary px-3 py-2 rounded-3xl"
-                              disabled={isPreviousData || !data?.hasMore}
-                            >
-                              Next Page
-                              <MdSkipNext />
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                      {isFetched && groupedByCategory.length <= 0 && (
-                        <p className="font-semibold text-center mt-4 text-xl">
-                          No Tasks Found!
-                        </p>
-                      )}
-                    </TabsContent>
-                  </motion.div>
-                )}
-                {activeTab === 'OverDue Report' && (
-                  <motion.div
-                    key="OverDue Report"
-                    initial={{ x: 100, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    exit={{ x: -100, opacity: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="w-full"
-                  >
-                    <TabsContent
-                      value="OverDue Report"
-                      className="w-full text-nowrap"
-                    >
-                      <div className="w-full overflow-x-auto bg-secondary font-semibold rounded-2xl">
-                        <table className="w-full table-auto text-center">
-                          <thead>
-                            <tr className="text-primary">
-                              <th className="p-4">Employee Name</th>
-                              <th className="py-4">
-                                <div className="flex flex-row items-center justify-center gap-2">
-                                  <span className="w-3 h-3 bg-red-500 rounded-full" />
-                                  OverDue
-                                </div>
-                              </th>
-                              <th className="py-4 ">
-                                <div className="flex flex-row items-center justify-center gap-2">
-                                  <FaClockRotateLeft className="fill-yellow-500" />
-                                  Overdue Since
-                                </div>
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {isFetched &&
-                              groupedByOverdueByEmployee.length > 0 &&
-                              groupedByOverdueByEmployee.map((item, index) => {
-                                const taskObj = item.obj.reduce((acc, task) => {
-                                  const overdueDate = new Date(task.dueDate);
-                                  const overdueAcc = new Date(acc.dueDate);
-                                  return overdueDate < overdueAcc ? task : acc;
-                                }, item.obj[0]);
-                                const date = Math.abs(
-                                  new Date(taskObj.dueDate).getDate() -
-                                    new Date().getDate()
-                                );
-                                return (
-                                  <tr
-                                    key={index}
-                                    className="bg-white rounded-2xl shadow-md group cursor-pointer hover:bg-white transition duration-300"
-                                  >
-                                    <td className="p-4 ">{item.employee}</td>
-                                    <td>{item.obj.length}</td>
-                                    <td>{date.toLocaleString()} days ago</td>
-                                  </tr>
-                                );
-                              })}
-                          </tbody>
-                        </table>
-
-                        {groupedByOverdueByEmployee?.filter(
-                          item => item.status === activeTab
-                        )?.length >= 10 && (
-                          <div className="flex flex-row gap-2 items-center justify-center mt-4">
-                            <button
-                              onClick={() =>
-                                setCurrentPage(prev => Math.max(prev - 1, 1))
-                              }
-                              className="flex flex-row gap-2 items-center bg-primary text-secondary px-3 py-2 rounded-3xl"
-                              disabled={currentPage === 1}
-                            >
-                              <MdSkipPrevious />
-                              Last Page
-                            </button>
-                            <span className="text-primary font-semibold">
-                              Page {currentPage}
-                            </span>
-                            <button
-                              onClick={() => {
-                                setCurrentPage(prev => prev + 1);
-                              }}
-                              className="flex flex-row gap-2 items-center bg-primary text-secondary px-3 py-2 rounded-3xl"
-                              disabled={isPreviousData || !data?.hasMore}
-                            >
-                              Next Page
-                              <MdSkipNext />
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                      {isFetched && groupedByOverdueByEmployee.length <= 0 && (
-                        <p className="font-semibold text-center mt-4 text-xl">
-                          No Tasks Found!
-                        </p>
-                      )}
-                    </TabsContent>
-                  </motion.div>
-                )}
+                <motion.div
+                  key={activeTab}
+                  initial={{ x: 100, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  exit={{ x: -100, opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="w-full"
+                >
+                  <TabsContent value={activeTab} className="w-full">
+                    {tabComponents[activeTab]}
+                  </TabsContent>
+                </motion.div>
               </AnimatePresence>
             </Tabs>
           </div>

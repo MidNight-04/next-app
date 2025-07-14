@@ -6,24 +6,24 @@ const PrivacyPolicyPage = () => {
   return (
     <>
       <Head>
-        <title>Bldox.Com Privacy Policy</title>
+        <title>Bldox Privacy Policy</title>
         <meta
           name="description"
-          content="Read the privacy policy of the Bldox.Com mobile application. Learn how we collect, use, and protect your data."
+          content="Read the privacy policy of the Bldox mobile application. Learn how we collect, use, and protect your data."
         />
       </Head>
 
       <article className="px-4 py-8 max-w-3xl mx-auto text-gray-800 dark:text-gray-200">
         <h1 className="text-3xl font-bold mb-6 text-center">
-          Bldox.Com Privacy Policy
+          Bldox Privacy Policy
         </h1>
 
         <section className="space-y-4">
           <p>
-            This privacy policy applies to the Bldox.Com app (referred to as
+            This privacy policy applies to the Bldox app (referred to as
             &quot;Application&quot;) for mobile devices that was created by
-            Bldox.Com (&quot;Service Provider&quot;) as a Free service. This
-            service is provided &quot;AS IS&quot;.
+            Bldox (&quot;Service Provider&quot;) as a Free service. This service
+            is provided &quot;AS IS&quot;.
           </p>
 
           <h2 className="text-xl font-semibold mt-6">
@@ -54,7 +54,7 @@ const PrivacyPolicyPage = () => {
             <li>As required by law</li>
             <li>To protect rights, safety, or prevent fraud</li>
             <li>
-              With trusted third-party service providers (e.g. - {' '}
+              With trusted third-party service providers (e.g. -{' '}
               <Link
                 href="https://policies.google.com/privacy"
                 target="_blank"

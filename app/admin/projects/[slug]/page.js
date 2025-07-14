@@ -655,7 +655,7 @@ const ClientProjectView = () => {
             className="data-[orientation=vertical]:h-4 bg-black"
           />
           <IoIosArrowBack
-            onClick={() => router.back()}
+            onClick={() => router.push('/admin/projects')}
             className="cursor-pointer transition duration-300 hover:scale-150 ease-in-out"
           />
           <h1 className="font-ubuntu font-semibold text-[25px] leading-7 py-5 whitespace-nowrap">
@@ -696,7 +696,8 @@ const ClientProjectView = () => {
         <StatCard
           label={
             <>
-              <span className="font-semibold">Start Date -</span> {startDate}
+              <span className="font-semibold">Start Date -</span>{' '}
+              {derived.startDate}
             </>
           }
           value={<BsCalendar4Event className="text-5" />}
@@ -704,7 +705,8 @@ const ClientProjectView = () => {
         <StatCard
           label={
             <>
-              <span className="font-semibold">End Date -</span> {endDate}
+              <span className="font-semibold">End Date -</span>{' '}
+              {derived.endDate}
             </>
           }
           value={<BsCalendar4Event className="text-5" />}
@@ -783,7 +785,12 @@ const ClientProjectView = () => {
               >
                 <AccordionItem
                   value={item.name}
-                  className="bg-white rounded-[14px] mb-2"
+                  className={`bg-white rounded-[14px] mb-2  ${
+                    activeTab !== item.name
+                      ? 'shadow-lg scale-100 hover:scale-[1.02] transition-all duration-300'
+                      : ''
+                  }`}
+                  // className="bg-white rounded-[14px] mb-2 scale-100 hover:scale-[1.02] transition-all duration-300"
                 >
                   <AccordionTrigger className="px-4">
                     <div className="flex flex-row justify-between w-full pr-8 -md:pr-2">
@@ -986,7 +993,7 @@ const ClientProjectView = () => {
                             </div>
                             <div className="flex items-center justify-center w-[70px]">
                               <button
-                                className="bg-secondary rounded-3xl text-primary px-3 py-2 -md:text-xs -md:px-2 -md:py-1"
+                                className="bg-secondary rounded-3xl text-primary px-3 py-2 -md:text-xs -md:px-2 -md:py-1 scale-100 hover:scale-105 transition-all duration-100"
                                 onClick={() => {
                                   router.push(`/admin/tasks/${itm.taskId._id}`);
                                 }}
@@ -1160,7 +1167,6 @@ const ClientProjectView = () => {
                         </span>
                       </div>
                       <span className="p-2 bg-green-600 rounded-full cursor-pointer">
-                        {' '}
                         <IoCallSharp className="text-white" />
                       </span>
                     </div>

@@ -111,7 +111,7 @@ const Page = () => {
           return (
             <div
               key={index}
-              className="bg-white rounded-3xl shadow-md cursor-pointer"
+              className="bg-white rounded-3xl shadow-md cursor-pointer hover:scale-[1.02] transition-all duration-300"
               onClick={() => router.push(`/admin/projects/${item?.siteID}`)}
             >
               <div className="p-8 mb-4 -md:p-4">

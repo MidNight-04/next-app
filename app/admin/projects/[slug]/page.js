@@ -379,46 +379,40 @@ const ClientProjectView = () => {
     setInspectionDialogOpen(false);
   };
 
-  const handleUploadDocument = () => {
-    if (!documentName || !document?.length) {
+  const handleUploadDocument = async () => {
+    if (!documentName?.trim() || !document?.length) {
       toast('Document name and files are required');
       return;
     }
 
-    const formData = new FormData();
-    formData.append('name', documentName);
-    formData.append('client', projectDetails?.client || '');
-    formData.append('siteID', slug);
-    formData.append('user', userId);
-    formData.append('userName', userName);
-    formData.append('date', formatedtoday);
+    try {
+      const formData = new FormData();
+      formData.append('name', documentName.trim());
+      formData.append('client', projectDetails?.client || '');
+      formData.append('siteID', slug);
+      formData.append('user', userId);
+      formData.append('date', formatedtoday);
 
-    if (Array.isArray(document)) {
-      document.forEach(file => formData.append('document', file));
-    }
+      for (let i = 0; i < document?.length; i++) {
+        formData.append('docs', document[i]);
+      }
 
-    const config = {
-      method: 'post',
-      maxBodyLength: Infinity,
-      url: `admin/project-document/add`,
-      headers: { 'Content-Type': 'multipart/form-data' },
-      data: formData,
-    };
-
-    api
-      .request(config)
-      .then(resp => {
-        setDocumentName('');
-        setDocument('');
-        toast(resp?.data?.message || 'Document uploaded successfully');
-      })
-      .catch(err => {
-        console.error(err);
-        toast('Error while uploading document.');
-      })
-      .finally(() => {
-        setDocumentDialogOpen(false);
+      const resp = await api.post(`admin/project-document/add`, formData, {
+        maxBodyLength: Infinity,
       });
+
+      toast(resp?.data?.message || 'Document uploaded successfully');
+
+      setDocumentName('');
+      setDocument([]);
+    } catch (err) {
+      console.error(err);
+      const errorMsg =
+        err.response?.data?.message || 'Error while uploading document.';
+      toast(errorMsg);
+    } finally {
+      setDocumentDialogOpen(false);
+    }
   };
 
   const handleDocumentClose = () => {

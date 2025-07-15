@@ -1,829 +1,291 @@
 'use client';
-import React, { useState, useEffect } from 'react';
-import { MdSkipNext, MdSkipPrevious } from 'react-icons/md';
+
+import React, {
+  useEffect,
+  useState,
+  useMemo,
+  useCallback,
+  Suspense,
+} from 'react';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import api from '../../../../lib/api';
-import Avatar from '@mui/material/Avatar';
-import { toast } from 'sonner';
 import AsideContainer from '../../../../components/AsideContainer';
-import { cn } from '../../../../lib/utils';
-import { useRouter } from 'next/navigation';
-import { useQuery, keepPreviousData } from '@tanstack/react-query';
-import { useAuthStore } from '../../../../store/useAuthStore';
+import TaskFilterPopup from '../../../../components/filter/Filter';
+import TaskCardSkeleton from '../../../../components/skeletons/TaskCardSkeleton';
+import PageHeaderSkeleton from '../../../../components/skeletons/HeaderSkeleton';
+import TabsSkeleton from '../../../../components/skeletons/TabsSkeleton';
+import TaskCard from '../../../../components/TaskCard';
 import {
   Tabs,
-  TabsContent,
   TabsList,
   TabsTrigger,
+  TabsContent,
 } from '../../../../components/ui/tabs';
+import { MdFilterListOff } from 'react-icons/md';
 import { SearchOutlined } from '@mui/icons-material';
 import { IoFilterOutline } from 'react-icons/io5';
-import TaskFilterPopup from '../../../../components/filter/Filter';
-import LoaderSpinner from '../../../../components/loader/LoaderSpinner';
-import { SlCalender } from 'react-icons/sl';
-import { IoIosPricetag } from 'react-icons/io';
-import { IoIosFlag } from 'react-icons/io';
-import { FiRepeat } from 'react-icons/fi';
-import { FaRegCircle } from 'react-icons/fa';
-import { FaCircleCheck } from 'react-icons/fa6';
-import { FaCircle } from 'react-icons/fa6';
-import { AiOutlineLoading3Quarters } from 'react-icons/ai';
+import { cn } from '../../../../lib/utils';
+import { useAuthStore } from '../../../../store/useAuthStore';
+import { FaCircleCheck, FaCircle } from 'react-icons/fa6';
 import { FaExclamationCircle } from 'react-icons/fa';
-import { FaUserCircle } from 'react-icons/fa';
-import { MdFilterListOff } from 'react-icons/md';
+import { AiOutlineLoading3Quarters } from 'react-icons/ai';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useInView } from 'react-intersection-observer';
+import { debounce } from 'lodash';
 
-// import ProgressBar from "../ProgressBar/ProgressBar";
+const tabValues = [
+  { value: 'Overdue', icon: <FaExclamationCircle className="mr-1" /> },
+  { value: 'Pending', icon: <FaCircle className="mr-1" /> },
+  {
+    value: 'In Progress',
+    icon: <AiOutlineLoading3Quarters className="mr-1" />,
+  },
+  { value: 'Complete', icon: <FaCircleCheck className="mr-1" /> },
+];
 
-const Page = () => {
+const filters = [
+  'Yesterday',
+  'Today',
+  'Tomorrow',
+  'This Week',
+  'This Month',
+  'Last Month',
+  'Next Week',
+];
+
+const Content = () => {
   const router = useRouter();
-  const userType = useAuthStore(state => state.userType);
-  const userId = useAuthStore(state => state.userId);
-  const [activeFilter, setActiveFilter] = useState('This Week');
-  const [activeTab, setActiveTab] = useState('Pending');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [tasks, setTasks] = useState(1);
-  const [searchTerm, setSearchTerm] = useState(null);
-  const [openFilter, setOpenFilter] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState('');
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const { userId, userType } = useAuthStore.getState();
+  const user = userType !== 'ROLE_ADMIN' ? userId : null;
+
+  const getParam = useCallback(
+    (key, fallback = '') => searchParams.get(key) || fallback,
+    [searchParams]
+  );
+
+  const [activeTab, setActiveTab] = useState(() => getParam('tab', 'Pending'));
+  const [activeFilter, setActiveFilter] = useState(() =>
+    getParam('filter', 'This Week')
+  );
   const [customFilters, setCustomFilters] = useState({
-    selectedCategory: '',
-    assignedBy: '',
-    assignedTo: '',
-    frequency: '',
-    priority: '',
+    selectedCategory: getParam('selectedCategory'),
+    assignedBy: getParam('assignedBy'),
+    assignedTo: getParam('assignedTo'),
+    frequency: getParam('frequency'),
+    priority: getParam('priority'),
   });
 
-  // let url;
+  const [openFilter, setOpenFilter] = useState(false);
 
-  // switch (activeFilter) {
-  //   case 'Today':
-  //     url = `task/gettodaytaskbyid`;
-  //     break;
-  //   case 'Yesterday':
-  //     url = `task/getyesterdaytaskbyid`;
-  //     break;
-  //   case 'Tomorrow':
-  //     url = `task/gettomorrowtaskbyid`;
-  //     break;
-  //   case 'This Week':
-  //     url = `task/getthisweektaskbyid`;
-  //     break;
-  //   case 'Next Week':
-  //     url = `task/getnextweektaskbyid`;
-  //     break;
-  //   case 'Next Month':
-  //     url = `task/getnextmonthtaskbyid`;
-  //     break;
-  //   case 'This Month':
-  //     url = `task/getthismonthtaskbyid`;
-  //     break;
-  //   case 'Last Month':
-  //     url = `task/getlastmonthtaskbyid`;
-  //     break;
-  //   case 'Custom':
-  //     url = `task/customfilters`;
-  //     break;
-  // }
+  const setUrlParams = useCallback(
+    params => {
+      const newParams = new URLSearchParams(searchParams.toString());
+      Object.entries(params).forEach(([key, value]) => {
+        if (value) newParams.set(key, value);
+        else newParams.delete(key);
+      });
+      router.replace(`${pathname}?${newParams.toString()}`);
+    },
+    [router, pathname, searchParams]
+  );
 
-  const user = userType !== 'ROLE_ADMIN' ? userId : null;
-  const { data, isFetched, isError, isPreviousData, isFetching, refetch } =
-    useQuery({
-      queryKey: ['delegatedTasks', activeFilter, currentPage],
-      queryFn: async () => {
-        const response = await api.post(`/task/customfilters`, {
-          page: currentPage,
-          userId: user,
-          filter: activeFilter,
-          ...customFilters,
-        });
-        return response.data;
-      },
-      keepPreviousData: true,
-      placeholderData: keepPreviousData,
-      retry: 1,
-      retryDelay: 5000,
-      staleTime: 10000,
-    });
+  const {
+    data,
+    isFetching,
+    isFetched,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    refetch,
+  } = useInfiniteQuery({
+    queryKey: ['delegatedTasks', activeFilter, activeTab, customFilters],
+    queryFn: async ({ pageParam = 1 }) => {
+      const res = await api.post(`/task/delegatedtasks`, {
+        page: pageParam,
+        userId: user,
+        filter: activeFilter,
+        ...customFilters,
+      });
+      return res.data;
+    },
+    getNextPageParam: (lastPage, allPages) =>
+      lastPage?.hasMore ? allPages.length + 1 : undefined,
+  });
 
-  const filters = [
-    'Yesterday',
-    'Today',
-    'Tomorrow',
-    'This Week',
-    'This Month',
-    'Last Month',
-    'Next Week',
-    // 'All Time',
-  ];
+  const flatData = useMemo(
+    () =>
+      data?.pages?.flatMap(page =>
+        page?.tasks?.filter(task => task.status === activeTab)
+      ) || [],
+    [data, activeTab]
+  );
 
-  const searchTask = e => {
-    const searchValue = e.target.value.toLowerCase();
-    const data = api.post(`/task/search/${searchValue}`);
-    setTasks(data);
+  const { ref: inViewRef, inView } = useInView({ threshold: 0.3 });
+
+  const debouncedFetchNext = useMemo(
+    () =>
+      debounce(() => {
+        if (hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      }, 300),
+    [hasNextPage, isFetchingNextPage, fetchNextPage]
+  );
+
+  useEffect(() => {
+    if (inView) debouncedFetchNext();
+  }, [inView, debouncedFetchNext]);
+
+  const handleTabChange = value => {
+    setActiveTab(value);
+    setUrlParams({ tab: value });
   };
 
-  const handleFilterChange = filter => {
+  const handleFilterClick = filter => {
+    setActiveFilter(filter);
+    setUrlParams({ filter });
+  };
+
+  const handleCustomFilterChange = filter => {
     setCustomFilters(filter);
+    setUrlParams(filter);
+  };
+
+  const handleClearFilters = () => {
+    const cleared = {
+      selectedCategory: '',
+      assignedBy: '',
+      assignedTo: '',
+      frequency: '',
+      priority: '',
+    };
+    setCustomFilters(cleared);
+    setUrlParams(cleared);
   };
 
   useEffect(() => {
     refetch();
-  }, [customFilters, refetch]);
+  }, [activeTab, activeFilter, customFilters, refetch]);
 
-  if (isFetching && !isError) {
-    return <LoaderSpinner />;
-  }
-
-  function stringToColor(string) {
-    let hash = 0;
-    let i;
-
-    for (i = 0; i < string.length; i += 1) {
-      hash = string.charCodeAt(i) + ((hash << 5) - hash);
-    }
-
-    let color = '#';
-
-    for (i = 0; i < 3; i += 1) {
-      const value = (hash >> (i * 8)) & 0xff;
-      color += `00${value.toString(16)}`.slice(-2);
-    }
-    return color;
-  }
-
-  function stringAvatar(name) {
-    const splitName = name.split(' ');
-    const initials = splitName
-      .map(n => n[0])
-      .join('')
-      .toUpperCase();
-    const firstLetter = splitName[0][0].toUpperCase();
-    const secondLetter = splitName[1] ? splitName[1][0].toUpperCase() : '';
-    const initialsColor = stringToColor(initials);
-    return {
-      sx: {
-        height: '24px',
-        width: '24px',
-        fontSize: '12px',
-        fontWeight: '400',
-        bgcolor: initialsColor,
-      },
-      children: `${firstLetter}${secondLetter}`,
-    };
+  if (isFetching && !isFetched) {
+    return (
+      <AsideContainer>
+        <PageHeaderSkeleton />
+        <TabsSkeleton />
+        <div className="flex flex-col gap-4 w-full justify-center items-center my-4">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <TaskCardSkeleton key={i} />
+          ))}
+        </div>
+      </AsideContainer>
+    );
   }
 
   return (
     <AsideContainer>
       <div>
-        <div className="flex flex-row gap-2 w-full items-center my-4 justify-between">
-          <h1 className="font-ubuntu font-bold text-[25px] leading-7 p-5 text-nowrap">
+        <div className="flex justify-between items-center my-4 px-5">
+          <h1 className="font-ubuntu font-bold text-[25px] leading-7 text-nowrap">
             Delegated Tasks
           </h1>
-          <div className="relative w-72 ">
-            <SearchOutlined
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-              size={20}
-            />
+          <div className="relative w-72">
+            <SearchOutlined className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
               placeholder="Search..."
               className="pl-10 pr-4 py-2 rounded-2xl border w-full border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
-              onChange={e => searchTask(e)}
             />
           </div>
         </div>
-        <div>
-          <div className="flex flex-row items-center justify-center gap-2 -xl:flex-wrap">
-            {filters.map(filter => (
-              <span
-                key={filter}
-                className={cn(
-                  'flex flex-row gap-2 py-[6px] text-nowrap px-3 bg-primary-foreground text-primary rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl cursor-pointer',
-                  activeFilter === filter
-                    ? 'text-green-800 bg-green-200 border-green-800'
-                    : ''
-                )}
-                onClick={() => setActiveFilter(filter)}
-              >
-                {filter}
-              </span>
-            ))}
-            <div className="flex flex-row gap-3">
-              <button
-                className={cn(
-                  'flex flex-row items-center gap-2 bg-secondary text-primary px-3 py-2 rounded-3xl cursor-pointer'
-                )}
-                onClick={() => {
-                  setOpenFilter(true);
-                }}
-              >
-                Filter
-                <IoFilterOutline />
-              </button>
-              <button
-                className={cn(
-                  'flex flex-row items-center gap-2 bg-secondary text-primary px-3 py-2 rounded-3xl cursor-pointer',
-                  Object.values(customFilters).every(value => value === '') &&
-                    'hidden'
-                )}
-                disabled={Object.values(customFilters).every(
-                  value => value === ''
-                )}
-                onClick={() => {
-                  setCustomFilters({
-                    selectedCategory: '',
-                    assignedBy: '',
-                    assignedTo: '',
-                    frequency: '',
-                    priority: '',
-                  });
-                }}
-              >
-                Clear
-                <MdFilterListOff />
-              </button>
-            </div>
-            {/* <div>
-               {Object.keys(customFilters).map(
-                 key =>
-                   customFilters[key] !== '' && (
-                     <span key={key}>
-                       {key}:{customFilters[key]}
-                     </span>
-                   )
-               )}
-             </div> */}
-          </div>
-          <div>
-            <Tabs
-              defaultValue="Pending"
-              onValueChange={value => setActiveTab(value)}
-              className="flex flex-col w-full justify-center items-center my-4"
+
+        {/* Quick Filters */}
+        <div className="flex flex-row flex-wrap gap-2 justify-center mb-4">
+          {filters.map(filter => (
+            <span
+              key={filter}
+              className={cn(
+                'flex gap-2 py-[6px] px-3 bg-primary-foreground text-primary rounded-full border border-primary cursor-pointer',
+                activeFilter === filter &&
+                  'text-green-800 bg-green-200 border-green-800'
+              )}
+              onClick={() => handleFilterClick(filter)}
             >
-              <TabsList className="grid grid-cols-4 -2xl:w-1/2 -lg:w-full">
-                <TabsTrigger value="Overdue">
-                  <FaExclamationCircle className="text-secondary mr-1" />
-                  OverDue
-                </TabsTrigger>
-                <TabsTrigger value="Pending">
-                  <FaCircle className="text-secondary mr-1" />
-                  Pending
-                </TabsTrigger>
-                <TabsTrigger value="In Progress">
-                  <AiOutlineLoading3Quarters className="text-secondary mr-1" />{' '}
-                  In Progress
-                </TabsTrigger>
-                <TabsTrigger value="Complete">
-                  <FaCircleCheck className="text-secondary mr-1" />
-                  Completed
-                </TabsTrigger>
-              </TabsList>
-              <TabsContent value="Overdue" className="w-full">
-                <div className="flex flex-col gap-4 w-full justify-center items-center my-4">
-                  {isFetched &&
-                    data.length > 0 &&
-                    data
-                      .filter(item => item.status === activeTab)
-                      .map((item, index) => (
-                        <div
-                          key={index}
-                          className="bg-white w-full rounded-2xl p-8 flex flex-row justify-between shadow-md cursor-pointer"
-                          onClick={() =>
-                            router.push(`/admin/tasks/${item._id}`)
-                          }
-                        >
-                          <div className="flex flex-row gap-4">
-                            <span className="h-20 rounded-full w-1 bg-primary" />
-                            <div className="flex flex-col [&_span]:leading-7 font-ubuntu text-base text-[#565656]">
-                              <div>
-                                <span className="font-semibold text-sm flex flex-row gap-2 items-center">
-                                  <Avatar
-                                    sx={{}}
-                                    {...stringAvatar(
-                                      `${
-                                        item.issueMember?.firstname +
-                                        ' ' +
-                                        item.issueMember?.lastname
-                                      }`
-                                    )}
-                                  />
-                                  {item.issueMember?.firstname}
-                                </span>
-                                <span className="text-lg font-bold">
-                                  {item.title}
-                                </span>
-                              </div>
-                              {item.issueMember?.firstname ===
-                              'ThikedaarDotCom' ? (
-                                <span className="font-semibold text-sm">
-                                  Admin
-                                </span>
-                              ) : (
-                                <div className="flex flex-row gap-4 items-center">
-                                  <span className="font-semibold text-sm flex flex-row gap-2 items-center">
-                                    <FaUserCircle className="text-primary" />
-                                    <p className="font-semibold text-sm">
-                                      {item.assignedBy?.firstname +
-                                        ' ' +
-                                        item.assignedBy?.lastname}
-                                    </p>
-                                  </span>
-                                  <span className="font-semibold text-sm flex flex-row gap-2 items-center">
-                                    <SlCalender className="text-primary" />
-                                    <p>
-                                      {new Date(item.dueDate).toLocaleString(
-                                        'en-US',
-                                        {
-                                          dateStyle: 'medium',
-                                          timeStyle: 'short',
-                                        }
-                                      )}
-                                    </p>
-                                  </span>
-                                  <span className="font-semibold text-sm flex flex-row gap-1 items-center">
-                                    {item.status === 'Complete' && (
-                                      <FaCircleCheck className="text-primary" />
-                                    )}
-                                    {item.status === 'Pending' && (
-                                      <FaCircle className="text-primary" />
-                                    )}
-                                    {item.status === 'In Progress' && (
-                                      <AiOutlineLoading3Quarters className="text-primary" />
-                                    )}
-                                    {item.status === 'In Progress' && (
-                                      <FaRegCircle className="text-primary" />
-                                    )}
-                                    {item.status === 'Overdue' && (
-                                      <FaExclamationCircle className="text-primary" />
-                                    )}
-                                    <p>{item.status}</p>
-                                  </span>
-                                  <span className="font-semibold text-sm flex flex-row gap-1 items-center">
-                                    <IoIosPricetag className="text-primary" />
-                                    <p>{item.category}</p>
-                                  </span>
-                                  <span className="font-semibold text-sm flex flex-row gap-1 items-center">
-                                    <IoIosFlag className="text-primary" />
-                                    <p>{item.priority}</p>
-                                  </span>
-                                  <span className="font-semibold text-sm flex flex-row gap-1 items-center">
-                                    <FiRepeat className="text-primary" />
-                                    <p>
-                                      {item.repeat?.repeatType === 'norepeat'
-                                        ? 'Once'
-                                        : item.repeat?.repeatType}
-                                    </p>
-                                  </span>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                </div>
-                {data?.filter(item => item.status === activeTab)?.length >=
-                  10 && (
-                  <div className="flex flex-row gap-2 items-center w-full justify-center mb-4">
-                    <button
-                      onClick={() =>
-                        setCurrentPage(prev => Math.max(prev - 1, 1))
-                      }
-                      className="flex flex-row gap-2 items-center bg-secondary text-primary px-3 py-2 rounded-3xl"
-                      disabled={currentPage === 1}
-                    >
-                      <MdSkipPrevious />
-                      Last Page
-                    </button>
-                    <span className="text-secondary font-semibold">
-                      Page {currentPage}
-                    </span>
-                    <button
-                      onClick={() => {
-                        setCurrentPage(prev => prev + 1);
-                        if (!isPreviousData && data.hasMore) {
-                        }
-                      }}
-                      className="flex flex-row gap-2 items-center bg-secondary text-primary px-3 py-2 rounded-3xl"
-                      disabled={isPreviousData || !data?.hasMore}
-                    >
-                      Next Page
-                      <MdSkipNext />
-                    </button>
-                  </div>
-                )}
-              </TabsContent>
-              <TabsContent value="Pending" className="w-full">
-                <div className="flex flex-col gap-4 w-full justify-center items-center my-4">
-                  {isFetched &&
-                    data.length > 0 &&
-                    data
-                      .filter(item => item.status === activeTab)
-                      .map((item, index) => (
-                        <div
-                          key={index}
-                          className="bg-white w-full rounded-2xl p-8 flex flex-row justify-between shadow-md cursor-pointer"
-                          onClick={() =>
-                            router.push(`/admin/tasks/${item._id}`)
-                          }
-                        >
-                          <div className="flex flex-row gap-4">
-                            <span className="h-20 rounded-full w-1 bg-primary" />
-                            <div className="flex flex-col [&_span]:leading-7 font-ubuntu text-base text-[#565656]">
-                              <div>
-                                <span className="font-semibold text-sm flex flex-row gap-2 items-center">
-                                  <Avatar
-                                    {...stringAvatar(
-                                      `${
-                                        item.issueMember?.firstname +
-                                        ' ' +
-                                        item.issueMember?.lastname
-                                      }`
-                                    )}
-                                  />
-                                  {item.issueMember?.firstname +
-                                    ' ' +
-                                    item.issueMember?.lastname}
-                                </span>
-                                <span className="text-lg font-bold">
-                                  {item.title}
-                                </span>
-                              </div>
-                              {item.issueMember?.firstname ===
-                              'ThikedaarDotCom' ? (
-                                <span className="font-semibold text-sm">
-                                  Admin
-                                </span>
-                              ) : (
-                                <div className="flex flex-row gap-4 items-center">
-                                  <span className="font-semibold text-sm flex flex-row gap-2 items-center">
-                                    <FaUserCircle className="text-primary" />
-                                    <p className="font-semibold text-sm">
-                                      {item.assignedBy?.firstname +
-                                        ' ' +
-                                        item.assignedBy?.lastname}
-                                    </p>
-                                  </span>
-                                  <span className="font-semibold text-sm flex flex-row gap-2 items-center">
-                                    <SlCalender className="text-primary" />
-                                    <p>
-                                      {new Date(item.dueDate).toLocaleString(
-                                        'en-US',
-                                        {
-                                          dateStyle: 'medium',
-                                          timeStyle: 'short',
-                                        }
-                                      )}
-                                    </p>
-                                  </span>
-                                  <span className="font-semibold text-sm flex flex-row gap-1 items-center">
-                                    {item.status === 'Complete' && (
-                                      <FaCircleCheck className="text-primary" />
-                                    )}
-                                    {item.status === 'Pending' && (
-                                      <FaCircle className="text-primary" />
-                                    )}
-                                    {item.status === 'In Progress' && (
-                                      <AiOutlineLoading3Quarters className="text-primary" />
-                                    )}
-                                    {item.status === 'In Progress' && (
-                                      <FaRegCircle className="text-primary" />
-                                    )}
-                                    {item.status === 'Overdue' && (
-                                      <FaExclamationCircle className="text-primary" />
-                                    )}
-                                    <p>{item.status}</p>
-                                  </span>
-                                  <span className="font-semibold text-sm flex flex-row gap-1 items-center">
-                                    <IoIosPricetag className="text-primary" />
-                                    <p>{item.category}</p>
-                                  </span>
-                                  <span className="font-semibold text-sm flex flex-row gap-1 items-center">
-                                    <IoIosFlag className="text-primary" />
-                                    <p>{item.priority}</p>
-                                  </span>
-                                  <span className="font-semibold text-sm flex flex-row gap-1 items-center">
-                                    <FiRepeat className="text-primary" />
-                                    {item.repeat?.repeatType === 'norepeat'
-                                      ? 'Once'
-                                      : item.repeat?.repeatType}
-                                  </span>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                </div>
-                {data?.filter(item => item.status === activeTab)?.length >=
-                  10 && (
-                  <div className="flex flex-row gap-2 items-center w-full justify-center mb-4">
-                    <button
-                      onClick={() =>
-                        setCurrentPage(prev => Math.max(prev - 1, 1))
-                      }
-                      className="flex flex-row gap-2 items-center bg-secondary text-primary px-3 py-2 rounded-3xl"
-                      disabled={currentPage === 1}
-                    >
-                      <MdSkipPrevious />
-                      Last Page
-                    </button>
-                    <span className="text-secondary font-semibold">
-                      Page {currentPage}
-                    </span>
-                    <button
-                      onClick={() => {
-                        setCurrentPage(prev => prev + 1);
-                        if (!isPreviousData && data.hasMore) {
-                        }
-                      }}
-                      className="flex flex-row gap-2 items-center bg-secondary text-primary px-3 py-2 rounded-3xl"
-                      disabled={isPreviousData || !data?.hasMore}
-                    >
-                      Next Page
-                      <MdSkipNext />
-                    </button>
-                  </div>
-                )}
-              </TabsContent>
-              <TabsContent value="In Progress" className="w-full">
-                <div className="flex flex-col gap-4 w-full justify-center items-center my-4">
-                  {isFetched &&
-                    data.length > 0 &&
-                    data
-                      .filter(item => item.status === activeTab)
-                      .map((item, index) => (
-                        <div
-                          key={index}
-                          className="bg-white w-full rounded-2xl p-8 flex flex-row justify-between shadow-md cursor-pointer"
-                          onClick={() =>
-                            router.push(`/admin/tasks/${item._id}`)
-                          }
-                        >
-                          <div className="flex flex-row gap-4">
-                            <span className="h-20 rounded-full w-1 bg-primary" />
-                            <div className="flex flex-col [&_span]:leading-7 font-ubuntu text-base text-[#565656]">
-                              <div>
-                                <span className="font-semibold text-sm flex flex-row gap-2 items-center">
-                                  <Avatar
-                                    sx={{}}
-                                    {...stringAvatar(
-                                      `${
-                                        item.issueMember?.firstname +
-                                        ' ' +
-                                        item.issueMember?.lastname
-                                      }`
-                                    )}
-                                  />
-                                  {item.issueMember?.firstname +
-                                    ' ' +
-                                    item.issueMember?.lastname}
-                                </span>
-                                <span className="text-lg font-bold">
-                                  {item.title}
-                                </span>
-                              </div>
-                              {item.issueMember?.name === 'ThikedaarDotCom' ? (
-                                <span className="font-semibold text-sm">
-                                  Admin
-                                </span>
-                              ) : (
-                                <div className="flex flex-row gap-4 items-center">
-                                  <span className="font-semibold text-sm flex flex-row gap-2 items-center">
-                                    <FaUserCircle className="text-primary" />
-                                    <p className="font-semibold text-sm">
-                                      {item.assignedBy?.firstname +
-                                        ' ' +
-                                        item.assignedBy?.lastname}
-                                    </p>
-                                  </span>
-                                  <span className="font-semibold text-sm flex flex-row gap-2 items-center">
-                                    <SlCalender className="text-primary" />
-                                    <p>
-                                      {new Date(item.dueDate).toLocaleString(
-                                        'en-US',
-                                        {
-                                          dateStyle: 'medium',
-                                          timeStyle: 'short',
-                                        }
-                                      )}
-                                    </p>
-                                  </span>
-                                  <span className="font-semibold text-sm flex flex-row gap-1 items-center">
-                                    {item.status === 'Complete' && (
-                                      <FaCircleCheck className="text-primary" />
-                                    )}
-                                    {item.status === 'Pending' && (
-                                      <FaCircle className="text-primary" />
-                                    )}
-                                    {item.status === 'In Progress' && (
-                                      <AiOutlineLoading3Quarters className="text-primary" />
-                                    )}
-                                    {item.status === 'In Progress' && (
-                                      <FaRegCircle className="text-primary" />
-                                    )}
-                                    {item.status === 'Overdue' && (
-                                      <FaExclamationCircle className="text-primary" />
-                                    )}
-                                    <p>{item.status}</p>
-                                  </span>
-                                  <span className="font-semibold text-sm flex flex-row gap-1 items-center">
-                                    <IoIosPricetag className="text-primary" />
-                                    <p>{item.category}</p>
-                                  </span>
-                                  <span className="font-semibold text-sm flex flex-row gap-1 items-center">
-                                    <IoIosFlag className="text-primary" />
-                                    <p>{item.priority}</p>
-                                  </span>
-                                  <span className="font-semibold text-sm flex flex-row gap-1 items-center">
-                                    <FiRepeat className="text-primary" />
-                                    {item.repeat?.repeatType === 'norepeat'
-                                      ? 'Once'
-                                      : item.repeat?.repeatType}
-                                  </span>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                </div>
-                {data?.filter(item => item.status === activeTab)?.length >=
-                  10 && (
-                  <div className="flex flex-row gap-2 items-center w-full justify-center mb-4">
-                    <button
-                      onClick={() =>
-                        setCurrentPage(prev => Math.max(prev - 1, 1))
-                      }
-                      className="flex flex-row gap-2 items-center bg-secondary text-primary px-3 py-2 rounded-3xl"
-                      disabled={currentPage === 1}
-                    >
-                      <MdSkipPrevious />
-                      Last Page
-                    </button>
-                    <span className="text-secondary font-semibold">
-                      Page {currentPage}
-                    </span>
-                    <button
-                      onClick={() => {
-                        setCurrentPage(prev => prev + 1);
-                        if (!isPreviousData && data.hasMore) {
-                        }
-                      }}
-                      className="flex flex-row gap-2 items-center bg-secondary text-primary px-3 py-2 rounded-3xl"
-                      disabled={isPreviousData || !data?.hasMore}
-                    >
-                      Next Page
-                      <MdSkipNext />
-                    </button>
-                  </div>
-                )}
-              </TabsContent>
-              <TabsContent value="Complete" className="w-full">
-                <div className="flex flex-col gap-4 w-full justify-center items-center my-4">
-                  {isFetched &&
-                    data.length > 0 &&
-                    data
-                      .filter(item => item.status === activeTab)
-                      .map((item, index) => (
-                        <div
-                          key={index}
-                          className="bg-white w-full rounded-2xl p-8 flex flex-row justify-between shadow-md cursor-pointer"
-                          onClick={() =>
-                            router.push(`/admin/tasks/${item._id}`)
-                          }
-                        >
-                          <div className="flex flex-row gap-4">
-                            <span className="h-20 rounded-full w-1 bg-primary" />
-                            <div className="flex flex-col [&_span]:leading-7 font-ubuntu text-base text-[#565656]">
-                              <div>
-                                <span className="font-semibold text-sm flex flex-row gap-2 items-center">
-                                  <Avatar
-                                    sx={{}}
-                                    {...stringAvatar(
-                                      `${
-                                        item.issueMember?.firstname +
-                                        ' ' +
-                                        item.issueMember?.lastname
-                                      }`
-                                    )}
-                                  />
-                                  {item.issueMember?.firstname +
-                                    ' ' +
-                                    item.issueMember?.lastname}
-                                </span>
-                                <span className="text-lg font-bold">
-                                  {item.title}
-                                </span>
-                              </div>
-                              {item.issueMember?.name === 'ThikedaarDotCom' ? (
-                                <span className="font-semibold text-sm">
-                                  Admin
-                                </span>
-                              ) : (
-                                <div className="flex flex-row gap-4 items-center">
-                                  <span className="font-semibold text-sm flex flex-row gap-2 items-center">
-                                    <FaUserCircle className="text-primary" />
-                                    <p className="font-semibold text-sm">
-                                      {item.assignedBy?.firstname +
-                                        ' ' +
-                                        item.assignedBy?.lastname}
-                                    </p>
-                                  </span>
-                                  <span className="font-semibold text-sm flex flex-row gap-2 items-center">
-                                    <SlCalender className="text-primary" />
-                                    <p>
-                                      {new Date(item.dueDate).toLocaleString(
-                                        'en-US',
-                                        {
-                                          dateStyle: 'medium',
-                                          timeStyle: 'short',
-                                        }
-                                      )}
-                                    </p>
-                                  </span>
-                                  <span className="font-semibold text-sm flex flex-row gap-1 items-center">
-                                    {item.status === 'Complete' && (
-                                      <FaCircleCheck className="text-primary" />
-                                    )}
-                                    {item.status === 'Pending' && (
-                                      <FaCircle className="text-primary" />
-                                    )}
-                                    {item.status === 'In Progress' && (
-                                      <AiOutlineLoading3Quarters className="text-primary" />
-                                    )}
-                                    {item.status === 'In Progress' && (
-                                      <FaRegCircle className="text-primary" />
-                                    )}
-                                    {item.status === 'Overdue' && (
-                                      <FaExclamationCircle className="text-primary" />
-                                    )}
-                                    <p>{item.status}</p>
-                                  </span>
-                                  <span className="font-semibold text-sm flex flex-row gap-1 items-center">
-                                    <IoIosPricetag className="text-primary" />
-                                    <p>{item.category}</p>
-                                  </span>
-                                  <span className="font-semibold text-sm flex flex-row gap-1 items-center">
-                                    <IoIosFlag className="text-primary" />
-                                    <p>{item.priority}</p>
-                                  </span>
-                                  <span className="font-semibold text-sm flex flex-row gap-1 items-center">
-                                    <FiRepeat className="text-primary" />
-                                    {item.repeat?.repeatType === 'norepeat'
-                                      ? 'Once'
-                                      : item.repeat?.repeatType}
-                                  </span>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                </div>
-                {data?.filter(item => item.status === activeTab)?.length >=
-                  10 && (
-                  <div className="flex flex-row gap-2 items-center w-full justify-center mb-4">
-                    <button
-                      onClick={() =>
-                        setCurrentPage(prev => Math.max(prev - 1, 1))
-                      }
-                      className="flex flex-row gap-2 items-center bg-secondary text-primary px-3 py-2 rounded-3xl"
-                      disabled={currentPage === 1}
-                    >
-                      <MdSkipPrevious />
-                      Last Page
-                    </button>
-                    <span className="text-secondary font-semibold">
-                      Page {currentPage}
-                    </span>
-                    <button
-                      onClick={() => {
-                        setCurrentPage(prev => prev + 1);
-                        if (!isPreviousData && data.hasMore) {
-                        }
-                      }}
-                      className="flex flex-row gap-2 items-center bg-secondary text-primary px-3 py-2 rounded-3xl"
-                      disabled={isPreviousData || !data?.hasMore}
-                    >
-                      Next Page
-                      <MdSkipNext />
-                    </button>
-                  </div>
-                )}{' '}
-              </TabsContent>
-              {!isFetched ||
-                (data?.filter(item => item.status === activeTab)?.length <
-                  1 && (
-                  <p
-                    className="text-center text-secondary"
-                    style={{ marginTop: '200px', fontSize: '18px' }}
-                  >
-                    No Task Assign ...
-                  </p>
-                ))}
-            </Tabs>
-          </div>
+              {filter}
+            </span>
+          ))}
+
+          <button
+            className="flex flex-row items-center gap-2 bg-secondary text-primary px-3 py-2 rounded-3xl"
+            onClick={() => setOpenFilter(true)}
+          >
+            Filter <IoFilterOutline />
+          </button>
+
+          {!Object.values(customFilters).every(v => v === '') && (
+            <button
+              className="flex flex-row items-center gap-2 bg-secondary text-primary px-3 py-2 rounded-3xl"
+              onClick={handleClearFilters}
+            >
+              Clear <MdFilterListOff />
+            </button>
+          )}
         </div>
+
+        <Tabs
+          defaultValue={activeTab}
+          value={activeTab}
+          onValueChange={handleTabChange}
+          className="flex flex-col w-full justify-center items-center my-4"
+        >
+          <TabsList className="grid grid-cols-4">
+            {tabValues.map(tab => (
+              <TabsTrigger key={tab.value} value={tab.value}>
+                {tab.icon} {tab.value}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+
+          <AnimatePresence mode="wait">
+            <TabsContent value={activeTab} className="w-full" key={activeTab}>
+              <motion.div
+                key={activeTab}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.25 }}
+              >
+                <div className="flex flex-col gap-4 w-full justify-center my-4">
+                  {flatData.length > 0 ? (
+                    flatData.map((item, i) => (
+                      <div
+                        key={item._id}
+                        ref={i === flatData.length - 1 ? inViewRef : undefined}
+                      >
+                        <TaskCard
+                          item={item}
+                          onClick={() =>
+                            router.push(`/admin/tasks/${item._id}`)
+                          }
+                        />
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-center text-secondary mt-20 text-lg">
+                      No Task Assigned...
+                    </p>
+                  )}
+
+                  {isFetchingNextPage && <TaskCardSkeleton />}
+                </div>
+              </motion.div>
+            </TabsContent>
+          </AnimatePresence>
+        </Tabs>
       </div>
+
       <TaskFilterPopup
         isOpen={openFilter}
         assgndBy={customFilters.assignedBy}
@@ -831,12 +293,27 @@ const Page = () => {
         category={customFilters.selectedCategory}
         frqcy={customFilters.frequency}
         prty={customFilters.priority}
-        filterhandler={handleFilterChange}
+        filterhandler={handleCustomFilterChange}
         onClose={() => setOpenFilter(false)}
         showTo={true}
         showBy={userType === 'ROLE_ADMIN'}
       />
     </AsideContainer>
+  );
+};
+
+const Page = () => {
+  return (
+    <Suspense
+      fallback={
+        <AsideContainer>
+          <PageHeaderSkeleton />
+          <TabsSkeleton />
+        </AsideContainer>
+      }
+    >
+      <Content />
+    </Suspense>
   );
 };
 

@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { IoIosArrowBack } from 'react-icons/io';
 import AsideContainer from '../../../../components/AsideContainer';
 import Image from 'next/image';
@@ -108,6 +108,7 @@ const Page = () => {
   const [taskId, setTaskId] = useState(null);
   const [openManualClose, setOpenManualClose] = useState(false);
   const { token } = useAuthStore.getState();
+  const queryClient = useQueryClient();
   const [manualDate, setManualDate] = useState(
     new Date().toISOString().split('T')[0]
   );
@@ -374,35 +375,68 @@ const Page = () => {
       });
   };
 
-  const deleteChecklistHandler = async () => {
+  // const handleDeleteChecklist = async () => {
+  //   setOpenDeleteChecklist(false);
+  //   const data = await api
+  //     .post(`/task/deletechecklist`, {
+  //       taskId: slug,
+  //     })
+  //     .then(res => {
+  //       refetch();
+  //       toast('Checklist Deleted Successfully.');
+  //     })
+  //     .catch(err => {
+  //       console.log(err);
+  //     });
+  // };
+
+  const { mutate: deleteChecklist, isPending: isDeletingChecklist } =
+    useMutation({
+      mutationFn: async taskId => {
+        const { data } = await api.post(`/task/deletechecklist`, { taskId });
+        return data;
+      },
+      onSuccess: () => {
+        toast.success('Checklist deleted successfully.');
+        queryClient.invalidateQueries({ queryKey: ['gettaskbyid', slug] });
+      },
+      onError: error => {
+        console.error('Failed to delete checklist:', error);
+        toast.error(
+          error?.response?.data?.message || 'Failed to delete checklist.'
+        );
+      },
+    });
+
+  const handleDeleteChecklist = () => {
     setOpenDeleteChecklist(false);
-    const data = await api
-      .post(`/task/deletechecklist`, {
-        taskId: slug,
-      })
-      .then(res => {
-        refetch();
-        toast('Checklist Deleted Successfully.');
-      })
-      .catch(err => {
-        console.log(err);
-      });
+    deleteChecklist(slug);
   };
 
-  const closelManuallyHandler = async () => {
-    setOpenManualClose(false);
-    const data = await api
-      .post(`/task/manuallyclosetask`, {
-        taskId: slug,
-        date: manualDate,
-      })
-      .then(res => {
-        refetch();
-        toast('Task Manually Closed.');
-      })
-      .catch(err => {
-        console.log(err);
+  const { mutate: closeTask } = useMutation({
+    mutationFn: async ({ taskId, date }) => {
+      const response = await api.post(`/task/manuallyclosetask`, {
+        taskId,
+        date,
       });
+      return response.data;
+    },
+    onSuccess: () => {
+      toast.success('Task manually closed.');
+      queryClient.invalidateQueries({ queryKey: ['projectDetail'] });
+      queryClient.invalidateQueries({ queryKey: ['gettaskbyid', slug] });
+    },
+    onError: error => {
+      console.error('Failed to manually close task:', error);
+      toast.error(
+        error?.response?.data?.message || 'Failed to manually close the task.'
+      );
+    },
+  });
+
+  const handleManualClose = () => {
+    setOpenManualClose(false);
+    closeTask({ taskId: slug, date: manualDate });
   };
 
   const isAbled = data?.data?.checkList?.items?.every(item =>
@@ -1376,7 +1410,7 @@ const Page = () => {
                 </button>
                 <button
                   className="bg-secondary text-primary rounded-3xl px-4 py-2 flex flex-row  items-center"
-                  onClick={deleteChecklistHandler}
+                  onClick={handleDeleteChecklist}
                 >
                   Delete
                 </button>
@@ -1474,7 +1508,7 @@ const Page = () => {
                 </button>
                 <button
                   className="bg-secondary text-primary rounded-3xl px-4 py-2 flex flex-row  items-center"
-                  onClick={closelManuallyHandler}
+                  onClick={handleManualClose}
                 >
                   Close Task
                 </button>

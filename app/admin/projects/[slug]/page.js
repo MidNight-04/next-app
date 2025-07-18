@@ -398,6 +398,9 @@ const ClientProjectView = () => {
       }
 
       const resp = await api.post(`admin/project-document/add`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
         maxBodyLength: Infinity,
       });
 

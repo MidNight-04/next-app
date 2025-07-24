@@ -56,6 +56,7 @@ import { LuTimerReset } from 'react-icons/lu';
 import { SidebarTrigger } from '../../../../components/ui/sidebar';
 import { Separator } from '../../../../components/ui/separator';
 import { useQuery, useMutation } from '@tanstack/react-query';
+import { allowRoles } from '../../../../helpers/constants';
 
 let today = new Date();
 let yyyy = today.getFullYear();
@@ -398,6 +399,9 @@ const ClientProjectView = () => {
       }
 
       const resp = await api.post(`admin/project-document/add`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
         maxBodyLength: Infinity,
       });
 
@@ -609,7 +613,7 @@ const ClientProjectView = () => {
       const data = {
         userId,
         siteId: slug,
-        issue: issue?.role?.name,
+        issue: issue?.roles,
         newMember,
       };
 
@@ -665,7 +669,7 @@ const ClientProjectView = () => {
             <ActionButton>Payment Details</ActionButton>
           </Link>
 
-          {userType === 'ROLE_ADMIN' && (
+          {allowRoles.includes(userType) && (
             <ActionButton onClick={uploadDocument}>Add Documents</ActionButton>
           )}
 
@@ -751,7 +755,7 @@ const ClientProjectView = () => {
         />
         <StatCard
           label="Force Majeure"
-          value={projectDetails?.extension ?? 0}
+          value={projectDetails?.extension}
           onClick={() => setExtensionOpen(prev => !prev)}
         />
       </div>
@@ -836,7 +840,7 @@ const ClientProjectView = () => {
                             <FaPlus />
                           </span>
                         )}
-                        {userType === 'ROLE_ADMIN' && (
+                        {allowRoles.includes(userType) && (
                           <span
                             className="border border-primary rounded-full p-2 font-semibold text-primary cursor-pointer"
                             onClick={() =>
@@ -1033,9 +1037,10 @@ const ClientProjectView = () => {
                         <span
                           className="bg-secondary text-primary p-2 rounded-full cursor-pointer"
                           onClick={() => {
+                            console.log(item);
                             setIssue(item);
                             setOpenChangeMember(true);
-                            getTeammembersByRole(item.role._id);
+                            getTeammembersByRole(item.roles);
                             teamOpenCancel();
                           }}
                         >
@@ -1066,7 +1071,7 @@ const ClientProjectView = () => {
                           onClick={() => {
                             setIssue(item);
                             setOpenChangeMember(true);
-                            getTeammembersByRole(item.role._id);
+                            getTeammembersByRole(item.roles);
                             teamOpenCancel();
                           }}
                         >
@@ -1095,7 +1100,7 @@ const ClientProjectView = () => {
                           onClick={() => {
                             setIssue(item);
                             setOpenChangeMember(true);
-                            getTeammembersByRole(item.role._id);
+                            getTeammembersByRole(item.roles);
                             teamOpenCancel();
                           }}
                         >
@@ -1124,7 +1129,7 @@ const ClientProjectView = () => {
                           onClick={() => {
                             setIssue(item);
                             setOpenChangeMember(true);
-                            getTeammembersByRole(item.role._id);
+                            getTeammembersByRole(item.roles);
                             teamOpenCancel();
                           }}
                         >
@@ -1153,7 +1158,7 @@ const ClientProjectView = () => {
                           onClick={() => {
                             setIssue(item);
                             setOpenChangeMember(true);
-                            getTeammembersByRole(item.role._id);
+                            getTeammembersByRole(item.roles);
                             teamOpenCancel();
                           }}
                         >
@@ -1177,12 +1182,13 @@ const ClientProjectView = () => {
                     >
                       <div className="mt-1 flex flex-row items-center gap-4">
                         <span>{item.firstname + ' ' + item?.lastname}</span>
+
                         <span
                           className="bg-secondary text-primary p-2 rounded-full cursor-pointer"
                           onClick={() => {
                             setIssue(item);
                             setOpenChangeMember(true);
-                            getTeammembersByRole(item.role._id);
+                            getTeammembersByRole(item.roles);
                             teamOpenCancel();
                           }}
                         >
@@ -1219,12 +1225,12 @@ const ClientProjectView = () => {
             letterSpacing: '1px',
           }}
         >
-          Change {issue?.role?.name}
+          Change {issue?.roles?.name}
         </DialogTitle>
         <DialogContent style={{ width: '600px' }}>
           <FormControl fullWidth>
             <InputLabel id="newmember-simple-select-label">
-              {issue?.role.name}
+              {teammembersByRole[0]?.roles?.name}
             </InputLabel>
             <MUISelect
               labelId="newmember-simple-select-label"
@@ -1238,7 +1244,7 @@ const ClientProjectView = () => {
             >
               {teammembersByRole.map(item => (
                 <MenuItem key={item._id} value={item._id}>
-                  {item.name}
+                  {item.firstname + ' ' + item.lastname}
                 </MenuItem>
               ))}
             </MUISelect>

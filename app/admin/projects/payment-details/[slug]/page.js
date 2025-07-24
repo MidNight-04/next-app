@@ -1,5 +1,6 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+
+import React, { useEffect, useState, useMemo } from 'react';
 import api from '../../../../../lib/api';
 import {
   Button,
@@ -16,13 +17,21 @@ import {
 } from '@mui/material';
 import { toast } from 'sonner';
 import { FaRupeeSign } from 'react-icons/fa';
-import { IoIosArrowBack, IoIosArrowDown, IoIosArrowUp } from 'react-icons/io';
-import { useParams } from 'next/navigation';
+import { IoIosArrowBack } from 'react-icons/io';
+import { useParams, usePathname, useSearchParams } from 'next/navigation';
 import AsideContainer from '../../../../../components/AsideContainer';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '../../../../../store/useAuthStore';
 import { SidebarTrigger } from '../../../../../components/ui/sidebar';
 import { Separator } from '../../../../../components/ui/separator';
+import { useQueries, useQueryClient, useMutation } from '@tanstack/react-query';
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from '../../../../../components/ui/accordion';
+import { useProjectPayementStore } from '../../../../../store/useProjectPayementStore';
 
 const selectStyles = {
   width: '100%',
@@ -55,284 +64,272 @@ const selectStyles = {
 };
 
 const Page = () => {
-  const userType = useAuthStore(state => state.userType);
-  const activeUser = useAuthStore(state => state.userId);
   const { slug } = useParams();
-  const [data, setData] = useState([]);
-  const [showPaymentDetails, setShowPaymentDetails] = useState(false);
-  const [projectDetails, setProjectDetails] = useState({});
-  const [payDetails, setPayDetails] = useState([]);
-  const [payBox, setpayBox] = useState(false);
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const queryClient = useQueryClient();
+  const { activeUser, userType } = useAuthStore.getState();
+  const isClient = userType?.substring(5).toLowerCase() === 'client';
+  const [showPaymentDetails, setShowPaymentDetails] = useState([]);
+  const [payBox, setPayBox] = useState(false);
   const [payAmount, setPayAmount] = useState('');
   const [paymentStage, setPaymentStage] = useState('');
   const [OpenStatus, setOpenStatus] = useState(false);
   const [stage, setStage] = useState(null);
-  const [status, setStatus] = useState(null);
-  const [remarks, setRemarks] = useState(null);
-  const [amount, setAmount] = useState(null);
-  const [mode, setMode] = useState(null);
-  const [paymentDate, setPaymentDate] = useState(null);
-  const [pay, setPay] = useState(0);
-  const router = useRouter();
+  const [status, setStatus] = useState('');
+  const [remarks, setRemarks] = useState('');
+  const [amount, setAmount] = useState('');
+  const [mode, setMode] = useState('');
+  const [paymentDate, setPaymentDate] = useState('');
+  const { activeTab, setActiveTab } = useProjectPayementStore();
 
-  useEffect(() => {
-    if (data[0]?.stages) {
-      setShowPaymentDetails(new Array(data[0]?.stages.length).fill(false));
-    }
-  }, [data]);
-
-  const toggleContent = index => {
-    setShowPaymentDetails(prevState => {
-      const newState = [...prevState];
-      newState[index] = !newState[index];
-      return newState;
-    });
-  };
-  
-  const fetchData = async () => {
-    try {
-      const projectResponse = await api.get(`/project/databyid/${slug}`);
-      setProjectDetails(projectResponse?.data?.data[0]);
-
-      const paymentDetailsResponse = await api.get(
-        `/project/paymentstages/bysiteid/${slug}`
-        // `project/paydetailbysiteid/${slug}`
-      );
-      setPayDetails(paymentDetailsResponse?.data?.data);
-
-      const stagesResponse =
-        userType?.substring(5).toLowerCase() === 'client'
-          ? await api.post(`/project/paymentstages/forclient`, {
+  const [projectDetailsQuery, paymentDetailsQuery, stagesQuery] = useQueries({
+    queries: [
+      {
+        queryKey: ['projectDetail', slug],
+        queryFn: async () => {
+          const res = await api.get(`/project/databyid/${slug}`);
+          return res?.data?.data?.[0];
+        },
+        enabled: !!slug,
+      },
+      {
+        queryKey: ['paymentDetails', slug],
+        queryFn: async () => {
+          const res = await api.get(`/project/paymentstages/bysiteid/${slug}`);
+          return res?.data?.data;
+        },
+        enabled: !!slug,
+      },
+      {
+        queryKey: ['paymentStages', slug, isClient, activeUser],
+        queryFn: async () => {
+          if (isClient) {
+            const res = await api.post(`/project/paymentstages/forclient`, {
               siteID: slug,
               clientID: activeUser,
-            })
-          : await api.get(`/project/paymentstages/bysiteid/${slug}`);
+            });
+            return res?.data?.data;
+          } else {
+            const res = await api.get(
+              `/project/paymentstages/bysiteid/${slug}`
+            );
+            return res?.data?.data;
+          }
+        },
+        enabled: !!slug && !!userType,
+      },
+    ],
+  });
 
-      setData(stagesResponse?.data?.data);
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  const projectDetails = projectDetailsQuery.data;
+  const payDetails = paymentDetailsQuery.data;
+  const stages = useMemo(() => {
+    return stagesQuery.data?.[0]?.stages || [];
+  }, [stagesQuery.data]);
+
   useEffect(() => {
-    fetchData();
-  }, [slug, userType, activeUser]);
+    if (stages.length > 0) {
+      setShowPaymentDetails(new Array(stages.length).fill(false));
+    }
+  }, [stages]);
 
-  const payProjectAmount = stage => {
-    setpayBox(true);
-    setPaymentStage(stage);
+  const isLoading =
+    projectDetailsQuery.isLoading ||
+    paymentDetailsQuery.isLoading ||
+    stagesQuery.isLoading;
+
+  const isError =
+    projectDetailsQuery.isError ||
+    paymentDetailsQuery.isError ||
+    stagesQuery.isError;
+
+  const isSuccess =
+    projectDetailsQuery.isSuccess &&
+    paymentDetailsQuery.isSuccess &&
+    stagesQuery.isSuccess;
+
+  const handleTabChange = newTab => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('tab', newTab);
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
+    setActiveTab(newTab);
   };
 
-  const handleClosePayBox = () => {
-    setpayBox(false);
+  useEffect(() => {
+    const handleScroll = () => {
+      useProjectPayementStore.getState().setScrollY(window.scrollY);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const { scrollY, hasRestoredScroll, setHasRestoredScroll } =
+      useProjectPayementStore.getState();
+
+    if (!isSuccess || hasRestoredScroll || scrollY <= 0) return;
+
+    let attempts = 0;
+    const interval = setInterval(() => {
+      const docHeight = document.documentElement.scrollHeight;
+
+      if (docHeight > scrollY + window.innerHeight) {
+        window.scrollTo({
+          top: scrollY,
+          behavior: 'smooth',
+        });
+        setHasRestoredScroll(true);
+        clearInterval(interval);
+      }
+      if (attempts > 10) clearInterval(interval);
+      attempts++;
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, [isSuccess]);
+
+  useEffect(() => {
+    return () => {
+      useProjectPayementStore.getState().setHasRestoredScroll(false);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (stages.length > 0) {
+      setShowPaymentDetails(new Array(stages.length).fill(false));
+    }
+  }, [stages]);
+
+  const updateStatusMutation = useMutation({
+    mutationFn: async data => {
+      await api.post(`/project/updatepaymentstages/bysiteid/${slug}`, data);
+    },
+    onSuccess: () => {
+      toast.success('Payment status updated!');
+      queryClient.invalidateQueries({ queryKey: ['paymentDetails', slug] });
+      queryClient.invalidateQueries({ queryKey: ['paymentStages', slug] });
+    },
+    onError: err => {
+      toast.error(err?.response?.data?.message || 'Failed to update status');
+    },
+  });
+
+  const handleUpdateStatus = () => {
+    updateStatusMutation.mutate({
+      stage,
+      status,
+      paymentDate,
+      remarks,
+      amount,
+      mode,
+    });
+    setOpenStatus(false);
   };
 
-  const updatePaymentStatus = () => {
-    const fetch = api
-      .post(`/project/updatepaymentstages/bysiteid/${slug}`, {
-        stage,
-        status,
-        paymentDate,
-        remarks,
-        amount,
-        mode,
-      })
-      .then(() => fetchData());
-  };
+  const paymentMutation = useMutation({
+    mutationFn: async ({ orderId, amount }) => {
+      const callbackUrl = window.location.href;
+      const currency = 'INR';
+      return api.post(`/project/initiate-payment`, {
+        orderId,
+        payAmount: amount,
+        callbackUrl,
+        currency,
+        activeUser,
+      });
+    },
+    onSuccess: resp => {
+      const result = resp.data.data.body.resultInfo;
+      if (result.resultStatus === 'S') {
+        const transactionToken = resp.data.data.body.txnToken;
+        toast.info('Redirecting to payment...');
+        initializePayment(transactionToken);
+      } else {
+        toast.error('Failed to initiate payment');
+      }
+    },
+    onError: err => {
+      toast.error(err?.response?.data?.message || 'Payment initiation failed');
+    },
+  });
 
   const handlePayment = () => {
-    // Sandbox Credentials
-    let mid = 'WBJIwm08119302462954'; // Merchant ID
-    let orderId = slug + new Date().getTime();
-    let currency = 'INR';
-    let contactType = 'Project Payment';
-    let paymentType = 'Online';
-    const callbackUrl = window.location.href;
-    if (payAmount) {
-      api
-        .post(`/project/initiate-payment`, {
-          orderId,
-          payAmount,
-          callbackUrl,
-          currency,
-          activeUser,
-        })
-        .then(resp => {
-          // console.log("transaction token", resp.data.data)
-          if (resp.data.data.body.resultInfo.resultStatus == 'S') {
-            setpayBox(false);
-            const transactionToken = resp.data.data.body.txnToken;
-            initialize(
-              mid,
-              orderId,
-              payAmount,
-              transactionToken,
-              contactType,
-              paymentType,
-              slug
-            );
-          }
-        })
-        .catch(err => {
-          console.error(err);
-        });
-    } else {
-      toast('Enter amount for payment');
-    }
+    if (!payAmount) return toast.error('Enter amount for payment');
+    const orderId = `${slug}${Date.now()}`;
+    paymentMutation.mutate({ orderId, amount: payAmount });
   };
 
-  const initialize = (
-    mid,
-    orderId,
-    amount,
-    token,
-    contactType,
-    paymentType,
-    siteID
-  ) => {
-    var config = {
+  const initializePayment = txnToken => {
+    const mid = 'WBJIwm08119302462954';
+    const orderId = `${slug}${Date.now()}`;
+    const amount = payAmount;
+    const contactType = 'Project Payment';
+    const paymentType = 'Online';
+
+    const config = {
       root: '',
-      style: {
-        bodyBackgroundColor: '#fafafb',
-        bodyColor: '',
-        themeBackgroundColor: '#0FB8C9',
-        themeColor: '#ffffff',
-        headerBackgroundColor: '#284055',
-        headerColor: '#ffffff',
-        errorColor: '',
-        successColor: '',
-        card: {
-          padding: '',
-          backgroundColor: '',
-        },
-      },
       data: {
-        orderId: orderId,
-        token: token,
+        orderId,
+        token: txnToken,
         tokenType: 'TXN_TOKEN',
-        amount: amount /* update amount */,
+        amount,
       },
-      payMode: {
-        labels: {},
-        filter: {
-          exclude: [],
-        },
-        order: ['CC', 'DC', 'NB', 'UPI', 'PPBL', 'PPI', 'BALANCE'],
-      },
-      website: 'DEFAULT',
-      flow: 'DEFAULT',
-      merchant: {
-        mid: mid,
-        redirect: false,
-      },
+      merchant: { mid, redirect: false },
       handler: {
-        transactionStatus: async function (paymentStatus) {
-          // console.log("paymentStatus handler function called");
-          const data = {
-            siteID: siteID,
-            clientID: activeUser,
-            paymentStage: paymentStage,
-            amount: amount,
-            contactType: contactType,
-            paymentType: paymentType,
-            projectDetails: projectDetails,
-            orderId: orderId,
-          };
-          // console.log(data);
+        transactionStatus: async paymentStatus => {
           await api
-            .post(`/project/verify-payment`, data)
+            .post(`/project/verify-payment`, {
+              siteID: slug,
+              clientID: activeUser,
+              paymentStage,
+              amount,
+              contactType,
+              paymentType,
+              projectDetails,
+              orderId,
+            })
             .then(resp => {
-              console.log('transaction token', resp.data);
-              if (
-                resp.data.data.paymentInformation.body.resultInfo
-                  .resultStatus == 'TXN_SUCCESS'
-              ) {
-                toast(
-                  `Congratulations, Your payment has been successfully done for siteID ${siteID}`
-                );
-
-                const payNotification = {
-                  clientID: activeUser,
-                  message: `Payment done Successfully for siteID ${siteID}`,
-                  url: window.location.href,
-                };
-                // console.log(payNotification);
-                api
-                  .post(
-                    `/payproject/notification/createNotification`,
-                    payNotification
-                  )
-                  .then(resp1 => {
-                    // console.log(resp1.data);
-                    toast(resp1?.data?.message);
-                  })
-                  .catch(err => {
-                    console.error(err);
-                  });
-              }
-
-              if (
-                resp.data.data.paymentInformation.body.resultInfo
-                  .resultStatus == 'TXN_FAILURE'
-              ) {
-                toast(
-                  resp.data.data.paymentInformation.body.resultInfo.resultMsg
-                );
-              }
-
-              if (
-                resp.data.data.paymentInformation.body.resultInfo
-                  .resultStatus == 'PENDING'
-              ) {
-                toast(
-                  resp.data.data.paymentInformation.body.resultInfo.resultMsg
-                );
-              }
-
-              if (
-                resp.data.data.paymentInformation.body.resultInfo
-                  .resultStatus == 'NO_RECORD_FOUND'
-              ) {
-                toast(
-                  resp.data.data.paymentInformation.body.resultInfo.resultMsg
-                );
+              const result = resp.data.data.paymentInformation.body.resultInfo;
+              if (result.resultStatus === 'TXN_SUCCESS') {
+                toast.success('Payment successful!');
+                queryClient.invalidateQueries({
+                  queryKey: ['paymentDetails', slug],
+                });
+                queryClient.invalidateQueries({
+                  queryKey: ['paymentStages', slug],
+                });
+              } else {
+                toast.error(result.resultMsg);
               }
             })
-            .catch(err => {
-              console.error(err);
-              toast('Something went wrong. Please try again!');
-            });
+            .catch(() => toast.error('Payment verification failed'));
           setTimeout(() => window.location.reload(), 2000);
-          console.log(paymentStatus);
-        },
-        notifyMerchant: function (eventName, data) {
-          console.log('notifyMerchant handler function called');
-          console.log('eventName => ', eventName);
-          console.log('data => ', data);
         },
       },
     };
 
-    if (window.Paytm && window.Paytm.CheckoutJS) {
+    if (window.Paytm?.CheckoutJS) {
       window.Paytm.CheckoutJS.init(config)
-        .then(function onSuccess() {
-          window.Paytm.CheckoutJS.invoke();
-        })
-        .catch(function onError(error) {
-          console.log('Error => ', error);
-        });
+        .then(() => window.Paytm.CheckoutJS.invoke())
+        .catch(err => console.error('Paytm init error', err));
     }
   };
 
-  const totalPaymentAmount = stage => {
-    return payDetails
-      .filter(dt => dt.payStage === stage)
-      .reduce(
-        (total, detail) => total + parseFloat(detail.paymentAmount || 0),
-        0
-      );
-  };
+  const installmentsByStage = useMemo(() => {
+    if (!payDetails?.[0]?.stages) return {};
+    return payDetails[0].stages.reduce((acc, stageData) => {
+      acc[stageData.stage] = stageData.installments || [];
+      return acc;
+    }, {});
+  }, [payDetails]);
 
-  let rupee = new Intl.NumberFormat('en-IN', {
+  if (isLoading) return <div className="p-6">Loading...</div>;
+  if (isError)
+    return <div className="p-6 text-red-500">Failed to load data</div>;
+
+  const rupee = new Intl.NumberFormat('en-IN', {
     maximumFractionDigits: 0,
     useGrouping: true,
   });
@@ -366,149 +363,148 @@ const Page = () => {
             </div>
           </div>
           <section>
-            {data[0]?.stages?.map((item, index) => {
-              return (
-                <div key={index} className="bg-gray-300 rounded-3xl mb-4">
-                  <div className="bg-secondary rounded-t-3xl font-semibold flex flex-row items-center justify-between">
-                    <div className="text-primary p-5">
-                      <span>
-                        {item?.stage}
-                        {` (${item?.payment}%)`}
-                      </span>
-                      <span className="p-1 border border-primary-foreground rounded-md ml-4 text-secondary-foreground font-ubuntu text-sm">
-                        {item?.paymentStatus}
-                      </span>
-                    </div>
-                    {userType !== 'ROLE_CLIENT' &&
-                      userType !== 'ROLE_SITE ENGINEER' &&
-                      item.paymentStatus !== 'Paid' && (
-                        <button
-                          onClick={() => {
-                            setStage(item.stage);
-                            setOpenStatus(true);
-                          }}
-                          className="px-3 bg-primary border-2 border-secondary rounded-full font-ubuntu -md:px-2 py-[6px] mx-4"
-                        >
-                          Update Status
-                        </button>
-                      )}
-                  </div>
-                  <div className="flex flex-row items-center bg-primary-foreground justify-between p-2">
-                    <div className="flex flex-row items-center justify-between w-full p-5">
-                      <div className="flex flex-row items-center justify-center gap-2">
-                        <span>Payment History</span>
-                        {showPaymentDetails[index] ? (
-                          <span onClick={() => toggleContent(index)}>
-                            <IoIosArrowUp />
-                          </span>
-                        ) : (
-                          <span onClick={() => toggleContent(index)}>
-                            <IoIosArrowDown />
-                          </span>
-                        )}
+            <Accordion
+              type="single"
+              className="w-full"
+              value={activeTab}
+              onValueChange={value => handleTabChange(value)}
+            >
+              {stages?.map((item, index) => {
+                const currentInstallments =
+                  installmentsByStage[item.stage] || [];
+                const totalPaid = currentInstallments.reduce(
+                  (acc, installment) =>
+                    acc + parseFloat(installment.amount || 0),
+                  0
+                );
+
+                const totalStageAmount =
+                  (item.payment * projectDetails?.cost) / 100;
+                const outstandingAmount = totalStageAmount - totalPaid;
+
+                const stageDetails = payDetails[0]?.stages.find(
+                  dt => dt.stage === item.stage
+                );
+                const installments = stageDetails?.installments || [];
+
+                return (
+                  <AccordionItem
+                    key={index}
+                    value={`stage-${index}`}
+                    className="bg-gray-300 rounded-3xl mb-4 overflow-hidden"
+                  >
+                    <div className="bg-secondary flex justify-between items-center p-5 -md:p-3">
+                      <div className="text-primary font-semibold">
+                        <span>
+                          {item?.stage} ({item?.payment}%)
+                        </span>
+                        <span className="ml-4 px-2 py-1 border border-primary-foreground rounded-md text-secondary-foreground text-sm text-nowrap">
+                          {item?.paymentStatus}
+                        </span>
                       </div>
-                      <span className="flex flex-row items-center">
-                        <span>
-                          <FaRupeeSign />
-                        </span>
-                        <span>
-                          {rupee.format(
-                            (item.payment * projectDetails.cost) / 100
-                          )}
-                        </span>
-                      </span>
+
+                      {userType !== 'ROLE_CLIENT' &&
+                        userType !== 'ROLE_SITE ENGINEER' &&
+                        item.paymentStatus !== 'Paid' && (
+                          <button
+                            onClick={() => {
+                              setStage(item.stage);
+                              setOpenStatus(true);
+                            }}
+                            className="px-3 bg-primary border-2 border-secondary rounded-full font-ubuntu -md:px-2 py-[6px] mx-4 text-nowrap -md:mx-0"
+                          >
+                            Update Status
+                          </button>
+                        )}
                     </div>
-                  </div>
-                  {showPaymentDetails[index] && (
-                    <>
-                      {payDetails[0]?.stages.filter(
-                        dt => dt.stage === item.stage
-                      )[0]?.installments.length > 0 ? (
-                        <div className="text-center">
-                          <table className="w-full">
-                            <thead>
+
+                    <AccordionTrigger className="flex justify-between bg-primary-foreground px-5 py-4 text-base font-medium hover:no-underline w-full">
+                      <div className="flex flex-row justify-between w-full pr-4 -md:pr-2">
+                        <span>Payment History</span>
+                        <span>₹{rupee.format(totalStageAmount)}</span>
+                      </div>
+                    </AccordionTrigger>
+
+                    <AccordionContent className="bg-background p-4">
+                      {installments.length > 0 ? (
+                        <div className="overflow-x-auto">
+                          <table className="w-full text-sm text-left border">
+                            <thead className="bg-muted">
                               <tr>
-                                <th className="font-semibold">Date</th>
-                                <th className="font-semibold">Mode</th>
-                                <th className="font-semibold">Amount</th>
-                                <th className="font-semibold">Remarks</th>
+                                <th className="px-4 py-2 font-semibold">
+                                  Date
+                                </th>
+                                <th className="px-4 py-2 font-semibold">
+                                  Mode
+                                </th>
+                                <th className="px-4 py-2 font-semibold">
+                                  Amount
+                                </th>
+                                <th className="px-4 py-2 font-semibold">
+                                  Remarks
+                                </th>
                               </tr>
                             </thead>
                             <tbody>
-                              {payDetails[0]?.stages
-                                .filter(dt => dt.stage === item.stage)[0]
-                                ?.installments.map((detail, index) => {
-                                  return (
-                                    <tr key={index}>
-                                      <td>{detail.paymentDate}</td>
-                                      <td>{detail.mode}</td>
-                                      <td>
-                                        <span>
-                                          {rupee.format(detail.amount)}
-                                        </span>
-                                      </td>
-                                      <td>{detail.remarks}</td>
-                                    </tr>
-                                  );
-                                })}
+                              {installments.map((detail, idx) => (
+                                <tr
+                                  key={idx}
+                                  className="border-b hover:bg-muted/50 transition-colors"
+                                >
+                                  <td className="px-4 py-2">
+                                    {detail.paymentDate}
+                                  </td>
+                                  <td className="px-4 py-2">{detail.mode}</td>
+                                  <td className="px-4 py-2">
+                                    ₹{rupee.format(detail.amount)}
+                                  </td>
+                                  <td className="px-4 py-2">
+                                    {detail.remarks || '-'}
+                                  </td>
+                                </tr>
+                              ))}
                             </tbody>
                           </table>
                         </div>
                       ) : (
-                        <p className="text-center p-4">
+                        <p className="text-center text-muted-foreground py-4">
                           No payment details available
                         </p>
                       )}
-                    </>
-                  )}
-                  <div className="flex flex-row items-center bg-secondary-foreground  p-2 w-full rounded-b-3xl">
-                    <div className="flex flex-row items-center gap-2 w-full p-5 justify-between">
-                      {item.paymentStatus !== 'Paid'
-                        ? ' Outstanding Amount:'
-                        : 'Paid Amount'}
-                      <span className="flex flex-row items-center gap">
-                        <span>
-                          <FaRupeeSign />
-                        </span>
+                    </AccordionContent>
+
+                    <div className="flex justify-between items-center bg-secondary-foreground p-5">
+                      <span>
                         {item.paymentStatus !== 'Paid'
-                          ? rupee.format(
-                              (item.payment * projectDetails.cost) / 100 -
-                                payDetails[0]?.stages
-                                  .filter(dt => dt.stage === item.stage)[0]
-                                  ?.installments.reduce(
-                                    (acc, item) =>
-                                      acc + parseFloat(item.amount || 0),
-                                    0
-                                  )
-                            )
-                          : payDetails[0]?.stages
-                              .filter(dt => dt.stage === item.stage)[0]
-                              ?.installments.reduce(
-                                (acc, item) =>
-                                  acc + parseFloat(item.amount || 0),
-                                0
-                              )}
+                          ? 'Outstanding Amount:'
+                          : 'Paid Amount'}
                       </span>
+                      <span className="font-medium mr-8 -md:mr-6">
+                        ₹
+                        {item.paymentStatus !== 'Paid'
+                          ? rupee.format(outstandingAmount)
+                          : rupee.format(totalPaid)}
+                      </span>
+                      {/* {userType === 'ROLE_CLIENT' && (
+                        <Button
+                          variant="outline"
+                          onClick={() => payProjectAmount(item.stage)}
+                        >
+                          Pay Now
+                        </Button>
+                      )} */}
                     </div>
-                    {/* {userType === "ROLE_CLIENT" && (
-                      <button
-                        className="p-[6px] px-3 bg-transparent border-2 border-secondary rounded-full font-ubuntu hover:bg-secondary text-nowrap [&_p]:hover:text-primary [&_svg]:hover:text-primary"
-                        onClick={() => payProjectAmount(item.stage)}
-                      >
-                        <p>Pay Now</p>
-                      </button>
-                    )} */}
-                  </div>
-                </div>
-              );
-            })}
+                  </AccordionItem>
+                );
+              })}
+            </Accordion>
           </section>
         </div>
       </div>
       <Modal
         open={OpenStatus}
         onClose={() => {
-          setOpenStatus(preb => !prev);
+          setOpenStatus(prev => !prev);
         }}
         sx={{
           display: 'flex',
@@ -598,7 +594,7 @@ const Page = () => {
               className="bg-secondary text-primary rounded-3xl px-4 py-2 flex flex-row  items-center"
               onClick={() => {
                 setOpenStatus(false);
-                updatePaymentStatus();
+                handleUpdateStatus();
               }}
             >
               Update Status
@@ -607,7 +603,7 @@ const Page = () => {
         </div>
       </Modal>
 
-      <Dialog open={payBox} onClose={handleClosePayBox}>
+      <Dialog open={payBox} onClose={() => setPayBox(false)}>
         <DialogTitle className="text-uppercase fs-5 text-center">
           Pay Amount
         </DialogTitle>
@@ -623,7 +619,7 @@ const Page = () => {
           </FormControl>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClosePayBox} color="primary">
+          <Button onClick={() => setPayBox(false)} color="primary">
             Cancel
           </Button>
           <Button onClick={handlePayment} color="primary">

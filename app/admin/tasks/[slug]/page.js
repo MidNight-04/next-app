@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { IoIosArrowBack } from 'react-icons/io';
 import AsideContainer from '../../../../components/AsideContainer';
 import Image from 'next/image';
@@ -40,6 +40,7 @@ import {
 import { CiViewList } from 'react-icons/ci';
 import { SidebarTrigger } from '../../../../components/ui/sidebar';
 import { Separator } from '../../../../components/ui/separator';
+import { allowRoles } from '../../../../helpers/constants';
 
 function stringToColor(string) {
   let hash = 0;
@@ -108,6 +109,7 @@ const Page = () => {
   const [taskId, setTaskId] = useState(null);
   const [openManualClose, setOpenManualClose] = useState(false);
   const { token } = useAuthStore.getState();
+  const queryClient = useQueryClient();
   const [manualDate, setManualDate] = useState(
     new Date().toISOString().split('T')[0]
   );
@@ -374,35 +376,68 @@ const Page = () => {
       });
   };
 
-  const deleteChecklistHandler = async () => {
+  // const handleDeleteChecklist = async () => {
+  //   setOpenDeleteChecklist(false);
+  //   const data = await api
+  //     .post(`/task/deletechecklist`, {
+  //       taskId: slug,
+  //     })
+  //     .then(res => {
+  //       refetch();
+  //       toast('Checklist Deleted Successfully.');
+  //     })
+  //     .catch(err => {
+  //       console.log(err);
+  //     });
+  // };
+
+  const { mutate: deleteChecklist, isPending: isDeletingChecklist } =
+    useMutation({
+      mutationFn: async taskId => {
+        const { data } = await api.post(`/task/deletechecklist`, { taskId });
+        return data;
+      },
+      onSuccess: () => {
+        toast.success('Checklist deleted successfully.');
+        queryClient.invalidateQueries({ queryKey: ['gettaskbyid', slug] });
+      },
+      onError: error => {
+        console.error('Failed to delete checklist:', error);
+        toast.error(
+          error?.response?.data?.message || 'Failed to delete checklist.'
+        );
+      },
+    });
+
+  const handleDeleteChecklist = () => {
     setOpenDeleteChecklist(false);
-    const data = await api
-      .post(`/task/deletechecklist`, {
-        taskId: slug,
-      })
-      .then(res => {
-        refetch();
-        toast('Checklist Deleted Successfully.');
-      })
-      .catch(err => {
-        console.log(err);
-      });
+    deleteChecklist(slug);
   };
 
-  const closelManuallyHandler = async () => {
-    setOpenManualClose(false);
-    const data = await api
-      .post(`/task/manuallyclosetask`, {
-        taskId: slug,
-        date: manualDate,
-      })
-      .then(res => {
-        refetch();
-        toast('Task Manually Closed.');
-      })
-      .catch(err => {
-        console.log(err);
+  const { mutate: closeTask } = useMutation({
+    mutationFn: async ({ taskId, date }) => {
+      const response = await api.post(`/task/manuallyclosetask`, {
+        taskId,
+        date,
       });
+      return response.data;
+    },
+    onSuccess: () => {
+      toast.success('Task manually closed.');
+      queryClient.invalidateQueries({ queryKey: ['projectDetail'] });
+      queryClient.invalidateQueries({ queryKey: ['gettaskbyid', slug] });
+    },
+    onError: error => {
+      console.error('Failed to manually close task:', error);
+      toast.error(
+        error?.response?.data?.message || 'Failed to manually close the task.'
+      );
+    },
+  });
+
+  const handleManualClose = () => {
+    setOpenManualClose(false);
+    closeTask({ taskId: slug, date: manualDate });
   };
 
   const isAbled = data?.data?.checkList?.items?.every(item =>
@@ -643,17 +678,18 @@ const Page = () => {
                     Comment
                   </button>
                 )}
-              {userType === 'ROLE_ADMIN' && data.data.status !== 'Complete' && (
-                <button
-                  className="px-[10px] py-[6px] border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-1 items-center -md:px-2 -md:py-1 -md:text-sm"
-                  onClick={() => {
-                    setAddChecklist(prev => !prev);
-                  }}
-                >
-                  <MdChecklist className="text-xl -md:text-sm" />
-                  {data?.data?.checkList ? 'Change' : 'Add'} Checklist
-                </button>
-              )}
+              {allowRoles.includes(userType) &&
+                data.data.status !== 'Complete' && (
+                  <button
+                    className="px-[10px] py-[6px] border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-1 items-center -md:px-2 -md:py-1 -md:text-sm"
+                    onClick={() => {
+                      setAddChecklist(prev => !prev);
+                    }}
+                  >
+                    <MdChecklist className="text-xl -md:text-sm" />
+                    {data?.data?.checkList ? 'Change' : 'Add'} Checklist
+                  </button>
+                )}
               {data.data.issueMember._id !== userId &&
                 data.data.status !== 'Complete' &&
                 data?.data?.checkList && (
@@ -669,7 +705,7 @@ const Page = () => {
                 )}
               {data.data.issueMember._id !== userId &&
                 data.data.status !== 'Complete' &&
-                userType === 'ROLE_ADMIN' &&
+                allowRoles.includes(userType) &&
                 data?.data?.checkList && (
                   <button
                     className="px-[10px] py-[6px] border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-1 items-center -md:px-2 -md:py-1 -md:text-sm"
@@ -679,7 +715,7 @@ const Page = () => {
                     Delete Checklist
                   </button>
                 )}
-              {data?.data?.checkList && (
+              {data?.data?.checkList?.checkList && (
                 <button
                   className="px-[10px] py-[6px] border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-1 items-center -md:px-2 -md:py-1 -md:text-sm"
                   onClick={() => setOpenViewChecklist(true)}
@@ -816,9 +852,7 @@ const Page = () => {
                                           />
                                         </div>
                                         <div className="flex flex-row gap-4 justify-evenly p-4 -md:flex-wrap">
-                                          {userType === 'ROLE_ADMIN' ||
-                                          userType ===
-                                            'ROLE_PROJECT MANAGER' ? (
+                                          {allowRoles.includes(userType) && (
                                             <>
                                               <button
                                                 className="py-2 px-4 font-semibold bg-secondary text-primary rounded-full flex flex-row items-center justify-center gap-1 text-nowrap"
@@ -828,8 +862,6 @@ const Page = () => {
                                                 Delete Image
                                               </button>
                                             </>
-                                          ) : (
-                                            ''
                                           )}
                                           <button
                                             className="py-2 px-4 font-semibold bg-secondary text-primary rounded-full flex flex-row items-center justify-center gap-1 text-nowrap"
@@ -849,8 +881,7 @@ const Page = () => {
                             </div>
                           </div>
                         </div>
-                        {(userType === 'ROLE_ADMIN' ||
-                          userType === 'ROLE_PROJECT MANAGER') &&
+                          {allowRoles.includes(userType) &&
                           item.type !== 'Task Updated' &&
                           data.data.category === 'Project' &&
                           !item.approved.isApproved && (
@@ -1101,7 +1132,7 @@ const Page = () => {
                 >
                   {teammembers.map(item => (
                     <MenuItem key={item._id} value={item._id}>
-                      {`${item.name} (${item.role.name})`}
+                      {`${item.firstname} ${item.lastname} (${item.roles.name})`}
                     </MenuItem>
                   ))}
                 </Select>
@@ -1376,7 +1407,7 @@ const Page = () => {
                 </button>
                 <button
                   className="bg-secondary text-primary rounded-3xl px-4 py-2 flex flex-row  items-center"
-                  onClick={deleteChecklistHandler}
+                  onClick={handleDeleteChecklist}
                 >
                   Delete
                 </button>
@@ -1474,7 +1505,7 @@ const Page = () => {
                 </button>
                 <button
                   className="bg-secondary text-primary rounded-3xl px-4 py-2 flex flex-row  items-center"
-                  onClick={closelManuallyHandler}
+                  onClick={handleManualClose}
                 >
                   Close Task
                 </button>

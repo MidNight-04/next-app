@@ -20,6 +20,7 @@ import { useRouter } from 'next/navigation';
 import { SidebarTrigger } from '../../../components/ui/sidebar';
 import { Separator } from '../../../components/ui/separator';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { allowRoles } from '../../../helpers/constants';
 
 const fetchProjects = async ({ userType, id, search }) => {
   const url =
@@ -77,7 +78,7 @@ const Page = () => {
           </h1>
         </div>
         <div className="flex flex-row gap-2">
-          {userType === 'ROLE_ADMIN' && (
+          {allowRoles.includes(userType) && (
             <Link href="/admin/projects/add">
               <button className="p-[6px] px-3 bg-transparent border-2 border-secondary rounded-full font-ubuntu hover:bg-secondary [&_p]:hover:text-primary-foreground [&_svg]:hover:text-primary-foreground">
                 <div className="text-secondary flex flex-row items-center">

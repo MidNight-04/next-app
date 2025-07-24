@@ -233,7 +233,7 @@ export default function AddMemberForm() {
             ['Last Name', 'lastname'],
             ['Username', 'username'],
             ['Email', 'email', 'email'],
-            ['Employee ID', 'employeeID'],
+            ['Client ID', 'employeeID'],
             ['Phone', 'phone'],
             ['City', 'city'],
             ['State', 'state'],

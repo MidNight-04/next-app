@@ -13,7 +13,7 @@ import { SidebarTrigger } from '../../../components/ui/sidebar';
 import { Separator } from '../../../components/ui/separator';
 
 const Page = () => {
-  const { userId, userType } = useAuthStore().getState();
+  const { userId, userType } = useAuthStore.getState();
   const hasHydrated = useAuthStore.persist?.hasHydrated();
   const [activeFilter, setActiveFilter] = useState('All Ticket');
   const [ticketList, setTicketList] = useState([]);

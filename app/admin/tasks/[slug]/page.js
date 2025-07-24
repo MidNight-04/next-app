@@ -40,6 +40,7 @@ import {
 import { CiViewList } from 'react-icons/ci';
 import { SidebarTrigger } from '../../../../components/ui/sidebar';
 import { Separator } from '../../../../components/ui/separator';
+import { allowRoles } from '../../../../helpers/constants';
 
 function stringToColor(string) {
   let hash = 0;
@@ -677,17 +678,18 @@ const Page = () => {
                     Comment
                   </button>
                 )}
-              {userType === 'ROLE_ADMIN' && data.data.status !== 'Complete' && (
-                <button
-                  className="px-[10px] py-[6px] border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-1 items-center -md:px-2 -md:py-1 -md:text-sm"
-                  onClick={() => {
-                    setAddChecklist(prev => !prev);
-                  }}
-                >
-                  <MdChecklist className="text-xl -md:text-sm" />
-                  {data?.data?.checkList ? 'Change' : 'Add'} Checklist
-                </button>
-              )}
+              {allowRoles.includes(userType) &&
+                data.data.status !== 'Complete' && (
+                  <button
+                    className="px-[10px] py-[6px] border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-1 items-center -md:px-2 -md:py-1 -md:text-sm"
+                    onClick={() => {
+                      setAddChecklist(prev => !prev);
+                    }}
+                  >
+                    <MdChecklist className="text-xl -md:text-sm" />
+                    {data?.data?.checkList ? 'Change' : 'Add'} Checklist
+                  </button>
+                )}
               {data.data.issueMember._id !== userId &&
                 data.data.status !== 'Complete' &&
                 data?.data?.checkList && (
@@ -703,7 +705,7 @@ const Page = () => {
                 )}
               {data.data.issueMember._id !== userId &&
                 data.data.status !== 'Complete' &&
-                userType === 'ROLE_ADMIN' &&
+                allowRoles.includes(userType) &&
                 data?.data?.checkList && (
                   <button
                     className="px-[10px] py-[6px] border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-1 items-center -md:px-2 -md:py-1 -md:text-sm"
@@ -713,7 +715,7 @@ const Page = () => {
                     Delete Checklist
                   </button>
                 )}
-              {data?.data?.checkList && (
+              {data?.data?.checkList?.checkList && (
                 <button
                   className="px-[10px] py-[6px] border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-1 items-center -md:px-2 -md:py-1 -md:text-sm"
                   onClick={() => setOpenViewChecklist(true)}
@@ -850,9 +852,7 @@ const Page = () => {
                                           />
                                         </div>
                                         <div className="flex flex-row gap-4 justify-evenly p-4 -md:flex-wrap">
-                                          {userType === 'ROLE_ADMIN' ||
-                                          userType ===
-                                            'ROLE_PROJECT MANAGER' ? (
+                                          {allowRoles.includes(userType) && (
                                             <>
                                               <button
                                                 className="py-2 px-4 font-semibold bg-secondary text-primary rounded-full flex flex-row items-center justify-center gap-1 text-nowrap"
@@ -862,8 +862,6 @@ const Page = () => {
                                                 Delete Image
                                               </button>
                                             </>
-                                          ) : (
-                                            ''
                                           )}
                                           <button
                                             className="py-2 px-4 font-semibold bg-secondary text-primary rounded-full flex flex-row items-center justify-center gap-1 text-nowrap"
@@ -883,8 +881,7 @@ const Page = () => {
                             </div>
                           </div>
                         </div>
-                        {(userType === 'ROLE_ADMIN' ||
-                          userType === 'ROLE_PROJECT MANAGER') &&
+                          {allowRoles.includes(userType) &&
                           item.type !== 'Task Updated' &&
                           data.data.category === 'Project' &&
                           !item.approved.isApproved && (
@@ -1135,7 +1132,7 @@ const Page = () => {
                 >
                   {teammembers.map(item => (
                     <MenuItem key={item._id} value={item._id}>
-                      {`${item.name} (${item.role.name})`}
+                      {`${item.firstname} ${item.lastname} (${item.roles.name})`}
                     </MenuItem>
                   ))}
                 </Select>

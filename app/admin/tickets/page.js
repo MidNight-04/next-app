@@ -13,8 +13,7 @@ import { SidebarTrigger } from '../../../components/ui/sidebar';
 import { Separator } from '../../../components/ui/separator';
 
 const Page = () => {
-  const userId = useAuthStore(state => state.userId);
-  const userType = useAuthStore(state => state.userType);
+  const { userId, userType } = useAuthStore().getState();
   const hasHydrated = useAuthStore.persist?.hasHydrated();
   const [activeFilter, setActiveFilter] = useState('All Ticket');
   const [ticketList, setTicketList] = useState([]);
@@ -34,20 +33,14 @@ const Page = () => {
     const fetchTickets = async () => {
       try {
         if (userType === 'ROLE_USER' || userType === 'ROLE_ADMIN') {
-          const response = await api.get(
-            `/tickets/getalltickets`
-          );
+          const response = await api.get(`/tickets/getalltickets`);
           setTicketList(response.data.data);
         } else if (userType === 'ROLE_CLIENT') {
-          const response = await api.get(
-            `/tickets/gettickets/${userId}`
-          );
+          const response = await api.get(`/tickets/gettickets/${userId}`);
 
           setTicketList(response.data.data);
         } else {
-          const response = await api.get(
-            `/tickets/getmembertickets/${userId}`
-          );
+          const response = await api.get(`/tickets/getmembertickets/${userId}`);
           setTicketList(response.data.data);
         }
       } catch (error) {

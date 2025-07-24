@@ -1,52 +1,99 @@
 import { useEffect } from 'react';
-import { useScrollStore } from '@/store/useScrollStore';
+import { useScrollStore } from '../store/useScrollStore';
+
+// export function useScrollRestore(isReady) {
+//   const scrollY = useScrollStore(s => s.scrollY);
+//   const setScrollY = useScrollStore(s => s.setScrollY);
+//   const hasRestoredScroll = useScrollStore(s => s.hasRestoredScroll);
+//   const setHasRestoredScroll = useScrollStore(s => s.setHasRestoredScroll);
+
+//   useEffect(() => {
+//     const handleScroll = () =>
+//       requestAnimationFrame(() => setScrollY(window.scrollY));
+
+//     window.addEventListener('scroll', handleScroll, { passive: true });
+
+//     return () => window.removeEventListener('scroll', handleScroll);
+//   }, [setScrollY]);
+
+//   useEffect(() => {
+//     if (!isReady || hasRestoredScroll || scrollY <= 0) return;
+
+//     const container = document.documentElement;
+//     let lastHeight = container.scrollHeight;
+
+//     let timeout = null;
+//     let observer = new ResizeObserver(() => {
+//       const newHeight = container.scrollHeight;
+
+//       // If height stopped changing for a bit → restore scroll
+//       if (newHeight === lastHeight) {
+//         if (timeout) clearTimeout(timeout);
+//         timeout = setTimeout(() => {
+//           // ✅ Only restore if enough content exists
+//           if (newHeight > scrollY) {
+//             window.scrollTo({ top: scrollY, behavior: 'auto' });
+//             setHasRestoredScroll(true);
+//             observer.disconnect();
+//           }
+//         }, 120);
+//       } else {
+//         lastHeight = newHeight;
+//       }
+//     });
+
+//     // Start observing DOM height changes
+//     observer.observe(container);
+
+//     return () => {
+//       if (timeout) clearTimeout(timeout);
+//       observer.disconnect();
+//     };
+//   }, [isReady, scrollY, hasRestoredScroll, setHasRestoredScroll]);
+
+//   // Reset state when unmounting / navigating away
+//   useEffect(() => {
+//     return () => setHasRestoredScroll(false);
+//   }, [setHasRestoredScroll]);
+// }
 
 export function useScrollRestore(isReady) {
-  const scrollY = useScrollStore(state => state.scrollY);
-  const setScrollY = useScrollStore(state => state.setScrollY);
-  const hasRestoredScroll = useScrollStore(state => state.hasRestoredScroll);
-  const setHasRestoredScroll = useScrollStore(
-    state => state.setHasRestoredScroll
-  );
+  const scrollY = useScrollStore(s => s.scrollY);
+  const setScrollY = useScrollStore(s => s.setScrollY);
+  const hasRestoredScroll = useScrollStore(s => s.hasRestoredScroll);
+  const setHasRestoredScroll = useScrollStore(s => s.setHasRestoredScroll);
 
   useEffect(() => {
-    const handleScroll = () => setScrollY(window.scrollY);
-    window.addEventListener('scroll', handleScroll);
+    const handleScroll = () =>
+      requestAnimationFrame(() => setScrollY(window.scrollY));
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, [setScrollY]);
 
   useEffect(() => {
     if (!isReady || hasRestoredScroll || scrollY <= 0) return;
 
-    let attempts = 0;
+    let lastHeight = 0;
+    let stableTimer = null;
 
-    const tryRestore = () => {
-      const docHeight = document.documentElement.scrollHeight;
+    const checkStable = () => {
+      const currentHeight = document.documentElement.scrollHeight;
 
-      if (docHeight > scrollY + window.innerHeight) {
-        window.scrollTo({
-          top: scrollY,
-          behavior: 'smooth',
-        });
+      if (currentHeight === lastHeight && currentHeight > scrollY) {
+        window.scrollTo({ top: scrollY, behavior: 'auto' });
         setHasRestoredScroll(true);
-        return true;
+      } else {
+        lastHeight = currentHeight;
+        stableTimer = setTimeout(checkStable, 150);
       }
-      return false;
     };
 
-    const interval = setInterval(() => {
-      const done = tryRestore();
-      if (done || attempts > 10) clearInterval(interval);
-      attempts++;
-    }, 100);
+    stableTimer = setTimeout(checkStable, 150);
 
-    return () => clearInterval(interval);
+    return () => clearTimeout(stableTimer);
   }, [isReady, scrollY, hasRestoredScroll, setHasRestoredScroll]);
 
   useEffect(() => {
     return () => setHasRestoredScroll(false);
   }, [setHasRestoredScroll]);
 }
-
-  // ✅ Enable scroll restore after reload
-//   useScrollRestore(isSuccess);

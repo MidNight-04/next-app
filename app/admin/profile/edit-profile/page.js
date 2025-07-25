@@ -113,7 +113,7 @@ const Page = () => {
       }
 
       const response = await api.post(
-        `/api/client/update-profile/${userId}`,
+        `/client/update-profile/${userId}`,
         formData,
         {
           headers: { 'Content-Type': 'multipart/form-data' },

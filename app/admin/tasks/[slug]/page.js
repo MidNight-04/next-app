@@ -724,15 +724,16 @@ const Page = () => {
                   View Checklist
                 </button>
               )}
-              {userType === 'ROLE_ADMIN' && data.data.status !== 'Complete' && (
-                <button
-                  className="px-[10px] py-[6px] border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-1 items-center -md:px-2 -md:py-1 -md:text-sm"
-                  onClick={() => setOpenManualClose(true)}
-                >
-                  <FaCheck className="text-xl -md:text-sm" />
-                  Close Manually
-                </button>
-              )}
+              {allowRoles.includes(userType) &&
+                data.data.status !== 'Complete' && (
+                  <button
+                    className="px-[10px] py-[6px] border border-secondary text-primary bg-secondary rounded-3xl flex flex-row gap-1 items-center -md:px-2 -md:py-1 -md:text-sm"
+                    onClick={() => setOpenManualClose(true)}
+                  >
+                    <FaCheck className="text-xl -md:text-sm" />
+                    Close Manually
+                  </button>
+                )}
             </div>
           </div>
           {data.data.comments.length > 0 && (
@@ -881,7 +882,7 @@ const Page = () => {
                             </div>
                           </div>
                         </div>
-                          {allowRoles.includes(userType) &&
+                        {allowRoles.includes(userType) &&
                           item.type !== 'Task Updated' &&
                           data.data.category === 'Project' &&
                           !item.approved.isApproved && (

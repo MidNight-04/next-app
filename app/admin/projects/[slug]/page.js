@@ -810,7 +810,7 @@ const ClientProjectView = () => {
                             })}
                           />
                         </div>
-                        {userType === 'ROLE_ADMIN' && (
+                        {allowRoles.includes(userType) && (
                           <span
                             className="p-2 text-lg border border-primary rounded-full font-semibold text-primary cursor-pointer"
                             onClick={() =>

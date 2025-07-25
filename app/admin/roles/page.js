@@ -56,11 +56,11 @@ const RoleDataTable = () => {
   const { data: roles = [], isLoading } = useQuery({
     queryKey: ['roles'],
     queryFn: () =>
-      api.get('/api/role/getall').then(res => res.data.data),
+      api.get('/role/getall').then(res => res.data.data),
   });
 
   const addMutation = useMutation({
-    mutationFn: data => api.post('/api/role/add', data),
+    mutationFn: data => api.post('/role/add', data),
     onSuccess: res => {
       toast.success(res.data.message);
       reset();
@@ -69,7 +69,7 @@ const RoleDataTable = () => {
   });
 
   const updateMutation = useMutation({
-    mutationFn: data => api.put('/api/role/updatebyid', data),
+    mutationFn: data => api.put('/role/updatebyid', data),
     onSuccess: res => {
       toast.success(res.data.message);
       setConfirmationOpen(false);
@@ -78,7 +78,7 @@ const RoleDataTable = () => {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: id => api.delete(`/api/role/delete/${id}`),
+    mutationFn: id => api.delete(`/role/delete/${id}`),
     onSuccess: () => {
       toast.success('Role deleted');
       queryClient.invalidateQueries(['roles']);

@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation';
 import { FiEdit } from 'react-icons/fi';
 import { MdOutlineDelete } from 'react-icons/md';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useAuthStore } from '../../../store/useAuthStore';
 
 const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
   [`& .${gridClasses.row}.even`]: {
@@ -118,6 +119,7 @@ const initialState = {
 };
 
 const MemberTable = () => {
+  const { userType } = useAuthStore.getState();
   const router = useRouter();
   const queryClient = useQueryClient();
   const [confirmationOpen, setConfirmationOpen] = useState(false);
@@ -136,9 +138,9 @@ const MemberTable = () => {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: () => api.delete(`/teammember/delete/${userId}`),
+    mutationFn: id => api.get(`/user/deactivate/${id}`),
     onSuccess: () => {
-      toast('Record deleted successfully');
+      toast('Employee deactivated successfully');
       queryClient.invalidateQueries({ queryKey: ['members'] });
       setConfirmationDelete(false);
     },
@@ -194,20 +196,23 @@ const MemberTable = () => {
     { field: 'role', headerName: 'Role', width: 200 },
     { field: 'email', headerName: 'Email', width: 280 },
     { field: 'phone', headerName: 'Phone', width: 140 },
-    { field: 'address', headerName: 'Address', width: 360 },
+    { field: 'address', headerName: 'Address', width: 280 },
+    { field: 'status', headerName: 'Status', width: 92 },
     {
       field: 'action',
       headerName: 'Action',
       width: 200,
       renderCell: params => (
         <div className="flex flex-row gap-2 items-center">
-          <div
-            className="p-2 rounded-full border border-primary text-primary bg-primary-foreground cursor-pointer"
-            // onClick={() => updateFunction(params.row.id)}
-            onClick={() => router.push(`/admin/employee/${params.row.id}`)}
-          >
-            <FiEdit className="text-xl" />
-          </div>
+          {userType === 'ROLE_ADMIN' && (
+            <div
+              className="p-2 rounded-full border border-primary text-primary bg-primary-foreground cursor-pointer"
+              // onClick={() => updateFunction(params.row.id)}
+              onClick={() => router.push(`/admin/employee/${params.row.id}`)}
+            >
+              <FiEdit className="text-xl" />
+            </div>
+          )}
           <div
             className="p-2 rounded-full border border-primary text-primary bg-primary-foreground cursor-pointer"
             onClick={() => {
@@ -232,6 +237,7 @@ const MemberTable = () => {
       role: row.roles?.name,
       phone: row.phone,
       address: row?.city + ' ' + row?.state,
+      status: row.userStatus.charAt(0).toUpperCase() + row.userStatus.slice(1),
     })) || [];
 
   return (
@@ -409,11 +415,11 @@ const MemberTable = () => {
           <div className="bg-white w-1/3 p-8 rounded-3xl outline-none -md:w-3/4">
             <div>
               <h3 className=" text-2xl font-semibold font-ubuntu">
-                Delete Employee
+                Deactivate Employee
               </h3>
               <hr className="my-4" />
             </div>
-            <h5>Are your sure you want to delete ?</h5>
+            <h5>Are your sure you want to Deactivate ?</h5>
             <div className="flex flex-row gap-2 justify-end mt-4">
               <button
                 className="bg-primary-foreground border border-secondary text-secondary rounded-3xl px-4 py-2 flex flex-row  items-center"
@@ -425,7 +431,7 @@ const MemberTable = () => {
                 className="bg-secondary text-primary rounded-3xl px-4 py-2 flex flex-row  items-center"
                 onClick={deleteMember}
               >
-                Delete
+                Deactivate
               </button>
             </div>
           </div>

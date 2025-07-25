@@ -788,6 +788,20 @@ const managerSidebar = [
         linkClassName: 'adminNavLink',
         subMenuItem: [],
       },
+      {
+        path: '/admin/clients',
+        iconName: <AiOutlineUsergroupAdd />,
+        feildName: 'Clients',
+        linkClassName: 'adminNavLink',
+        subMenuItem: [],
+      },
+      {
+        path: '/admin/employee',
+        iconName: <HiOutlineUserGroup />,
+        feildName: 'Employee',
+        linkClassName: 'adminNavLink',
+        subMenuItem: [],
+      },
     ],
   },
   {

@@ -120,21 +120,13 @@ const ClientTable = () => {
 
   const { data: clientList = [] } = useQuery({
     queryKey: ['clients'],
-    queryFn: () =>
-      api
-        .get('/client/getall', {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        .then(res => res.data.data),
+    queryFn: () => api.get('/client/getall').then(res => res.data.data),
   });
 
   const deleteMutation = useMutation({
-    mutationFn: id =>
-      api.delete(`/client/delete/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      }),
+    mutationFn: id => api.get(`/user/deactivate/${id}`),
     onSuccess: () => {
-      toast('Record deleted successfully');
+      toast('Client deactivated successfully');
       queryClient.invalidateQueries({ queryKey: ['clients'] });
       setDeleteConfirm(false);
     },
@@ -154,11 +146,12 @@ const ClientTable = () => {
   });
 
   const columns = [
-    { field: 'seriel', headerName: 'S. No.', width: 140 },
+    { field: 'seriel', headerName: 'S. No.', width: 100 },
     { field: 'name', headerName: 'Name', width: 300 },
     { field: 'email', headerName: 'Email', width: 340 },
     { field: 'phone', headerName: 'Phone', width: 200 },
     { field: 'address', headerName: 'Address', width: 260 },
+    { field: 'status', headerName: 'Status', width: 92 },
   ];
 
   const arrayData = clientList.map((row, index) => ({
@@ -168,6 +161,7 @@ const ClientTable = () => {
     email: row.email,
     phone: row.phone,
     address: `${row.city} ${row.state}`,
+    status: row.userStatus.charAt(0).toUpperCase() + row.userStatus.slice(1),
   }));
 
   const updateFunction = id => {
@@ -303,9 +297,11 @@ const ClientTable = () => {
         sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}
       >
         <div className="bg-white w-1/3 p-8 rounded-3xl">
-          <h3 className="text-2xl font-semibold font-ubuntu">Delete Client</h3>
+          <h3 className="text-2xl font-semibold font-ubuntu">
+            Deactivate Client
+          </h3>
           <hr className="my-4" />
-          <p>Are you sure you want to delete this client?</p>
+          <p>Are you sure you want to Deactivate this client?</p>
           <div className="flex justify-end gap-2 mt-4">
             <button
               onClick={() => setDeleteConfirm(false)}
@@ -317,7 +313,7 @@ const ClientTable = () => {
               onClick={() => deleteMutation.mutate(clientId)}
               className="bg-secondary text-primary rounded-full px-4 py-2"
             >
-              Delete
+              Deactivate
             </button>
           </div>
         </div>

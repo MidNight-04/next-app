@@ -11,6 +11,7 @@ import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import ContactsIcon from '@mui/icons-material/Contacts';
 import CurrencyRupee from '@mui/icons-material/CurrencyRupee';
+import { TbLogs } from "react-icons/tb";
 import { ListItemIcon } from '@mui/material';
 import {
   AddTask,
@@ -118,6 +119,13 @@ const adminSidebar = [
         path: '/admin/floors',
         iconName: <BsBuilding />,
         feildName: 'Floors',
+        linkClassName: 'adminNavLink',
+        subMenuItem: [],
+      },
+      {
+        path: '/admin/logs',
+        iconName: <TbLogs className="text-xl" />,
+        feildName: 'Logs',
         linkClassName: 'adminNavLink',
         subMenuItem: [],
       },

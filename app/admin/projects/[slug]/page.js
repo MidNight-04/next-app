@@ -57,6 +57,7 @@ import { SidebarTrigger } from '../../../../components/ui/sidebar';
 import { Separator } from '../../../../components/ui/separator';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { allowRoles } from '../../../../helpers/constants';
+import ProjectDetailSkeleton from '../../../../components/skeletons/ProjectDetailSkeleton';
 
 let today = new Date();
 let yyyy = today.getFullYear();
@@ -93,6 +94,19 @@ const ActionButton = ({ children, onClick }) => (
     </div>
   </button>
 );
+
+const ActionButtonSkeleton = ({ items = 1 }) => {
+  return (
+    <div className="flex flex-row gap-2 flex-wrap items-center">
+      {Array.from({ length: items }).map((_, i) => (
+        <div
+          key={i}
+          className="w-28 h-9 bg-gray-300 rounded-full animate-pulse"
+        />
+      ))}
+    </div>
+  );
+};
 
 const StatCard = ({ label, value, onClick }) => (
   <div
@@ -644,7 +658,6 @@ const ClientProjectView = () => {
 
   return (
     <AsideContainer>
-      {isLoading && <LoaderSpinner />}
       <div className="flex flex-row -md:flex-col -md:pl-0 -md:my-2 w-full justify-between">
         <div className="flex items-center gap-1 lg:gap-2">
           <SidebarTrigger className="-ml-2 hover:bg-primary" />
@@ -661,354 +674,380 @@ const ClientProjectView = () => {
           </h1>
         </div>
 
-        <div className="flex flex-row gap-2 flex-wrap items-center">
-          <Link href={`/admin/projects/payment-stages/${slug}`}>
-            <ActionButton>Payment Stages</ActionButton>
-          </Link>
-          <Link href={`/admin/projects/payment-details/${slug}`}>
-            <ActionButton>Payment Details</ActionButton>
-          </Link>
+        {isLoading ? (
+          <ActionButtonSkeleton items={4} />
+        ) : (
+          <div className="flex flex-row gap-2 flex-wrap items-center">
+            <Link href={`/admin/projects/payment-stages/${slug}`}>
+              <ActionButton>Payment Stages</ActionButton>
+            </Link>
+            <Link href={`/admin/projects/payment-details/${slug}`}>
+              <ActionButton>Payment Details</ActionButton>
+            </Link>
 
-          {allowRoles.includes(userType) && (
-            <ActionButton onClick={uploadDocument}>Add Documents</ActionButton>
-          )}
+            {allowRoles.includes(userType) && (
+              <>
+                <ActionButton onClick={uploadDocument}>
+                  Add Documents
+                </ActionButton>
+                <Link href={`/admin/projects/project-logs/${slug}`}>
+                  <ActionButton>Project Logs</ActionButton>
+                </Link>
+              </>
+            )}
 
-          <ActionButton onClick={updateStatus}>Raise Ticket</ActionButton>
-        </div>
+            <ActionButton onClick={updateStatus}>Raise Ticket</ActionButton>
+          </div>
+        )}
       </div>
-      <div className="grid grid-cols-6 -xl:grid-cols-4 -lg:grid-cols-3 -md:grid-cols-2 gap-4 -lg:gap-2 justify-evenly [&>div]:h-[88px] lg:[&>div]:p-[10px] -md:[&>div]:h-14 -lg:text-xs">
-        <StatCard
-          label="Documents"
-          value={<IoDocumentsOutline className="text-5" />}
-          onClick={documentDialogFunction}
-        />
-        <StatCard
-          label="Team"
-          value={<GoPeople className="text-5" />}
-          onClick={() => setTeamOpen(true)}
-        />
-        <StatCard
-          label={`Site ID - ${projectDetails?.siteID || 'N/A'}`}
-          value={<MdLockOutline className="text-5" />}
-        />
-        <StatCard
-          label={
-            <>
-              <span className="font-semibold">Start Date -</span>{' '}
-              {derived.startDate}
-            </>
-          }
-          value={<BsCalendar4Event className="text-5" />}
-        />
-        <StatCard
-          label={
-            <>
-              <span className="font-semibold">End Date -</span>{' '}
-              {derived.endDate}
-            </>
-          }
-          value={<BsCalendar4Event className="text-5" />}
-        />
-
-        <div className="px-5 py-[14px] flex w-full flex-auto items-center justify-center bg-white rounded-[14px]">
-          <Select onValueChange={value => handleOpenInspectionDialog(value)}>
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="No. of Inspections" />
-            </SelectTrigger>
-            <SelectContent>
-              {projectDetails?.project_status
-                ?.sort((a, b) => a.priority - b.priority)
-                ?.map(item => (
-                  <SelectItem key={item.name} value={item.name}>
-                    {item.name}
-                  </SelectItem>
-                ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <StatCard
-          label="Pending Inspection"
-          value={
-            projectDetails?.inspections?.filter(itm => itm.passed === false)
-              ?.length || 0
-          }
-        />
-        <StatCard
-          label="Passed Inspection"
-          value={
-            projectDetails?.inspections?.filter(itm => itm.passed === true)
-              ?.length || 0
-          }
-        />
-        <StatCard
-          label="Total Tickets"
-          value={projectDetails?.openTicket?.length || 0}
-        />
-        <StatCard
-          label="Pending Tickets"
-          value={
-            projectDetails?.openTicket?.filter(
-              t => t.finalStatus !== 'Completed'
-            )?.length || 0
-          }
-        />
-        <StatCard
-          label="Force Majeure"
-          value={projectDetails?.extension}
-          onClick={() => setExtensionOpen(prev => !prev)}
-        />
-      </div>
-
-      <div className="my-4">
-        {projectDetails?.project_status
-          ?.sort((a, b) => a.priority - b.priority)
-          .map((item, index) => {
-            var totalPoint = 0;
-            var completePoint = 0;
-            for (let j = 0; j < item?.step?.length; j++) {
-              totalPoint += 1;
-              if (item?.step[j]?.taskId?.status === 'Complete') {
-                completePoint += 1;
+      {isLoading ? (
+        <ProjectDetailSkeleton />
+      ) : (
+        <>
+          <div className="grid grid-cols-6 -xl:grid-cols-4 -lg:grid-cols-3 -md:grid-cols-2 gap-4 -lg:gap-2 justify-evenly [&>div]:h-[88px] lg:[&>div]:p-[10px] -md:[&>div]:h-14 -lg:text-xs">
+            <StatCard
+              label="Documents"
+              value={<IoDocumentsOutline className="text-5" />}
+              onClick={documentDialogFunction}
+            />
+            <StatCard
+              label="Team"
+              value={<GoPeople className="text-5" />}
+              onClick={() => setTeamOpen(true)}
+            />
+            <StatCard
+              label={`Site ID - ${projectDetails?.siteID || 'N/A'}`}
+              value={<MdLockOutline className="text-5" />}
+            />
+            <StatCard
+              label={
+                <>
+                  <span className="font-semibold">Start Date -</span>{' '}
+                  {derived.startDate}
+                </>
               }
-            }
-            var percent = ((completePoint * 100) / totalPoint).toFixed(0);
-            return (
-              <Accordion
-                type="single"
-                collapsible
-                key={item.name}
-                value={activeTab}
-                onValueChange={value => handleTabChange(value)}
+              value={<BsCalendar4Event className="text-5" />}
+            />
+            <StatCard
+              label={
+                <>
+                  <span className="font-semibold">End Date -</span>{' '}
+                  {derived.endDate}
+                </>
+              }
+              value={<BsCalendar4Event className="text-5" />}
+            />
+
+            <div className="px-5 py-[14px] flex w-full flex-auto items-center justify-center bg-white rounded-[14px]">
+              <Select
+                onValueChange={value => handleOpenInspectionDialog(value)}
               >
-                <AccordionItem
-                  value={item.name}
-                  className={`bg-white rounded-[14px] mb-2  ${
-                    activeTab !== item.name
-                      ? 'shadow-lg scale-100 hover:scale-[1.02] transition-all duration-300'
-                      : ''
-                  }`}
-                  // className="bg-white rounded-[14px] mb-2 scale-100 hover:scale-[1.02] transition-all duration-300"
-                >
-                  <AccordionTrigger className="px-4">
-                    <div className="flex flex-row justify-between w-full pr-8 -md:pr-2">
-                      <p className="flex text-lg font-ubuntu justify-center items-center font-bold -md:text-sm">
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="No. of Inspections" />
+                </SelectTrigger>
+                <SelectContent>
+                  {projectDetails?.project_status
+                    ?.sort((a, b) => a.priority - b.priority)
+                    ?.map(item => (
+                      <SelectItem key={item.name} value={item.name}>
                         {item.name}
-                      </p>
-                      <div className="flex flex-row gap-4 items-center">
-                        <div style={{ width: 40, height: 40 }}>
-                          <CircularProgressbar
-                            value={percent}
-                            text={`${percent}%`}
-                            strokeWidth={14}
-                            styles={buildStyles({
-                              backgroundColor: '#3e98c7',
-                              textColor: 'black',
-                              pathColor: '#93BFCF',
-                              trailColor: '#d6d6d6',
-                              textSize: '1.5rem',
-                            })}
-                          />
-                        </div>
-                        {allowRoles.includes(userType) && (
-                          <span
-                            className="p-2 text-lg border border-primary rounded-full font-semibold text-primary cursor-pointer"
-                            onClick={() =>
-                              confirmDeleteProjectStep(
-                                item?.siteID,
-                                item?.name,
-                                item?._id
-                              )
-                            }
-                          >
-                            <RiDeleteBin6Line />
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </AccordionTrigger>
-                  <AccordionContent className="py-0">
-                    <div className="bg-[#efefef]  pt-2">
-                      <div className="flex flex-row justify-end gap-2 mb-2">
-                        {userType !== 'ROLE_CLIENT' && (
-                          <span
-                            className="border border-primary rounded-full p-2 font-semibold text-primary cursor-pointer"
-                            onClick={() =>
-                              AddStepOpenModal(item?.step, item?.name)
-                            }
-                          >
-                            <FaPlus />
-                          </span>
-                        )}
-                        {allowRoles.includes(userType) && (
-                          <span
-                            className="border border-primary rounded-full p-2 font-semibold text-primary cursor-pointer"
-                            onClick={() =>
-                              DeleteStepOpenModal(item?.step, item?.name)
-                            }
-                          >
-                            <FaMinus />
-                          </span>
-                        )}
-                      </div>
-                      <div className="bg-secondary text-primary h-16 flex flex-row justify-evenly items-center rounded-t-3xl flex-auto text-base font-semibold -md:justify-between">
-                        <span className="font-semibold w-24 -sm:hidden" />
-                        <span className="font-semibold w-[200px] text-center -md:w-16 -md:ml-8 -sm:ml-12 -md:text-xs">
-                          Point
-                        </span>
-                        <span className="font-semibold w-[200px] flex md:ml-6 -md:w-20 text-left -sm:ml-4 -md:text-xs">
-                          Member Issue
-                        </span>
-                        <span className="font-semibold w-[200px] text-left -md:w-24 -md:text-xs">
-                          Schedule Time
-                        </span>
-                        <span className="font-semibold w-[70px] text-center -md:w-24 -md:text-xs">
-                          Action
-                        </span>
-                      </div>
-                    </div>
-                    <div>
-                      {item.step?.map((itm, idx) => {
-                        const dur = itm.duration ? parseInt(itm.duration) : 0;
-                        initialDate.setDate(initialDate.getDate() + dur);
-                        const formatToDate = date => {
-                          const day = String(date.getDate()).padStart(2, '0');
-                          const month = String(date.getMonth() + 1).padStart(
-                            2,
-                            '0'
-                          );
-                          const year = date.getFullYear();
-                          return `${day}-${month}-${year}`;
-                        };
-                        if (
-                          itm.taskId.status === 'Completed' &&
-                          new Date(initialDate) > new Date(itm.taskId.createdAt)
-                        ) {
-                          diff =
-                            (new Date(initialDate) -
-                              new Date(itm.taskId.createdAt)) /
-                            (1000 * 60 * 60 * 24);
-                          initialDate.setDate(initialDate.getDate() - diff);
-                        }
-                        const finalDate = initialDate
-                          .toISOString()
-                          .split('T')[0];
-                        return (
-                          <div
-                            key={itm.taskId.title + +idx}
-                            className="flex flex-row justify-evenly w-full py-0 outline-none -md:text-xs"
-                          >
-                            <div className="relative w-[120px] -md:w-8">
-                              <div className="h-full w-6 flex items-center justify-center">
-                                <span
-                                  className={cn(
-                                    'w-[2px] bg-secondary pointer-events-none h-full -md:w-[1px]',
-                                    idx === 0 ? 'mt-[100%] h-8' : '',
-                                    idx === item.step.length - 1
-                                      ? 'mb-[100%] h-8'
-                                      : '',
-                                    itm.taskId.status !== 'Complete'
-                                      ? 'bg-secondary'
-                                      : ''
-                                  )}
-                                />
-                              </div>
-                              <div
-                                className={cn(
-                                  'w-8 h-8 absolute top-1/2 md:right-[92px] -md:right-2 -mt-4 rounded-full bg-green-500 shadow-xl text-center -md:h-6 -md:w-6 -md:[&_svg]:text-base',
-                                  itm.taskId.status !== 'Complete'
-                                    ? 'bg-primary'
-                                    : ''
-                                )}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <StatCard
+              label="Pending Inspection"
+              value={
+                projectDetails?.inspections?.filter(itm => itm.passed === false)
+                  ?.length || 0
+              }
+            />
+            <StatCard
+              label="Passed Inspection"
+              value={
+                projectDetails?.inspections?.filter(itm => itm.passed === true)
+                  ?.length || 0
+              }
+            />
+            <StatCard
+              label="Total Tickets"
+              value={projectDetails?.openTicket?.length || 0}
+            />
+            <StatCard
+              label="Pending Tickets"
+              value={
+                projectDetails?.openTicket?.filter(
+                  t => t.finalStatus !== 'Completed'
+                )?.length || 0
+              }
+            />
+            <StatCard
+              label="Force Majeure"
+              value={projectDetails?.extension}
+              onClick={() => setExtensionOpen(prev => !prev)}
+            />
+          </div>
+
+          <div className="my-4">
+            {projectDetails?.project_status
+              ?.sort((a, b) => a.priority - b.priority)
+              .map((item, index) => {
+                var totalPoint = 0;
+                var completePoint = 0;
+                for (let j = 0; j < item?.step?.length; j++) {
+                  totalPoint += 1;
+                  if (item?.step[j]?.taskId?.status === 'Complete') {
+                    completePoint += 1;
+                  }
+                }
+                var percent = ((completePoint * 100) / totalPoint).toFixed(0);
+                return (
+                  <Accordion
+                    type="single"
+                    collapsible
+                    key={item.name}
+                    value={activeTab}
+                    onValueChange={value => handleTabChange(value)}
+                  >
+                    <AccordionItem
+                      value={item.name}
+                      className={`bg-white rounded-[14px] mb-2  ${
+                        activeTab !== item.name
+                          ? 'shadow-lg scale-100 hover:scale-[1.02] transition-all duration-300'
+                          : ''
+                      }`}
+                      // className="bg-white rounded-[14px] mb-2 scale-100 hover:scale-[1.02] transition-all duration-300"
+                    >
+                      <AccordionTrigger className="px-4">
+                        <div className="flex flex-row justify-between w-full pr-8 -md:pr-2">
+                          <p className="flex text-lg font-ubuntu justify-center items-center font-bold -md:text-sm">
+                            {item.name}
+                          </p>
+                          <div className="flex flex-row gap-4 items-center">
+                            <div style={{ width: 40, height: 40 }}>
+                              <CircularProgressbar
+                                value={percent}
+                                text={`${percent}%`}
+                                strokeWidth={14}
+                                styles={buildStyles({
+                                  backgroundColor: '#3e98c7',
+                                  textColor: 'black',
+                                  pathColor: '#93BFCF',
+                                  trailColor: '#d6d6d6',
+                                  textSize: '1.5rem',
+                                })}
+                              />
+                            </div>
+                            {allowRoles.includes(userType) && (
+                              <span
+                                className="p-2 text-lg border border-primary rounded-full font-semibold text-primary cursor-pointer"
+                                onClick={() =>
+                                  confirmDeleteProjectStep(
+                                    item?.siteID,
+                                    item?.name,
+                                    item?._id
+                                  )
+                                }
                               >
-                                {itm.taskId.status === 'Pending' && (
-                                  <BsClockHistory className="mt-1 ml-1 text-secondary text-2xl" />
-                                )}
-                                {itm.taskId.status === 'Complete' && (
-                                  <Check
-                                    sx={{
-                                      marginTop: '4px',
-                                      fontSize: '24px',
-                                      color: 'white',
-                                    }}
-                                  />
-                                )}
-                                {itm.taskId.status === 'In Progress' && (
-                                  <TbProgress className="mt-1 ml-1 text-secondary text-2xl" />
-                                )}
-                                {itm.taskId.status === 'Overdue' && (
-                                  <LuTimerReset className="mt-[3px] ml-1 text-secondary text-2xl" />
-                                )}
-                              </div>
-                            </div>
-                            <div className="w-[200px] flex items-center -md:w-16">
-                              <p className="text-sm font-medium -md:text-xs">
-                                {itm.taskId.title}
-                                {itm.checkList?.toLowerCase() === 'yes' && (
-                                  <>inspections</>
-                                )}
-                              </p>
-                            </div>
-                            <div className="w-[200px] flex self-center justify-start -md:w-16">
-                              {`${itm.taskId.issueMember?.firstname} ${itm.taskId.issueMember?.lastname} `}
-                            </div>
-                            <div className="w-[200px] -md:w-20 my-1 flex items-start flex-col">
-                              <div className="text-left text-nowrap">
-                                <div className="flex flex-row mb-2">
-                                  <p className="text-sm font-medium -md:text-xs">
-                                    ETC :
-                                  </p>
-                                  <p className="text-sm -md:text-xs">
-                                    {finalDate}
-                                  </p>
-                                </div>
-                                <div className="flex flex-row">
-                                  <p className="text-sm font-medium -md:text-xs">
-                                    DOC :
-                                  </p>
-                                  <p className="text-sm -md:hidden">
-                                    {itm?.taskId?.updatedOn !== '' &&
-                                      itm?.taskId?.status === 'Complete' &&
-                                      new Date(itm.taskId.updatedOn)
-                                        .toISOString()
-                                        .split('T')[0]}{' '}
-                                    {itm.taskId.updatedOn !== '' &&
-                                    itm?.taskId?.status === 'Complete' &&
-                                    new Date(itm.taskId.updatedOn) >
-                                      new Date(finalDate)
-                                      ? '(Delayed)'
-                                      : new Date(itm.taskId.updatedOn) <
-                                          new Date(finalDate) &&
-                                        itm?.taskId?.status === 'Complete'
-                                      ? '(Early)'
-                                      : itm.taskId.updatedOn !== '' &&
-                                        itm?.taskId?.status === 'Complete'
-                                      ? '(On Time)'
-                                      : ''}
-                                  </p>
-                                </div>
-                              </div>
-                            </div>
-                            <div className="flex items-center justify-center w-[70px]">
-                              <button
-                                className="bg-secondary rounded-3xl text-primary px-3 py-2 -md:text-xs -md:px-2 -md:py-1 scale-100 hover:scale-105 transition-all duration-100"
-                                onClick={() => {
-                                  router.push(`/admin/tasks/${itm.taskId._id}`);
-                                }}
-                              >
-                                Details
-                              </button>
-                            </div>
+                                <RiDeleteBin6Line />
+                              </span>
+                            )}
                           </div>
-                        );
-                      })}
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
-            );
-          })}
-      </div>
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent className="py-0">
+                        <div className="bg-[#efefef]  pt-2">
+                          <div className="flex flex-row justify-end gap-2 mb-2">
+                            {userType !== 'ROLE_CLIENT' && (
+                              <span
+                                className="border border-primary rounded-full p-2 font-semibold text-primary cursor-pointer"
+                                onClick={() =>
+                                  AddStepOpenModal(item?.step, item?.name)
+                                }
+                              >
+                                <FaPlus />
+                              </span>
+                            )}
+                            {allowRoles.includes(userType) && (
+                              <span
+                                className="border border-primary rounded-full p-2 font-semibold text-primary cursor-pointer"
+                                onClick={() =>
+                                  DeleteStepOpenModal(item?.step, item?.name)
+                                }
+                              >
+                                <FaMinus />
+                              </span>
+                            )}
+                          </div>
+                          <div className="bg-secondary text-primary h-16 flex flex-row justify-evenly items-center rounded-t-3xl flex-auto text-base font-semibold -md:justify-between">
+                            <span className="font-semibold w-24 -sm:hidden" />
+                            <span className="font-semibold w-[200px] text-center -md:w-16 -md:ml-8 -sm:ml-12 -md:text-xs">
+                              Point
+                            </span>
+                            <span className="font-semibold w-[200px] flex md:ml-6 -md:w-20 text-left -sm:ml-4 -md:text-xs">
+                              Member Issue
+                            </span>
+                            <span className="font-semibold w-[200px] text-left -md:w-24 -md:text-xs">
+                              Schedule Time
+                            </span>
+                            <span className="font-semibold w-[70px] text-center -md:w-24 -md:text-xs">
+                              Action
+                            </span>
+                          </div>
+                        </div>
+                        <div>
+                          {item.step?.map((itm, idx) => {
+                            const dur = itm.duration
+                              ? parseInt(itm.duration)
+                              : 0;
+                            initialDate.setDate(initialDate.getDate() + dur);
+                            const formatToDate = date => {
+                              const day = String(date.getDate()).padStart(
+                                2,
+                                '0'
+                              );
+                              const month = String(
+                                date.getMonth() + 1
+                              ).padStart(2, '0');
+                              const year = date.getFullYear();
+                              return `${day}-${month}-${year}`;
+                            };
+                            if (
+                              itm.taskId.status === 'Completed' &&
+                              new Date(initialDate) >
+                                new Date(itm.taskId.createdAt)
+                            ) {
+                              diff =
+                                (new Date(initialDate) -
+                                  new Date(itm.taskId.createdAt)) /
+                                (1000 * 60 * 60 * 24);
+                              initialDate.setDate(initialDate.getDate() - diff);
+                            }
+                            const finalDate = initialDate
+                              .toISOString()
+                              .split('T')[0];
+                            return (
+                              <div
+                                key={itm.taskId.title + +idx}
+                                className="flex flex-row justify-evenly w-full py-0 outline-none -md:text-xs"
+                              >
+                                <div className="relative w-[120px] -md:w-8">
+                                  <div className="h-full w-6 flex items-center justify-center">
+                                    <span
+                                      className={cn(
+                                        'w-[2px] bg-secondary pointer-events-none h-full -md:w-[1px]',
+                                        idx === 0 ? 'mt-[100%] h-8' : '',
+                                        idx === item.step.length - 1
+                                          ? 'mb-[100%] h-8'
+                                          : '',
+                                        itm.taskId.status !== 'Complete'
+                                          ? 'bg-secondary'
+                                          : ''
+                                      )}
+                                    />
+                                  </div>
+                                  <div
+                                    className={cn(
+                                      'w-8 h-8 absolute top-1/2 md:right-[92px] -md:right-2 -mt-4 rounded-full bg-green-500 shadow-xl text-center -md:h-6 -md:w-6 -md:[&_svg]:text-base',
+                                      itm.taskId.status !== 'Complete'
+                                        ? 'bg-primary'
+                                        : ''
+                                    )}
+                                  >
+                                    {itm.taskId.status === 'Pending' && (
+                                      <BsClockHistory className="mt-1 ml-1 text-secondary text-2xl" />
+                                    )}
+                                    {itm.taskId.status === 'Complete' && (
+                                      <Check
+                                        sx={{
+                                          marginTop: '4px',
+                                          fontSize: '24px',
+                                          color: 'white',
+                                        }}
+                                      />
+                                    )}
+                                    {itm.taskId.status === 'In Progress' && (
+                                      <TbProgress className="mt-1 ml-1 text-secondary text-2xl" />
+                                    )}
+                                    {itm.taskId.status === 'Overdue' && (
+                                      <LuTimerReset className="mt-[3px] ml-1 text-secondary text-2xl" />
+                                    )}
+                                  </div>
+                                </div>
+                                <div className="w-[200px] flex items-center -md:w-16">
+                                  <p className="text-sm font-medium -md:text-xs">
+                                    {itm.taskId.title}
+                                    {itm.checkList?.toLowerCase() === 'yes' && (
+                                      <>inspections</>
+                                    )}
+                                  </p>
+                                </div>
+                                <div className="w-[200px] flex self-center justify-start -md:w-16">
+                                  {`${itm.taskId.issueMember?.firstname} ${itm.taskId.issueMember?.lastname} `}
+                                </div>
+                                <div className="w-[200px] -md:w-20 my-1 flex items-start flex-col">
+                                  <div className="text-left text-nowrap">
+                                    <div className="flex flex-row mb-2">
+                                      <p className="text-sm font-medium -md:text-xs">
+                                        ETC :
+                                      </p>
+                                      <p className="text-sm -md:text-xs">
+                                        {finalDate}
+                                      </p>
+                                    </div>
+                                    <div className="flex flex-row">
+                                      <p className="text-sm font-medium -md:text-xs">
+                                        DOC :
+                                      </p>
+                                      <p className="text-sm -md:hidden">
+                                        {itm?.taskId?.updatedOn !== '' &&
+                                          itm?.taskId?.status === 'Complete' &&
+                                          new Date(itm.taskId.updatedOn)
+                                            .toISOString()
+                                            .split('T')[0]}{' '}
+                                        {itm.taskId.updatedOn !== '' &&
+                                        itm?.taskId?.status === 'Complete' &&
+                                        new Date(itm.taskId.updatedOn) >
+                                          new Date(finalDate)
+                                          ? '(Delayed)'
+                                          : new Date(itm.taskId.updatedOn) <
+                                              new Date(finalDate) &&
+                                            itm?.taskId?.status === 'Complete'
+                                          ? '(Early)'
+                                          : itm.taskId.updatedOn !== '' &&
+                                            itm?.taskId?.status === 'Complete'
+                                          ? '(On Time)'
+                                          : ''}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="flex items-center justify-center w-[70px]">
+                                  <button
+                                    className="bg-secondary rounded-3xl text-primary px-3 py-2 -md:text-xs -md:px-2 -md:py-1 scale-100 hover:scale-105 transition-all duration-100"
+                                    onClick={() => {
+                                      router.push(
+                                        `/admin/tasks/${itm.taskId._id}`
+                                      );
+                                    }}
+                                  >
+                                    Details
+                                  </button>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
+                );
+              })}
+          </div>
+        </>
+      )}
 
       <Dialog open={teamOpen} onClose={teamOpenCancel}>
         <DialogTitle

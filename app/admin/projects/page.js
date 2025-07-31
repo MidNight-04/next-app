@@ -37,7 +37,7 @@ const fetchProjects = async ({ userType, userId, search }) => {
 
 const Page = () => {
   const { userType, userId } = useAuthStore(state => state);
-  const hasHydrated = useAuthStore.persist.hasHydrated();
+  const hasHydrated = useAuthStore?.persist?.hasHydrated();
 
   const [search, setSearch] = useState('');
   const [siteId, setSiteId] = useState('');

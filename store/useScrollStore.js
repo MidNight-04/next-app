@@ -18,3 +18,21 @@ export const useScrollStore = create(
     }
   )
 );
+
+export const useContainerScrollStore = create(
+  persist(
+    (set) => ({
+      scrollY: 0,
+      hasRestoredScroll: false,
+      setScrollY: (y) => set({ scrollY: y }),
+      setHasRestoredScroll: (value) => set({ hasRestoredScroll: value }),
+    }),
+    {
+      name: 'sidebar-scroll-storage', // localStorage key
+      partialize: (state) => ({ scrollY: state.scrollY }), // only persist scrollY
+    }
+  )
+);
+
+
+

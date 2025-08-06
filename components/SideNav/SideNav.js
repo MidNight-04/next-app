@@ -13,70 +13,89 @@ import {
   SidebarMenuButton,
 } from '../../components/ui/sidebar';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useAuthStore } from '../../store/useAuthStore';
 import { getDashboardSidebar } from '../../constant/dashboardSidebarData';
 import { usePathname } from 'next/navigation';
 import { cn } from '../../lib/utils';
-import Image from 'next/image';
 import { NavUser } from '../../components/nav-user';
-
-const user = {
-  name: 'Thikedaar',
-  email: 'test@thikedaar.com',
-  avatar: '/avatars/shadcn.jpg',
-};
+import { useRef } from 'react';
+import { useContainerScrollRestore } from '../../hooks/useContainerScrollRestore';
 
 const SideNav = () => {
+  const containerRef = useRef(null);
   const userType = useAuthStore(state => state.userType);
-  const state = useAuthStore(state => state);
-  const content = getDashboardSidebar(userType || 'ROLE_CLIENT');
-  // const content = getDashboardSidebar(userType || 'ROLE_CLIENT');
+  const username = useAuthStore(state => state.username);
+  const email = useAuthStore(state => state.email);
+  const profileImage = useAuthStore(state => state.profileImage);
+  const hydrated = useAuthStore.persist.hasHydrated();
+  const content = getDashboardSidebar(userType) || [];
   const path = usePathname();
+
+  useContainerScrollRestore(hydrated, containerRef);
+
+  const user = {
+    name: username || 'User',
+    email: email || 'no-email@domain.com',
+    avatar: profileImage || '/avatars/shadcn.jpg',
+  };
 
   return (
     <Sidebar>
-      <SidebarContent className="bg-secondary">
+      <SidebarContent
+        ref={containerRef}
+        className="bg-secondary overflow-y-auto"
+      >
         <SidebarGroup className="pr-0 pl-5">
           <SidebarHeader>
-            <Link href={'/admin/home'} className="pt-[14px]">
-              <img src="/logo_white.png" alt="log" className="h-9" />
+            <Link href="/admin/home" className="pt-[14px] block">
+              <Image
+                src="/logo_white.png"
+                alt="logo"
+                width={100}
+                height={36}
+                priority
+                className="h-9 w-auto"
+              />
             </Link>
           </SidebarHeader>
+
           <SidebarGroupContent>
-            {content.map((item, index) => (
-              <SidebarMenu key={item.name}>
+            {content.map((section, index) => (
+              <SidebarMenu key={section.name}>
                 <SidebarGroupLabel className="text-[#8a8a8a] font-[700] text-[13px] font-ubuntu">
-                  {item.name}
+                  {section.name}
                 </SidebarGroupLabel>
-                <>
-                  {item.menuItem.map(item => (
-                    <SidebarMenuItem key={item.feildName}>
+
+                {section.menuItem.map(menu => {
+                  const isActive = path.startsWith(menu.path);
+                  return (
+                    <SidebarMenuItem key={menu.feildName}>
                       <SidebarMenuButton
                         className="pr-0 hover:bg-[#EEE9DA] hover:text-black"
                         asChild
                       >
                         <Link
+                          href={menu.path}
                           className={cn(
-                            'text-[#93BFCF] font-normal flex flex-row justify-between',
-                            path.includes(item.path) ? 'text-[#EEE9DA] ' : ''
+                            'text-[#93BFCF] font-normal flex flex-row justify-between items-center',
+                            isActive && 'text-[#EEE9DA]'
                           )}
-                          href={item.path}
                         >
                           <div className="flex flex-row gap-2 text-base items-center">
-                            <span>{item.iconName}</span>
-                            <span>{item.feildName}</span>
+                            <span>{menu.iconName}</span>
+                            <span>{menu.feildName}</span>
                           </div>
-                          {path.includes(item.path) && (
-                            <span className="bg-[#EEE9DA] w-[6px] h-[140%] rounded-md" />
+                          {isActive && (
+                            <span className="bg-[#EEE9DA] w-[6px] h-full rounded-md" />
                           )}
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
-                  ))}
-                </>
-                {content.length - 1 === index ? (
-                  ''
-                ) : (
+                  );
+                })}
+
+                {index !== content.length - 1 && (
                   <hr className="border-[#565656] ml-2 my-4 w-[85%]" />
                 )}
               </SidebarMenu>
@@ -92,26 +111,3 @@ const SideNav = () => {
 };
 
 export default SideNav;
-
-// import { AppSidebar } from '../../components/app-sidebar';
-// import { SidebarInset, SidebarProvider } from '../../components/ui/sidebar';
-
-// export default function Page() {
-//   return (
-//     <SidebarProvider
-//       style={{
-//         '--sidebar-width': 'calc(var(--spacing) * 72)',
-//         '--header-height': 'calc(var(--spacing) * 12)',
-//       }}
-//     >
-//       <AppSidebar variant='inset' />
-//       <SidebarInset>
-//         <div className='flex flex-1 flex-col'>
-//           <div className='@container/main flex flex-1 flex-col gap-2'>
-
-//           </div>
-//         </div>
-//       </SidebarInset>
-//     </SidebarProvider>
-//   );
-// }

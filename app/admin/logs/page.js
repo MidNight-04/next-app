@@ -50,7 +50,7 @@ const Page = () => {
     initialPageParam: 1,
     queryFn: fetchLogs,
     getNextPageParam: lastPage => lastPage.nextPage ?? undefined,
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60 * 1,
     keepPreviousData: true,
   });
 

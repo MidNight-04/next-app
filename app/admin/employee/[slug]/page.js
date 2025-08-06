@@ -220,7 +220,7 @@ export default function AddMemberForm() {
           onClick={() => router.back()}
           className="cursor-pointer hover:scale-150 transition"
         />
-        <h1>{isEditMode ? 'Edit User' : 'Add User'}</h1>
+        <h1>{isEditMode ? 'Edit Employee  ' : 'Add Employee'}</h1>
       </div>
 
       <div className="bg-white rounded-3xl p-5">

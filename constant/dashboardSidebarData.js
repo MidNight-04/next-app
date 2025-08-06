@@ -11,7 +11,7 @@ import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import ContactsIcon from '@mui/icons-material/Contacts';
 import CurrencyRupee from '@mui/icons-material/CurrencyRupee';
-import { TbLogs } from "react-icons/tb";
+import { TbLogs } from 'react-icons/tb';
 import { ListItemIcon } from '@mui/material';
 import {
   AddTask,
@@ -32,6 +32,11 @@ import {
 } from 'react-icons/md';
 import { BsBuilding } from 'react-icons/bs';
 import { FaTasks } from 'react-icons/fa';
+import { TbShoppingBag } from 'react-icons/tb';
+import { TbShoppingBagPlus } from 'react-icons/tb';
+import { IoPersonAddOutline } from 'react-icons/io5';
+import { MdOutlinePlaylistAdd } from 'react-icons/md';
+import { IoReceiptOutline } from 'react-icons/io5';
 // const userRole = localStorage.getItem("role");
 
 const adminSidebar = [
@@ -199,26 +204,36 @@ const adminSidebar = [
       },
     ],
   },
-  // {
-  //   name: "Log Management",
-  //   paraClass: "title",
-  //   menuItem: [
-  //     {
-  //       path: "/admin/log/list",
-  //       iconName: <ListAlt  style={{color:"#fec20e"}} />,
-  //       feildName: "Logs",
-  //       linkClassName: "adminNavLink",
-  //       subMenuItem: [],
-  //     },
-  //     // {
-  //     //   path: "/admin/ticket/add",
-  //     //   iconName: <ListAlt  style={{color:"#fec20e"}} />,
-  //     //   feildName: "Raise Ticket",
-  //     //   linkClassName: "adminNavLink",
-  //     //   subMenuItem: [],
-  //     // },
-  //   ],
-  // },
+  {
+    name: 'Material Management',
+    menuItem: [
+      {
+        path: '/admin/allorders',
+        iconName: <TbShoppingBag />,
+        feildName: 'All Orders',
+      },
+      {
+        path: '/admin/ordermaterials',
+        iconName: <TbShoppingBagPlus />,
+        feildName: 'Order Material',
+      },
+      {
+        path: '/admin/receivematerial',
+        iconName: <IoReceiptOutline />,
+        feildName: 'Receive Material',
+      },
+      {
+        path: '/admin/materials',
+        iconName: <MdOutlinePlaylistAdd />,
+        feildName: 'Materials',
+      },
+      {
+        path: '/admin/vendors',
+        iconName: <IoPersonAddOutline />,
+        feildName: 'Vendors',
+      },
+    ],
+  },
   {
     name: 'User Management',
     paraClass: 'title',
@@ -720,6 +735,13 @@ const siteEngineerSidebar = [
         linkClassName: 'adminNavLink',
         subMenuItem: [],
       },
+      {
+        path: '/admin/material',
+        iconName: <TbShoppingBag />,
+        feildName: 'Material',
+        linkClassName: 'adminNavLink',
+        subMenuItem: [],
+      },
       // {
       //   path: "/material-request/list",
       //   iconName: <GroupIcon />,
@@ -765,19 +787,6 @@ const siteEngineerSidebar = [
 ];
 
 const managerSidebar = [
-  // {
-  //   name: 'Main',
-  //   paraClass: 'title',
-  //   menuItem: [
-  //     {
-  //       path: '/admin/profile',
-  //       iconName: <AccountBoxIcon />,
-  //       feildName: 'Profile',
-  //       linkClassName: 'adminNavLink',
-  //       subMenuItem: [],
-  //     },
-  //   ],
-  // },
   {
     name: 'Project Management',
     paraClass: 'title',
@@ -793,6 +802,13 @@ const managerSidebar = [
         path: '/admin/projects',
         iconName: <GrProjects />,
         feildName: 'Projects',
+        linkClassName: 'adminNavLink',
+        subMenuItem: [],
+      },
+      {
+        path: '/admin/material',
+        iconName: <TbShoppingBag />,
+        feildName: 'Material',
         linkClassName: 'adminNavLink',
         subMenuItem: [],
       },
@@ -870,7 +886,7 @@ export const getDashboardSidebar = role => {
       return userSidebar;
 
     case 'ROLE_ARCHITECT':
-      return architectSidebar;
+      return managerSidebar;
 
     case 'ROLE_CONTRACTOR':
       return contractorSidebar;

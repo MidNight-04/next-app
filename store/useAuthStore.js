@@ -7,6 +7,7 @@ const EXPIRY_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
 const getResetState = () => ({
   userType: null,
   token: null,
+  profileImage: null,
   tokenSetAt: null,
   userId: null,
   email: null,
@@ -25,7 +26,16 @@ const store = set => ({
       state.isHydrated = true;
     }),
 
-  setLogIn: ({ userId, email, phone, userType, token, employeeId, username }) =>
+  setLogIn: ({
+    userId,
+    email,
+    phone,
+    userType,
+    token,
+    employeeId,
+    username,
+    profileImage,
+  }) =>
     set(state => {
       const hasChanged =
         state.userId !== userId ||
@@ -34,7 +44,8 @@ const store = set => ({
         state.userType !== userType ||
         state.token !== token ||
         state.employeeId !== employeeId ||
-        state.username !== username;
+        state.username !== username ||
+        state.profileImage !== profileImage;
 
       if (!hasChanged) return state;
 
@@ -48,6 +59,7 @@ const store = set => ({
       state.tokenSetAt = now;
       state.employeeId = employeeId;
       state.username = username;
+      state.profileImage = profileImage;
     }),
 
   setLogout: () => set(() => getResetState()),

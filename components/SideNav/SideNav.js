@@ -28,7 +28,7 @@ const SideNav = () => {
   const username = useAuthStore(state => state.username);
   const email = useAuthStore(state => state.email);
   const profileImage = useAuthStore(state => state.profileImage);
-  const hydrated = useAuthStore.persist.hasHydrated();
+  const hydrated = useAuthStore.persist?.hasHydrated();
   const content = getDashboardSidebar(userType) || [];
   const path = usePathname();
 

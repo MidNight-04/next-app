@@ -36,9 +36,9 @@ const TicketDetailsSkeleton = memo(function TicketDetailsSkeleton() {
   return (
     <div className="p-5 rounded-2xl bg-white flex flex-col gap-4 mb-4">
       <div className="flex gap-4">
-        <div className="flex flex-col gap-3 flex-1">
+        <div className="flex flex-col gap-2 flex-1">
           {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} variant="text" width="60%" height={20} />
+            <Skeleton key={i} variant="text" width="60%" height={28} />
           ))}
         </div>
         <Skeleton variant="circular" width={160} height={160} />
@@ -186,14 +186,6 @@ export default function TicketViewClient() {
   const isComplete = ticket?.status === 'Complete';
   const isClosed = ticket?.status === 'Closed';
 
-  if (isLoading) {
-    return (
-      <AsideContainer>
-        <TicketDetailsSkeleton />
-      </AsideContainer>
-    );
-  }
-
   if (!ticket) return null;
 
   return (
@@ -210,147 +202,153 @@ export default function TicketViewClient() {
         </h1>
       </div>
 
-      <div className="p-5 rounded-2xl bg-white flex flex-col gap-4 mb-4 shadow-md">
-        <div className="flex gap-4">
-          <div className="flex flex-col gap-2 flex-1">
-            <DetailRow label="Query Point" value={ticket.content} />
-            <DetailRow label="Query" value={ticket.query} />
-            <DetailRow label="Work" value={ticket.work} />
-            <DetailRow
-              label="Assign member"
-              value={`${ticket.assignMember?.firstname || ''} ${
-                ticket.assignMember?.lastname || ''
-              }`}
-            />
-            <DetailRow
-              label="Ticket Date"
-              value={new Date(ticket.date).toLocaleDateString()}
-            />
-            <div className="flex items-center gap-2">
-              <h5 className="font-semibold">Status:</h5>
-              <p
-                className={cn(
-                  ticket.status === 'Pending' && '_pending',
-                  ticket.status === 'Process' && '_process',
-                  ticket.status === 'Completed' && '_resolve'
-                )}
-              >
-                {ticket.status}
-              </p>
-              {isOverdue && (
-                <span className="text-red-500 font-semibold">(Overdue)</span>
-              )}
-            </div>
-          </div>
-          {!isOverdue && ticket.status !== 'Completed' && (
-            <div className="h-40 w-40">
-              <CircularProgressbar
-                value={100 * (timeLeft / duration)}
-                text={formatTime(timeLeft)}
-                styles={buildStyles({
-                  textColor: isOverdue ? 'red' : 'green',
-                  trailColor: '#e5e5e5',
-                })}
+      {isLoading ? (
+        <TicketDetailsSkeleton />
+      ) : (
+        <div className="p-5 rounded-2xl bg-white flex flex-col gap-4 shadow-md">
+          <div className="flex gap-4">
+            <div className="flex flex-col gap-2 flex-1">
+              <DetailRow label="Query Point" value={ticket.content} />
+              <DetailRow label="Query" value={ticket.query} />
+              <DetailRow label="Work" value={ticket.work} />
+              <DetailRow
+                label="Assign member"
+                value={`${ticket.assignMember?.firstname || ''} ${
+                  ticket.assignMember?.lastname || ''
+                }`}
               />
+              <DetailRow
+                label="Ticket Date"
+                value={new Date(ticket.date).toLocaleDateString()}
+              />
+              <div className="flex items-center gap-2">
+                <h5 className="font-semibold">Status:</h5>
+                <p
+                  className={cn(
+                    ticket.status === 'Pending' && '_pending',
+                    ticket.status === 'Process' && '_process',
+                    ticket.status === 'Completed' && '_resolve'
+                  )}
+                >
+                  {ticket.status}
+                </p>
+                {isOverdue && !isComplete && (
+                  <span className="text-red-500 font-semibold">(Overdue)</span>
+                )}
+              </div>
+            </div>
+            {!isOverdue && ticket.status !== 'Completed' && (
+              <div className="h-40 w-40">
+                <CircularProgressbar
+                  value={100 * (timeLeft / duration)}
+                  text={formatTime(timeLeft)}
+                  styles={buildStyles({
+                    textColor: isOverdue ? 'red' : 'green',
+                    trailColor: '#e5e5e5',
+                  })}
+                />
+              </div>
+            )}
+          </div>
+
+          {ticket.image?.length > 0 && (
+            <div className="flex flex-col gap-4 my-4">
+              <h2 className="font-ubuntu text-lg font-semibold mb-2">
+                Images:
+              </h2>
+              <div className="flex gap-2 flex-wrap">
+                {ticket.image.map((img, idx) => (
+                  <div
+                    key={idx}
+                    className="relative w-28 h-28 cursor-pointer group"
+                    onClick={() => setSelectedImage(img)}
+                  >
+                    <span className="absolute inset-0 bg-black bg-opacity-30 hidden group-hover:flex items-center justify-center text-white font-semibold rounded">
+                      View
+                    </span>
+                    <Image
+                      src={img}
+                      alt="ticket"
+                      width={112}
+                      height={112}
+                      className="rounded object-cover w-28 h-28"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {!isClosed && (
+            <div className="flex gap-4 flex-wrap">
+              {(isAllowedRole || isAssignedToMe || isAssignedByMe) &&
+                !isComplete && (
+                  <ActionButton
+                    icon={<RiProgress3Line />}
+                    text="In Progress"
+                    onClick={() => {
+                      setCommentType('In Progress');
+                      setOpenComment(true);
+                    }}
+                  />
+                )}
+              {((isComplete && isAllowedRole) ||
+                (isComplete && isAssignedByMe)) && (
+                <ActionButton
+                  icon={<HiOutlineLockOpen />}
+                  text="Re-open"
+                  onClick={() => {
+                    setCommentType('Reopened');
+                    setOpenComment(true);
+                  }}
+                />
+              )}
+              {(isAllowedRole || isAssignedToMe) && !isComplete && (
+                <ActionButton
+                  icon={<FaCheck />}
+                  text="Complete"
+                  onClick={() => {
+                    setCommentType('Complete');
+                    setOpenComment(true);
+                  }}
+                />
+              )}
+              {(isAllowedRole || isAssignedByMe) && !isComplete && (
+                <ActionButton
+                  icon={<IoLockClosedOutline />}
+                  text="Close"
+                  onClick={() => {
+                    setCommentType('Closed');
+                    setOpenComment(true);
+                  }}
+                />
+              )}
+              {(isAllowedRole || isAssignedToMe || isAssignedByMe) &&
+                !isComplete &&
+                !isClosed && (
+                  <ActionButton
+                    icon={<MdOutlineInsertComment />}
+                    text="Comment"
+                    onClick={() => {
+                      setCommentType('Comment');
+                      setOpenComment(true);
+                    }}
+                  />
+                )}
+              {isAllowedRole && !isComplete && (
+                <ActionButton
+                  icon={<MdOutlineInsertComment />}
+                  text="Reassign Member"
+                  onClick={() => {
+                    setOpenAssignMember(true);
+                    setCommentType('Task Updated');
+                  }}
+                />
+              )}
             </div>
           )}
         </div>
-
-        {ticket.image?.length > 0 && (
-          <div>
-            <h2 className="font-ubuntu text-lg font-semibold mb-2">Images:</h2>
-            <div className="flex gap-2 flex-wrap">
-              {ticket.image.map((img, idx) => (
-                <div
-                  key={idx}
-                  className="relative w-28 h-28 cursor-pointer group"
-                  onClick={() => setSelectedImage(img)}
-                >
-                  <span className="absolute inset-0 bg-black bg-opacity-30 hidden group-hover:flex items-center justify-center text-white font-semibold rounded">
-                    View
-                  </span>
-                  <Image
-                    src={img}
-                    alt="ticket"
-                    width={112}
-                    height={112}
-                    className="rounded object-cover w-28 h-28"
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {!isClosed && (
-          <div className="flex gap-4 mt-4 flex-wrap">
-            {(isAllowedRole || isAssignedToMe || isAssignedByMe) &&
-              !isComplete && (
-                <ActionButton
-                  icon={<RiProgress3Line />}
-                  text="In Progress"
-                  onClick={() => {
-                    setCommentType('In Progress');
-                    setOpenComment(true);
-                  }}
-                />
-              )}
-            {((isComplete && isAllowedRole) ||
-              (isComplete && isAssignedByMe)) && (
-              <ActionButton
-                icon={<HiOutlineLockOpen />}
-                text="Re-open"
-                onClick={() => {
-                  setCommentType('Reopened');
-                  setOpenComment(true);
-                }}
-              />
-            )}
-            {(isAllowedRole || isAssignedToMe) && !isComplete && (
-              <ActionButton
-                icon={<FaCheck />}
-                text="Complete"
-                onClick={() => {
-                  setCommentType('Complete');
-                  setOpenComment(true);
-                }}
-              />
-            )}
-            {(isAllowedRole || isAssignedByMe) && !isComplete && (
-              <ActionButton
-                icon={<IoLockClosedOutline />}
-                text="Close"
-                onClick={() => {
-                  setCommentType('Closed');
-                  setOpenComment(true);
-                }}
-              />
-            )}
-            {(isAllowedRole || isAssignedToMe || isAssignedByMe) &&
-              !isComplete &&
-              !isClosed && (
-                <ActionButton
-                  icon={<MdOutlineInsertComment />}
-                  text="Comment"
-                  onClick={() => {
-                    setCommentType('Comment');
-                    setOpenComment(true);
-                  }}
-                />
-              )}
-            {isAllowedRole && !isComplete && (
-              <ActionButton
-                icon={<MdOutlineInsertComment />}
-                text="Reassign Member"
-                onClick={() => {
-                  setOpenAssignMember(true);
-                  setCommentType('Task Updated');
-                }}
-              />
-            )}
-          </div>
-        )}
-      </div>
+      )}
 
       {/* Comments */}
       {ticket.comments?.length > 0 && (
@@ -402,6 +400,28 @@ export default function TicketViewClient() {
                   </span>
                 </div>
                 <p className="mt-4">{item.comment}</p>
+                {item.images?.length > 0 && (
+                  <div className="mt-4 flex gap-2 flex-wrap">
+                    {item.images.map((img, idx) => (
+                      <div
+                        key={img}
+                        className="relative w-16 h-16 cursor-pointer group"
+                        onClick={() => setSelectedImage(img)}
+                      >
+                        <span className="absolute inset-0 bg-black bg-opacity-30 hidden group-hover:flex items-center justify-center text-white font-semibold rounded">
+                          View
+                        </span>
+                        <Image
+                          src={img}
+                          alt="comment"
+                          width={100}
+                          height={100}
+                          className="rounded object-cover w-16 h-16"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -457,12 +477,15 @@ export default function TicketViewClient() {
             onChange={e => setComment(e.target.value)}
             className="w-full border p-2 rounded mb-3"
           />
-          <FormControl fullWidth>
-            <TextField
+          {/* <TextField
               type="file"
               onChange={e => setImageFiles(e.target.files)}
-            />
-          </FormControl>
+            /> */}
+          <input
+            type="file"
+            onChange={e => setImageFiles(e.target.files)}
+            className=" w-full text-gray-400 font-semibold text-sm bg-gray-100 border border-primary rounded-[7px] file:cursor-pointer cursor-pointer file:border-0 file:py-[14px] file:px-3 file:mr-4 file:bg-secondary file:hover:bg-gray-200 file:text-primary"
+          />
           <div className="flex justify-end gap-2 mt-4">
             <button
               className="border px-4 py-2 rounded-full"

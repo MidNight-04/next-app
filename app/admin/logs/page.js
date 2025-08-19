@@ -86,7 +86,9 @@ const Page = () => {
             logs.map(log => {
               const url = log.taskId
                 ? `/admin/tasks/${log.taskId}`
-                : `/admin/projects/${log.siteID}`;
+                : log.siteID
+                ? `/admin/projects/${log.siteID}`
+                : null;
               return (
                 <div
                   key={log._id}

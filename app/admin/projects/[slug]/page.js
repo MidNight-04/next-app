@@ -6,12 +6,10 @@ import {
   DialogContent,
   DialogTitle,
   FormControl,
-  ImageListItem,
   InputLabel,
   MenuItem,
   Select as MUISelect,
   TextField,
-  Typography,
   Modal,
   Dialog,
   Button,
@@ -55,7 +53,12 @@ import { useRouter } from 'next/navigation';
 import { LuTimerReset } from 'react-icons/lu';
 import { SidebarTrigger } from '../../../../components/ui/sidebar';
 import { Separator } from '../../../../components/ui/separator';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import {
+  useQuery,
+  useMutation,
+  QueryClient,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { allowRoles } from '../../../../helpers/constants';
 import ProjectDetailSkeleton from '../../../../components/skeletons/ProjectDetailSkeleton';
 
@@ -151,8 +154,6 @@ const ClientProjectView = () => {
   const [step, setStep] = useState('');
   const [pointList, setPointList] = useState([]);
   const [assignMember, setAssignMember] = useState(null);
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
   const [checkListName, setCheckListName] = useState('');
   const [documentDialogOpen, setDocumentDialogOpen] = useState(false);
   const [document, setDocument] = useState('');
@@ -180,6 +181,7 @@ const ClientProjectView = () => {
   const [teammembersByRole, setTeammembersByRole] = useState([]);
   const searchParams = useSearchParams();
   const pathname = usePathname();
+  const queryClient = useQueryClient();
 
   const {
     activeTab,
@@ -340,8 +342,8 @@ const ClientProjectView = () => {
     formData.append('log', log);
     formData.append('date', date);
 
-    if (Array.isArray(image)) {
-      image.forEach(img => formData.append('image', img));
+    for (let i = 0; i < image.length; i++) {
+      formData.append('image', image[i]);
     }
 
     const config = {
@@ -446,16 +448,18 @@ const ClientProjectView = () => {
   const addStepMutation = useMutation({
     mutationFn: async formData => {
       const response = await api.put('/project/createnewpoint', formData);
-      if (response?.data?.status !== 200) {
-        throw new Error(response?.data?.message || 'Failed to add point');
-      }
+      // if (response?.data?.status !== 200) {
+      //   throw new Error(response?.data?.message || 'Failed to add point');
+      // }
       return response.data;
     },
     onSuccess: data => {
-      toast(data.message || 'Point added successfully');
       setStepModal(false);
+      queryClient.invalidateQueries(['projectDetail', slug]);
       refetchProjectDetails();
       setPointList([]);
+      handleCancel();
+      toast(data.message || 'Point added successfully');
     },
     onError: error => {
       console.error(error);
@@ -779,7 +783,7 @@ const ClientProjectView = () => {
               label="Pending Tickets"
               value={
                 projectDetails?.openTicket?.filter(
-                  t => t.finalStatus !== 'Completed'
+                  t => t.status !== 'Complete' && t.status !== 'Closed'
                 )?.length || 0
               }
             />
@@ -985,7 +989,7 @@ const ClientProjectView = () => {
                                   </p>
                                 </div>
                                 <div className="w-[200px] flex self-center justify-start -md:w-16">
-                                  {`${itm.taskId.issueMember?.firstname} ${itm.taskId.issueMember?.lastname} `}
+                                  {`${itm.taskId.issueMember?.firstname} ${itm.taskId.issueMember?.lastname}`}
                                 </div>
                                 <div className="w-[200px] -md:w-20 my-1 flex items-start flex-col">
                                   <div className="text-left text-nowrap">
@@ -1073,18 +1077,19 @@ const ClientProjectView = () => {
                     >
                       <div className="mt-1 flex flex-row items-center gap-4">
                         <span>{item.firstname + ' ' + item?.lastname}</span>
-                        <span
-                          className="bg-secondary text-primary p-2 rounded-full cursor-pointer"
-                          onClick={() => {
-                            console.log(item);
-                            setIssue(item);
-                            setOpenChangeMember(true);
-                            getTeammembersByRole(item.roles);
-                            teamOpenCancel();
-                          }}
-                        >
-                          <MdOutlineEdit />
-                        </span>
+                        {allowRoles.includes(userType) && (
+                          <span
+                            className="bg-secondary text-primary p-2 rounded-full cursor-pointer"
+                            onClick={() => {
+                              setIssue(item);
+                              setOpenChangeMember(true);
+                              getTeammembersByRole(item.roles);
+                              teamOpenCancel();
+                            }}
+                          >
+                            <MdOutlineEdit />
+                          </span>
+                        )}
                       </div>
                       <span className="p-2 bg-green-600 rounded-full cursor-pointer">
                         <IoCallSharp className="text-white" />
@@ -1105,17 +1110,19 @@ const ClientProjectView = () => {
                     >
                       <div className="mt-1 flex flex-row items-center gap-4">
                         <span>{item.firstname + ' ' + item?.lastname}</span>
-                        <span
-                          className="bg-secondary text-primary p-2 rounded-full cursor-pointer"
-                          onClick={() => {
-                            setIssue(item);
-                            setOpenChangeMember(true);
-                            getTeammembersByRole(item.roles);
-                            teamOpenCancel();
-                          }}
-                        >
-                          <MdOutlineEdit />
-                        </span>
+                        {allowRoles.includes(userType) && (
+                          <span
+                            className="bg-secondary text-primary p-2 rounded-full cursor-pointer"
+                            onClick={() => {
+                              setIssue(item);
+                              setOpenChangeMember(true);
+                              getTeammembersByRole(item.roles);
+                              teamOpenCancel();
+                            }}
+                          >
+                            <MdOutlineEdit />
+                          </span>
+                        )}
                       </div>
                       <span className="p-2 bg-green-600 rounded-full cursor-pointer">
                         <IoCallSharp className="text-white" />
@@ -1134,17 +1141,19 @@ const ClientProjectView = () => {
                     >
                       <div className="mt-1 flex flex-row items-center gap-4">
                         <span>{item.firstname + ' ' + item?.lastname}</span>
-                        <span
-                          className="bg-secondary text-primary p-2 rounded-full cursor-pointer"
-                          onClick={() => {
-                            setIssue(item);
-                            setOpenChangeMember(true);
-                            getTeammembersByRole(item.roles);
-                            teamOpenCancel();
-                          }}
-                        >
-                          <MdOutlineEdit />
-                        </span>
+                        {allowRoles.includes(userType) && (
+                          <span
+                            className="bg-secondary text-primary p-2 rounded-full cursor-pointer"
+                            onClick={() => {
+                              setIssue(item);
+                              setOpenChangeMember(true);
+                              getTeammembersByRole(item.roles);
+                              teamOpenCancel();
+                            }}
+                          >
+                            <MdOutlineEdit />
+                          </span>
+                        )}
                       </div>
                       <span className="p-2 bg-green-600 rounded-full cursor-pointer">
                         <IoCallSharp className="text-white" />
@@ -1163,17 +1172,19 @@ const ClientProjectView = () => {
                     >
                       <div className="mt-1 flex flex-row items-center gap-4">
                         <span>{item.firstname + ' ' + item?.lastname}</span>
-                        <span
-                          className="bg-secondary text-primary p-2 rounded-full cursor-pointer"
-                          onClick={() => {
-                            setIssue(item);
-                            setOpenChangeMember(true);
-                            getTeammembersByRole(item.roles);
-                            teamOpenCancel();
-                          }}
-                        >
-                          <MdOutlineEdit />
-                        </span>
+                        {allowRoles.includes(userType) && (
+                          <span
+                            className="bg-secondary text-primary p-2 rounded-full cursor-pointer"
+                            onClick={() => {
+                              setIssue(item);
+                              setOpenChangeMember(true);
+                              getTeammembersByRole(item.roles);
+                              teamOpenCancel();
+                            }}
+                          >
+                            <MdOutlineEdit />
+                          </span>
+                        )}
                       </div>
                       <span className="p-2 bg-green-600 rounded-full cursor-pointer">
                         <IoCallSharp className="text-white" />
@@ -1192,17 +1203,19 @@ const ClientProjectView = () => {
                     >
                       <div className="mt-1 flex flex-row items-center gap-4">
                         <span>{item.firstname + ' ' + item?.lastname}</span>
-                        <span
-                          className="bg-secondary text-primary p-2 rounded-full cursor-pointer"
-                          onClick={() => {
-                            setIssue(item);
-                            setOpenChangeMember(true);
-                            getTeammembersByRole(item.roles);
-                            teamOpenCancel();
-                          }}
-                        >
-                          <MdOutlineEdit />
-                        </span>
+                        {allowRoles.includes(userType) && (
+                          <span
+                            className="bg-secondary text-primary p-2 rounded-full cursor-pointer"
+                            onClick={() => {
+                              setIssue(item);
+                              setOpenChangeMember(true);
+                              getTeammembersByRole(item.roles);
+                              teamOpenCancel();
+                            }}
+                          >
+                            <MdOutlineEdit />
+                          </span>
+                        )}
                       </div>
                       <span className="p-2 bg-green-600 rounded-full cursor-pointer">
                         <IoCallSharp className="text-white" />
@@ -1221,21 +1234,21 @@ const ClientProjectView = () => {
                     >
                       <div className="mt-1 flex flex-row items-center gap-4">
                         <span>{item.firstname + ' ' + item?.lastname}</span>
-
-                        <span
-                          className="bg-secondary text-primary p-2 rounded-full cursor-pointer"
-                          onClick={() => {
-                            setIssue(item);
-                            setOpenChangeMember(true);
-                            getTeammembersByRole(item.roles);
-                            teamOpenCancel();
-                          }}
-                        >
-                          <MdOutlineEdit />
-                        </span>
+                        {allowRoles.includes(userType) && (
+                          <span
+                            className="bg-secondary text-primary p-2 rounded-full cursor-pointer"
+                            onClick={() => {
+                              setIssue(item);
+                              setOpenChangeMember(true);
+                              getTeammembersByRole(item.roles);
+                              teamOpenCancel();
+                            }}
+                          >
+                            <MdOutlineEdit />
+                          </span>
+                        )}
                       </div>
                       <span className="p-2 bg-green-600 rounded-full cursor-pointer">
-                        {' '}
                         <IoCallSharp className="text-white" />
                       </span>
                     </div>

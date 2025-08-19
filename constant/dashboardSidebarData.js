@@ -213,11 +213,6 @@ const adminSidebar = [
         feildName: 'All Orders',
       },
       {
-        path: '/admin/ordermaterials',
-        iconName: <TbShoppingBagPlus />,
-        feildName: 'Order Material',
-      },
-      {
         path: '/admin/receivematerial',
         iconName: <IoReceiptOutline />,
         feildName: 'Receive Material',
@@ -802,13 +797,6 @@ const managerSidebar = [
         path: '/admin/projects',
         iconName: <GrProjects />,
         feildName: 'Projects',
-        linkClassName: 'adminNavLink',
-        subMenuItem: [],
-      },
-      {
-        path: '/admin/material',
-        iconName: <TbShoppingBag />,
-        feildName: 'Material',
         linkClassName: 'adminNavLink',
         subMenuItem: [],
       },

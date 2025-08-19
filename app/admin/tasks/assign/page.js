@@ -561,13 +561,13 @@ const Page = () => {
                 {isRecording ? <FaStop /> : <FaMicrophone />}
               </button>
 
-              <button
+              {/* <button
                 type="button"
                 onClick={() => setReminderOpen(true)}
                 className="p-2 bg-primary-foreground rounded-full border border-primary text-primary text-xl"
               >
                 <MdOutlineAccessAlarm />
-              </button>
+              </button> */}
             </div>
 
             {fileName && <p className="col-span-2">File: {fileName}</p>}

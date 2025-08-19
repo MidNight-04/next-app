@@ -3,8 +3,11 @@
 import AsideContainer from '../../../components/AsideContainer';
 import { SidebarTrigger } from '../../../components/ui/sidebar';
 import { Separator } from '../../../components/ui/separator';
+import { useRouter } from 'next/navigation';
 
 const Page = () => {
+  const router = useRouter();
+  
   return (
     <AsideContainer>
       <div className="flex flex-row justify-between items-center my-5">
@@ -17,6 +20,12 @@ const Page = () => {
           <h1 className="font-ubuntu font-bold text-[25px] leading-7 text-nowrap">
             All Orders
           </h1>
+          <button
+            className="ml-auto bg-secondary text-primary px-4 py-2 rounded-full"
+            onClick={() => router.push('/admin/allorders/ordermaterials')}
+          >
+            Add New Order
+          </button>
         </div>
       </div>
     </AsideContainer>

@@ -24,7 +24,7 @@ const SkeletonTicketCard = () => (
             <div className="h-5 w-40 bg-gray-200 rounded"></div>
           </div>
         </div>
-        <div className="flex gap-4 flex-wrap mt-8">
+        <div className="flex gap-2 flex-wrap mt-4">
           {Array.from({ length: 4 }).map((_, idx) => (
             <div
               key={idx}
@@ -48,16 +48,11 @@ const Page = () => {
   const hasHydrated = useAuthStore.persist?.hasHydrated();
   const [activeFilter, setActiveFilter] = useState('All Tickets');
   const [filteredTickets, setFilteredTickets] = useState(null);
-  const [dropdownOpen, setDropdownOpen] = useState({
-    project: false,
-    employee: false,
-    client: false,
-  });
 
   const { data: ticketList = [], isLoading } = useQuery({
     queryKey: ['tickets', userType, userId],
     queryFn: async () => {
-      if (userType === 'ROLE_USER' || userType === 'ROLE_ADMIN') {
+      if (userType === 'ROLE_ADMIN') {
         const res = await api.get(`/tickets/getalltickets`);
         return res.data.data;
       } else if (userType === 'ROLE_CLIENT') {
@@ -109,51 +104,39 @@ const Page = () => {
         filteredData = ticketList;
     }
     setFilteredTickets(filteredData);
-    setDropdownOpen({ project: false, employee: false, client: false });
-  };
-
-  const toggleDropdown = type => {
-    setDropdownOpen(prev => ({
-      ...prev,
-      [type]: !prev[type],
-    }));
   };
 
   if (!hasHydrated) return null;
 
   return (
     <AsideContainer>
-      <div className="flex flex-row justify-between items-center my-5">
+      <header className="flex flex-row justify-between items-center my-5 -md:flex-col gap-4">
         <div className="flex w-full items-center gap-1 lg:gap-2">
           <SidebarTrigger className="-ml-2 hover:bg-primary" />
           <Separator orientation="vertical" className="h-4 bg-black" />
-          <h1 className="font-ubuntu font-bold text-[25px] leading-7">
+          <h1 className="font-ubuntu font-bold text-[25px] leading-7 text-nowrap ml-2">
             Ticket List
           </h1>
         </div>
-        <div>
-          {(userType === 'ROLE_USER' || userType === 'ROLE_ADMIN') && (
-            <div className="flex flex-row items-center gap-4">
-              {['All Tickets', 'Overdue Tickets', 'Pending Tickets'].map(
-                btn => (
-                  <button
-                    key={btn}
-                    onClick={() => handleButtonClick(btn)}
-                    className={cn(
-                      'py-2 px-4 rounded-full border text-nowrap cursor-pointer',
-                      activeFilter === btn
-                        ? 'text-green-800 bg-green-200 border-green-800'
-                        : 'bg-primary-foreground text-primary border-primary'
-                    )}
-                  >
-                    {btn}
-                  </button>
-                )
-              )}
-            </div>
-          )}
-        </div>
-      </div>
+        {(userType === 'ROLE_USER' || userType === 'ROLE_ADMIN') && (
+          <div className="flex flex-row items-center gap-4">
+            {['All Tickets', 'Overdue Tickets', 'Pending Tickets'].map(btn => (
+              <button
+                key={btn}
+                onClick={() => handleButtonClick(btn)}
+                className={cn(
+                  'py-2 px-4 rounded-full border text-nowrap cursor-pointer',
+                  activeFilter === btn
+                    ? 'text-green-800 bg-green-200 border-green-800'
+                    : 'bg-primary-foreground text-primary border-primary'
+                )}
+              >
+                {btn}
+              </button>
+            ))}
+          </div>
+        )}
+      </header>
       <div>
         {isLoading ? (
           Array.from({ length: 5 }).map((_, i) => (
@@ -163,18 +146,20 @@ const Page = () => {
           (filteredTickets ?? ticketList).map((dt, idx) => (
             <div key={idx} className="mb-4">
               <Link href={`/admin/tickets/${dt._id}`} className="block">
-                <div className="bg-white rounded-3xl p-8 w-full">
+                <div className="bg-white rounded-3xl p-8">
                   <div className="flex flex-row w-full">
                     <div className="flex flex-col w-full justify-between">
                       <div className="flex flex-row gap-4">
                         <span className="h-[5.25rem] rounded-full w-1 bg-primary" />
-                        <div className="flex flex-col font-ubuntu font-bold text-[#565656]">
+                        <div className="flex flex-col font-ubuntu font-bold text-[#565656] w-3/4">
                           <span className="text-lg">Site ID - {dt.siteID}</span>
-                          <span className="text-lg">Query - {dt.query}</span>
+                          <span className="text-lg truncate w-full">
+                            Query - {dt.query}
+                          </span>
                           <span className="text-lg">Status - {dt.status}</span>
                         </div>
                       </div>
-                      <div className="flex gap-4 flex-wrap mt-8 [&_svg]:text-primary [&_svg]:text-2xl">
+                      <div className="flex gap-2 flex-wrap mt-4 [&_svg]:text-primary [&_svg]:text-2xl">
                         <span className="flex gap-2 items-center p-2 bg-primary-foreground rounded-full border border-primary">
                           <RiShareForwardFill />
                           <p>Work : {dt.work}</p>
@@ -183,10 +168,10 @@ const Page = () => {
                           <RiShareForwardFill />
                           <p>Status : {dt.status}</p>
                         </span>
-                        <span className="flex gap-2 items-center p-2 bg-primary-foreground rounded-full border border-primary">
+                        {/* <span className="flex gap-2 items-center p-2 bg-primary-foreground rounded-full border border-primary">
                           <RiShareForwardFill />
                           <p>Query : {dt.query}</p>
-                        </span>
+                        </span> */}
                         <span className="flex gap-2 items-center p-2 bg-primary-foreground rounded-full border border-primary">
                           <RiShareForwardFill />
                           <p>
@@ -198,15 +183,17 @@ const Page = () => {
                         </span>
                       </div>
                     </div>
-                    <div className="flex justify-center items-center w-28 h-28">
-                      <Image
-                        width={80}
-                        height={80}
-                        className="object-cover rounded-md h-full w-auto"
-                        src={dt.image?.[0] ?? NoImage}
-                        alt="Ticket"
-                      />
-                    </div>
+                    {dt.image?.length > 0 && (
+                      <div className="flex justify-center items-center w-28 h-28">
+                        <Image
+                          width={80}
+                          height={80}
+                          className="object-cover rounded-md h-full w-auto"
+                          src={dt.image?.[0] ?? NoImage}
+                          alt="Ticket"
+                        />
+                      </div>
+                    )}
                   </div>
                 </div>
               </Link>
@@ -223,136 +210,3 @@ const Page = () => {
 };
 
 export default Page;
-
-// {userType !== "ROLE_USER" && (
-//   <div className="flex flex-row  gap-4">
-//     <div>
-//       <button
-//         onClick={() => handleButtonClick("All Ticket")}
-//         className={cn(
-//           "flex flex-row gap-2 py-2 px-4  bg-primary-foreground text-primary rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl cursor-pointer",
-//           activeFilter === "All Ticket"
-//             ? "text-green-800 bg-green-200 border-green-800"
-//             : ""
-//         )}
-//       >
-//         All Tickets
-//       </button>
-//     </div>
-//     <div>
-//       <button
-//         className={cn(
-//           "flex flex-row gap-2 py-2 px-4  bg-primary-foreground text-primary rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl cursor-pointer",
-//           activeFilter === "Overdue Ticket"
-//             ? "text-green-800 bg-green-200 border-green-800"
-//             : ""
-//         )}
-//         onClick={() => handleButtonClick("Overdue Ticket")}
-//       >
-//         Overdue Tickets
-//       </button>
-//     </div>
-//     <div>
-//       <button
-//         className={cn(
-//           "flex flex-row gap-2 py-2 px-4  bg-primary-foreground text-primary rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl cursor-pointer",
-//           activeFilter === "Pending Ticket"
-//             ? "text-green-800 bg-green-200 border-green-800"
-//             : ""
-//         )}
-//         onClick={() => handleButtonClick("Pending Ticket")}
-//       >
-//         Pending Tickets
-//       </button>
-//     </div>
-//     {userType === "ROLE_ADMIN" && (
-//       <>
-//         {" "}
-//         <div className="dropdown">
-//           <button
-//             className={cn(
-//               "flex flex-row gap-2 py-2 px-4  bg-primary-foreground text-primary rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl cursor-pointer",
-//               activeFilter === "project"
-//                 ? "text-green-800 bg-green-200 border-green-800"
-//                 : ""
-//             )}
-//             onClick={() => toggleDropdown("project")}
-//           >
-//             Project Tickets
-//           </button>
-//           {dropdownOpen.project && (
-//             <ul className="dropdown-menu show">
-//               {projectList?.map(item => (
-//                 <li
-//                   key={item.siteID}
-//                   onClick={() =>
-//                     handleItemClick("Project Tickets", item.siteID)
-//                   }
-//                   className="dropdown-item"
-//                 >
-//                   <span>{`${item.siteID}`}</span>
-//                 </li>
-//               ))}
-//             </ul>
-//           )}
-//         </div>
-//         <div className="dropdown">
-//           <button
-//             className={cn(
-//               "flex flex-row gap-2 py-2 px-4  bg-primary-foreground text-primary rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl cursor-pointer",
-//               activeFilter === "employee"
-//                 ? "text-green-800 bg-green-200 border-green-800"
-//                 : ""
-//             )}
-//             onClick={() => toggleDropdown("employee")}
-//           >
-//             Employee Tickets
-//           </button>
-//           {dropdownOpen.employee && (
-//             <ul className="dropdown-menu show">
-//               {memberList?.map(item => (
-//                 <li
-//                   key={item.employeeID}
-//                   onClick={() =>
-//                     handleItemClick("Employee Tickets", item.employeeID)
-//                   }
-//                   className="dropdown-item"
-//                 >
-//                   <span>{`${item.name} (${item.role})`}</span>
-//                 </li>
-//               ))}
-//             </ul>
-//           )}
-//         </div>
-//         <div className="dropdown">
-//           <button
-//             className={cn(
-//               "flex flex-row gap-2 py-2 px-4  bg-primary-foreground text-primary rounded-full border-[1px] border-primary [&_svg]:text-primary [&_svg]:text-2xl cursor-pointer",
-//               activeFilter === "employee"
-//                 ? "text-green-800 bg-green-200 border-green-800"
-//                 : ""
-//             )}
-//             onClick={() => toggleDropdown("client")}
-//           >
-//             Client Tickets
-//           </button>
-//           {dropdownOpen.client && (
-//             <ul className="dropdown-menu show">
-//               {clientList?.map(item => (
-//                 <li
-//                   key={item._id}
-//                   onClick={() =>
-//                     handleItemClick("Client Tickets", item._id)
-//                   }
-//                   className="dropdown-item"
-//                 >
-//                   <span>{`${item.name}`}</span>
-//                 </li>
-//               ))}
-//             </ul>
-//           )}
-//         </div>
-//       </>
-//     )}
-//   </div>
-// )}

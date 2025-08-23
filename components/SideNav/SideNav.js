@@ -286,7 +286,6 @@ const SideNav = () => {
 
   const { userType, username, email, profileImage } = useAuthStore.getState();
   const hydrated = useAuthStore.persist?.hasHydrated();
-
   const path = usePathname();
 
   const user = useMemo(

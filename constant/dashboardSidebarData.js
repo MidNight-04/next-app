@@ -208,15 +208,15 @@ const adminSidebar = [
     name: 'Material Management',
     menuItem: [
       {
-        path: '/admin/allorders',
+        path: '/admin/materialrequest',
         iconName: <TbShoppingBag />,
-        feildName: 'All Orders',
+        feildName: 'Materail Request',
       },
-      {
-        path: '/admin/receivematerial',
-        iconName: <IoReceiptOutline />,
-        feildName: 'Receive Material',
-      },
+      // {
+      //   path: '/admin/receivematerial',
+      //   iconName: <IoReceiptOutline />,
+      //   feildName: 'Receive Material',
+      // },
       {
         path: '/admin/materials',
         iconName: <MdOutlinePlaylistAdd />,

@@ -9,10 +9,12 @@ import { SidebarTrigger } from '../../../components/ui/sidebar';
 import { Separator } from '../../../components/ui/separator';
 import AsideContainer from '../../../components/AsideContainer';
 import { FiEdit } from 'react-icons/fi';
-import { MdOutlineDelete } from 'react-icons/md';
 import { useAuthStore } from '../../../store/useAuthStore';
 import api from '../../../lib/api';
+import { RxCross2 } from 'react-icons/rx';
+import { FaCheck } from 'react-icons/fa6';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { allowRoles, editableRoles } from '../../../helpers/constants';
 
 const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
   [`& .${gridClasses.row}.even`]: {
@@ -105,7 +107,7 @@ const tableStyles = {
 
 const ClientTable = () => {
   const router = useRouter();
-  const token = useAuthStore(state => state.token);
+  const { userType } = useAuthStore.getState();
   const queryClient = useQueryClient();
   const [confirmationOpen, setConfirmationOpen] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
@@ -133,10 +135,7 @@ const ClientTable = () => {
   });
 
   const updateMutation = useMutation({
-    mutationFn: updatedData =>
-      api.put('/client/updatebyid', updatedData, {
-        headers: { Authorization: `Bearer ${token}` },
-      }),
+    mutationFn: updatedData => api.put('/client/updatebyid', updatedData),
     onSuccess: res => {
       toast(res.data.message);
       queryClient.invalidateQueries({ queryKey: ['clients'] });
@@ -198,13 +197,15 @@ const ClientTable = () => {
       width: 280,
       renderCell: params => (
         <div className="flex flex-row items-center gap-2">
-          <button
-            className="p-2 rounded-full border border-primary text-primary bg-primary-foreground"
-            // onClick={() => updateFunction(params.row.id)}
-            onClick={() => router.push(`/admin/clients/${params.row.id}`)}
-          >
-            <FiEdit className="text-xl" />
-          </button>
+          {editableRoles.includes(userType) && (
+            <button
+              className="p-2 rounded-full border border-primary text-primary bg-primary-foreground"
+              // onClick={() => updateFunction(params.row.id)}
+              onClick={() => router.push(`/admin/clients/${params.row.id}`)}
+            >
+              <FiEdit className="text-xl" />
+            </button>
+          )}
           <button
             className="p-2 rounded-full border border-primary text-primary bg-primary-foreground"
             onClick={() => {
@@ -212,7 +213,12 @@ const ClientTable = () => {
               setDeleteConfirm(true);
             }}
           >
-            <MdOutlineDelete className="text-xl" />
+            {params.row.status !== 'Active' ? (
+              <FaCheck className="text-xl" />
+            ) : (
+              <RxCross2 className="text-xl" />
+            )}
+            {/* <MdOutlineDelete className="text-xl" /> */}
           </button>
         </div>
       ),
@@ -238,7 +244,9 @@ const ClientTable = () => {
 
       <StripedDataGrid
         rows={arrayData}
-        columns={columns.concat(actionColumn)}
+        columns={
+          allowRoles.includes(userType) ? columns.concat(actionColumn) : columns
+        }
         pageSize={9}
         getRowClassName={params =>
           params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd'

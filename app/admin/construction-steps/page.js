@@ -138,6 +138,9 @@ function SortableItem({ item, onDelete, onAddField, onRemoveField }) {
                 <th className="text-center font-semibold text-[16px]">
                   Issue Member
                 </th>
+                <th className="text-center font-semibold text-[16px]">
+                  Duration
+                </th>
                 <th className="text-right pr-6 font-semibold text-[16px] rounded-tr-3xl">
                   Action
                 </th>
@@ -151,6 +154,10 @@ function SortableItem({ item, onDelete, onAddField, onRemoveField }) {
                   </td>
                   <td className="text-center text-sm text-muted-foreground">
                     {pt.issueMember?.join(', ')}
+                  </td>
+                  <td className="text-center text-sm text-muted-foreground">
+                    {pt.duration ? pt.duration : 'Same'}{' '}
+                    {parseInt(pt.duration) > 1 ? 'days' : 'day'}
                   </td>
                   <td className="text-right pr-6">
                     <div className="flex justify-end gap-2">

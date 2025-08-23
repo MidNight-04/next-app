@@ -208,20 +208,15 @@ const adminSidebar = [
     name: 'Material Management',
     menuItem: [
       {
-        path: '/admin/allorders',
+        path: '/admin/materialrequest',
         iconName: <TbShoppingBag />,
-        feildName: 'All Orders',
+        feildName: 'Materail Request',
       },
-      {
-        path: '/admin/ordermaterials',
-        iconName: <TbShoppingBagPlus />,
-        feildName: 'Order Material',
-      },
-      {
-        path: '/admin/receivematerial',
-        iconName: <IoReceiptOutline />,
-        feildName: 'Receive Material',
-      },
+      // {
+      //   path: '/admin/receivematerial',
+      //   iconName: <IoReceiptOutline />,
+      //   feildName: 'Receive Material',
+      // },
       {
         path: '/admin/materials',
         iconName: <MdOutlinePlaylistAdd />,
@@ -802,13 +797,6 @@ const managerSidebar = [
         path: '/admin/projects',
         iconName: <GrProjects />,
         feildName: 'Projects',
-        linkClassName: 'adminNavLink',
-        subMenuItem: [],
-      },
-      {
-        path: '/admin/material',
-        iconName: <TbShoppingBag />,
-        feildName: 'Material',
         linkClassName: 'adminNavLink',
         subMenuItem: [],
       },

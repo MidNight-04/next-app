@@ -1,12 +1,156 @@
 'use client';
 
+import { DataGrid, gridClasses } from '@mui/x-data-grid';
+import { styled } from '@mui/material';
 import AsideContainer from '../../../components/AsideContainer';
 import { SidebarTrigger } from '../../../components/ui/sidebar';
 import { Separator } from '../../../components/ui/separator';
+import { useRouter } from 'next/navigation';
+import { Add } from '@mui/icons-material';
+import api from '../../../lib/api';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { FiEdit } from 'react-icons/fi';
+import { RxCross2 } from 'react-icons/rx';
+import { FaCheck } from 'react-icons/fa6';
+import { toast } from 'sonner';
+
+const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
+  [`& .${gridClasses.row}.even`]: {
+    backgroundColor: '#f8fbfc',
+    '&:hover': {
+      backgroundColor: '#93bfcf',
+      color: '#eee9da',
+      '@media (hover: none)': { backgroundColor: 'transparent' },
+    },
+    '&.Mui-selected': { backgroundColor: '#93bfcf' },
+  },
+  [`& .${gridClasses.row}.odd`]: {
+    backgroundColor: '#eee9da',
+    '&:hover': {
+      backgroundColor: '#93bfcf',
+      color: '#eee9da',
+      '@media (hover: none)': { backgroundColor: 'transparent' },
+    },
+    '&.Mui-selected': { backgroundColor: '#93bfcf' },
+  },
+}));
+
+const tableStyles = {
+  fontFamily: 'ubuntu',
+  fontSize: '16px',
+  '.MuiDataGrid-columnSeparator': { display: 'none' },
+  '& .MuiDataGrid-columnHeaderTitle': { color: '#93bfcf' },
+  '& .MuiDataGrid-menuOpen': { background: '#0b192c' },
+  '&.MuiDataGrid-root': {
+    borderRadius: '16px',
+    marginBottom: '1rem',
+    background: '#0b192c',
+  },
+  '& .MuiDataGrid-filler': { background: '#0b192c' },
+  '& .MuiDataGrid-columnHeader': {
+    background: '#0b192c',
+    color: '#93bfcf',
+  },
+  '& .MuiDataGrid-columnHeader--sortable': { color: '#93bfcf' },
+  '& .MuiDataGrid-withBorderColor': { color: '#93bfcf' },
+  '& .MuiDataGrid-menuIcon': {
+    background: '#0b192c',
+    color: '#93bfcf',
+  },
+  '& .MuiDataGrid-columnHeaders': {
+    background: '#0b192c',
+    color: '#93bfcf',
+  },
+  '& .MuiDataGrid-sortIcon': { color: '#93bfcf' },
+  '& .MuiDataGrid-cell:focus-within': { outline: 'none !important' },
+  '& .MuiDataGrid-columnHeaderTitleContainer': {
+    background: '#0b192c',
+    color: '#93bfcf',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  '& .MuiToolbar-root ': { color: '#93bfcf' },
+  '& .MuiButtonBase-root': { color: '#93bfcf' },
+  '& .MuiDataGrid-overlay': {
+    background: '#eee9da',
+    color: '#0b192c',
+  },
+  '& .MuiDataGrid-cell': {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+};
+
+const columns = [
+  { field: 'seriel', headerName: 'S. No.', width: 100 },
+  { field: 'name', headerName: 'Name', width: 300 },
+  { field: 'email', headerName: 'Email', width: 340 },
+  { field: 'phone', headerName: 'Phone', width: 200 },
+  { field: 'address', headerName: 'Address', width: 260 },
+  { field: 'status', headerName: 'Status', width: 120 },
+];
 
 const Page = () => {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+
+  const { data = [], isLoading } = useQuery({
+    queryKey: ['allVendors'],
+    queryFn: async () => {
+      const response = await api.get('/vendor/getallvendors');
+      return response.data;
+    },
+  });
+
+  const mutation = useMutation({
+    mutationFn: id => api.put(`/vendor/togglevendorstatus/${id}`),
+    onSuccess: () => {
+      toast.success('Vendor status updated successfully');
+      queryClient.invalidateQueries(['allVendors']);
+    },
+    onError: err => {
+      toast.error(err?.response?.data?.message || 'Error updating vendor');
+    },
+  });
+
+  const actionColumn = [
+    {
+      field: 'action',
+      headerName: 'Action',
+      width: 280,
+      renderCell: params => (
+        <div className="flex flex-row items-center gap-2">
+          <button
+            className="p-2 rounded-full border border-primary text-primary bg-primary-foreground"
+            onClick={() => router.push('/admin/vendors/' + params.row.id)}
+          >
+            <FiEdit className="text-xl" />
+          </button>
+          <button
+            className="p-2 rounded-full border border-primary text-primary bg-primary-foreground"
+            onClick={() => mutation.mutate(params.row.id)}
+            title={
+              params.row.status === 'Active'
+                ? 'Deactivate Vendor'
+                : 'Activate Vendor'
+            }
+          >
+            {params.row.status !== 'Active' ? (
+              <FaCheck className="text-xl" />
+            ) : (
+              <RxCross2 className="text-xl" />
+            )}
+          </button>
+        </div>
+      ),
+    },
+  ];
+
   return (
     <AsideContainer>
+      {/* Header */}
       <div className="flex flex-row justify-between items-center my-5">
         <div className="flex w-full items-center gap-1 lg:gap-2">
           <SidebarTrigger className="-ml-2 hover:bg-primary" />
@@ -18,6 +162,34 @@ const Page = () => {
             Vendors List
           </h1>
         </div>
+        <button
+          className="ml-auto bg-secondary text-primary px-3 py-2 rounded-full text-nowrap flex items-center gap-1 hover:bg-primary hover:text-secondary transition duration-300"
+          onClick={() => router.push('/admin/vendors/addvendor')}
+        >
+          <Add />
+          <span>Add Vendor</span>
+        </button>
+      </div>
+
+      {/* Table */}
+      <div>
+        <StripedDataGrid
+          rows={data.map((vendor, i) => ({
+            ...vendor,
+            id: vendor._id,
+            seriel: i + 1,
+            status: vendor.isActive ? 'Active' : 'Inactive',
+          }))}
+          columns={columns.concat(actionColumn)}
+          pageSize={9}
+          loading={isLoading}
+          getRowClassName={params =>
+            params.indexRelativeToCurrentPage % 2 === 0 ? 'even' : 'odd'
+          }
+          rowsPerPageOptions={[9]}
+          localeText={{ noRowsLabel: 'No Data Available...' }}
+          sx={tableStyles}
+        />
       </div>
     </AsideContainer>
   );

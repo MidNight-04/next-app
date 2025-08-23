@@ -15,7 +15,7 @@ import TaskFilterPopup from '../../../../components/filter/Filter';
 import TaskCardSkeleton from '../../../../components/skeletons/TaskCardSkeleton';
 import PageHeaderSkeleton from '../../../../components/skeletons/HeaderSkeleton';
 import TabsSkeleton from '../../../../components/skeletons/TabsSkeleton';
-import TaskCard from '../../../../components/TaskCard';
+import TaskCard from '../../../../components/Task/TaskCard';
 import {
   Tabs,
   TabsList,
@@ -168,7 +168,7 @@ const Content = () => {
 
   useEffect(() => {
     refetch();
-  }, [activeTab, activeFilter, customFilters, refetch]);
+  }, [activeFilter, customFilters]);
 
   if (isFetching && !isFetched) {
     return (
@@ -254,7 +254,7 @@ const Content = () => {
                 key={activeTab}
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
+                // exit={{ opacity: 0, y: 0 }}
                 transition={{ duration: 0.25 }}
               >
                 <div className="flex flex-col gap-4 w-full justify-center my-4">
@@ -273,8 +273,8 @@ const Content = () => {
                       </div>
                     ))
                   ) : (
-                    <p className="text-center text-secondary mt-20 text-lg">
-                      No Task Assigned...
+                    <p className="text-center text-secondary mt-20 text-lg text-gray-400 !font-semibold ">
+                      No Task Assigned
                     </p>
                   )}
 

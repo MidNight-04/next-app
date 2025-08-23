@@ -523,6 +523,14 @@ const Page = () => {
               </div>
               <div className="flex flex-row gap-2 items-center">
                 <p className="font-ubuntu font-semibold text-gray-600">
+                  Site Id :
+                </p>
+                <p className="flex flex-row gap-1 items-center">
+                  {data.data.siteID || 'N/A'}
+                </p>
+              </div>
+              <div className="flex flex-row gap-2 items-center">
+                <p className="font-ubuntu font-semibold text-gray-600">
                   Status :
                 </p>
                 <p className="flex flex-row gap-1 items-center">
@@ -586,7 +594,7 @@ const Page = () => {
               )}
             </div>
             <div className="flex flex-row gap-4 mt-4 text-nowrap flex-wrap -md:gap-2">
-              {(data.data.issueMember._id === userId ||
+              {(data.data.issueMember?._id === userId ||
                 data.data.assignedBy?._id === userId) &&
                 userType !== 'ROLE_CLIENT' &&
                 data.data.status !== 'Complete' && (
@@ -614,7 +622,7 @@ const Page = () => {
                     Re-open
                   </button>
                 )}
-              {(data.data.issueMember._id === userId ||
+              {(data.data.issueMember?._id === userId ||
                 data.data.assignedBy?._id === userId) &&
                 userType !== 'ROLE_CLIENT' &&
                 data.data.status !== 'Complete' && (
@@ -664,7 +672,7 @@ const Page = () => {
                     Reassign
                   </button>
                 )}
-              {(data.data.issueMember._id === userId ||
+              {(data.data.issueMember?._id === userId ||
                 data.data.assignedBy?._id === userId) &&
                 data.data.status !== 'Complete' && (
                   <button
@@ -690,7 +698,7 @@ const Page = () => {
                     {data?.data?.checkList ? 'Change' : 'Add'} Checklist
                   </button>
                 )}
-              {data.data.issueMember._id !== userId &&
+              {data.data.issueMember?._id !== userId &&
                 data.data.status !== 'Complete' &&
                 data?.data?.checkList && (
                   <button
@@ -703,7 +711,7 @@ const Page = () => {
                     Update Checklist
                   </button>
                 )}
-              {data.data.issueMember._id !== userId &&
+              {data.data.issueMember?._id !== userId &&
                 data.data.status !== 'Complete' &&
                 allowRoles.includes(userType) &&
                 data?.data?.checkList && (
@@ -886,18 +894,25 @@ const Page = () => {
                           item.type !== 'Task Updated' &&
                           data.data.category === 'Project' &&
                           !item.approved.isApproved && (
-                            <div className="flex flex-col items-center justify-between">
+                            <div className="flex flex-col items-end justify-between">
                               <span
-                                className="text-primary bg-secondary p-3 rounded-full text-lg cursor-pointer"
+                                className="text-primary bg-secondary p-2 rounded-full cursor-pointer flex flex-row gap-1 items-center"
                                 onClick={() => approveComment(item._id)}
                               >
-                                <FaCheck />
+                                <span className="text-xl">
+                                  <FaCheck />
+                                </span>
+                                <span>Approve</span>
                               </span>
                               <span
-                                className="text-primary bg-secondary p-3 rounded-full text-xl cursor-pointer"
+                                className="text-primary bg-secondary p-2 rounded-full cursor-pointer flex flex-row gap-1 items-center"
                                 onClick={() => deleteComment(item._id)}
                               >
-                                <MdDeleteOutline />
+                                <span className="text-xl">
+                                  <MdDeleteOutline />
+                                </span>
+
+                                <span>Delete</span>
                               </span>
                             </div>
                           )}
@@ -1334,7 +1349,7 @@ const Page = () => {
                             type="file"
                             hidden
                             onChange={e => {
-                              console.log(e.target.files[0]);
+                              // console.log(e.target.files[0]);
                               // setTaskChecklist((prev) => {
                               //   const updatedItems = prev.items.map((i) => {
                               //     if (i.heading !== item.heading) return i;

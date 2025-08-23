@@ -8,9 +8,11 @@ import AsideContainer from '../../../components/AsideContainer';
 import { Add } from '@mui/icons-material';
 import { useRouter } from 'next/navigation';
 import { FiEdit } from 'react-icons/fi';
-import { MdOutlineDelete } from 'react-icons/md';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '../../../store/useAuthStore';
+import { RxCross2 } from 'react-icons/rx';
+import { FaCheck } from 'react-icons/fa6';
+import { allowRoles, editableRoles } from '../../../helpers/constants';
 
 const StripedDataGrid = styled(DataGrid)(({ theme }) => ({
   [`& .${gridClasses.row}.even`]: {
@@ -198,13 +200,16 @@ const MemberTable = () => {
     { field: 'phone', headerName: 'Phone', width: 140 },
     { field: 'address', headerName: 'Address', width: 280 },
     { field: 'status', headerName: 'Status', width: 92 },
-    {
+  ];
+
+  if (allowRoles.includes(userType)) {
+    columns.push({
       field: 'action',
       headerName: 'Action',
       width: 200,
       renderCell: params => (
         <div className="flex flex-row gap-2 items-center">
-          {userType === 'ROLE_ADMIN' && (
+          {editableRoles.includes(userType) && (
             <div
               className="p-2 rounded-full border border-primary text-primary bg-primary-foreground cursor-pointer"
               // onClick={() => updateFunction(params.row.id)}
@@ -220,12 +225,16 @@ const MemberTable = () => {
               setConfirmationDelete(true);
             }}
           >
-            <MdOutlineDelete className="text-xl" />
+            {params.row.status !== 'Active' ? (
+              <FaCheck className="text-xl" />
+            ) : (
+              <RxCross2 className="text-xl" />
+            )}
           </div>
         </div>
       ),
-    },
-  ];
+    });
+  }
 
   const rows =
     memberList?.map((row, index) => ({
